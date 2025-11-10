@@ -1,0 +1,134 @@
+
+export const ageGroups = [
+    {
+        id: "OPEN",
+        name: "Open",
+        minimum_lifter_age: "0",
+        maximum_lifter_age: "1000",
+        disabled: false,
+        customWeightClasses: false
+    }, {
+        id: "U15",
+        name: "Under 15 (14-15 years old)",
+        minimum_lifter_age: "14",
+        maximum_lifter_age: "15",
+        disabled: false,
+        customWeightClasses: false
+    }, {
+        id: "U17",
+        name: "Under 17 (16-17 years old)",
+        minimum_lifter_age: "16",
+        maximum_lifter_age: "17",
+        disabled: false,
+        customWeightClasses: false
+    }, {
+        id: "JR",
+        name: "Junior (15-20 years old)",
+        minimum_lifter_age: "15",
+        maximum_lifter_age: "20",
+        disabled: false,
+        customWeightClasses: false
+    }, {
+        id: "35",
+        name: "35 - 39 years old",
+        minimum_lifter_age: "35",
+        maximum_lifter_age: "39",
+        disabled: false,
+        customWeightClasses: false
+    }, {
+        id: "40",
+        name: "40 - 44 years old",
+        minimum_lifter_age: "40",
+        maximum_lifter_age: "44",
+        disabled: false,
+        customWeightClasses: false
+    }, {
+        id: "45",
+        name: "45 - 49 years old",
+        minimum_lifter_age: "45",
+        maximum_lifter_age: "49",
+        disabled: false,
+        customWeightClasses: false
+    }, {
+        id: "50",
+        name: "50 - 54 years old",
+        minimum_lifter_age: "50",
+        maximum_lifter_age: "54",
+        disabled: false,
+        customWeightClasses: false
+    }, {
+        id: "55",
+        name: "55 - 59 years old",
+        minimum_lifter_age: "55",
+        maximum_lifter_age: "59",
+        disabled: false,
+        customWeightClasses: false
+    }, {
+        id: "60",
+        name: "60 - 64 years old",
+        minimum_lifter_age: "60",
+        maximum_lifter_age: "64",
+        disabled: false,
+        customWeightClasses: false
+    }, {
+        id: "65",
+        name: "65 - 69 years old",
+        minimum_lifter_age: "65",
+        maximum_lifter_age: "69",
+        disabled: false,
+        customWeightClasses: false
+    }, {
+        id: "70",
+        name: "70 - 74 years old",
+        minimum_lifter_age: "70",
+        maximum_lifter_age: "74",
+        disabled: false,
+        customWeightClasses: false
+    }, {
+        id: "75",
+        name: "75 - 79 years old",
+        minimum_lifter_age: "75",
+        maximum_lifter_age: "79",
+        disabled: false,
+        customWeightClasses: false
+    }, {
+        id: "80",
+        name: "80 - 84 years old",
+        minimum_lifter_age: "80",
+        maximum_lifter_age: "84",
+        disabled: false,
+        customWeightClasses: false
+    }, {
+        id: "85",
+        name: "85 - 89 years old",
+        minimum_lifter_age: "85",
+        maximum_lifter_age: "89",
+        disabled: false,
+        customWeightClasses: false
+    }, {
+        id: "90",
+        name: "90 years old and up",
+        minimum_lifter_age: "90",
+        maximum_lifter_age: "1000",
+        disabled: false,
+        customWeightClasses: false
+    },
+    // Some but not all youth classes need special weight class ids from sport80! 
+    // Disabling them until completed!
+    {
+        id: "U11",
+        name: "Under 11",
+        minimum_lifter_age: "0",
+        maximum_lifter_age: "11",
+        disabled: false,
+        customWeightClasses: true
+    },
+    {
+        id: "U13",
+        name: "Under 13",
+        minimum_lifter_age: "0",
+        maximum_lifter_age: "13",
+        disabled: false,
+        customWeightClasses: true
+    }
+]

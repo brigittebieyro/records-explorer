@@ -312,7 +312,8 @@ function App() {
   useEffect(() => {
     if (!!newPriorLiftsData) {
       const sortedLifts = sortLifts([...combinedPriorLiftsData, newPriorLiftsData], "total")
-      setCombinedPriorLiftsData(sortedLifts)
+      setCombinedPriorLiftsData(sortedLifts);
+      setNewPriorLiftsData()
     }
 // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newPriorLiftsData])
@@ -381,7 +382,8 @@ function App() {
     }
   }
 
-  const renderRecordHolder = (lifter, index) => {
+  const renderRecordHolder = (lifterData, index) => {
+    let lifter = lifterData;
     const club = typeof lifter.club === "string" ? lifter.club : "Unaffiliated";
     let classList = "record-viewer-record-holder";
     if (index === 0) {
@@ -393,6 +395,13 @@ function App() {
       classList += " record-viewer-record-unbeaten";
     }
     const isAllTimeBest = isFromPriorGroup && index === 0 && isUbeatenByCurrentLifters;
+
+    if(isFromPriorGroup) {
+      const liftData = combinedPriorLiftsData.find((lift) => lift.name === lifter.name);
+      if(liftData) {
+        lifter = {...lifter, ...liftData}
+      }
+    }
 
     const year = new Date(lifter.lift_date).getUTCFullYear();
 
@@ -442,7 +451,7 @@ function App() {
     )
   }
 
-  const renderData = (currentRankings, currentLifts, priorClassRecords) => {
+  const renderData = (currentRankings, currentLifts, priorClassRecords, priorClassLifts) => {
     const relevantRecords = displayedStandards[currentAgeGroup.id];
     return (<div>
       <div><strong>Official Record Standards for {currentWeightClass.name} {currentAgeGroup.name}:</strong>
@@ -527,7 +536,7 @@ function App() {
       )}
 
       {status === "complete" && (<div className="records-viewer-data-container">
-        {renderData(currentLeaders, combinedLiftsData, combinedPriorLiftsData)}
+        {renderData(currentLeaders, combinedLiftsData, combinedPriorGroups, combinedPriorLiftsData)}
       </div>)}
 
 

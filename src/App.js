@@ -16,8 +16,9 @@ import {
          currentRecordsSheetId,
          currentRecordsSheetName
       } from './RoutesAndSettings';
-import { handleError, sortLifts } from './Utils';
+import { handleError, sortLifts, shouldIncludePastLifter } from './Utils';
 import Standards from "./Standards";
+import RecordHolder from './RecordHolder';
 
 function App() {
   const [status, setStatus] = useState();
@@ -461,69 +462,6 @@ const prevWishfulLifts = usePreviousWishful(wishfulLiftsData);
     }
   }
 
-  const renderRecordHolder = (lifterData, index) => {
-    let lifter = lifterData;
-    const club = typeof lifter.club === "string" ? lifter.club : "Unaffiliated";
-    let classList = "record-viewer-record-holder";
-    if (index === 0) {
-      classList += " record-viewer-record-current"
-    }
-    const isFromPriorGroup = !!lifter.classData;
-    const isUbeatenByCurrentLifters = isFromPriorGroup && lifter.total > currentLeaders[0]?.total;
-    if (isUbeatenByCurrentLifters) {
-      classList += " record-viewer-record-unbeaten";
-    }
-    const isAllTimeBest = isFromPriorGroup && index === 0 && isUbeatenByCurrentLifters;
-
-    if(isFromPriorGroup) {
-      const priodGroupData = combinedPriorLiftsData.find((lift) => lift?.name === lifter?.name && lift?.total === lifter?.total && lift?.date === lifter?.lift_date);
-      if(priodGroupData) {
-        lifter = {...lifter, ...priodGroupData}
-      }
-    }
-
-    if(lifter.resultType === "allTimeMagic") {
-      const magicGroupData = wishfulLiftsCombinedData.find((lift) => lift?.name === lifter?.name && lift?.total === lifter?.total && lift?.date === lifter?.lift_date);
-      if(magicGroupData) {
-        lifter = {...lifter, ...magicGroupData}
-      }
-    }
-
-    const year = new Date(lifter.lift_date).getUTCFullYear();
-
-    return (<div className={classList} key={`record-holder-${index}-${lifter.lift_date}`}>
-      {isFromPriorGroup && (<div className="record-viewer-record-header"><p>{lifter.classData.className} • {lifter.classData.classYears}</p></div>)}
-      {isAllTimeBest && (<div className='record-viewer--record-undefeated'><p>Undefeated in the Total since {year}</p></div>)}
-      <h4 className="record-viewer-record-title">{lifter.name}</h4>
-      <p><strong>Total: </strong> {lifter.total}</p>
-      {!!lifter.best_snatch && (<p><strong>Snatch: </strong>{lifter.best_snatch}</p>)}
-      {!!lifter["best_c&j"] && (<p><strong>Clean and Jerk: </strong>{lifter["best_c&j"]}</p>)}
-      <p><strong>Age: </strong> {lifter.lifter_age}</p>
-      <p><strong>Date: </strong>{lifter.lift_date}</p>
-      <p><strong>Club: </strong>{club}</p>
-      {lifter.bodyweight > 0 && (<p><strong>Bodyweight: </strong>{lifter.bodyweight}</p>)}
-      {!!lifter.meet && (<p>{lifter.meet}</p>)}
-      {!lifter.best_snatch && (<div className='records-viewer-content-spinner'>
-        <CircleLoader loading={true} color="gold" size="18" />
-      </div>)}
-      <a className="record-viewer-view-link" target="_blank"  rel="noreferrer" href={lifter.action[0].url}>More Info</a>
-    </div>);
-  }
-
-  const shouldIncludePastLifter = (lifter, weightClass) => {
-    const totalIsPlausible = lifter.total <= 550;
-    // Some international events for not have the lifter's bodyweights!
-    if (!lifter.bodyweight) {
-      return totalIsPlausible;
-    }
-    const weightClassSet = getWeightClassSet(currentAgeGroup)
-    let useWtClass = weightClass || currentWeightClass || weightClassSet.find((wtClass) => wtClass.id === selectedWeightClass);
-    const minBodyweight = useWtClass?.minBodyweight;
-    const maxBodyweight = useWtClass?.maxBodyweight;
-    return totalIsPlausible && lifter.bodyweight >= minBodyweight && lifter.bodyweight <= maxBodyweight;
-  }
-
-
   const renderData = (currentRankings, currentLifts, priorClassRecords, priorClassLifts, allTimeMagicGroup, allTimeMagicLiftsData) => {
     return (<div>
       <Standards relevantRecords={displayedStandards[currentAgeGroup.id]} 
@@ -533,7 +471,9 @@ const prevWishfulLifts = usePreviousWishful(wishfulLiftsData);
         <h3>Leading Athletes by Total</h3>
         <p>These are the top three results in the current <strong>{currentWeightClass.name}</strong> weight class, active <strong>from {new Date(currentWeightClass.start).getUTCFullYear()}, by total.</strong></p>
         <div className='record-viewer-parent'>
-          {!!currentLifts.length && currentLifts.map((lifter, index) => (renderRecordHolder(lifter, index, true)))}
+          {!!currentLifts.length && currentLifts.map((lifter, index) => (
+            <RecordHolder lifterData={lifter} index={index} currentLeaders={currentLeaders} individualLiftsData={combinedLiftsData}/>
+            ))}
           {!currentRankings.length && (<div>Looks like nobody's competed in this division yet! Could be you?</div>)}
         </div>
       </div>
@@ -542,7 +482,8 @@ const prevWishfulLifts = usePreviousWishful(wishfulLiftsData);
         <h3>All time bests from this bodyweight</h3>
         <p>What if the current weight class were active earlier? Who would hold our all time records? These are top five athletes of all time, who would fit into this class.</p>
         <div className='record-viewer-parent'>
-          {!!allTimeMagicGroup?.length && allTimeMagicGroup.map((lifter, index) => renderRecordHolder(lifter, index))}
+          {!!allTimeMagicGroup?.length && allTimeMagicGroup.map((lifter, index) => 
+            <RecordHolder lifterData={lifter} index={index} currentLeaders={currentLeaders} individualLiftsData={allTimeMagicLiftsData} />)}
         </div>
       </div>
 
@@ -550,7 +491,8 @@ const prevWishfulLifts = usePreviousWishful(wishfulLiftsData);
         <h3>Leaders from previous weight classes:</h3>
         <p>These are the top lifters across all previous, overlapping weight classes. Showing the top 3 lifters by total from each prior class.</p>
         <div className='record-viewer-parent'>
-          {!!priorClassRecords?.length && priorClassRecords.map((lifter, index) => renderRecordHolder(lifter, index))}
+          {!!priorClassRecords?.length && priorClassRecords.map((lifter, index) => 
+            <RecordHolder lifterData={lifter} index={index} currentLeaders={currentLeaders} individualLiftsData={combinedPriorLiftsData}/>)}
         </div>
       </div>
 

@@ -23,3 +23,14 @@
         });
       }
     }
+
+  export const shouldIncludePastLifter = (lifter, weightClass) => {
+    const totalIsPlausible = lifter.total <= 550;
+    // Some international events for not have the lifter's bodyweights!
+    if (!lifter.bodyweight) {
+      return totalIsPlausible;
+    }
+    const minBodyweight = weightClass?.minBodyweight;
+    const maxBodyweight = weightClass?.maxBodyweight;
+    return totalIsPlausible && lifter.bodyweight >= minBodyweight && lifter.bodyweight <= maxBodyweight;
+  }

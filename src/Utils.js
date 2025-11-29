@@ -1,4 +1,27 @@
-  export const handleError = (error) => {
+
+import { ageGroups } from './Data/ageGroups';
+import { defaultWeightClasses } from './Data/defaultWeightClasses';
+import { u11WeightClasses, u13WeightClasses } from './Data/youthWeightClasses';
+
+export const getAgeGroup = (ageGroupId) => {
+    return ageGroups.find((group) => group.id === ageGroupId)
+  }
+
+ export const getWeightClassSet = (ageGroup) => {
+    if(!ageGroup || !ageGroup.customWeightClasses) {
+      return defaultWeightClasses;
+    }
+    if(ageGroup.id === "U11") {
+      return u11WeightClasses;
+    }
+    if(ageGroup.id === "U13") {
+      return u13WeightClasses;
+    }
+    console.log(`Could not find custom weight classes for ${ageGroup.id}`)
+    return defaultWeightClasses;
+  }
+
+export const handleError = (error) => {
     console.log(`An error occurred?`, error)
   }
 

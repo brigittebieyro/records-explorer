@@ -1,27 +1,25 @@
 import { CircleLoader } from 'react-spinners';
 
-
 function RecordHolder({lifterData, index, currentLeaders, individualLiftsData }) {
-
     let lifter = lifterData;
     const club = typeof lifter.club === "string" ? lifter.club : "Unaffiliated";
     let classList = "record-viewer-record-holder";
     if (index === 0) {
       classList += " record-viewer-record-current"
     }
+
     const isFromPriorGroup = !!lifter.classData;
     const isUbeatenByCurrentLifters = isFromPriorGroup && lifter.total > currentLeaders[0]?.total;
     if (isUbeatenByCurrentLifters) {
       classList += " record-viewer-record-unbeaten";
     }
     const isAllTimeBest = isFromPriorGroup && index === 0 && isUbeatenByCurrentLifters;
-
-      const liftData = individualLiftsData.find((lift) => lift?.name === lifter?.name && lift?.total === lifter?.total && lift?.date === lifter?.lift_date);
-      if(liftData) {
-        lifter = {...lifter, ...liftData}
-      }
-    
-
+    if(!lifter.best_snatch){
+        const liftData = individualLiftsData.find((lift) => lift?.name === lifter?.name && lift?.total === lifter?.total && lift?.date === lifter?.lift_date);
+        if(liftData) {
+            lifter = {...lifter, ...liftData}
+        }
+    }
     const year = new Date(lifter.lift_date).getUTCFullYear();
 
     return (<div className={classList} key={`record-holder-${index}-${lifter.lift_date}`}>

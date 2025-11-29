@@ -1,9 +1,7 @@
 import './App.css';
 import { useEffect, useState, useRef } from 'react';
 import { ageGroups } from './Data/ageGroups';
-import { defaultWeightClasses } from './Data/defaultWeightClasses';
 import { CircleLoader } from 'react-spinners';
-import { u11WeightClasses, u13WeightClasses } from './Data/youthWeightClasses';
 import { 
          headers, 
          endDate, 
@@ -16,9 +14,10 @@ import {
          currentRecordsSheetId,
          currentRecordsSheetName
       } from './RoutesAndSettings';
-import { handleError, sortLifts, shouldIncludePastLifter } from './Utils';
+import { getAgeGroup, getWeightClassSet, handleError, sortLifts, shouldIncludePastLifter } from './Utils';
 import Standards from "./Standards";
 import RecordHolder from './RecordHolder';
+import RecordGroup from './RecordGroup';
 
 function App() {
   const [status, setStatus] = useState();
@@ -36,90 +35,7 @@ function App() {
   const [newPriorLiftsData, setNewPriorLiftsData] = useState();
   const [combinedPriorLiftsData, setCombinedPriorLiftsData] = useState([])
   const [displayedStandards, setDisplayedStandards] = useState([]);
-  const [wishfulLifters, setWishfulLifters] = useState([])
-  const [wishfulLiftsData, setWishfulLiftsData] = useState()
-  const [wishfulLiftsCombinedData, setWishfulLiftsCombinedData] = useState([])
 
-
-
-  const getAgeGroup = (ageGroupId) => {
-    return ageGroups.find((group) => group.id === ageGroupId)
-  }
-
-  const getWeightClassSet = (ageGroup) => {
-    if(!ageGroup || !ageGroup.customWeightClasses) {
-      return defaultWeightClasses;
-    }
-    if(ageGroup.id === "U11") {
-      return u11WeightClasses;
-    }
-    if(ageGroup.id === "U13") {
-      return u13WeightClasses;
-    }
-    console.log(`Could not find custom weight classes for ${ageGroup.id}`)
-    return defaultWeightClasses;
-  }
-
-  const fetchCurrentLiftsDataFromRankings = async (lifter) => {
-    const publicLifterId = getLifterId(lifter.action);
-    const route = getLifterDataRoute(publicLifterId);
-    const specificDate = lifter.lift_date;
-    const specificTotal = lifter.total;
-
-    try {
-      const response = await fetch(route, {
-        headers,
-        "method": "POST",
-      });
-      if (!response.ok) {
-        // handleError(response.status)
-        Promise.resolve();
-      }
-      await response.json().then((response) => {
-        if (response.data.length) {
-          let meets = response.data;
-          const liftData = meets.find(meet => meet.date === specificDate && meet.total === specificTotal);
-          if (liftData) {
-            setNewLiftsData({ ...lifter, ...liftData });
-          }
-        }
-      });
-
-    } catch (error) {
-      // handleError();
-    }
-  }
-
-  const fetchWishfulLiftsDataFromRankings = async (lifter) => {
-    const publicLifterId = getLifterId(lifter.action);
-    const route = getLifterDataRoute(publicLifterId);
-    const specificDate = lifter.lift_date;
-    const specificTotal = lifter.total;
-    try {
-      const response = await fetch(route, {
-        headers,
-        "method": "POST",
-      });
-      if (!response.ok) {
-        // handleError(response.status)
-        Promise.resolve();
-      }
-      await response.json().then((response) => {
-        if (response.data.length) {
-          let meets = response.data;
-          const liftData = meets.find(meet => meet.date === specificDate && meet.total === specificTotal);
-          if (liftData) {
-            console.log("Found the lifts:", liftData)
-            const liftDataset = { ...lifter, ...liftData };
-            setWishfulLiftsData(liftDataset);
-          }
-        }
-      });
-
-    } catch (error) {
-      // handleError();
-    }
-  }
 
   const fetchPriorLiftsDataFromRankings = async (lifter) => {
     const publicLifterId = getLifterId(lifter.action);
@@ -175,87 +91,6 @@ function App() {
   }
 
   fetchCurrentStandards();
-
-
-  const fetchCurrentLeaders = async (currentWtClass, currentAge) => {
-    try {
-      const body = JSON.stringify({
-        "columns": [],
-        "filters": {
-          "date_range_start": currentWtClass.start,
-          "date_range_end": endDate,
-          "weight_class": currentWtClass.sport80Id,
-          "wso": wsoId,
-          "minimum_lifter_age": currentAge.minimum_lifter_age,
-          "maximum_lifter_age": currentAge.maximum_lifter_age
-        }
-      });
-      const response = await fetch(getRankingsRoute(3), {
-        headers,
-        body,
-        "method": "POST",
-      });
-      if (!response.ok) {
-        handleError(response.status)
-        throw new Error(`Response status: ${response.status}`);
-      }
-      await response.json().then((response) => {
-        const result = response.data;
-        updateDisplayedStandards(currentWtClass, selectedAgeGroup);
-        setCurrentWeightClass(currentWtClass)
-        setCurrentAgeGroup(currentAge);
-        setCurrentLeaders(result);
-        setStatus("complete")
-
-        for (let i = 0; i < result.length; i++) {
-          fetchCurrentLiftsDataFromRankings(result[i]);
-        }
-      });
-
-    } catch (error) {
-      handleError(error)
-    }
-  }
-
-  const fetchWishfulLeaders = async (currentWtClass, currentAge) => {
-    try {
-      const body = JSON.stringify({
-        "columns": [],
-        "filters": {
-           "date_range_start": allTimeStartDate,
-           "date_range_end": endDate,
-          "weight_class": currentWtClass.sport80Id,
-           "wso": wsoId,
-          "minimum_lifter_age": currentAge.minimum_lifter_age,
-          "maximum_lifter_age": currentAge.maximum_lifter_age
-        }
-      });
-      const response = await fetch(getRankingsRoute(5), {
-        headers,
-        body,
-        "method": "POST",
-      });
-      if (!response.ok) {
-        handleError(response.status)
-        throw new Error(`Response status: ${response.status}`);
-      }
-      await response.json().then((response) => {
-        const result = response.data;
-        for (let i = 0; i < result.length; i++) {
-          result[i].resultType = "allTimeMagic";
-        }
-        setWishfulLifters(result)
-        for (let i = 0; i < result.length; i++) {
-          setTimeout(() => {
-          fetchWishfulLiftsDataFromRankings(result[i]);
-          }, 100 * i)
-        }
-      });
-
-    } catch (error) {
-      handleError(error)
-    }
-  }
 
   async function fetchPriorGroup(primaryWtClass, currentAge, group) {
     try {
@@ -315,9 +150,6 @@ function App() {
     setNewPriorLiftsData();
     setCombinedPriorLiftsData([]);
     setDisplayedStandards([]);
-    setWishfulLifters([]);
-    setWishfulLiftsData();
-    setWishfulLiftsCombinedData([]);
   }
 
   useEffect(() => {
@@ -356,17 +188,8 @@ function usePrevious(value) {
   return ref.current;
 }
 
-function usePreviousWishful(value) {
-  const ref = useRef();
-  useEffect(() => {
-    console.log('Updating ref', ref.current, value)
-    ref.current = value;
-  });
-  return ref.current;
-}
 
 const prevPastLifts = usePrevious(newPriorLiftsData);
-const prevWishfulLifts = usePreviousWishful(wishfulLiftsData);
  
   useEffect(() => {
     if(!!newPriorLiftsData){
@@ -381,20 +204,6 @@ const prevWishfulLifts = usePreviousWishful(wishfulLiftsData);
 // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newPriorLiftsData])
 
-
-  useEffect(() => {
-    if(!!wishfulLiftsData){
-      console.log("Fetched some data", wishfulLiftsData)
-      const prevLifts = prevWishfulLifts;
-      const updatedWishfulLifts = [...wishfulLiftsCombinedData]
-      if(!updatedWishfulLifts.includes(prevLifts)) {
-        updatedWishfulLifts.push(prevLifts)
-      }
-      updatedWishfulLifts.push(wishfulLiftsData)
-      setWishfulLiftsCombinedData(updatedWishfulLifts)
-    }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wishfulLiftsData])
 
   const updateDisplayedStandards = async (weightClass, ageGroup) => {
     if (!!weightClass && localStandards.length) {
@@ -451,9 +260,10 @@ const prevWishfulLifts = usePreviousWishful(wishfulLiftsData);
     setStatus("inprogress")
     resetAllData();
 
-    fetchCurrentLeaders(currentWtClass, currentAge);
-
-    fetchWishfulLeaders(currentWtClass, currentAge);
+        updateDisplayedStandards(currentWtClass, selectedAgeGroup);
+        setCurrentWeightClass(currentWtClass)
+        setCurrentAgeGroup(currentAge);
+        setStatus("complete")
 
     for (let i = 0; i < currentWtClass.previousAnalogs.length; i++) {
       if (currentWtClass.previousAnalogs[i].sport80Id !== 0) {
@@ -470,21 +280,27 @@ const prevWishfulLifts = usePreviousWishful(wishfulLiftsData);
       <div>
         <h3>Leading Athletes by Total</h3>
         <p>These are the top three results in the current <strong>{currentWeightClass.name}</strong> weight class, active <strong>from {new Date(currentWeightClass.start).getUTCFullYear()}, by total.</strong></p>
-        <div className='record-viewer-parent'>
-          {!!currentLifts.length && currentLifts.map((lifter, index) => (
-            <RecordHolder lifterData={lifter} index={index} currentLeaders={currentLeaders} individualLiftsData={combinedLiftsData}/>
-            ))}
-          {!currentRankings.length && (<div>Looks like nobody's competed in this division yet! Could be you?</div>)}
-        </div>
+        <RecordGroup 
+        weightClass={currentWeightClass}
+        ageGroup={currentAgeGroup}
+        count={3}
+        startDate={currentWeightClass.start}
+        endDate={endDate}
+        emptyContent={(<div>Looks like nobody's competed in this division yet! Could be you?</div>)}
+        />
       </div>
 
       <div>
         <h3>All time bests from this bodyweight</h3>
         <p>What if the current weight class were active earlier? Who would hold our all time records? These are top five athletes of all time, who would fit into this class.</p>
-        <div className='record-viewer-parent'>
-          {!!allTimeMagicGroup?.length && allTimeMagicGroup.map((lifter, index) => 
-            <RecordHolder lifterData={lifter} index={index} currentLeaders={currentLeaders} individualLiftsData={allTimeMagicLiftsData} />)}
-        </div>
+        <RecordGroup 
+        weightClass={currentWeightClass}
+        ageGroup={currentAgeGroup}
+        count={5}
+        startDate={allTimeStartDate}
+        endDate={endDate}
+        emptyContent={(<div>Looks like nobody's competed in this division yet! Could be you?</div>)}
+        />
       </div>
 
       <div>
@@ -543,7 +359,7 @@ const prevWishfulLifts = usePreviousWishful(wishfulLiftsData);
       )}
 
       {status === "complete" && (<div className="records-viewer-data-container">
-        {renderData(currentLeaders, combinedLiftsData, combinedPriorGroups, combinedPriorLiftsData, wishfulLifters, wishfulLiftsCombinedData)}
+        {renderData(currentLeaders, combinedLiftsData, combinedPriorGroups, combinedPriorLiftsData)}
       </div>)}
 
 

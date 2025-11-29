@@ -1,9 +1,22 @@
 import './App.css';
-import { useEffect, useState, } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { ageGroups } from './Data/ageGroups';
 import { defaultWeightClasses } from './Data/defaultWeightClasses';
 import { CircleLoader } from 'react-spinners';
 import { u11WeightClasses, u13WeightClasses } from './Data/youthWeightClasses';
+import { 
+         headers, 
+         endDate, 
+         allTimeStartDate,
+         getSheetRoute,
+         getRankingsRoute, 
+         wsoId, 
+         getLifterId, 
+         getLifterDataRoute, 
+         currentRecordsSheetId,
+         currentRecordsSheetName
+      } from './RoutesAndSettings';
+import { handleError, sortLifts } from './Utils';
 
 function App() {
   const [status, setStatus] = useState();
@@ -11,37 +24,21 @@ function App() {
   const [currentAgeGroup, setCurrentAgeGroup] = useState();
   const [priorGroups, setPriorGroups] = useState([]);
   const [combinedPriorGroups, setCombinedPriorGroups] = useState([])
-
-  // TODO make constants
-  const rankingsRoute = "api/categories/all/rankings/table/data?platform=1&p=0&l=3&sort=action&d=asc&s=&st=";
-  // Run npm install -g local-cors-proxy and lcp --proxyUrl https://admin-usaw-rankings.sport80.com to make this work
-  // Will not be needed when hosted in real life. 
-  const baseUrl = "http://localhost:8010/proxy/" // instead of https://admin-usaw-rankings.sport80.com/ !
-
-  const headers = {
-    "accept": "application/json, text/plain, */*",
-    "accept-language": "en-US,en;q=0.9",
-    "content-type": "application/json",
-    "x-api-token": "14ced0f3-421f-4acf-94ad-cc63a371af19",
-    "Access-Control-Allow-Origin": "*"
-  }
-  const endDate = "2025-12-31";
   const [currentLeaders, setCurrentLeaders] = useState([])
   const [localStandards, setLocalStandards] = useState([])
   const [standardsStatus, setStandardsStatus] = useState();
-
-  const handleError = (error) => {
-    setStatus("error")
-  }
-
   const [selectedWeightClass, setSelectedWeightClass] = useState("");
   const [selectedAgeGroup, setSelectedAgeGroup] = useState("");
-
   const [newLiftsData, setNewLiftsData] = useState();
   const [combinedLiftsData, setCombinedLiftsData] = useState([])
   const [newPriorLiftsData, setNewPriorLiftsData] = useState();
   const [combinedPriorLiftsData, setCombinedPriorLiftsData] = useState([])
   const [displayedStandards, setDisplayedStandards] = useState([]);
+  const [wishfulLifters, setWishfulLifters] = useState([])
+  const [wishfulLiftsData, setWishfulLiftsData] = useState()
+  const [wishfulLiftsCombinedData, setWishfulLiftsCombinedData] = useState([])
+
+
 
   const getAgeGroup = (ageGroupId) => {
     return ageGroups.find((group) => group.id === ageGroupId)
@@ -62,10 +59,8 @@ function App() {
   }
 
   const fetchCurrentLiftsDataFromRankings = async (lifter) => {
-    const publicLifterId = lifter.action[0].url.split("https://usaweightlifting.sport80.com/public/rankings/member/")[1];
-    const pageParams = `?p=0&l=100&sort=&d=asc&s=&st=`;
-    // https://admin-usaw-rankings.sport80.com/api/athletes/29927/table/data?p=1&l=30&sort=&d=asc&s=&st=
-    const route = `${baseUrl}api/athletes/${publicLifterId}/table/data${pageParams}`;
+    const publicLifterId = getLifterId(lifter.action);
+    const route = getLifterDataRoute(publicLifterId);
     const specificDate = lifter.lift_date;
     const specificTotal = lifter.total;
 
@@ -93,11 +88,40 @@ function App() {
     }
   }
 
+  const fetchWishfulLiftsDataFromRankings = async (lifter) => {
+    const publicLifterId = getLifterId(lifter.action);
+    const route = getLifterDataRoute(publicLifterId);
+    const specificDate = lifter.lift_date;
+    const specificTotal = lifter.total;
+    try {
+      const response = await fetch(route, {
+        headers,
+        "method": "POST",
+      });
+      if (!response.ok) {
+        // handleError(response.status)
+        Promise.resolve();
+      }
+      await response.json().then((response) => {
+        if (response.data.length) {
+          let meets = response.data;
+          const liftData = meets.find(meet => meet.date === specificDate && meet.total === specificTotal);
+          if (liftData) {
+            console.log("Found the lifts:", liftData)
+            const liftDataset = { ...lifter, ...liftData };
+            setWishfulLiftsData(liftDataset);
+          }
+        }
+      });
+
+    } catch (error) {
+      // handleError();
+    }
+  }
+
   const fetchPriorLiftsDataFromRankings = async (lifter) => {
-    const publicLifterId = lifter.action[0].url.split("https://usaweightlifting.sport80.com/public/rankings/member/")[1];
-    const pageParams = `?p=0&l=100&sort=&d=asc&s=&st=`;
-    // https://admin-usaw-rankings.sport80.com/api/athletes/29927/table/data?p=1&l=30&sort=&d=asc&s=&st=
-    const route = `${baseUrl}api/athletes/${publicLifterId}/table/data${pageParams}`;
+    const publicLifterId = getLifterId(lifter.action);
+    const route = getLifterDataRoute(publicLifterId);
     const specificDate = lifter.lift_date;
     const specificTotal = lifter.total;
 
@@ -114,24 +138,21 @@ function App() {
         if (response.data.length) {
           let meets = response.data;
           const liftData = meets.find(meet => meet.date === specificDate && meet.total === specificTotal);
-          setNewPriorLiftsData({ ...lifter, ...liftData });
+            setNewPriorLiftsData({ ...lifter, ...liftData });
+          Promise.resolve();
         }
       });
 
     } catch (error) {
       // handleError();
+      Promise.resolve();
     }
   }
 
   const fetchCurrentStandards = async () => {
     if (standardsStatus) { return }
-
     setStandardsStatus("inprogress")
-    const sheetsBaseUrl = "https://sheets.googleapis.com/v4/spreadsheets";
-    const sheetId = "1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ";
-    const sheetName = "Norcal";
-    const googleKey = "AIzaSyB3tiu4QqJb-brY0MzE-e6J6rac-Lcn2_A"
-    const route = `${sheetsBaseUrl}/${sheetId}/values/${sheetName}?key=${googleKey}`
+    const route = getSheetRoute(currentRecordsSheetId, currentRecordsSheetName)
 
     try {
       const response = await fetch(route, {
@@ -153,27 +174,6 @@ function App() {
 
   fetchCurrentStandards();
 
-  const sortLifts = (lifts, key) => {
-    let useKey = key === "date" ? "lift_date" : "total";
-
-    if (useKey === "date") {
-      return lifts.sort(function (a, b) {
-        var keyA = new Date(a[useKey]),
-          keyB = new Date(b[useKey]);
-        if (keyA < keyB) return -1;
-        if (keyA > keyB) return 1;
-        return 0;
-      });
-    } else {
-      return lifts.sort(function (a, b) {
-        var keyA = parseInt(a[useKey]),
-          keyB = parseInt(b[useKey]);
-        if (keyA > keyB) return -1;
-        if (keyA < keyB) return 1;
-        return 0;
-      });
-    }
-  }
 
   const fetchCurrentLeaders = async (currentWtClass, currentAge) => {
     try {
@@ -183,12 +183,12 @@ function App() {
           "date_range_start": currentWtClass.start,
           "date_range_end": endDate,
           "weight_class": currentWtClass.sport80Id,
-          "wso": 21,
+          "wso": wsoId,
           "minimum_lifter_age": currentAge.minimum_lifter_age,
           "maximum_lifter_age": currentAge.maximum_lifter_age
         }
       });
-      const response = await fetch(`${baseUrl}${rankingsRoute}`, {
+      const response = await fetch(getRankingsRoute(3), {
         headers,
         body,
         "method": "POST",
@@ -215,6 +215,46 @@ function App() {
     }
   }
 
+  const fetchWishfulLeaders = async (currentWtClass, currentAge) => {
+    try {
+      const body = JSON.stringify({
+        "columns": [],
+        "filters": {
+           "date_range_start": allTimeStartDate,
+           "date_range_end": endDate,
+          "weight_class": currentWtClass.sport80Id,
+           "wso": wsoId,
+          "minimum_lifter_age": currentAge.minimum_lifter_age,
+          "maximum_lifter_age": currentAge.maximum_lifter_age
+        }
+      });
+      const response = await fetch(getRankingsRoute(5), {
+        headers,
+        body,
+        "method": "POST",
+      });
+      if (!response.ok) {
+        handleError(response.status)
+        throw new Error(`Response status: ${response.status}`);
+      }
+      await response.json().then((response) => {
+        const result = response.data;
+        for (let i = 0; i < result.length; i++) {
+          result[i].resultType = "allTimeMagic";
+        }
+        setWishfulLifters(result)
+        for (let i = 0; i < result.length; i++) {
+          setTimeout(() => {
+          fetchWishfulLiftsDataFromRankings(result[i]);
+          }, 100 * i)
+        }
+      });
+
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
   async function fetchPriorGroup(primaryWtClass, currentAge, group) {
     try {
       const body = JSON.stringify({
@@ -223,12 +263,12 @@ function App() {
           "date_range_start": group.start,
           "date_range_end": group.end,
           "weight_class": group.sport80Id,
-          "wso": 21,
+           "wso": wsoId,
           "minimum_lifter_age": currentAge.minimum_lifter_age,
           "maximum_lifter_age": currentAge.maximum_lifter_age
         }
       });
-      const response = await fetch(`${baseUrl}${rankingsRoute}`, {
+      const response = await fetch(getRankingsRoute(3), {
         headers,
         body,
         "method": "POST",
@@ -241,15 +281,15 @@ function App() {
         className: group.name,
         classYears: `${new Date(group.start).getUTCFullYear()} - ${new Date(group.end).getUTCFullYear()}`
       }
-      await response.json().then((response) => {
+      await response.json().then(async (response) => {
         if (response.data.length && selectedWeightClass === primaryWtClass) {
           let lifters = [];
           for (let i = 0; i < response.data.length; i++) {
             const lifter = response.data[i];
             lifter.classData = classData;
-            if (!currentWeightClass || shouldIncludePastLifter(lifter, currentWeightClass, currentAge)) {
+            if (!currentWeightClass || shouldIncludePastLifter(lifter, currentWeightClass)) {
               lifters.push(lifter);
-              fetchPriorLiftsDataFromRankings(lifter)
+                fetchPriorLiftsDataFromRankings(lifter)
             }
           }
           setPriorGroups(response.data);
@@ -273,13 +313,10 @@ function App() {
     setNewPriorLiftsData();
     setCombinedPriorLiftsData([]);
     setDisplayedStandards([]);
+    setWishfulLifters([]);
+    setWishfulLiftsData();
+    setWishfulLiftsCombinedData([]);
   }
-
-  // useEffect(() => {
-  //   if(localStandards.length && currentWeightClass) {
-  //     updateDisplayedStandards(currentWeightClass, selectedAgeGroup);
-  //   }
-  // }, [localStandards])
 
   useEffect(() => {
     if(!!selectedAgeGroup && !!selectedWeightClass) {
@@ -309,14 +346,53 @@ function App() {
 // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newLiftsData])
 
+function usePrevious(value) {
+  const ref = useRef();
   useEffect(() => {
-    if (!!newPriorLiftsData) {
-      const sortedLifts = sortLifts([...combinedPriorLiftsData, newPriorLiftsData], "total")
-      setCombinedPriorLiftsData(sortedLifts);
-      setNewPriorLiftsData()
+    ref.current = value;
+  });
+  return ref.current;
+}
+
+function usePreviousWishful(value) {
+  const ref = useRef();
+  useEffect(() => {
+    console.log('Updating ref', ref.current, value)
+    ref.current = value;
+  });
+  return ref.current;
+}
+
+const prevPastLifts = usePrevious(newPriorLiftsData);
+const prevWishfulLifts = usePreviousWishful(wishfulLiftsData);
+ 
+  useEffect(() => {
+    if(!!newPriorLiftsData){
+      const prevLifts = prevPastLifts;
+      const updatedPreviousLifts = [...combinedPriorLiftsData]
+      if(!updatedPreviousLifts.includes(prevLifts)) {
+        updatedPreviousLifts.push(prevLifts)
+      }
+      updatedPreviousLifts.push(newPriorLiftsData)
+      setCombinedPriorLiftsData(updatedPreviousLifts)
     }
 // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newPriorLiftsData])
+
+
+  useEffect(() => {
+    if(!!wishfulLiftsData){
+      console.log("Fetched some data", wishfulLiftsData)
+      const prevLifts = prevWishfulLifts;
+      const updatedWishfulLifts = [...wishfulLiftsCombinedData]
+      if(!updatedWishfulLifts.includes(prevLifts)) {
+        updatedWishfulLifts.push(prevLifts)
+      }
+      updatedWishfulLifts.push(wishfulLiftsData)
+      setWishfulLiftsCombinedData(updatedWishfulLifts)
+    }
+// eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wishfulLiftsData])
 
   const updateDisplayedStandards = async (weightClass, ageGroup) => {
     if (!!weightClass && localStandards.length) {
@@ -375,6 +451,8 @@ function App() {
 
     fetchCurrentLeaders(currentWtClass, currentAge);
 
+    fetchWishfulLeaders(currentWtClass, currentAge);
+
     for (let i = 0; i < currentWtClass.previousAnalogs.length; i++) {
       if (currentWtClass.previousAnalogs[i].sport80Id !== 0) {
         fetchPriorGroup(selectedWeightClass, currentAge, currentWtClass.previousAnalogs[i])
@@ -397,9 +475,16 @@ function App() {
     const isAllTimeBest = isFromPriorGroup && index === 0 && isUbeatenByCurrentLifters;
 
     if(isFromPriorGroup) {
-      const liftData = combinedPriorLiftsData.find((lift) => lift.name === lifter.name);
-      if(liftData) {
-        lifter = {...lifter, ...liftData}
+      const priodGroupData = combinedPriorLiftsData.find((lift) => lift?.name === lifter?.name && lift?.total === lifter?.total && lift?.date === lifter?.lift_date);
+      if(priodGroupData) {
+        lifter = {...lifter, ...priodGroupData}
+      }
+    }
+
+    if(lifter.resultType === "allTimeMagic") {
+      const magicGroupData = wishfulLiftsCombinedData.find((lift) => lift?.name === lifter?.name && lift?.total === lifter?.total && lift?.date === lifter?.lift_date);
+      if(magicGroupData) {
+        lifter = {...lifter, ...magicGroupData}
       }
     }
 
@@ -424,7 +509,7 @@ function App() {
     </div>);
   }
 
-  const shouldIncludePastLifter = (lifter, weightClass, ageGroup) => {
+  const shouldIncludePastLifter = (lifter, weightClass) => {
     const totalIsPlausible = lifter.total <= 550;
     // Some international events for not have the lifter's bodyweights!
     if (!lifter.bodyweight) {
@@ -441,7 +526,7 @@ function App() {
     return (
       <div>
         <p><strong>{standardData.weight}kg</strong></p>
-        {standardData.lifter === "STANDARD" && (<p>This standard has not yet been met.</p>)}
+        {standardData.lifter === "STANDARD" && (<p>Our WSO has chosen this as the record standard. To hold the record, an athlete must lift one kilo <b><i>more</i></b> in a sanctioned competition.</p>)}
         {standardData.lifter !== "STANDARD" && (<>
           <p><strong>{standardData.lifter}</strong></p>
           <p>{standardData.event}</p>
@@ -451,10 +536,10 @@ function App() {
     )
   }
 
-  const renderData = (currentRankings, currentLifts, priorClassRecords, priorClassLifts) => {
+  const renderData = (currentRankings, currentLifts, priorClassRecords, priorClassLifts, allTimeMagicGroup, allTimeMagicLiftsData) => {
     const relevantRecords = displayedStandards[currentAgeGroup.id];
     return (<div>
-      <div><strong>Official Record Standards for {currentWeightClass.name} {currentAgeGroup.name}:</strong>
+      <div><strong>Official Records & Standards for {currentWeightClass.name} {currentAgeGroup.name}:</strong>
         {!!relevantRecords && (<div>
           <div className='record-viewer-standard-set'>
             <div className='record-viewer-standard'>
@@ -470,12 +555,16 @@ function App() {
               {renderStandardInfo(relevantRecords.records["Clean & Jerk"])}
             </div>
           </div>
+          <p>
+            <strong>Something missing?</strong> If you believe you should hold one of these records, reach out to the WSO committee!
+          </p>
         </div>)}
 
       </div>
 
       <div>
-        <strong>Leading totals in the current {currentWeightClass.name} weight class, active from {new Date(currentWeightClass.start).getUTCFullYear()}:</strong>
+        <h3>Leading Athletes by Total</h3>
+        <p>These are the top three results in the current <strong>{currentWeightClass.name}</strong> weight class, active <strong>from {new Date(currentWeightClass.start).getUTCFullYear()}, by total.</strong></p>
         <div className='record-viewer-parent'>
           {!!currentLifts.length && currentLifts.map((lifter, index) => (renderRecordHolder(lifter, index, true)))}
           {!currentRankings.length && (<div>Looks like nobody's competed in this division yet! Could be you?</div>)}
@@ -483,9 +572,18 @@ function App() {
       </div>
 
       <div>
-        <p><strong>Leaders from previous weight classes:</strong></p>
+        <h3>All time bests from this bodyweight</h3>
+        <p>What if the current weight class were active earlier? Who would hold our all time records? These are top five athletes of all time, who would fit into this class.</p>
         <div className='record-viewer-parent'>
-          {!!priorClassRecords?.length && priorClassRecords.map((lifter, index) => (shouldIncludePastLifter(lifter, currentWeightClass, currentAgeGroup) && renderRecordHolder(lifter, index)))}
+          {!!allTimeMagicGroup?.length && allTimeMagicGroup.map((lifter, index) => renderRecordHolder(lifter, index))}
+        </div>
+      </div>
+
+      <div>
+        <h3>Leaders from previous weight classes:</h3>
+        <p>These are the top lifters across all previous, overlapping weight classes. Showing the top 3 lifters by total from each prior class.</p>
+        <div className='record-viewer-parent'>
+          {!!priorClassRecords?.length && priorClassRecords.map((lifter, index) => renderRecordHolder(lifter, index))}
         </div>
       </div>
 
@@ -536,7 +634,7 @@ function App() {
       )}
 
       {status === "complete" && (<div className="records-viewer-data-container">
-        {renderData(currentLeaders, combinedLiftsData, combinedPriorGroups, combinedPriorLiftsData)}
+        {renderData(currentLeaders, combinedLiftsData, combinedPriorGroups, combinedPriorLiftsData, wishfulLifters, wishfulLiftsCombinedData)}
       </div>)}
 
 

@@ -17,6 +17,7 @@ import {
          currentRecordsSheetName
       } from './RoutesAndSettings';
 import { handleError, sortLifts } from './Utils';
+import Standards from "./Standards";
 
 function App() {
   const [status, setStatus] = useState();
@@ -522,45 +523,11 @@ const prevWishfulLifts = usePreviousWishful(wishfulLiftsData);
     return totalIsPlausible && lifter.bodyweight >= minBodyweight && lifter.bodyweight <= maxBodyweight;
   }
 
-  const renderStandardInfo = (standardData) => {
-    return (
-      <div>
-        <p><strong>{standardData.weight}kg</strong></p>
-        {standardData.lifter === "STANDARD" && (<p>Our WSO has chosen this as the record standard. To hold the record, an athlete must lift one kilo <b><i>more</i></b> in a sanctioned competition.</p>)}
-        {standardData.lifter !== "STANDARD" && (<>
-          <p><strong>{standardData.lifter}</strong></p>
-          <p>{standardData.event}</p>
-          <p>{standardData.date}</p>
-        </>)}
-      </div>
-    )
-  }
 
   const renderData = (currentRankings, currentLifts, priorClassRecords, priorClassLifts, allTimeMagicGroup, allTimeMagicLiftsData) => {
-    const relevantRecords = displayedStandards[currentAgeGroup.id];
     return (<div>
-      <div><strong>Official Records & Standards for {currentWeightClass.name} {currentAgeGroup.name}:</strong>
-        {!!relevantRecords && (<div>
-          <div className='record-viewer-standard-set'>
-            <div className='record-viewer-standard'>
-              <h3>Total</h3>
-              {renderStandardInfo(relevantRecords.records["Total"])}
-            </div>
-            <div className='record-viewer-standard'>
-              <h3>Snatch</h3>
-              {renderStandardInfo(relevantRecords.records["Snatch"])}
-            </div>
-            <div className='record-viewer-standard'>
-              <h3>Clean & Jerk</h3>
-              {renderStandardInfo(relevantRecords.records["Clean & Jerk"])}
-            </div>
-          </div>
-          <p>
-            <strong>Something missing?</strong> If you believe you should hold one of these records, reach out to the WSO committee!
-          </p>
-        </div>)}
-
-      </div>
+      <Standards relevantRecords={displayedStandards[currentAgeGroup.id]} 
+        weightClassName={currentWeightClass.name} ageGroupName={currentAgeGroup.name}/>
 
       <div>
         <h3>Leading Athletes by Total</h3>

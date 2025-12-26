@@ -26,14 +26,14 @@ export const handleError = (error) => {
   }
 
   export const sortLifts = (lifts, key) => {
-      let useKey = key === "date" ? "lift_date" : "total";
-  
-      if (useKey === "date") {
+      let useKey = key || "total";// === "date" ? "lift_date" : "total";
+      console.log("sorting by ", key)
+      if (useKey === "lift_date") {
         return lifts.sort(function (a, b) {
           var keyA = new Date(a[useKey]),
             keyB = new Date(b[useKey]);
-          if (keyA < keyB) return -1;
-          if (keyA > keyB) return 1;
+          if (keyA > keyB) return -1;
+          if (keyA < keyB) return 1;
           return 0;
         });
       } else {
@@ -49,11 +49,16 @@ export const handleError = (error) => {
 
   export const shouldIncludePastLifter = (lifter, weightClass) => {
     const totalIsPlausible = lifter.total <= 550;
+    return totalIsPlausible;
     // Some international events for not have the lifter's bodyweights!
-    if (!lifter.bodyweight) {
-      return totalIsPlausible;
-    }
-    const minBodyweight = weightClass?.minBodyweight;
-    const maxBodyweight = weightClass?.maxBodyweight;
-    return totalIsPlausible && lifter.bodyweight >= minBodyweight && lifter.bodyweight <= maxBodyweight;
+    // if (!lifter.bodyweight) {
+    //   return totalIsPlausible;
+    // }
+    // const minBodyweight = weightClass?.minBodyweight;
+    // const maxBodyweight = weightClass?.maxBodyweight;
+    // return totalIsPlausible && lifter.bodyweight >= minBodyweight && lifter.bodyweight <= maxBodyweight;
+  }
+
+  export const getYear = (date) => {
+    return  new Date(date).getUTCFullYear();
   }

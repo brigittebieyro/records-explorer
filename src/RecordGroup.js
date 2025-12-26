@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { 
          headers, 
          getRankingsRoute, 
@@ -6,22 +6,42 @@ import {
          getLifterId, 
          getLifterDataRoute, 
       } from './RoutesAndSettings';
-import { handleError, sortLifts } from './Utils';
+import { handleError, shouldIncludePastLifter, sortLifts } from './Utils';
 import RecordHolder from './RecordHolder';
 import { CircleLoader } from "react-spinners";
 
 function RecordGroup({weightClass, ageGroup, count, startDate, endDate, emptyContent}) {
   const [status, setStatus] = useState();;
-      const [leadingLifters, setLeadingLifters] = useState([]);
-      const [newLiftsData, setNewLiftsData] = useState();
-      const [combinedLiftsData, setCombinedLiftsData] = useState([]);
+  const [leadingLifters, setLeadingLifters] = useState([]);
+  const [newLiftsData, setNewLiftsData] = useState();
+  const [combinedLiftsData, setCombinedLiftsData] = useState([]);
+  const [sortType, setSortType] = useState(["total"]);
 
+  const sortTypeDescriptions = [
+    {id: "total", name: "Overall Total"},
+    {id: "best_snatch", name: "Snatch"},
+    {id: "best_c&j", name: "Clean and Jerk"},
+    {id: "lift_date", name: "Most Recent"},
+    // {id: "bodyweight", name: "Bodyweight"},
+    // Weight class? 
+  ];
+    
   const resetAllData = () => {
     setStatus("inprogress");
     setLeadingLifters([]);
     setNewLiftsData();
     setCombinedLiftsData([]);
   }
+
+  function usePrevious(value) {
+    const ref = useRef();
+    useEffect(() => {
+      ref.current = value;
+    });
+    return ref.current;
+  }
+  
+  const prevLifts = usePrevious(newLiftsData);
 
   useEffect(() => {
     if(weightClass && ageGroup){
@@ -32,21 +52,32 @@ function RecordGroup({weightClass, ageGroup, count, startDate, endDate, emptyCon
 
     useEffect(() => {
       if (!!newLiftsData) {
-        const sortedLifts = sortLifts([...combinedLiftsData, newLiftsData], "total")
-        setCombinedLiftsData(sortedLifts)
+        let updatedLifts = [...combinedLiftsData, newLiftsData]
+        if(prevLifts && !combinedLiftsData.includes(prevLifts)) {
+          updatedLifts.push(prevLifts)
+        }
+        const sortedLifts = sortLifts(updatedLifts, "total")
+        setCombinedLiftsData(sortedLifts);
       }
   // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [newLiftsData])
-  
-    
-      const fetchRecordGroup = async (weightClass, ageGroup) => {
+
+const updateSortType = (newType) => {
+        console.log("Fetch is complete, proceeding to re-sort lifters", combinedLiftsData)
+        const newSortedLifts = sortLifts(combinedLiftsData, newType)
+        console.log("Updated version:", newSortedLifts)
+        setLeadingLifters(newSortedLifts);
+        setSortType(newType);
+}
+
+      const fetchRecordGroup = async (wtClass, ageGroup) => {
         try {
           const body = JSON.stringify({
             "columns": [],
             "filters": {
               "date_range_start": startDate,
               "date_range_end": endDate,
-              "weight_class": weightClass.sport80Id,
+              "weight_class": wtClass.sport80Id,
               "wso": wsoId,
               "minimum_lifter_age": ageGroup.minimum_lifter_age,
               "maximum_lifter_age": ageGroup.maximum_lifter_age
@@ -61,15 +92,18 @@ function RecordGroup({weightClass, ageGroup, count, startDate, endDate, emptyCon
             handleError(response.status)
             throw new Error(`Response status: ${response.status}`);
           }
-          await response.json().then((response) => {
-            const result = response.data;
+          await response.json().then(async (response) => {
+            let result = [];
+            for(let i = 0; i < response.data.length; i++) {
+              const lifter = response.data[i];
+              if(shouldIncludePastLifter(lifter)) {
+              result.push(lifter)}
+            }
             setLeadingLifters(result);
             setStatus("complete")
-    
+
             for (let i = 0; i < result.length; i++) {
-              setTimeout(() => {
-                fetchIndividualLifts(result[i]);
-              }, 100);
+               await fetchIndividualLifts(result[i]);
             }
           });
     
@@ -100,6 +134,7 @@ function RecordGroup({weightClass, ageGroup, count, startDate, endDate, emptyCon
           const liftData = meets.find(meet => meet.date === specificDate && meet.total === specificTotal);
           if (liftData) {
             setNewLiftsData({ ...lifter, ...liftData });
+            return Promise.resolve();
           }
         }
       });
@@ -110,8 +145,22 @@ function RecordGroup({weightClass, ageGroup, count, startDate, endDate, emptyCon
   }
 
     return (<div className='record-viewer-parent'>
-        {status !== "complete" && (
-          <CircleLoader loading={true} color="gold" />)}
+        {status !== "complete" && (<CircleLoader loading={true} color="gold" />)}
+        {combinedLiftsData.length > 0 && (
+           <p className="sort-select-parent">
+              Sort <select
+                    name="sort-selection"
+                    id="sort-select"
+                    onChange={(e) => {
+                      updateSortType(e.target.value)
+                    }}
+                    disabled={status !== "complete"}
+                  >
+                      {sortTypeDescriptions.map((sort, index) => (<option value={sort.id} key={`sort-selector-${index}-${sort.id}`} selected={sortType === sort.id}>{sort.name} </option>))}
+                  </select>
+          </p>
+          
+        )}
           {status === "complete" && !!leadingLifters.length && leadingLifters.map((lifter, index) => (
             <RecordHolder lifterData={lifter} index={index} currentLeaders={leadingLifters} individualLiftsData={combinedLiftsData}/>
             ))}

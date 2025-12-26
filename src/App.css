@@ -124,3 +124,8 @@ body {
   justify-content: center;
   padding: 24px;
 }
+
+.sort-select-parent {
+  width: 100%;
+  display: block;
+}

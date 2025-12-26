@@ -1,4 +1,5 @@
 import { CircleLoader } from 'react-spinners';
+import { getYear } from './Utils';
 
 function RecordHolder({lifterData, index, currentLeaders, individualLiftsData }) {
     let lifter = lifterData;
@@ -8,23 +9,31 @@ function RecordHolder({lifterData, index, currentLeaders, individualLiftsData })
       classList += " record-viewer-record-current"
     }
 
-    const isFromPriorGroup = !!lifter.classData;
-    const isUbeatenByCurrentLifters = isFromPriorGroup && lifter.total > currentLeaders[0]?.total;
-    if (isUbeatenByCurrentLifters) {
-      classList += " record-viewer-record-unbeaten";
-    }
-    const isAllTimeBest = isFromPriorGroup && index === 0 && isUbeatenByCurrentLifters;
+    // const isUbeatenByCurrentLifters = isFromPriorGroup && lifter.total > currentLeaders[0]?.total;
+    // if (isUbeatenByCurrentLifters) {
+    //   classList += " record-viewer-record-unbeaten";
+    // }
+
+    // const isAllTimeBest = isFromPriorGroup && index === 0 && isUbeatenByCurrentLifters;
     if(!lifter.best_snatch){
         const liftData = individualLiftsData.find((lift) => lift?.name === lifter?.name && lift?.total === lifter?.total && lift?.date === lifter?.lift_date);
         if(liftData) {
             lifter = {...lifter, ...liftData}
         }
     }
-    const year = new Date(lifter.lift_date).getUTCFullYear();
 
-    return (<div className={classList} key={`record-holder-${index}-${lifter.lift_date}`}>
-      {isFromPriorGroup && (<div className="record-viewer-record-header"><p>{lifter.classData.className} • {lifter.classData.classYears}</p></div>)}
-      {isAllTimeBest && (<div className='record-viewer--record-undefeated'><p>Undefeated in the Total since {year}</p></div>)}
+    const isFromPriorGroup = !!lifter.classData;
+    // if(isFromPriorGroup) {
+    //   debugger
+    // }
+    const startYear = getYear(lifter.classData?.start) || "";
+    const endYear = getYear(lifter.classData?.end) || "";
+    const classYears = `${startYear} - ${endYear}`;
+
+    return (
+    <div className={classList} key={`record-holder-${index}-${lifter.lift_date}`}>
+      {isFromPriorGroup && (<div className="record-viewer-record-header"><p>{lifter.classData.name} • {classYears}</p></div>)}
+      {/* {isAllTimeBest && (<div className='record-viewer--record-undefeated'><p>Undefeated in the Total since {year}</p></div>)} */}
       <h4 className="record-viewer-record-title">{lifter.name}</h4>
       <p><strong>Total: </strong> {lifter.total}</p>
       {!!lifter.best_snatch && (<p><strong>Snatch: </strong>{lifter.best_snatch}</p>)}

@@ -3,20 +3,14 @@ import { useEffect, useState, useRef } from 'react';
 import { ageGroups } from './Data/ageGroups';
 import { CircleLoader } from 'react-spinners';
 import { 
-         headers, 
          endDate, 
          allTimeStartDate,
          getSheetRoute,
-         getRankingsRoute, 
-         wsoId, 
-         getLifterId, 
-         getLifterDataRoute, 
          currentRecordsSheetId,
          currentRecordsSheetName
       } from './RoutesAndSettings';
-import { getAgeGroup, getWeightClassSet, handleError, sortLifts, shouldIncludePastLifter } from './Utils';
+import { getAgeGroup, getWeightClassSet, sortLifts } from './Utils';
 import Standards from "./Standards";
-import RecordHolder from './RecordHolder';
 import RecordGroup from './RecordGroup';
 
 function App() {
@@ -35,37 +29,6 @@ function App() {
   const [newPriorLiftsData, setNewPriorLiftsData] = useState();
   const [combinedPriorLiftsData, setCombinedPriorLiftsData] = useState([])
   const [displayedStandards, setDisplayedStandards] = useState([]);
-
-
-  const fetchPriorLiftsDataFromRankings = async (lifter) => {
-    const publicLifterId = getLifterId(lifter.action);
-    const route = getLifterDataRoute(publicLifterId);
-    const specificDate = lifter.lift_date;
-    const specificTotal = lifter.total;
-
-    try {
-      const response = await fetch(route, {
-        headers,
-        "method": "POST",
-      });
-      if (!response.ok) {
-        // handleError(response.status)
-        Promise.resolve();
-      }
-      await response.json().then((response) => {
-        if (response.data.length) {
-          let meets = response.data;
-          const liftData = meets.find(meet => meet.date === specificDate && meet.total === specificTotal);
-            setNewPriorLiftsData({ ...lifter, ...liftData });
-          Promise.resolve();
-        }
-      });
-
-    } catch (error) {
-      // handleError();
-      Promise.resolve();
-    }
-  }
 
   const fetchCurrentStandards = async () => {
     if (standardsStatus) { return }
@@ -89,55 +52,8 @@ function App() {
       setStandardsStatus("error")
     }
   }
-
   fetchCurrentStandards();
 
-  async function fetchPriorGroup(primaryWtClass, currentAge, group) {
-    try {
-      const body = JSON.stringify({
-        "columns": [],
-        "filters": {
-          "date_range_start": group.start,
-          "date_range_end": group.end,
-          "weight_class": group.sport80Id,
-           "wso": wsoId,
-          "minimum_lifter_age": currentAge.minimum_lifter_age,
-          "maximum_lifter_age": currentAge.maximum_lifter_age
-        }
-      });
-      const response = await fetch(getRankingsRoute(3), {
-        headers,
-        body,
-        "method": "POST",
-      });
-      if (!response.ok) {
-        handleError(response.status)
-        Promise.resolve();
-      }
-      const classData = {
-        className: group.name,
-        classYears: `${new Date(group.start).getUTCFullYear()} - ${new Date(group.end).getUTCFullYear()}`
-      }
-      await response.json().then(async (response) => {
-        if (response.data.length && selectedWeightClass === primaryWtClass) {
-          let lifters = [];
-          for (let i = 0; i < response.data.length; i++) {
-            const lifter = response.data[i];
-            lifter.classData = classData;
-            if (!currentWeightClass || shouldIncludePastLifter(lifter, currentWeightClass)) {
-              lifters.push(lifter);
-                fetchPriorLiftsDataFromRankings(lifter)
-            }
-          }
-          setPriorGroups(response.data);
-        }
-      });
-
-    } catch (error) {
-      handleError(error)
-      Promise.resolve();
-    }
-  }
 
   const resetAllData = () => {
     setCurrentWeightClass();
@@ -260,16 +176,11 @@ const prevPastLifts = usePrevious(newPriorLiftsData);
     setStatus("inprogress")
     resetAllData();
 
-        updateDisplayedStandards(currentWtClass, selectedAgeGroup);
-        setCurrentWeightClass(currentWtClass)
-        setCurrentAgeGroup(currentAge);
-        setStatus("complete")
+    updateDisplayedStandards(currentWtClass, selectedAgeGroup);
+    setCurrentWeightClass(currentWtClass)
+    setCurrentAgeGroup(currentAge);
+    setStatus("complete")
 
-    for (let i = 0; i < currentWtClass.previousAnalogs.length; i++) {
-      if (currentWtClass.previousAnalogs[i].sport80Id !== 0) {
-        fetchPriorGroup(selectedWeightClass, currentAge, currentWtClass.previousAnalogs[i])
-      }
-    }
   }
 
   const renderData = (currentRankings, currentLifts, priorClassRecords, priorClassLifts, allTimeMagicGroup, allTimeMagicLiftsData) => {
@@ -292,24 +203,15 @@ const prevPastLifts = usePrevious(newPriorLiftsData);
 
       <div>
         <h3>All time bests from this bodyweight</h3>
-        <p>What if the current weight class were active earlier? Who would hold our all time records? These are top five athletes of all time, who would fit into this class.</p>
+        <p>What if the current weight class were active earlier? Who would hold our all time records? Here are the top lifters by total in overlapping weight classes, prior to {new Date(currentWeightClass.start).getUTCFullYear()}.</p>
         <RecordGroup 
         weightClass={currentWeightClass}
         ageGroup={currentAgeGroup}
-        count={5}
+        count={20}
         startDate={allTimeStartDate}
         endDate={endDate}
-        emptyContent={(<div>Looks like nobody's competed in this division yet! Could be you?</div>)}
+        emptyContent={(<div>No history found for this age division and weight class.</div>)}
         />
-      </div>
-
-      <div>
-        <h3>Leaders from previous weight classes:</h3>
-        <p>These are the top lifters across all previous, overlapping weight classes. Showing the top 3 lifters by total from each prior class.</p>
-        <div className='record-viewer-parent'>
-          {!!priorClassRecords?.length && priorClassRecords.map((lifter, index) => 
-            <RecordHolder lifterData={lifter} index={index} currentLeaders={currentLeaders} individualLiftsData={combinedPriorLiftsData}/>)}
-        </div>
       </div>
 
     </div>);

@@ -23,6 +23,7 @@ function App() {
   const [selectedWeightClass, setSelectedWeightClass] = useState("");
   const [selectedAgeGroup, setSelectedAgeGroup] = useState("OPEN");
   const [displayedStandards, setDisplayedStandards] = useState([]);
+  const [menuVisible, setMenuVisible] = useState(false);
 
   const fetchCurrentStandards = async () => {
     if (standardsStatus) {
@@ -136,17 +137,48 @@ function App() {
     setStatus("complete");
   }
 
+  const getMenuStyles = () => {
+    let styles = "menu-flyout";
+    if (!menuVisible) {
+      styles += " hidden";
+    }
+    return styles;
+  };
+
+  const toggleMenu = () => {
+    setMenuVisible(!menuVisible);
+  };
   return (
     <div className="App">
       <header className="App-header">
         <img
           className="header-logo"
           src="/WSOLogo.png"
-          width="100"
-          height="100"
+          width="150"
+          height="150"
         />
         {wsoName} WSO Records Explorer
       </header>
+
+      <div className="menu-container">
+        <div className="menu-icon" onClick={toggleMenu}>
+          <div className={getMenuStyles()}>
+            <ul>
+              <li>
+                <a href="#">Nav Button A - Explorer home</a>
+              </li>
+              <li>
+                <a href="#">
+                  Nav Button B - More about records and how they work
+                </a>
+              </li>
+              <li>
+                <a href="#">Nav Button C - PWA Site</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
 
       <div className="record-viewer-options-bar">
         <span>Select a weight class & group: </span>

@@ -11,6 +11,56 @@ body {
   background-color: var(--main-background-color);
 }
 
+.menu-container { 
+    display: flex;
+    width: 100%;
+    justify-content: right;
+    position: absolute;
+    top: 15px;
+}
+
+.menu-icon {
+background-image: url('data:image/svg+xml,<svg width="50px" height="50px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="%23ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M4 18L20 18" stroke="%23ffffff" stroke-width="2" stroke-linecap="round"></path><path d="M4 12L20 12" stroke="%23ffffff" stroke-width="2" stroke-linecap="round"></path><path d="M4 6L20 6" stroke="%23ffffff" stroke-width="2" stroke-linecap="round"></path></g></svg>');
+height: 50px;
+width: 50px;
+display: block;
+position: absolute;
+right: 50px;
+}
+.menu-icon:hover {
+  cursor: pointer;
+  background-image: url('data:image/svg+xml,<svg width="50px" height="50px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="%23cccccc"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M4 18L20 18" stroke="%23cccccc" stroke-width="2" stroke-linecap="round"></path><path d="M4 12L20 12" stroke="%23cccccc" stroke-width="2" stroke-linecap="round"></path><path d="M4 6L20 6" stroke="%23cccccc" stroke-width="2" stroke-linecap="round"></path></g></svg>');
+}
+.menu-icon:active {
+  cursor: pointer;
+  background-image: url('data:image/svg+xml,<svg width="50px" height="50px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="%23aaaaaa"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M4 18L20 18" stroke="%23aaaaaa" stroke-width="2" stroke-linecap="round"></path><path d="M4 12L20 12" stroke="%23aaaaaa" stroke-width="2" stroke-linecap="round"></path><path d="M4 6L20 6" stroke="%23aaaaaa" stroke-width="2" stroke-linecap="round"></path></g></svg>');
+}
+
+.hidden {
+  display: none;
+}
+
+.menu-flyout {
+    font-size: 12pt;
+    text-align: left;
+    padding: 0 15px;
+    position: absolute;
+    right: -10px;
+    top: 32px;
+}
+.menu-flyout ul {
+  list-style: none;
+  padding: 0;
+  text-wrap: nowrap;
+}
+.menu-flyout li a {
+  border:1px solid blue;
+  background-color: var(--main-text-color);
+  margin-bottom:1px; 
+  padding:8px;
+  display: block;
+}
+
 .App {
   display: flex;
   flex-direction: column;

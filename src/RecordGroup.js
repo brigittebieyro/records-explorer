@@ -22,7 +22,7 @@ function RecordGroup({
   const [leadingLifters, setLeadingLifters] = useState([]);
   const [newLiftsData, setNewLiftsData] = useState();
   const [combinedLiftsData, setCombinedLiftsData] = useState([]);
-  const [sortType, setSortType] = useState(["total"]);
+  const [sortType, setSortType] = useState("total");
 
   const sortTypeDescriptions = [
     { id: "total", name: "Overall Total" },
@@ -38,6 +38,7 @@ function RecordGroup({
     setLeadingLifters([]);
     setNewLiftsData();
     setCombinedLiftsData([]);
+    setSortType("total");
   };
 
   function usePrevious(value) {
@@ -188,8 +189,8 @@ function RecordGroup({
           <RecordHolder
             lifterData={lifter}
             index={index}
-            currentLeaders={leadingLifters}
             individualLiftsData={combinedLiftsData}
+            sortType={sortType}
           />
         ))}
       {!leadingLifters.length && emptyContent}

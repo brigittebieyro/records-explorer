@@ -1,12 +1,7 @@
 import { CircleLoader } from "react-spinners";
 import { getYear } from "./Utils";
 
-function RecordHolder({
-  lifterData,
-  index,
-  currentLeaders,
-  individualLiftsData,
-}) {
+function RecordHolder({ lifterData, index, individualLiftsData, sortType }) {
   let lifter = lifterData;
   const club = typeof lifter.club === "string" ? lifter.club : "Unaffiliated";
   let classList = "record-viewer-record-holder";
@@ -54,7 +49,9 @@ function RecordHolder({
       )}
       {/* {isAllTimeBest && (<div className='record-viewer--record-undefeated'><p>Undefeated in the Total since {year}</p></div>)} */}
       <h4 className="record-viewer-record-title">
-        <div className="record-viewer-ranking">{index + 1}</div>
+        {sortType !== "lift_date" && (
+          <div className="record-viewer-ranking">{index + 1}</div>
+        )}
         {lifter.name}
       </h4>
       <div className="record-viewer-columns">

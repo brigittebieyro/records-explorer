@@ -209,22 +209,16 @@ function App() {
       )}
 
       {status === "complete" && (
-        <div>
-          <Standards
-            relevantRecords={displayedStandards[currentAgeGroup.id]}
-            weightClassName={currentWeightClass.name}
-            ageGroupName={currentAgeGroup.name}
-          />
-
+        <div className="record-viewer-results-parent">
           <div className="current-leaders-group">
             <div className="record-group-info">
-              <p className="record-group-title">Leading Athletes by Total</p>
+              <p className="record-group-title">Current Top Athletes</p>
               <p className="record-group-description">
-                These are the top three results in the current{" "}
+                These are the {wsoName} WSO's top ranked lifters in the current{" "}
                 <strong>{currentWeightClass.name}</strong> weight class, active{" "}
                 <strong>
-                  from {new Date(currentWeightClass.start).getUTCFullYear()}, by
-                  total.
+                  from {new Date(currentWeightClass.start).getUTCFullYear()},
+                  originally fetched by total.
                 </strong>
               </p>
             </div>
@@ -244,6 +238,12 @@ function App() {
           </div>
 
           <div className="combined-history-group">
+            <Standards
+              relevantRecords={displayedStandards[currentAgeGroup.id]}
+              weightClassName={currentWeightClass.name}
+              ageGroupName={currentAgeGroup.name}
+            />
+
             <div className="record-group-info">
               <p className="record-group-title">
                 All time bests from this bodyweight

@@ -77,16 +77,16 @@ body {
   display: flex;
   align-content: space-evenly;
   flex-wrap: wrap;
-  justify-content: center;
-  margin-bottom: 32px;
+  margin-bottom: 15px;
 }
 .current-leaders-group {
   min-width:525px;
   width:45%;
   text-align: center;
   display:inline-block;
-    border-right: 1px solid silver;
-    padding-right: 20px;
+    border-right: 1px solid #666666;
+    padding: 0 50px 0 25px;
+    margin-right:30px;
 }
 
 .combined-history-group {
@@ -157,10 +157,16 @@ body {
     border: 1px solid black;
 }
 
+.record-viewer-standards-parent {
+  padding-bottom: 0;
+  margin-bottom: 45px;
+  border-bottom: 1px solid silver;
+}
+
 .record-group-info {
   /* padding: 0 25px; */
   text-align:left;
-  padding-left: 25px;
+  padding-left: 5px;
 }
 .record-group-description {
     /* text-align: center; */
@@ -251,8 +257,8 @@ body {
   width: 100%;
   display: block;
   text-align: left;
-  padding-left: 25px;
   margin-bottom: 10px;
+  padding-left:5px;
 }
 
 .combined-history-group .sort-select-parent {
@@ -265,4 +271,9 @@ body {
 
     font-size: 12px;
     font-style: italic;
+}
+
+.record-viewer-results-parent {
+    display: flex;
+    padding: 0 75px 0 50px;
 }

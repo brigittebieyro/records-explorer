@@ -34,6 +34,12 @@ function Standards({ relevantRecords, weightClassName, ageGroupName }) {
         <p className="record-group-title">
           Official Records & Standards for {weightClassName} {ageGroupName}:
         </p>
+
+        <p className="record-viewer-fine-print">
+          <strong>Something missing?</strong> If you believe you should hold one
+          of these records, reach out to the WSO committee!
+        </p>
+
         {!!relevantRecords && (
           <div>
             <div className="record-viewer-standard-set">
@@ -52,10 +58,6 @@ function Standards({ relevantRecords, weightClassName, ageGroupName }) {
                 )}
               </div>
             </div>
-            <p>
-              <strong>Something missing?</strong> If you believe you should hold
-              one of these records, reach out to the WSO committee!
-            </p>
           </div>
         )}
       </div>

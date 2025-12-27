@@ -160,7 +160,7 @@ function RecordGroup({
     <div className="record-viewer-parent">
       {status !== "complete" && <CircleLoader loading={true} color="gold" />}
       {combinedLiftsData.length > 0 && (
-        <p className="sort-select-parent">
+        <div className="sort-select-parent">
           Sort{" "}
           <select
             name="sort-selection"
@@ -180,7 +180,7 @@ function RecordGroup({
               </option>
             ))}
           </select>
-        </p>
+        </div>
       )}
       {status === "complete" &&
         !!leadingLifters.length &&

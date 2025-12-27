@@ -217,15 +217,17 @@ function App() {
           />
 
           <div className="current-leaders-group">
-            <p className="record-group-title">Leading Athletes by Total</p>
-            <p>
-              These are the top three results in the current{" "}
-              <strong>{currentWeightClass.name}</strong> weight class, active{" "}
-              <strong>
-                from {new Date(currentWeightClass.start).getUTCFullYear()}, by
-                total.
-              </strong>
-            </p>
+            <div className="record-group-info">
+              <p className="record-group-title">Leading Athletes by Total</p>
+              <p className="record-group-description">
+                These are the top three results in the current{" "}
+                <strong>{currentWeightClass.name}</strong> weight class, active{" "}
+                <strong>
+                  from {new Date(currentWeightClass.start).getUTCFullYear()}, by
+                  total.
+                </strong>
+              </p>
+            </div>
             <RecordGroup
               weightClass={currentWeightClass}
               ageGroup={currentAgeGroup}
@@ -242,19 +244,21 @@ function App() {
           </div>
 
           <div className="combined-history-group">
-            <p className="record-group-title">
-              All time bests from this bodyweight
-            </p>
-            <p>
-              What if the current weight class were active earlier? Who would
-              hold our all time records? Here are the top lifters by total in
-              overlapping weight classes, prior to{" "}
-              {new Date(currentWeightClass.start).getUTCFullYear()}.
-            </p>
+            <div className="record-group-info">
+              <p className="record-group-title">
+                All time bests from this bodyweight
+              </p>
+              <p className="record-group-description">
+                What if the current weight class were active earlier? Who would
+                hold our all time records? Here are the top lifters by total in
+                overlapping weight classes, prior to{" "}
+                {new Date(currentWeightClass.start).getUTCFullYear()}.
+              </p>
+            </div>
             <RecordGroup
               weightClass={currentWeightClass}
               ageGroup={currentAgeGroup}
-              count={20}
+              count={12}
               startDate={allTimeStartDate}
               endDate={endDate}
               emptyContent={

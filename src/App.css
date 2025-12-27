@@ -63,11 +63,10 @@ body {
 }
 
 .record-viewer-parent {
-  display: flex;
-  align-content: space-evenly;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-bottom: 32px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: left;
+    margin-bottom: 32px;
 }
 
 .record-group-title {
@@ -82,14 +81,19 @@ body {
   margin-bottom: 32px;
 }
 .current-leaders-group {
-  width:525px;
+  min-width:525px;
+  width:45%;
   text-align: center;
   display:inline-block;
+    border-right: 1px solid silver;
+    padding-right: 20px;
 }
 
 .combined-history-group {
   display:inline-block;
-  width: calc(100% - 600px);
+  width: 50%;
+  padding-left: 20px;
+  text-align: left;
 }
 .record-viewer-standard {
   border: 1px solid silver;
@@ -108,11 +112,12 @@ body {
   border-radius: 3px;
   margin: 6px;
   padding: 0px 24px 12px;
-  width: 425px;
+  width: 100%;
 }
 
 .combined-history-group .record-viewer-record-holder {
   width: 200px;
+  border: 1px solid silver;
 }
 
 .combined-history-group .record-viewer-columns {
@@ -124,10 +129,9 @@ body {
 }
 
 .combined-history-group .record-viewer-columns p {
-    display: inline-flex;
+    display: block;
     width: auto;
     text-align: left;
-    
     text-overflow: ellipsis;
     text-wrap: nowrap;
     overflow: hidden;
@@ -153,11 +157,40 @@ body {
     border: 1px solid black;
 }
 
+.record-group-info {
+  /* padding: 0 25px; */
+  text-align:left;
+  padding-left: 25px;
+}
+.record-group-description {
+    /* text-align: center; */
+    font-size: 12px;
+    font-style: italic;
+}
+
+.combined-history-group 
+.record-group-info {
+  /* padding: 0 100px; */
+    width: 75%;
+    /* text-align: center; */
+}
+.combined-history-group .record-group-title {
+    /* text-align: center; */
+}
+.combined-history-group .record-viewer-ranking {
+  background: transparent;
+  border-color: silver;
+  color: white;
+}
+
 .record-viewer-record-title {
   color: gold;
   font-weight: bold;
   display: block;
   text-align: center;
+}
+.combined-history-group .record-viewer-record-title {
+  color: white;
 }
 
 .record-viewer-columns {
@@ -217,4 +250,19 @@ body {
 .sort-select-parent {
   width: 100%;
   display: block;
+  text-align: left;
+  padding-left: 25px;
+  margin-bottom: 10px;
+}
+
+.combined-history-group .sort-select-parent {
+    /* width: 75%; */
+    /* text-align: center; */
+
+}
+
+.record-viewer-fine-print {
+
+    font-size: 12px;
+    font-style: italic;
 }

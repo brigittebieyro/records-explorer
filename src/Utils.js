@@ -45,17 +45,13 @@ export const sortLifts = (lifts, key) => {
       return 0;
     });
   }
-  if (result.length > lifts.length) {
-    // handle dupes here
-    let trimmedResult = [];
-    for (let i = 0; i < result.length; i++) {
-      if (trimmedResult.indexOf(result[i]) === -1) {
-        trimmedResult.push(result[i]);
-      }
-      return trimmedResult;
+  let trimmedResult = [];
+  for (let i = 0; i < result.length; i++) {
+    if (trimmedResult.indexOf(result[i]) === -1) {
+      trimmedResult.push(result[i]);
     }
   }
-  return result;
+  return trimmedResult;
 };
 
 export const shouldIncludePastLifter = (lifter, weightClass) => {

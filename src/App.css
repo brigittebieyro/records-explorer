@@ -38,6 +38,11 @@ body {
   color: #61dafb;
 }
 
+.header-button {
+  padding: 10px;
+    margin: 0px 8px;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -49,11 +54,12 @@ body {
 }
 
 .record-viewer-options-bar {
-
     display: block;
     width: 100%;
     border: 1px solid lightgray;
     padding: 15px;
+    margin-bottom: 25px;
+    font-style: italic;
 }
 
 .record-viewer-parent {
@@ -64,6 +70,10 @@ body {
   margin-bottom: 32px;
 }
 
+.record-group-title {
+  font-weight: bold;
+}
+
 .record-viewer-standard-set {
   display: flex;
   align-content: space-evenly;
@@ -71,7 +81,16 @@ body {
   justify-content: center;
   margin-bottom: 32px;
 }
+.current-leaders-group {
+  width:525px;
+  text-align: center;
+  display:inline-block;
+}
 
+.combined-history-group {
+  display:inline-block;
+  width: calc(100% - 600px);
+}
 .record-viewer-standard {
   border: 1px solid silver;
   font-size: 12px;
@@ -89,7 +108,29 @@ body {
   border-radius: 3px;
   margin: 6px;
   padding: 0px 24px 12px;
+  width: 425px;
+}
+
+.combined-history-group .record-viewer-record-holder {
   width: 200px;
+}
+
+.combined-history-group .record-viewer-columns {
+  display: inline;
+}
+
+.combined-history-group .record-viewer-full-width-detail {
+  text-align: left;
+}
+
+.combined-history-group .record-viewer-columns p {
+    display: inline-flex;
+    width: auto;
+    text-align: left;
+    
+    text-overflow: ellipsis;
+    text-wrap: nowrap;
+    overflow: hidden;
 }
 
 .record-viewer-record-current {
@@ -100,10 +141,48 @@ body {
   background-color: #444444;
 }
 
-.record-viewer-record-title {
-  color: gold;
+.record-viewer-ranking {
+    background-color: gold;
+    color: black;
+    display: inline-block;
+    width: 20px;
+    border-radius: 50%;
+    height: 20px;
+    line-height: 20px;
+    margin-right: 7px;
+    border: 1px solid black;
 }
 
+.record-viewer-record-title {
+  color: gold;
+  font-weight: bold;
+  display: block;
+  text-align: center;
+}
+
+.record-viewer-columns {
+  display: flex;
+    column-count: 3;
+    justify-content: space-around;
+}
+
+.record-viewer-full-width-detail {
+    width: 100%;
+    display: block;
+    text-align: center;
+    font-weight: bold;
+    font-style: italic;
+    line-height: 18px;
+    text-overflow: ellipsis;
+    text-wrap: nowrap;
+    overflow: hidden;
+}
+
+.record-viewer-columns p {
+    display: inline-flex;
+    width: 150px;
+    text-align: left;
+}
 .record-viewer-parent p {
   margin: 0px 0px;
   padding: 2px 0px;
@@ -115,8 +194,12 @@ body {
 }
 
 .record-viewer-view-link {
-  color: silver;
-  margin-top: 6px;
+    color: silver;
+    width: 100%;
+    display: flex;
+    text-align: right;
+    justify-content: end;
+    margin: 0;
 }
 
 .records-viewer-loading-container {

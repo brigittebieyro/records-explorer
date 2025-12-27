@@ -53,40 +53,49 @@ function RecordHolder({
         </div>
       )}
       {/* {isAllTimeBest && (<div className='record-viewer--record-undefeated'><p>Undefeated in the Total since {year}</p></div>)} */}
-      <h4 className="record-viewer-record-title">{lifter.name}</h4>
-      <p>
-        <strong>Total: </strong> {lifter.total}
-      </p>
-      {!!lifter.best_snatch && (
+      <h4 className="record-viewer-record-title">
+        <div className="record-viewer-ranking">{index + 1}</div>
+        {lifter.name}
+      </h4>
+      <div className="record-viewer-columns">
         <p>
-          <strong>Snatch: </strong>
-          {lifter.best_snatch}
+          <strong>Total:&nbsp;</strong> {lifter.total}
         </p>
-      )}
-      {!!lifter["best_c&j"] && (
+        {!!lifter.best_snatch && (
+          <p>
+            <strong>Snatch:&nbsp;</strong>
+            {lifter.best_snatch}
+          </p>
+        )}
+        {!!lifter["best_c&j"] && (
+          <p>
+            <strong>Clean and Jerk:&nbsp;</strong>
+            {lifter["best_c&j"]}
+          </p>
+        )}
+      </div>
+      <div className="record-viewer-columns">
         <p>
-          <strong>Clean and Jerk: </strong>
-          {lifter["best_c&j"]}
+          <strong>Age:&nbsp;</strong> {lifter.lifter_age}
         </p>
-      )}
-      <p>
-        <strong>Age: </strong> {lifter.lifter_age}
-      </p>
-      <p>
-        <strong>Date: </strong>
-        {lifter.lift_date}
-      </p>
-      <p>
-        <strong>Club: </strong>
-        {club}
-      </p>
-      {lifter.bodyweight > 0 && (
         <p>
-          <strong>Bodyweight: </strong>
-          {lifter.bodyweight}
+          <strong>Date:&nbsp;</strong>
+          {lifter.lift_date}
         </p>
+        <p>
+          <strong>Club:&nbsp;</strong>
+          {club}
+        </p>
+        {/* {lifter.bodyweight > 0 && (
+          <p>
+            <strong>Bodyweight:&nbsp;</strong>
+            {lifter.bodyweight}
+          </p>
+        )} */}
+      </div>
+      {!!lifter.meet && (
+        <p className="record-viewer-full-width-detail">{lifter.meet}</p>
       )}
-      {!!lifter.meet && <p>{lifter.meet}</p>}
       {!lifter.best_snatch && (
         <div className="records-viewer-content-spinner">
           <CircleLoader loading={true} color="gold" size="18" />
@@ -98,7 +107,7 @@ function RecordHolder({
         rel="noreferrer"
         href={lifter.action[0].url}
       >
-        More Info
+        More Info &gt;&gt;
       </a>
     </div>
   );

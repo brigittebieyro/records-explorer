@@ -26,9 +26,10 @@ export const handleError = (error) => {
 
 export const sortLifts = (lifts, key) => {
   let useKey = key || "total"; // === "date" ? "lift_date" : "total";
-  console.log("sorting by ", key);
+
+  let result = [];
   if (useKey === "lift_date") {
-    return lifts.sort(function (a, b) {
+    result = lifts.sort(function (a, b) {
       var keyA = new Date(a[useKey]),
         keyB = new Date(b[useKey]);
       if (keyA > keyB) return -1;
@@ -36,7 +37,7 @@ export const sortLifts = (lifts, key) => {
       return 0;
     });
   } else {
-    return lifts.sort(function (a, b) {
+    result = lifts.sort(function (a, b) {
       var keyA = parseInt(a[useKey]),
         keyB = parseInt(b[useKey]);
       if (keyA > keyB) return -1;
@@ -44,6 +45,17 @@ export const sortLifts = (lifts, key) => {
       return 0;
     });
   }
+  if (result.length > lifts.length) {
+    // handle dupes here
+    let trimmedResult = [];
+    for (let i = 0; i < result.length; i++) {
+      if (trimmedResult.indexOf(result[i]) === -1) {
+        trimmedResult.push(result[i]);
+      }
+      return trimmedResult;
+    }
+  }
+  return result;
 };
 
 export const shouldIncludePastLifter = (lifter, weightClass) => {

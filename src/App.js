@@ -10,7 +10,7 @@ import {
   currentRecordsSheetName,
   wsoName,
 } from "./RoutesAndSettings";
-import { getAgeGroup, getWeightClassSet, sortLifts } from "./Utils";
+import { getAgeGroup, getWeightClassSet } from "./Utils";
 import Standards from "./Standards";
 import RecordGroup from "./RecordGroup";
 
@@ -18,17 +18,10 @@ function App() {
   const [status, setStatus] = useState();
   const [currentWeightClass, setCurrentWeightClass] = useState();
   const [currentAgeGroup, setCurrentAgeGroup] = useState();
-  const [priorGroups, setPriorGroups] = useState([]);
-  const [combinedPriorGroups, setCombinedPriorGroups] = useState([]);
-  const [currentLeaders, setCurrentLeaders] = useState([]);
   const [localStandards, setLocalStandards] = useState([]);
   const [standardsStatus, setStandardsStatus] = useState();
   const [selectedWeightClass, setSelectedWeightClass] = useState("");
-  const [selectedAgeGroup, setSelectedAgeGroup] = useState("");
-  const [newLiftsData, setNewLiftsData] = useState();
-  const [combinedLiftsData, setCombinedLiftsData] = useState([]);
-  const [newPriorLiftsData, setNewPriorLiftsData] = useState();
-  const [combinedPriorLiftsData, setCombinedPriorLiftsData] = useState([]);
+  const [selectedAgeGroup, setSelectedAgeGroup] = useState("OPEN");
   const [displayedStandards, setDisplayedStandards] = useState([]);
 
   const fetchCurrentStandards = async () => {
@@ -58,14 +51,7 @@ function App() {
 
   const resetAllData = () => {
     setCurrentWeightClass();
-    setCurrentLeaders([]);
     setCurrentAgeGroup();
-    setPriorGroups([]);
-    setCombinedPriorGroups([]);
-    setNewLiftsData();
-    setCombinedLiftsData([]);
-    setNewPriorLiftsData();
-    setCombinedPriorLiftsData([]);
     setDisplayedStandards([]);
   };
 
@@ -82,51 +68,6 @@ function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAgeGroup]);
-
-  useEffect(() => {
-    if (priorGroups.length) {
-      const sortedCombinedGroups = sortLifts(
-        [...priorGroups, ...combinedPriorGroups],
-        "total",
-      );
-      setCombinedPriorGroups(sortedCombinedGroups);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [priorGroups]);
-
-  useEffect(() => {
-    if (!!newLiftsData) {
-      const sortedLifts = sortLifts(
-        [...combinedLiftsData, newLiftsData],
-        "total",
-      );
-      setCombinedLiftsData(sortedLifts);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newLiftsData]);
-
-  function usePrevious(value) {
-    const ref = useRef();
-    useEffect(() => {
-      ref.current = value;
-    });
-    return ref.current;
-  }
-
-  const prevPastLifts = usePrevious(newPriorLiftsData);
-
-  useEffect(() => {
-    if (!!newPriorLiftsData) {
-      const prevLifts = prevPastLifts;
-      const updatedPreviousLifts = [...combinedPriorLiftsData];
-      if (!updatedPreviousLifts.includes(prevLifts)) {
-        updatedPreviousLifts.push(prevLifts);
-      }
-      updatedPreviousLifts.push(newPriorLiftsData);
-      setCombinedPriorLiftsData(updatedPreviousLifts);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newPriorLiftsData]);
 
   const updateDisplayedStandards = async (weightClass, ageGroup) => {
     if (!!weightClass && localStandards.length) {
@@ -170,7 +111,7 @@ function App() {
     }
   };
 
-  async function getData(event) {
+  async function updateContents(event) {
     if (!selectedWeightClass) {
       // TODO handle error
       return;
@@ -195,71 +136,6 @@ function App() {
     setStatus("complete");
   }
 
-  const renderData = (
-    currentRankings,
-    currentLifts,
-    priorClassRecords,
-    priorClassLifts,
-    allTimeMagicGroup,
-    allTimeMagicLiftsData,
-  ) => {
-    return (
-      <div>
-        <Standards
-          relevantRecords={displayedStandards[currentAgeGroup.id]}
-          weightClassName={currentWeightClass.name}
-          ageGroupName={currentAgeGroup.name}
-        />
-
-        <div>
-          <h3>Leading Athletes by Total</h3>
-          <p>
-            These are the top three results in the current{" "}
-            <strong>{currentWeightClass.name}</strong> weight class, active{" "}
-            <strong>
-              from {new Date(currentWeightClass.start).getUTCFullYear()}, by
-              total.
-            </strong>
-          </p>
-          <RecordGroup
-            weightClass={currentWeightClass}
-            ageGroup={currentAgeGroup}
-            count={3}
-            startDate={currentWeightClass.start}
-            endDate={endDate}
-            emptyContent={
-              <div>
-                Looks like nobody's competed in this division yet! Could be you?
-              </div>
-            }
-          />
-        </div>
-
-        <div>
-          <h3>All time bests from this bodyweight</h3>
-          <p>
-            What if the current weight class were active earlier? Who would hold
-            our all time records? Here are the top lifters by total in
-            overlapping weight classes, prior to{" "}
-            {new Date(currentWeightClass.start).getUTCFullYear()}.
-          </p>
-          <RecordGroup
-            weightClass={currentWeightClass}
-            ageGroup={currentAgeGroup}
-            count={20}
-            startDate={allTimeStartDate}
-            endDate={endDate}
-            emptyContent={
-              <div>
-                No history found for this age division and weight class.
-              </div>
-            }
-          />
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="App">
       <header className="App-header">
@@ -273,19 +149,21 @@ function App() {
       </header>
 
       <div className="record-viewer-options-bar">
+        <span>Select a weight class & group: </span>
         <select
+          className="header-button"
           name="age-group"
           id="age-group-select"
           onChange={(e) => {
             setSelectedAgeGroup(e.target.value);
           }}
         >
-          <option value="">Select an Age Group</option>)
           {ageGroups.map((group, index) => (
             <option
               value={group.id}
               key={`ageGroup-selector-${index}-${group.id}`}
               disabled={group.disabled}
+              selected={group.id === selectedAgeGroup}
             >
               {group.name}
             </option>
@@ -293,13 +171,16 @@ function App() {
         </select>
 
         <select
+          className="header-button"
           name="weight-class"
           id="weight-class-select"
           onChange={(e) => {
             setSelectedWeightClass(e.target.value);
           }}
         >
-          <option value="">Select a Weight Class</option>)
+          {!selectedWeightClass && (
+            <option value="">Select a Weight Class</option>
+          )}
           {getWeightClassSet(getAgeGroup(selectedAgeGroup)).map(
             (wtClass, index) => (
               <option
@@ -313,7 +194,8 @@ function App() {
         </select>
 
         <button
-          onClick={getData}
+          className="header-button"
+          onClick={updateContents}
           disabled={!selectedAgeGroup || !selectedWeightClass}
         >
           Go
@@ -327,13 +209,61 @@ function App() {
       )}
 
       {status === "complete" && (
-        <div className="records-viewer-data-container">
-          {renderData(
-            currentLeaders,
-            combinedLiftsData,
-            combinedPriorGroups,
-            combinedPriorLiftsData,
-          )}
+        <div>
+          <Standards
+            relevantRecords={displayedStandards[currentAgeGroup.id]}
+            weightClassName={currentWeightClass.name}
+            ageGroupName={currentAgeGroup.name}
+          />
+
+          <div className="current-leaders-group">
+            <p className="record-group-title">Leading Athletes by Total</p>
+            <p>
+              These are the top three results in the current{" "}
+              <strong>{currentWeightClass.name}</strong> weight class, active{" "}
+              <strong>
+                from {new Date(currentWeightClass.start).getUTCFullYear()}, by
+                total.
+              </strong>
+            </p>
+            <RecordGroup
+              weightClass={currentWeightClass}
+              ageGroup={currentAgeGroup}
+              count={5}
+              startDate={currentWeightClass.start}
+              endDate={endDate}
+              emptyContent={
+                <div>
+                  Looks like nobody's competed in this division yet! Could be
+                  you?
+                </div>
+              }
+            />
+          </div>
+
+          <div className="combined-history-group">
+            <p className="record-group-title">
+              All time bests from this bodyweight
+            </p>
+            <p>
+              What if the current weight class were active earlier? Who would
+              hold our all time records? Here are the top lifters by total in
+              overlapping weight classes, prior to{" "}
+              {new Date(currentWeightClass.start).getUTCFullYear()}.
+            </p>
+            <RecordGroup
+              weightClass={currentWeightClass}
+              ageGroup={currentAgeGroup}
+              count={20}
+              startDate={allTimeStartDate}
+              endDate={endDate}
+              emptyContent={
+                <div>
+                  No history found for this age division and weight class.
+                </div>
+              }
+            />
+          </div>
         </div>
       )}
     </div>

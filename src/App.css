@@ -217,10 +217,6 @@ right: 50px;
   /* text-align: center; */
 }
 
-.combined-history-group .record-group-title {
-  /* text-align: center; */
-}
-
 .combined-history-group .record-viewer-ranking {
   background: transparent;
   border-color: var(--main-border-color);
@@ -299,11 +295,6 @@ right: 50px;
   text-align: left;
   margin-bottom: 10px;
   padding-left: 5px;
-}
-
-.combined-history-group .sort-select-parent {
-  /* width: 75%; */
-  /* text-align: center; */
 }
 
 .record-viewer-fine-print {

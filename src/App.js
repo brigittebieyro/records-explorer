@@ -13,6 +13,7 @@ import {
 import { getAgeGroup, getWeightClassSet } from "./Utils";
 import Standards from "./Standards";
 import RecordGroup from "./RecordGroup";
+import Header from "./Header";
 
 function App() {
   const [status, setStatus] = useState();
@@ -150,35 +151,7 @@ function App() {
   };
   return (
     <div className="App">
-      <header className="App-header">
-        <img
-          className="header-logo"
-          src="/WSOLogo.png"
-          width="150"
-          height="150"
-        />
-        {wsoName} WSO Records Explorer
-      </header>
-
-      <div className="menu-container">
-        <div className="menu-icon" onClick={toggleMenu}>
-          <div className={getMenuStyles()}>
-            <ul>
-              <li>
-                <a href="#">Nav Button A - Explorer home</a>
-              </li>
-              <li>
-                <a href="#">
-                  Nav Button B - More about records and how they work
-                </a>
-              </li>
-              <li>
-                <a href="#">Nav Button C - PWA Site</a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
+      <Header />
 
       <div className="record-viewer-options-bar">
         <span>Select a weight class & group: </span>

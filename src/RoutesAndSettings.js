@@ -7,8 +7,8 @@ export const wsoName = "California North Central";
 //
 // Run npm install -g local-cors-proxy and lcp --proxyUrl https://admin-usaw-rankings.sport80.com to make this work
 // Will not be needed when hosted in real life.
-// const _baseUrl = "http://localhost:8010/proxy/"; // instead of https://admin-usaw-rankings.sport80.com/ !
-const _baseUrl = "https://admin-usaw-rankings.sport80.com/";
+const _baseUrl = "http://localhost:8010/proxy/"; // instead of https://admin-usaw-rankings.sport80.com/ !
+// const _baseUrl = "https://admin-usaw-rankings.sport80.com/";
 export const getRankingsRoute = (count) => {
   const limit = typeof count === "number" && count > 0 ? count : 3;
   return `${_baseUrl}api/categories/all/rankings/table/data?platform=1&p=0&l=${limit}&sort=action&d=asc&s=&st=`;

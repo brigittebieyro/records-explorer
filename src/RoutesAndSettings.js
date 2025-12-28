@@ -28,7 +28,7 @@ export const headers = {
   "accept-language": "en-US,en;q=0.9",
   "content-type": "application/json",
   "x-api-token": "14ced0f3-421f-4acf-94ad-cc63a371af19",
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": "https://brigittebieyro.github.io/records-explorer",
 };
 // New weight classes begin August 1, 2026
 export const endDate = "2026-08-01";

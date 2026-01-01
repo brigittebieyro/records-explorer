@@ -2,11 +2,13 @@
   "name": "my-app",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:5001",
   "dependencies": {
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
+    "cors": "^2.8.5",
     "local-cors-proxy": "^1.1.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -18,7 +20,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "server": "node-env-run server --exec nodemon | pino-colada"
   },
   "eslintConfig": {
     "extends": [
@@ -39,6 +42,13 @@
     ]
   },
   "devDependencies": {
-    "gh-pages": "^6.3.0"
+    "body-parser": "^2.2.1",
+    "express": "^5.2.1",
+    "express-pino-logger": "^7.0.0",
+    "gh-pages": "^6.3.0",
+    "node-env-run": "^4.0.2",
+    "nodemon": "^3.1.11",
+    "npm-run-all": "^4.1.5",
+    "pino-colada": "^2.2.2"
   }
 }

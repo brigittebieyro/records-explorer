@@ -5,16 +5,11 @@
 export const wsoId = 21;
 export const wsoName = "California North Central";
 //
-// Run npm install -g local-cors-proxy and lcp --proxyUrl https://admin-usaw-rankings.sport80.com to make this work
-// Will not be needed when hosted in real life.
-
-// Use a relative local base path so the client works when deployed
-// behind a reverse proxy. When developing locally the proxy
-// runs on port 8010, but the app should call `/proxy/...`.
-const _baseUrl = "/proxy/"; // instead of https://admin-usaw-rankings.sport80.com/ !
+// Use a relative local base path so the client works when deployed behind a reverse proxy. 
+const _baseUrl = "/api/lifter-data"; // instead of https://admin-usaw-rankings.sport80.com/ !
 export const getRankingsRoute = (count) => {
   const limit = typeof count === "number" && count > 0 ? count : 3;
-  return `${_baseUrl}api/categories/all/rankings/table/data?platform=1&p=0&l=${limit}&sort=action&d=asc&s=&st=`;
+  return `${_baseUrl}/categories/all/rankings/table/data?platform=1&p=0&l=${limit}&sort=action&d=asc&s=&st=`;
 };
 
 export const getLifterId = (lifterActionRoute) => {
@@ -25,7 +20,7 @@ export const getLifterId = (lifterActionRoute) => {
 export const getLifterDataRoute = (publicLifterId) => {
   const pageParams = `?p=0&l=100&sort=&d=asc&s=&st=`;
   // https://admin-usaw-rankings.sport80.com/api/athletes/29927/table/data?p=1&l=30&sort=&d=asc&s=&st=
-  return `${_baseUrl}api/athletes/${publicLifterId}/table/data${pageParams}`;
+  return `${_baseUrl}/athletes/${publicLifterId}/table/data${pageParams}`;
 };
 export const headers = {
   accept: "application/json, text/plain, */*",

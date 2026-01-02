@@ -15,25 +15,23 @@ app.get("/api/greeting", (req, res) => {
   res.send(JSON.stringify({ greeting: `Hello ${name}!` }));
 });
 
-// Mount CORS-Anywhere behind /proxy so client can call
-// http://localhost:5001/proxy/api/.... which will be forwarded
-// to https://admin-usaw-rankings.sport80.com/api/...
+// Mount CORS-Anywhere 
 const proxyServer = corsAnywhere.createServer({
   originWhitelist: [], // Allow all origins
   requireHeader: [],
   removeHeaders: ["cookie", "cookie2"],
 });
 
-app.use('/proxy', (req, res) => {
+app.use('/api/lifter-data', (req, res) => {
   // Rewrite the incoming URL so cors-anywhere sees the target URL as the first path segment
-  // Incoming: /proxy/api/categories/... -> cors-anywhere expects /https://host/api/...
-  const targetBase = 'https://admin-usaw-rankings.sport80.com';
-  const suffix = req.originalUrl.replace(/^\/proxy/, '');
+  // Incoming: /api/lifter-data/api/categories/... -> cors-anywhere expects /https://host/api/...
+  const targetBase = 'https://admin-usaw-rankings.sport80.com/api/';
+  const suffix = req.originalUrl.replace(/^\/api\/lifter-data/, '');
   req.url = `/${targetBase}${suffix}`;
   proxyServer.emit('request', req, res);
 });
 
 const PORT = 5001;
 app.listen(PORT, () =>
-  console.log(`Express + CORS proxy running on http://localhost:${PORT}/proxy/`)
+  console.log(`Express + CORS proxy running on http://localhost:${PORT}`)
 );

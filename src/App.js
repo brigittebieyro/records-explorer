@@ -1,5 +1,5 @@
 import "./App.css";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { ageGroups } from "./Data/ageGroups";
 import { CircleLoader } from "react-spinners";
 import {

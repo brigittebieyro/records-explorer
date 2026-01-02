@@ -34,13 +34,3 @@ EXPOSE 3000
 
 # Start the Express server which will serve the build and proxy API
 CMD ["node", "server/index.js"]
-# syntax = docker/dockerfile:1
-
-# Adjust NODE_VERSION as desired
-ARG NODE_VERSION=22.21.1
-FROM node:${NODE_VERSION}-slim AS base
-
-LABEL fly_launch_runtime="Node.js"
-
-# Node.js app lives here
-WORKDIR /app

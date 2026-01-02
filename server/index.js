@@ -31,7 +31,17 @@ app.use('/api/lifter-data', (req, res) => {
   proxyServer.emit('request', req, res);
 });
 
-const PORT = 5001;
-app.listen(PORT, () =>
-  console.log(`Express + CORS proxy running on http://localhost:${PORT}`)
+// Serve React build if available (for containerized deployments)
+const path = require('path');
+const buildDir = path.join(__dirname, '..', 'build');
+if (require('fs').existsSync(buildDir)) {
+  app.use(express.static(buildDir));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(buildDir, 'index.html'));
+  });
+}
+
+const PORT = process.env.PORT || 5001;
+app.listen(PORT, '0.0.0.0', () =>
+  console.log(`Express + CORS proxy running on http://0.0.0.0:${PORT}`)
 );

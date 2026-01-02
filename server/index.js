@@ -40,7 +40,7 @@ if (fs.existsSync(buildDir)) {
   app.use(express.static(buildDir));
   
   // Fallback to index.html for SPA routing (only for non-API routes)
-  app.get('/*', (req, res) => {
+  app.get('*', (req, res) => {
     // Don't serve index.html for API routes
     if (!req.path.startsWith('/api/')) {
       res.sendFile(path.join(buildDir, 'index.html'));

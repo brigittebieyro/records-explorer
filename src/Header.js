@@ -25,6 +25,7 @@ function Header() {
             src="/WSOLogo.png"
             width="150"
             height="150"
+            alt="WSO logo"
           />
           {wsoName} WSO Records Explorer
         </header>
@@ -37,7 +38,7 @@ function Header() {
                   <a href="/">WSO Records Explorer</a>
                 </li>
                 <li>
-                  <a href="#">Nav Button - Info on how records work</a>
+                  <a href="/info">How Records Work</a>
                 </li>
                 <li>
                   <a href="https://www.pacificweightliftingassociation.org/meet-schedule">

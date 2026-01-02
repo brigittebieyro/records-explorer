@@ -1,5 +1,7 @@
 import "./App.css";
 import { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Info from "./Info";
 import { ageGroups } from "./Data/ageGroups";
 import { CircleLoader } from "react-spinners";
 import {
@@ -15,7 +17,7 @@ import Standards from "./Standards";
 import RecordGroup from "./RecordGroup";
 import Header from "./Header";
 
-function App() {
+function MainPage() {
   const [status, setStatus] = useState();
   const [currentWeightClass, setCurrentWeightClass] = useState();
   const [currentAgeGroup, setCurrentAgeGroup] = useState();
@@ -24,7 +26,6 @@ function App() {
   const [selectedWeightClass, setSelectedWeightClass] = useState("");
   const [selectedAgeGroup, setSelectedAgeGroup] = useState("OPEN");
   const [displayedStandards, setDisplayedStandards] = useState([]);
-  const [menuVisible, setMenuVisible] = useState(false);
 
   const fetchCurrentStandards = async () => {
     if (standardsStatus) {
@@ -138,20 +139,10 @@ function App() {
     setStatus("complete");
   }
 
-  const getMenuStyles = () => {
-    let styles = "menu-flyout";
-    if (!menuVisible) {
-      styles += " hidden";
-    }
-    return styles;
-  };
-
-  const toggleMenu = () => {
-    setMenuVisible(!menuVisible);
-  };
+  
+  // menu handling moved into `Header` component; keep state for future use
   return (
     <div className="App">
-      <Header />
 
       <div className="record-viewer-options-bar">
         <span>Select a weight class & group: </span>
@@ -279,4 +270,14 @@ function App() {
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Header />
+      <Routes>
+        <Route path="/" element={<MainPage />} />
+        <Route path="/info" element={<Info />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}

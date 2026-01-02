@@ -10,6 +10,7 @@
     "@testing-library/user-event": "^13.5.0",
     "cors": "^2.8.5",
     "local-cors-proxy": "^1.1.0",
+    "cors-anywhere": "^0.4.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-scripts": "5.0.1",

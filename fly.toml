@@ -1,10 +1,10 @@
-# fly.toml app configuration file generated for records-explorer on 2026-01-02T09:03:43Z
+# fly.toml app configuration file generated for records-explorer on 2026-01-02T09:53:02Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
 app = 'records-explorer'
-primary_region = 'sjc'
+primary_region = 'iad'
 
 [build]
 

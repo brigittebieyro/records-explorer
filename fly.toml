@@ -24,4 +24,4 @@ primary_region = 'iad'
 
 [env]
   APP_NAME = "Records Exploprer"
-  LOG_LEVEL = "info"
+  LOG_LEVEL = "debug"

@@ -7,12 +7,16 @@ export const wsoName = "California North Central";
 //
 // Run npm install -g local-cors-proxy and lcp --proxyUrl https://admin-usaw-rankings.sport80.com to make this work
 // Will not be needed when hosted in real life.
-// const _baseUrl = "http://localhost:8010/proxy/"; // instead of https://admin-usaw-rankings.sport80.com/ !
-const _baseUrl = "https://admin-usaw-rankings.sport80.com/";
+
+// Use a relative local base path so the client works when deployed
+// behind a reverse proxy. When developing locally the proxy
+// runs on port 8010, but the app should call `/proxy/...`.
+const _baseUrl = "/proxy/"; // instead of https://admin-usaw-rankings.sport80.com/ !
 export const getRankingsRoute = (count) => {
   const limit = typeof count === "number" && count > 0 ? count : 3;
   return `${_baseUrl}api/categories/all/rankings/table/data?platform=1&p=0&l=${limit}&sort=action&d=asc&s=&st=`;
 };
+
 export const getLifterId = (lifterActionRoute) => {
   return lifterActionRoute[0].url.split(
     "https://usaweightlifting.sport80.com/public/rankings/member/",
@@ -28,7 +32,7 @@ export const headers = {
   "accept-language": "en-US,en;q=0.9",
   "content-type": "application/json",
   "x-api-token": "14ced0f3-421f-4acf-94ad-cc63a371af19",
-  "Access-Control-Allow-Origin": "https://usaweightlifting.sport80.com",
+  "Access-Control-Allow-Origin": "*",
 };
 // New weight classes begin August 1, 2026
 export const endDate = "2026-08-01";

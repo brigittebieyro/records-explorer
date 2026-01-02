@@ -9,12 +9,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(pino);
 app.use(cors());
 
-app.get("/api/greeting", (req, res) => {
-  const name = req.query.name || "World";
-  res.setHeader("Content-Type", "application/json");
-  res.send(JSON.stringify({ greeting: `Hello ${name}!` }));
-});
-
 // Mount CORS-Anywhere 
 const proxyServer = corsAnywhere.createServer({
   originWhitelist: [], // Allow all origins
@@ -40,7 +34,7 @@ if (fs.existsSync(buildDir)) {
   app.use(express.static(buildDir));
   
   // Fallback to index.html for SPA routing (only for non-API routes)
-  app.all('/{*any}', (req, res) => {
+  app.all(/.*/, (req, res) => {
     // Don't serve index.html for API routes
     if (!req.path.startsWith('/api/')) {
       res.sendFile(path.join(buildDir, 'index.html'));

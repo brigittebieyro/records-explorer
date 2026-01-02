@@ -33,11 +33,20 @@ app.use('/api/lifter-data', (req, res) => {
 
 // Serve React build if available (for containerized deployments)
 const path = require('path');
+const fs = require('fs');
 const buildDir = path.join(__dirname, '..', 'build');
-if (require('fs').existsSync(buildDir)) {
+if (fs.existsSync(buildDir)) {
+  // Serve static files from build directory
   app.use(express.static(buildDir));
+  
+  // Fallback to index.html for SPA routing (only for non-API routes)
   app.get('*', (req, res) => {
-    res.sendFile(path.join(buildDir, 'index.html'));
+    // Don't serve index.html for API routes
+    if (!req.path.startsWith('/api/')) {
+      res.sendFile(path.join(buildDir, 'index.html'));
+    } else {
+      res.status(404).json({ error: 'Not found' });
+    }
   });
 }
 

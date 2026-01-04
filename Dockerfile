@@ -22,7 +22,7 @@ RUN npm run build
 FROM node:${NODE_VERSION}-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=5001
 
 # Copy built frontend and node_modules from build stage
 COPY --from=build /app/build ./build
@@ -30,7 +30,7 @@ COPY --from=build /app/node_modules ./node_modules
 COPY server ./server
 COPY package.json ./
 
-EXPOSE 3000
+EXPOSE 5001
 
 # Start the Express server which will serve the build and proxy API
 CMD ["node", "server/index.js"]

@@ -32,6 +32,7 @@ const buildDir = path.join(__dirname, '..', 'build');
 if (fs.existsSync(buildDir)) {
   // Serve static files from build directory
   app.use(express.static(buildDir));
+
   
   // Fallback to index.html for SPA routing (only for non-API routes)
   app.all('/{*any}', (req, res) => {
@@ -42,6 +43,12 @@ if (fs.existsSync(buildDir)) {
       res.status(404).json({ error: 'Not found' });
     }
   });
+
+// The "catchall" handler: for any request that doesn't match a previous route,
+// send back the React app's index.html file.
+app.get('/*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+})
 }
 
 const PORT = process.env.PORT || 5001;

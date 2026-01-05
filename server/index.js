@@ -30,21 +30,8 @@ const path = require('path');
 const fs = require('fs');
 const buildDir = path.join(__dirname, '..', 'build');
 if (fs.existsSync(buildDir)) {
-  // // Serve static files from build directory
-  // app.use(express.static(buildDir));
-
-  // Serve static files from the 'build' directory
-// Make sure this path is correct for your project structure
-app.use(express.static(path.join(__dirname, 'build')));
-
-// If you have API routes, define them here BEFORE the catch-all handler
-// app.get('/api/data', (req, res) => { /* ... */ });
-
-// The "catchall" handler: for any request that doesn't match a previous route,
-// send back the React app's index.html file.
-app.get('/*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-})
+  // Serve static files from build directory
+  app.use(express.static(buildDir));
   
   // Fallback to index.html for SPA routing (only for non-API routes)
   app.all('/{*any}', (req, res) => {

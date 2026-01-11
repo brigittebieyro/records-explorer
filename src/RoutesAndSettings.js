@@ -33,6 +33,7 @@ export const headers = {
 export const endDate = "2026-08-01";
 // New york WSO starts tracking records in 1998, no reason we can't do the same.
 export const allTimeStartDate = "1998-01-01";
+export const youthAllTimeStartDate = "2014-01-01"; // This is a magic number - looking for a date which captures history, without the source API throwing errors. 
 
 // ----------------------------------------------------------------------------------------------------------------
 // Google Sheets Routes for Prior Recognized Records

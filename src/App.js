@@ -11,6 +11,7 @@ import {
   currentRecordsSheetId,
   currentRecordsSheetName,
   wsoName,
+  youthAllTimeStartDate,
 } from "./RoutesAndSettings";
 import { getAgeGroup, getWeightClassSet } from "./Utils";
 import Standards from "./Standards";
@@ -140,6 +141,8 @@ function MainPage() {
   }
 
   
+
+
   // menu handling moved into `Header` component; keep state for future use
   return (
     <div className="App">
@@ -255,7 +258,7 @@ function MainPage() {
               weightClass={currentWeightClass}
               ageGroup={currentAgeGroup}
               count={12}
-              startDate={allTimeStartDate}
+              startDate={(currentAgeGroup.id === "U11" || currentAgeGroup.id === "U13") ? youthAllTimeStartDate : allTimeStartDate}
               endDate={endDate}
               emptyContent={
                 <div>

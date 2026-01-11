@@ -26,6 +26,7 @@ width: 50px;
 display: block;
 position: absolute;
 right: 50px;
+  cursor: pointer;
 }
 .menu-icon:hover {
   cursor: pointer;
@@ -47,18 +48,28 @@ right: 50px;
     position: absolute;
     right: -10px;
     top: 32px;
+  cursor: pointer;
 }
 .menu-flyout ul {
   list-style: none;
   padding: 0;
   text-wrap: nowrap;
+  cursor: pointer;
 }
 .menu-flyout li a {
-  border:1px solid blue;
-  background-color: var(--main-text-color);
+  background-color: #ccc;
+  color: #333;
+  text-decoration: none;
+  font-weight: bold;
+  border: 2px solid #bbb;
   margin-bottom:1px; 
   padding:8px;
   display: block;
+  cursor: pointer;
+}
+.menu-flyout li a:hover {
+  background-color: #dfdfdf;
+  cursor: pointer;
 }
 
 .App {

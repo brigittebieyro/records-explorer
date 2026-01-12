@@ -1,6 +1,6 @@
 import { ageGroups } from "./Data/ageGroups";
 import { defaultWeightClasses } from "./Data/defaultWeightClasses";
-import { u11WeightClasses, u13WeightClasses } from "./Data/youthWeightClasses";
+import { u11WeightClasses, u13WeightClasses, u15WeightClasses } from "./Data/youthWeightClasses";
 
 export const getAgeGroup = (ageGroupId) => {
   return ageGroups.find((group) => group.id === ageGroupId);
@@ -15,6 +15,9 @@ export const getWeightClassSet = (ageGroup) => {
   }
   if (ageGroup.id === "U13") {
     return u13WeightClasses;
+  }
+  if (ageGroup.id === "U15") {
+    return u15WeightClasses;
   }
   console.log(`Could not find custom weight classes for ${ageGroup.id}`);
   return defaultWeightClasses;

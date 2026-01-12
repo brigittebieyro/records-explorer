@@ -1206,159 +1206,9 @@ export const u15WeightClasses = [
     ],
   },
   {
-    id: "W63",
-    name: "Girls 63kg",
-    sport80Id: 733,
-    minBodyweight: "53.01",
-    maxBodyweight: "63",
-    gender: "female",
-    start: "2025-06-01",
-    previousAnalogs: [
-      {
-        name: "Girls 63kg", // Pre-2018
-        sport80Id: 733,
-        gender: "female",
-        start: "2004-01-01",
-        end: "2018-01-01",
-      },
-      {
-        name: "Girls 63kg",
-        sport80Id: 733,
-        gender: "female",
-        start: "2018-01-01",
-        end: "2025-06-01",
-      },
-    ],
-  },
-  {
-    id: "W63plus",
-    name: "Girls 63+ kg",
-    sport80Id: 732,
-    minBodyweight: "63.01",
-    maxBodyweight: "1000",
-    gender: "female",
-    start: "2025-06-01",
-    previousAnalogs: [
-      {
-        name: "Girls 63+kg", // Pre-2018
-        sport80Id: 732,
-        gender: "female",
-        start: "2004-01-01",
-        end: "2018-01-01",
-      },
-      {
-        name: "Girls 63+kg",
-        sport80Id: 732,
-        gender: "female",
-        start: "2018-01-01",
-        end: "2025-06-01",
-      },
-    ],
-  },
-  {
-    id: "M32",
-    name: "Boys 32kg",
-    sport80Id: 842,
-    minBodyweight: "0",
-    maxBodyweight: "32",
-    gender: "male",
-    start: "2025-06-01",
-    previousAnalogs: [
-      {
-        name: "Boys 32kg", // Pre-2018
-        sport80Id: 842,
-        gender: "male",
-        start: "2004-01-01",
-        end: "2018-01-01",
-      },
-      {
-        name: "Boys 32kg",
-        sport80Id: 842,
-        gender: "male",
-        start: "2018-01-01",
-        end: "2025-06-01",
-      },
-    ],
-  },
-  {
-    id: "M36",
-    name: "Boys 36kg",
-    sport80Id: 843,
-    minBodyweight: "32.01",
-    maxBodyweight: "36",
-    gender: "male",
-    start: "2025-06-01",
-    previousAnalogs: [
-      {
-        name: "Boys 36kg", // Pre-2018
-        sport80Id: 843,
-        gender: "male",
-        start: "2004-01-01",
-        end: "2018-01-01",
-      },
-      {
-        name: "Boys 36kg",
-        sport80Id: 843,
-        gender: "male",
-        start: "2018-01-01",
-        end: "2025-06-01",
-      },
-    ],
-  },
-  {
-    id: "M40",
-    name: "Boys 40kg",
-    sport80Id: 747,
-    minBodyweight: "36.01",
-    maxBodyweight: "40",
-    gender: "male",
-    start: "2025-06-01",
-    previousAnalogs: [
-      {
-        name: "Boys 40kg", // Pre-2018
-        sport80Id: 747,
-        gender: "male",
-        start: "2004-01-01",
-        end: "2018-01-01",
-      },
-      {
-        name: "Boys 40kg",
-        sport80Id: 747,
-        gender: "male",
-        start: "2018-01-01",
-        end: "2025-06-01",
-      },
-    ],
-  },
-  {
-    id: "M44",
-    name: "Boys 44kg",
-    sport80Id: 746,
-    minBodyweight: "40.01",
-    maxBodyweight: "44",
-    gender: "male",
-    start: "2025-06-01",
-    previousAnalogs: [
-      {
-        name: "Boys 44kg", // Pre-2018
-        sport80Id: 746,
-        gender: "male",
-        start: "2004-01-01",
-        end: "2018-01-01",
-      },
-      {
-        name: "Boys 44kg",
-        sport80Id: 746,
-        gender: "male",
-        start: "2018-01-01",
-        end: "2025-06-01",
-      },
-    ],
-  },
-  {
     id: "M48",
     name: "Boys 48kg",
-    sport80Id: 745,
+    sport80Id: 763,
     minBodyweight: "44.01",
     maxBodyweight: "48",
     gender: "male",
@@ -1366,14 +1216,14 @@ export const u15WeightClasses = [
     previousAnalogs: [
       {
         name: "Boys 48kg", // Pre-2018
-        sport80Id: 745,
+        sport80Id: 0,
         gender: "male",
         start: "2004-01-01",
         end: "2018-01-01",
       },
       {
         name: "Boys 48kg",
-        sport80Id: 745,
+        sport80Id: 0,
         gender: "male",
         start: "2018-01-01",
         end: "2025-06-01",
@@ -1383,7 +1233,7 @@ export const u15WeightClasses = [
   {
     id: "M52",
     name: "Boys 52kg",
-    sport80Id: 744,
+    sport80Id: 762,
     minBodyweight: "48.01",
     maxBodyweight: "52",
     gender: "male",
@@ -1391,14 +1241,14 @@ export const u15WeightClasses = [
     previousAnalogs: [
       {
         name: "Boys 52kg", // Pre-2018
-        sport80Id: 744,
+        sport80Id: 0,
         gender: "male",
         start: "2004-01-01",
         end: "2018-01-01",
       },
       {
         name: "Boys 52kg",
-        sport80Id: 744,
+        sport80Id: 0,
         gender: "male",
         start: "2018-01-01",
         end: "2025-06-01",
@@ -1408,7 +1258,7 @@ export const u15WeightClasses = [
   {
     id: "M56",
     name: "Boys 56kg",
-    sport80Id: 743,
+    sport80Id: 761,
     minBodyweight: "52.01",
     maxBodyweight: "56",
     gender: "male",
@@ -1416,14 +1266,14 @@ export const u15WeightClasses = [
     previousAnalogs: [
       {
         name: "Boys 56kg", // Pre-2018
-        sport80Id: 743,
+        sport80Id: 0,
         gender: "male",
         start: "2004-01-01",
         end: "2018-01-01",
       },
       {
         name: "Boys 56kg",
-        sport80Id: 743,
+        sport80Id: 0,
         gender: "male",
         start: "2018-01-01",
         end: "2025-06-01",
@@ -1433,7 +1283,7 @@ export const u15WeightClasses = [
   {
     id: "M60",
     name: "Boys 60kg",
-    sport80Id: 742,
+    sport80Id: 760,
     minBodyweight: "56.01",
     maxBodyweight: "60",
     gender: "male",
@@ -1441,14 +1291,14 @@ export const u15WeightClasses = [
     previousAnalogs: [
       {
         name: "Boys 60kg", // Pre-2018
-        sport80Id: 742,
+        sport80Id: 0,
         gender: "male",
         start: "2004-01-01",
         end: "2018-01-01",
       },
       {
         name: "Boys 60kg",
-        sport80Id: 742,
+        sport80Id: 0,
         gender: "male",
         start: "2018-01-01",
         end: "2025-06-01",
@@ -1458,7 +1308,7 @@ export const u15WeightClasses = [
   {
     id: "M65",
     name: "Boys 65kg",
-    sport80Id: 741,
+    sport80Id: 759,
     minBodyweight: "60.01",
     maxBodyweight: "65",
     gender: "male",
@@ -1481,24 +1331,74 @@ export const u15WeightClasses = [
     ],
   },
   {
-    id: "M65plus",
-    name: "Boys 65+kg",
-    sport80Id: 740,
+    id: "M71",
+    name: "Boys 71kg",
+    sport80Id: 758,
     minBodyweight: "65.01",
-    maxBodyweight: "1000",
+    maxBodyweight: "71",
     gender: "male",
     start: "2025-06-01",
     previousAnalogs: [
       {
-        name: "Boys 65+kg", // Pre-2018
-        sport80Id: 740,
+        name: "Boys 79kg", // Pre-2018
+        sport80Id: 0,
         gender: "male",
         start: "2004-01-01",
         end: "2018-01-01",
       },
       {
-        name: "Boys 65+kg",
-        sport80Id: 740,
+        name: "Boys 79kg",
+        sport80Id: 0,
+        gender: "male",
+        start: "2018-01-01",
+        end: "2025-06-01",
+      },
+    ],
+  },
+  {
+    id: "M79",
+    name: "Boys 79kg",
+    sport80Id: 757,
+    minBodyweight: "71.01",
+    maxBodyweight: "79",
+    gender: "male",
+    start: "2025-06-01",
+    previousAnalogs: [
+      {
+        name: "Boys 79kg", // Pre-2018
+        sport80Id: 0,
+        gender: "male",
+        start: "2004-01-01",
+        end: "2018-01-01",
+      },
+      {
+        name: "Boys 79kg",
+        sport80Id: 0,
+        gender: "male",
+        start: "2018-01-01",
+        end: "2025-06-01",
+      },
+    ],
+  },
+  {
+    id: "M79plus",
+    name: "Boys 79+kg",
+    sport80Id: 756,
+    minBodyweight: "79.01",
+    maxBodyweight: "1000",
+    gender: "male",
+    start: "2025-06-01",
+    previousAnalogs: [
+      {
+        name: "Boys 79+kg", // Pre-2018
+        sport80Id: 0,
+        gender: "male",
+        start: "2004-01-01",
+        end: "2018-01-01",
+      },
+      {
+        name: "Boys 79+kg",
+        sport80Id: 0,
         gender: "male",
         start: "2018-01-01",
         end: "2025-06-01",
@@ -1532,4 +1432,4 @@ export const u15WeightClasses = [
 // M60 778
 // 65 and up, can run squential OR use general until 94+ with same results
 // Recommend using general to avoid having to painstakingly pull ids out of the web inspector for all previous classes.
-// 79+ 772
+// 94+ 772

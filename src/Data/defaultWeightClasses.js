@@ -454,7 +454,7 @@ export const defaultWeightClasses =
         {
             id: "M110plus",
             name: "Men's 110+kg",
-            sport80Id: 715,
+            sport80Id: 710,
             minBodyweight: "110.01",
             maxBodyweight: "1000",
             gender: "male",

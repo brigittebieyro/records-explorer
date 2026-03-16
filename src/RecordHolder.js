@@ -15,7 +15,7 @@ function RecordHolder({ lifterData, index, individualLiftsData, sortType }) {
   // }
 
   // const isAllTimeBest = isFromPriorGroup && index === 0 && isUbeatenByCurrentLifters;
-  if (!lifter.best_snatch) {
+  if (!lifter.best_snatch && lifter.best_snatch !== 0) {
     const liftData = individualLiftsData.find(
       (lift) =>
         lift?.name === lifter?.name &&
@@ -58,13 +58,13 @@ function RecordHolder({ lifterData, index, individualLiftsData, sortType }) {
         <p>
           <strong>Total:&nbsp;</strong> {lifter.total}
         </p>
-        {!!lifter.best_snatch && (
+        {!!String(lifter.best_snatch) && (
           <p>
             <strong>Snatch:&nbsp;</strong>
             {lifter.best_snatch}
           </p>
         )}
-        {!!lifter["best_c&j"] && (
+        {!!String(lifter["best_c&j"]) && (
           <p>
             <strong>Clean and Jerk:&nbsp;</strong>
             {lifter["best_c&j"]}
@@ -83,17 +83,17 @@ function RecordHolder({ lifterData, index, individualLiftsData, sortType }) {
           <strong>Club:&nbsp;</strong>
           {club}
         </p>
-        {/* {lifter.bodyweight > 0 && (
+        {lifter.bodyweight > 0 && (
           <p>
             <strong>Bodyweight:&nbsp;</strong>
             {lifter.bodyweight}
           </p>
-        )} */}
+        )}
       </div>
       {!!lifter.meet && (
         <p className="record-viewer-full-width-detail">{lifter.meet}</p>
       )}
-      {!lifter.best_snatch && (
+      {!lifter.best_snatch && lifter?.best_snatch !== 0 && (
         <div className="records-viewer-content-spinner">
           <CircleLoader loading={true} color="gold" size="18" />
         </div>

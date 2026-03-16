@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   headers,
   getRankingsRoute,
@@ -20,7 +20,6 @@ function RecordGroup({
 }) {
   const [status, setStatus] = useState();
   const [leadingLifters, setLeadingLifters] = useState([]);
-  const [newLiftsData, setNewLiftsData] = useState();
   const [combinedLiftsData, setCombinedLiftsData] = useState([]);
   const [sortType, setSortType] = useState("total");
 
@@ -36,20 +35,9 @@ function RecordGroup({
   const resetAllData = () => {
     setStatus("inprogress");
     setLeadingLifters([]);
-    setNewLiftsData();
     setCombinedLiftsData([]);
     setSortType("total");
   };
-
-  function usePrevious(value) {
-    const ref = useRef();
-    useEffect(() => {
-      ref.current = value;
-    });
-    return ref.current;
-  }
-
-  const prevLifts = usePrevious(newLiftsData);
 
   useEffect(() => {
     if (weightClass && ageGroup) {
@@ -60,16 +48,12 @@ function RecordGroup({
   }, [weightClass, ageGroup]);
 
   useEffect(() => {
-    if (!!newLiftsData) {
-      let updatedLifts = [...combinedLiftsData, newLiftsData];
-      if (prevLifts && !combinedLiftsData.includes(prevLifts)) {
-        updatedLifts.push(prevLifts);
-      }
-      const sortedLifts = sortLifts(updatedLifts, "total");
-      setCombinedLiftsData(sortedLifts);
+    if (combinedLiftsData.length > 0) {
+      const sortedLifts = sortLifts(combinedLiftsData, sortType);
+      setLeadingLifters(sortedLifts);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newLiftsData]);
+  }, [combinedLiftsData, sortType]);
 
   const updateSortType = (newType) => {
     console.log(
@@ -127,8 +111,6 @@ function RecordGroup({
   const fetchIndividualLifts = async (lifter) => {
     const publicLifterId = getLifterId(lifter.action);
     const route = getLifterDataRoute(publicLifterId);
-    const specificDate = lifter.lift_date;
-    const specificTotal = lifter.total;
 
     try {
       const response = await fetch(route, {
@@ -142,13 +124,24 @@ function RecordGroup({
       await response.json().then((response) => {
         if (response.data.length) {
           let meets = response.data;
-          const liftData = meets.find(
-            (meet) =>
-              meet.date === specificDate && meet.total === specificTotal,
-          );
-          if (liftData) {
-            setNewLiftsData({ ...lifter, ...liftData });
-            return Promise.resolve();
+          // Collect all lifts within the date range for this bodyweight category
+          const matchingLifts = [];
+          for (let meet of meets) {
+            if (meet.date >= startDate && 
+                meet.date <= endDate &&
+                meet["body_weight_(kg)"] >= weightClass.minBodyweight &&
+                meet["body_weight_(kg)"] <= weightClass.maxBodyweight &&
+                meet.age_category.indexOF(ageGroup.usawDisplayKey) > -1
+              ) {
+              matchingLifts.push({ ...lifter, ...meet });
+            }
+          }
+          // Add all matching lifts at once
+          if (matchingLifts.length > 0) {
+            setCombinedLiftsData((prevData) => {
+              const updated = [...prevData, ...matchingLifts];
+              return updated;
+            });
           }
         }
       });

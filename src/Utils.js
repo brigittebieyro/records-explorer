@@ -28,33 +28,57 @@ export const handleError = (error) => {
 };
 
 export const sortLifts = (lifts, key) => {
-  let useKey = key || "total"; // === "date" ? "lift_date" : "total";
+  let useKey = key || "total";
 
-  let result = [];
+  // For date sorting, keep all lifts
   if (useKey === "lift_date") {
-    result = lifts.sort(function (a, b) {
+    let result = lifts.sort(function (a, b) {
       var keyA = new Date(a[useKey]),
         keyB = new Date(b[useKey]);
       if (keyA > keyB) return -1;
       if (keyA < keyB) return 1;
       return 0;
     });
-  } else {
-    result = lifts.sort(function (a, b) {
-      var keyA = parseInt(a[useKey]),
-        keyB = parseInt(b[useKey]);
-      if (keyA > keyB) return -1;
-      if (keyA < keyB) return 1;
-      return 0;
-    });
+    let trimmedResult = [];
+    for (let i = 0; i < result.length; i++) {
+      if (trimmedResult.indexOf(result[i]) === -1) {
+        trimmedResult.push(result[i]);
+      }
+    }
+    return trimmedResult;
   }
-  let trimmedResult = [];
-  for (let i = 0; i < result.length; i++) {
-    if (trimmedResult.indexOf(result[i]) === -1) {
-      trimmedResult.push(result[i]);
+
+  // For other metrics (total, best_snatch, best_c&j), keep only best per athlete
+  // Group by athlete name and keep the performance with the highest value for the metric
+  const athleteMap = new Map();
+  for (let lift of lifts) {
+    const athleteName = lift.name;
+    // Handle zero and non-zero values correctly
+    const liftValue = lift[useKey] !== undefined && lift[useKey] !== null ? parseInt(lift[useKey]) : 0;
+
+    if (!athleteMap.has(athleteName)) {
+      athleteMap.set(athleteName, lift);
+    } else {
+      const existingLift = athleteMap.get(athleteName);
+      const existingValue = existingLift[useKey] !== undefined && existingLift[useKey] !== null ? parseInt(existingLift[useKey]) : 0;
+      // Only replace if new value is strictly greater
+      if (liftValue > existingValue) {
+        athleteMap.set(athleteName, lift);
+      }
     }
   }
-  return trimmedResult;
+
+  // Convert map to array and sort
+  let result = Array.from(athleteMap.values());
+  result.sort(function (a, b) {
+    var keyA = a[useKey] !== undefined && a[useKey] !== null ? parseInt(a[useKey]) : 0;
+    var keyB = b[useKey] !== undefined && b[useKey] !== null ? parseInt(b[useKey]) : 0;
+    if (keyA > keyB) return -1;
+    if (keyA < keyB) return 1;
+    return 0;
+  });
+
+  return result;
 };
 
 export const shouldIncludePastLifter = (lifter, weightClass) => {

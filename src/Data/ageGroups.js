@@ -2,6 +2,7 @@ export const ageGroups = [
   {
     id: "OPEN",
     name: "Open",
+    usawDisplayKey: "Open",
     minimum_lifter_age: "0",
     maximum_lifter_age: "1000",
     disabled: false,
@@ -10,6 +11,7 @@ export const ageGroups = [
   {
     id: "U11",
     name: "Under 11",
+    usawDisplayKey: "11 Under Age Group",
     minimum_lifter_age: "0",
     maximum_lifter_age: "11",
     disabled: false,
@@ -18,6 +20,7 @@ export const ageGroups = [
   {
     id: "U13",
     name: "Under 13",
+    usawDisplayKey: "13 Under Age Group",
     minimum_lifter_age: "0",
     maximum_lifter_age: "13",
     disabled: false,
@@ -26,6 +29,7 @@ export const ageGroups = [
   {
     id: "U15",
     name: "Under 15 (14-15 years old)",
+    usawDisplayKey: "14-15 Age Group",
     minimum_lifter_age: "14",
     maximum_lifter_age: "15",
     disabled: false,
@@ -34,6 +38,7 @@ export const ageGroups = [
   {
     id: "U17",
     name: "Under 17 (16-17 years old)",
+    usawDisplayKey: "16-17 Age Group",
     minimum_lifter_age: "16",
     maximum_lifter_age: "17",
     disabled: false,
@@ -42,6 +47,7 @@ export const ageGroups = [
   {
     id: "JR",
     name: "Junior (15-20 years old)",
+    usawDisplayKey: "Junior",
     minimum_lifter_age: "15",
     maximum_lifter_age: "20",
     disabled: false,
@@ -50,6 +56,7 @@ export const ageGroups = [
   {
     id: "35",
     name: "35 - 39 years old",
+    usawDisplayKey: "Masters (35-39)",
     minimum_lifter_age: "35",
     maximum_lifter_age: "39",
     disabled: false,
@@ -58,6 +65,7 @@ export const ageGroups = [
   {
     id: "40",
     name: "40 - 44 years old",
+    usawDisplayKey: "Masters (40-44)",
     minimum_lifter_age: "40",
     maximum_lifter_age: "44",
     disabled: false,
@@ -66,6 +74,7 @@ export const ageGroups = [
   {
     id: "45",
     name: "45 - 49 years old",
+    usawDisplayKey: "Masters (45-49)",
     minimum_lifter_age: "45",
     maximum_lifter_age: "49",
     disabled: false,
@@ -74,6 +83,7 @@ export const ageGroups = [
   {
     id: "50",
     name: "50 - 54 years old",
+    usawDisplayKey: "Masters (50-54)",
     minimum_lifter_age: "50",
     maximum_lifter_age: "54",
     disabled: false,
@@ -82,6 +92,7 @@ export const ageGroups = [
   {
     id: "55",
     name: "55 - 59 years old",
+    usawDisplayKey: "Masters (55-59)",
     minimum_lifter_age: "55",
     maximum_lifter_age: "59",
     disabled: false,
@@ -90,6 +101,7 @@ export const ageGroups = [
   {
     id: "60",
     name: "60 - 64 years old",
+    usawDisplayKey: "Masters (60-64)",
     minimum_lifter_age: "60",
     maximum_lifter_age: "64",
     disabled: false,
@@ -98,6 +110,7 @@ export const ageGroups = [
   {
     id: "65",
     name: "65 - 69 years old",
+    usawDisplayKey: "Masters (65-69)",
     minimum_lifter_age: "65",
     maximum_lifter_age: "69",
     disabled: false,
@@ -106,6 +119,7 @@ export const ageGroups = [
   {
     id: "70",
     name: "70 - 74 years old",
+    usawDisplayKey: "Masters (70-74)",
     minimum_lifter_age: "70",
     maximum_lifter_age: "74",
     disabled: false,
@@ -114,6 +128,7 @@ export const ageGroups = [
   {
     id: "75",
     name: "75 - 79 years old",
+    usawDisplayKey: "Masters (75-79)",
     minimum_lifter_age: "75",
     maximum_lifter_age: "79",
     disabled: false,
@@ -122,6 +137,7 @@ export const ageGroups = [
   {
     id: "80",
     name: "80 - 84 years old",
+    usawDisplayKey: "Masters (80-84)",
     minimum_lifter_age: "80",
     maximum_lifter_age: "84",
     disabled: false,
@@ -130,6 +146,7 @@ export const ageGroups = [
   {
     id: "85",
     name: "85 - 89 years old",
+    usawDisplayKey: "Masters (85-89)",
     minimum_lifter_age: "85",
     maximum_lifter_age: "89",
     disabled: false,
@@ -138,6 +155,7 @@ export const ageGroups = [
   {
     id: "90",
     name: "90 years old and up",
+    usawDisplayKey: "Masters (90+)",
     minimum_lifter_age: "90",
     maximum_lifter_age: "1000",
     disabled: false,

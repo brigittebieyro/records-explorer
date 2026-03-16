@@ -83,12 +83,13 @@ function RecordHolder({ lifterData, index, individualLiftsData, sortType }) {
           <strong>Club:&nbsp;</strong>
           {club}
         </p>
-        {lifter.bodyweight > 0 && (
+        {/* This is handy for debugging purposes. I do not want to show it to users.  */}
+        {/* {lifter.bodyweight > 0 && (
           <p>
             <strong>Bodyweight:&nbsp;</strong>
             {lifter.bodyweight}
           </p>
-        )}
+        )} */}
       </div>
       {!!lifter.meet && (
         <p className="record-viewer-full-width-detail">{lifter.meet}</p>

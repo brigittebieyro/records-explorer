@@ -124,15 +124,26 @@ function RecordGroup({
       await response.json().then((response) => {
         if (response.data.length) {
           let meets = response.data;
+          // Get a min and max year for the lifter based on the age group
+          const ageAtRankingTime = parseInt(lifter.lifter_age);
+          const rankingYear = new Date(lifter.lift_date).getFullYear();
+          const minYearForLifter = rankingYear - (ageAtRankingTime - parseInt(ageGroup.minimum_lifter_age));
+          const maxYearForLifter = rankingYear + (parseInt(ageGroup.maximum_lifter_age) - ageAtRankingTime) ;
+          
           // Collect all lifts within the date range for this bodyweight category
           const matchingLifts = [];
           for (let meet of meets) {
+            const meetYear = new Date(meet.date).getFullYear();
             if (meet.date >= startDate && 
                 meet.date <= endDate &&
                 meet["body_weight_(kg)"] >= weightClass.minBodyweight &&
                 meet["body_weight_(kg)"] <= weightClass.maxBodyweight &&
-                meet.age_category.indexOF(ageGroup.usawDisplayKey) > -1
+                meetYear >= minYearForLifter &&
+                meetYear <= maxYearForLifter 
               ) {
+                // if(lifter.name.indexOf("Brigitte") >= 0) {
+                //   debugger
+                // }
               matchingLifts.push({ ...lifter, ...meet });
             }
           }

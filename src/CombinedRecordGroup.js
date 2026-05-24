@@ -11,11 +11,11 @@ import RecordHolder from './RecordHolder';
 import { CircleLoader } from "react-spinners";
 
 function CombinedRecordGroup({weightClass, ageGroup, emptyContent}) {
-  const [status, setStatus] = useState();;
-      const [newLiftsData, setNewLiftsData] = useState();
-      const [combinedLiftsData, setCombinedLiftsData] = useState([]);
-      const [lifterGroups, setLifterGroups] = useState([])
-      const [combinedLifterGroups, setCombinedLifterGroups] = useState([])
+  const [status, setStatus] = useState();
+  const [newLiftsData, setNewLiftsData] = useState();
+  const [combinedLiftsData, setCombinedLiftsData] = useState([]);
+  const [lifterGroups, setLifterGroups] = useState([]);
+  const [combinedLifterGroups, setCombinedLifterGroups] = useState([]);
 
   const resetAllData = () => {
     setStatus("inprogress");
@@ -23,54 +23,50 @@ function CombinedRecordGroup({weightClass, ageGroup, emptyContent}) {
     setNewLiftsData();
     setCombinedLiftsData([]);
     setCombinedLifterGroups([]);
-  }
-
-function usePrevious(value) {
-  const ref = useRef();
-  useEffect(() => {
-    ref.current = value;
-  });
-  return ref.current;
-}
-
-const prevNewLifts = usePrevious(newLiftsData);
+  };
 
   useEffect(() => {
-    if(weightClass && ageGroup){
-        resetAllData();
-    
-    for (let i = 0; i < weightClass.previousAnalogs.length; i++) {
-      if (weightClass.previousAnalogs[i].sport80Id !== 0) {
-        setTimeout(() => {
-          fetchRecordGroup( weightClass.previousAnalogs[i], ageGroup)
-        }, 100);
+    if (weightClass && ageGroup) {
+      resetAllData();
+
+      for (let i = 0; i < weightClass.previousAnalogs.length; i++) {
+        if (weightClass.previousAnalogs[i].sport80Id !== 0) {
+          setTimeout(() => {
+            fetchRecordGroup(weightClass.previousAnalogs[i], ageGroup);
+          }, 100 * (i + 1));
+        }
       }
     }
-  }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [weightClass, ageGroup])
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [weightClass, ageGroup]);
 
   useEffect(() => {
-    if(!!newLiftsData){
-      const prevLifts = prevNewLifts;
-      const updatedLifts = [newLiftsData]
-      if(prevLifts && !combinedLiftsData.includes(prevLifts)) {
-        updatedLifts.push(prevLifts)
-      }
-      const combined = sortLifts([...combinedLiftsData, ...updatedLifts]);
-      setCombinedLiftsData(combined)
+    if (!!newLiftsData) {
+      setCombinedLiftsData((prevData) => {
+        const candidate = [...prevData, newLiftsData];
+        const uniqueMap = new Map();
+
+        candidate.forEach((lift) => {
+          const key = `${lift.name}|${lift.lift_date}|${lift.total}`;
+          if (!uniqueMap.has(key)) {
+            uniqueMap.set(key, lift);
+          }
+        });
+
+        return sortLifts(Array.from(uniqueMap.values()));
+      });
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newLiftsData])  
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newLiftsData]);
 
   useEffect(() => {
     if (lifterGroups.length) {
-      const sortedCombinedGroups = sortLifts([...lifterGroups, ...combinedLifterGroups], "total")
-      setCombinedLifterGroups(sortedCombinedGroups);
+      setCombinedLifterGroups((prevGroups) =>
+        sortLifts([...prevGroups, ...lifterGroups], "total"),
+      );
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lifterGroups])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lifterGroups]);
     
     
       const fetchRecordGroup = async (subClass, ageGroup) => {

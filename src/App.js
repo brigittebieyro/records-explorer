@@ -67,6 +67,8 @@ function MainPage() {
         (wtClass) => wtClass.id === selectedWeightClass,
       );
       if (!selectedWeightClassObj) {
+        // Intentional: clearing the weight class when switching age groups is expected
+        // behavior — the new age group may not share the same weight classes.
         setSelectedWeightClass("");
       }
     }
@@ -78,6 +80,7 @@ function MainPage() {
       let recordSet = {};
 
       let weightClassIndicator = weightClass.maxBodyweight;
+        // The standards spreadsheet always uses ">86" format (not "86+") for plus-weight classes.
       if (weightClass.maxBodyweight > 200) {
         weightClassIndicator = `>${parseInt(weightClass.minBodyweight)}`;
       }
@@ -150,6 +153,7 @@ function MainPage() {
       <div className="record-viewer-options-bar">
         <span>Select a weight class & group: </span>
         <select
+          aria-label="Age Group"
           className="header-button"
           name="age-group"
           id="age-group-select"
@@ -170,6 +174,7 @@ function MainPage() {
         </select>
 
         <select
+          aria-label="Weight Class"
           className="header-button"
           name="weight-class"
           id="weight-class-select"

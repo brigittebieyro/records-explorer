@@ -163,8 +163,9 @@ function RecordGroup({
       {status !== "complete" && <CircleLoader loading={true} color="gold" />}
       {combinedLiftsData.length > 0 && (
         <div className="sort-select-parent">
-          Sort{" "}
+          <label htmlFor="sort-select">Sort</label>{" "}
           <select
+            aria-label="Sort"
             name="sort-selection"
             id="sort-select"
             onChange={(e) => {
@@ -188,6 +189,7 @@ function RecordGroup({
         !!leadingLifters.length &&
         leadingLifters.map((lifter, index) => (
           <RecordHolder
+            key={`record-holder-${index}-${lifter.name}`}
             lifterData={lifter}
             index={index}
             individualLiftsData={combinedLiftsData}

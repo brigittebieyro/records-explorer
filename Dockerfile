@@ -12,7 +12,7 @@ RUN apt-get update -qq && \
 
 # Copy package manifests and install deps (including dev for build)
 COPY package.json package-lock.json ./
-RUN npm install --no-audit --no-fund
+RUN npm install --no-audit --no-fund --legacy-peer-deps
 
 # Copy source and build the React app
 COPY . ./

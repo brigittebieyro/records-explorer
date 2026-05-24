@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Info from "./Info";
 import { ageGroups } from "./Data/ageGroups";
+import { defaultWeightClasses } from "./Data/defaultWeightClasses";
 import { CircleLoader } from "react-spinners";
 import {
   endDate,
@@ -17,6 +18,67 @@ import { getAgeGroup, getWeightClassSet } from "./Utils";
 import Standards from "./Standards";
 import RecordGroup from "./RecordGroup";
 import Header from "./Header";
+import AllCurrentRecordsView from "./AllCurrentRecordsView";
+
+export function computeStandardsForWeightClass(weightClass, standards) {
+  const recordSet = {};
+  let weightClassIndicator = weightClass.maxBodyweight;
+  if (weightClass.maxBodyweight > 200) {
+    weightClassIndicator = `>${parseInt(weightClass.minBodyweight)}`;
+  }
+  standards.forEach((standard) => {
+    if (standard[7] === weightClassIndicator) {
+      const ageKey = String(standard[2]).toUpperCase();
+      const indicator = ageKey[0];
+      const recordKey =
+        indicator === "W" || indicator === "M" ? standard[4] : ageKey;
+      const genderKey = standard[3];
+      if (
+        (weightClass.gender === "female" && genderKey === "F") ||
+        (weightClass.gender === "male" && genderKey === "M")
+      ) {
+        if (!recordSet[recordKey]) {
+          recordSet[recordKey] = {
+            ageGroup: ageKey,
+            weightClass: standard[7],
+            records: {},
+          };
+        }
+        recordSet[recordKey].records[standard[8]] = {
+          weight: standard[9],
+          lifter: standard[10],
+          event: standard[11],
+          date: standard[12],
+        };
+      }
+    }
+  });
+  return recordSet;
+}
+
+export function buildAllCurrentRecords(standards) {
+  const result = [];
+  for (const weightClass of defaultWeightClasses) {
+    const recordSet = computeStandardsForWeightClass(weightClass, standards);
+    const groups = [];
+    for (const ageGroup of ageGroups) {
+      const ageGroupData = recordSet[ageGroup.id];
+      if (!ageGroupData) continue;
+      const realRecords = {};
+      Object.entries(ageGroupData.records).forEach(([liftType, record]) => {
+        if (record.lifter !== "STANDARD") {
+          realRecords[liftType] = record;
+        }
+      });
+      if (Object.keys(realRecords).length === 0) continue;
+      groups.push({ ageGroup, records: realRecords });
+    }
+    if (groups.length > 0) {
+      result.push({ weightClass, groups });
+    }
+  }
+  return result;
+}
 
 function MainPage() {
   const [status, setStatus] = useState();
@@ -27,6 +89,7 @@ function MainPage() {
   const [selectedWeightClass, setSelectedWeightClass] = useState("");
   const [selectedAgeGroup, setSelectedAgeGroup] = useState("OPEN");
   const [displayedStandards, setDisplayedStandards] = useState([]);
+  const [allRecordsData, setAllRecordsData] = useState([]);
 
   const fetchCurrentStandards = async () => {
     if (standardsStatus) {
@@ -75,46 +138,18 @@ function MainPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAgeGroup]);
 
+  useEffect(() => {
+    if (localStandards.length) {
+      setAllRecordsData(buildAllCurrentRecords(localStandards));
+    }
+  }, [localStandards]);
+
   const updateDisplayedStandards = async (weightClass, ageGroup) => {
     if (!!weightClass && localStandards.length) {
-      let recordSet = {};
-
-      let weightClassIndicator = weightClass.maxBodyweight;
-        // The standards spreadsheet always uses ">86" format (not "86+") for plus-weight classes.
-      if (weightClass.maxBodyweight > 200) {
-        weightClassIndicator = `>${parseInt(weightClass.minBodyweight)}`;
-      }
-      localStandards.filter((standard) => {
-        if (standard[7] === weightClassIndicator) {
-          const ageKey = String(standard[2]).toUpperCase();
-          const indicator = ageKey[0];
-          let recordKey =
-            indicator === "W" || indicator === "M" ? standard[4] : ageKey;
-          const genderKey = standard[3];
-          if (
-            (weightClass.gender === "female" && genderKey === "F") ||
-            (weightClass.gender === "male" && genderKey === "M")
-          ) {
-            let weightClassKey = standard[7];
-            if (!recordSet[recordKey]) {
-              recordSet[recordKey] = {
-                ageGroup: ageKey,
-                weightClass: weightClassKey,
-                records: {},
-              };
-            }
-
-            recordSet[recordKey].records[standard[8]] = {
-              weight: standard[9],
-              lifter: standard[10],
-              event: standard[11],
-              date: standard[12],
-            };
-          }
-        }
-        return true;
-      });
-      setDisplayedStandards(recordSet);
+      // The standards spreadsheet always uses ">86" format (not "86+") for plus-weight classes.
+      setDisplayedStandards(
+        computeStandardsForWeightClass(weightClass, localStandards)
+      );
     }
   };
 
@@ -178,6 +213,7 @@ function MainPage() {
           className="header-button"
           name="weight-class"
           id="weight-class-select"
+          value={selectedWeightClass}
           onChange={(e) => {
             setSelectedWeightClass(e.target.value);
           }}
@@ -204,7 +240,25 @@ function MainPage() {
         >
           Go
         </button>
+
+        {status === "complete" && (
+          <button
+            className="header-button reset-button"
+            onClick={() => {
+              setSelectedAgeGroup("OPEN");
+              setSelectedWeightClass("");
+              resetAllData();
+              setStatus(undefined);
+            }}
+          >
+            Reset
+          </button>
+        )}
       </div>
+
+      {!status && (
+        <AllCurrentRecordsView data={allRecordsData} />
+      )}
 
       {status === "inprogress" && (
         <div className="records-viewer-loading-container">

@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import App from './App';
+import App, { computeStandardsForWeightClass, buildAllCurrentRecords } from './App';
 import * as RoutesAndSettings from './RoutesAndSettings';
 import * as Utils from './Utils';
 
@@ -25,6 +25,12 @@ jest.mock('./Standards', () => {
 jest.mock('./Header', () => {
   return function Header() {
     return <div data-testid="header">Header</div>;
+  };
+});
+
+jest.mock('./AllCurrentRecordsView', () => {
+  return function AllCurrentRecordsView({ data }) {
+    return <div data-testid="all-current-records-view">All Records ({data.length})</div>;
   };
 });
 
@@ -557,6 +563,223 @@ describe('App - MainPage Component', () => {
       await waitFor(() => {
         expect(screen.getAllByTestId('record-group')).toHaveLength(2);
       });
+    });
+  });
+
+  describe('Reset Button and Empty State', () => {
+    test('Reset button is not visible in the initial empty state', () => {
+      global.fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ values: mockStandardsData }),
+      });
+
+      renderApp();
+
+      expect(screen.queryByRole('button', { name: 'Reset' })).not.toBeInTheDocument();
+    });
+
+    test('shows AllCurrentRecordsView as the initial empty state', () => {
+      global.fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ values: mockStandardsData }),
+      });
+
+      renderApp();
+
+      expect(screen.getByTestId('all-current-records-view')).toBeInTheDocument();
+    });
+
+    test('Reset button appears after clicking Go', async () => {
+      global.fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ values: mockStandardsData }),
+      });
+
+      renderApp();
+
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
+      await userEvent.selectOptions(weightClassSelect, 'W48');
+      await userEvent.click(screen.getByRole('button', { name: 'Go' }));
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Reset' })).toBeInTheDocument();
+      });
+    });
+
+    test('AllCurrentRecordsView is hidden while a specific weight class is being viewed', async () => {
+      global.fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ values: mockStandardsData }),
+      });
+
+      renderApp();
+
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
+      await userEvent.selectOptions(weightClassSelect, 'W48');
+      await userEvent.click(screen.getByRole('button', { name: 'Go' }));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('all-current-records-view')).not.toBeInTheDocument();
+        expect(screen.getAllByTestId('record-group').length).toBeGreaterThan(0);
+      });
+    });
+
+    test('Reset button returns to empty state and hides itself', async () => {
+      global.fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ values: mockStandardsData }),
+      });
+
+      renderApp();
+
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
+      await userEvent.selectOptions(weightClassSelect, 'W48');
+      await userEvent.click(screen.getByRole('button', { name: 'Go' }));
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Reset' })).toBeInTheDocument();
+      });
+
+      await userEvent.click(screen.getByRole('button', { name: 'Reset' }));
+      await waitFor(() => {
+        expect(screen.getByTestId('all-current-records-view')).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Reset' })).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('computeStandardsForWeightClass (pure helper)', () => {
+    const femaleW48 = {
+      id: 'W48',
+      name: "Women's 48kg",
+      maxBodyweight: '48',
+      minBodyweight: '0',
+      gender: 'female',
+    };
+
+    const maleM60 = {
+      id: 'M60',
+      name: "Men's 60kg",
+      maxBodyweight: '60',
+      minBodyweight: '0',
+      gender: 'male',
+    };
+
+    const plusClass = {
+      id: 'W86plus',
+      name: "Women's 86+kg",
+      maxBodyweight: '1000',
+      minBodyweight: '86.01',
+      gender: 'female',
+    };
+
+    test('groups records by age group key', () => {
+      const standards = [
+        ['', '', 'OPEN', 'F', 'OPEN', '', '', '48', 'Total', '200', 'Jane', 'Meet', '2024-01-01'],
+        ['', '', 'OPEN', 'F', 'OPEN', '', '', '48', 'Snatch', '90', 'Jane', 'Meet', '2024-01-01'],
+      ];
+      const result = computeStandardsForWeightClass(femaleW48, standards);
+      expect(result['OPEN']).toBeDefined();
+      expect(result['OPEN'].records['Total'].lifter).toBe('Jane');
+      expect(result['OPEN'].records['Snatch'].lifter).toBe('Jane');
+    });
+
+    test('filters by gender — female weight class ignores male records', () => {
+      const standards = [
+        ['', '', 'OPEN', 'M', 'OPEN', '', '', '48', 'Total', '200', 'John', 'Meet', '2024-01-01'],
+      ];
+      const result = computeStandardsForWeightClass(femaleW48, standards);
+      expect(Object.keys(result)).toHaveLength(0);
+    });
+
+    test('filters by gender — male weight class ignores female records', () => {
+      const standards = [
+        ['', '', 'OPEN', 'F', 'OPEN', '', '', '60', 'Total', '200', 'Jane', 'Meet', '2024-01-01'],
+      ];
+      const result = computeStandardsForWeightClass(maleM60, standards);
+      expect(Object.keys(result)).toHaveLength(0);
+    });
+
+    test('uses >minBodyweight indicator for plus-weight classes', () => {
+      const standards = [
+        ['', '', 'OPEN', 'F', 'OPEN', '', '', '>86', 'Total', '280', 'Jane', 'Meet', '2024-01-01'],
+      ];
+      const result = computeStandardsForWeightClass(plusClass, standards);
+      expect(result['OPEN']).toBeDefined();
+      expect(result['OPEN'].records['Total'].lifter).toBe('Jane');
+    });
+
+    test('uses standard[4] as key for Masters age groups (M prefix)', () => {
+      const standards = [
+        ['', '', 'MASTERS_35-39', 'F', '35', '', '', '48', 'Total', '180', 'Jane', 'Meet', '2024-01-01'],
+      ];
+      const result = computeStandardsForWeightClass(femaleW48, standards);
+      expect(result['35']).toBeDefined();
+    });
+
+    test('includes STANDARD records (caller is responsible for filtering)', () => {
+      const standards = [
+        ['', '', 'OPEN', 'F', 'OPEN', '', '', '48', 'Total', '250', 'STANDARD', '', ''],
+      ];
+      const result = computeStandardsForWeightClass(femaleW48, standards);
+      expect(result['OPEN'].records['Total'].lifter).toBe('STANDARD');
+    });
+  });
+
+  describe('buildAllCurrentRecords (pure helper)', () => {
+    test('returns empty array when standards is empty', () => {
+      const result = buildAllCurrentRecords([]);
+      expect(result).toEqual([]);
+    });
+
+    test('excludes entries where lifter is STANDARD', () => {
+      const standards = [
+        ['', '', 'OPEN', 'F', 'OPEN', '', '', '48', 'Total', '250', 'STANDARD', '', ''],
+        ['', '', 'OPEN', 'F', 'OPEN', '', '', '48', 'Snatch', '110', 'STANDARD', '', ''],
+        ['', '', 'OPEN', 'F', 'OPEN', '', '', '48', 'Clean & Jerk', '140', 'STANDARD', '', ''],
+      ];
+      const result = buildAllCurrentRecords(standards);
+      expect(result).toHaveLength(0);
+    });
+
+    test('includes entries where at least one lift has a real record holder', () => {
+      const standards = [
+        ['', '', 'OPEN', 'F', 'OPEN', '', '', '48', 'Total', '250', 'Jane Smith', 'Meet', '2024-01-01'],
+        ['', '', 'OPEN', 'F', 'OPEN', '', '', '48', 'Snatch', '110', 'STANDARD', '', ''],
+      ];
+      const result = buildAllCurrentRecords(standards);
+      expect(result).toHaveLength(1);
+      expect(result[0].weightClass.id).toBe('W48');
+      expect(result[0].groups[0].records['Total'].lifter).toBe('Jane Smith');
+      expect(result[0].groups[0].records['Snatch']).toBeUndefined();
+    });
+
+    test('orders weight classes women first then men', () => {
+      const standards = [
+        ['', '', 'OPEN', 'M', 'OPEN', '', '', '60', 'Total', '310', 'John', 'Meet', '2024-01-01'],
+        ['', '', 'OPEN', 'F', 'OPEN', '', '', '48', 'Total', '225', 'Jane', 'Meet', '2024-01-01'],
+      ];
+      const result = buildAllCurrentRecords(standards);
+      expect(result[0].weightClass.gender).toBe('female');
+      const maleEntries = result.filter(r => r.weightClass.gender === 'male');
+      const femaleEntries = result.filter(r => r.weightClass.gender === 'female');
+      const lastFemaleIdx = result.indexOf(femaleEntries[femaleEntries.length - 1]);
+      const firstMaleIdx = result.indexOf(maleEntries[0]);
+      expect(lastFemaleIdx).toBeLessThan(firstMaleIdx);
+    });
+
+    test('groups records by weight class with age groups nested', () => {
+      const standards = [
+        ['', '', 'OPEN', 'F', 'OPEN', '', '', '48', 'Total', '225', 'Jane', 'Meet A', '2024-01-01'],
+        ['', '', 'MASTERS_35-39', 'F', '35', '', '', '48', 'Total', '200', 'Joan', 'Meet B', '2024-02-01'],
+      ];
+      const result = buildAllCurrentRecords(standards);
+      const w48 = result.find(r => r.weightClass.id === 'W48');
+      expect(w48).toBeDefined();
+      const groupIds = w48.groups.map(g => g.ageGroup.id);
+      expect(groupIds).toContain('OPEN');
+      expect(groupIds).toContain('35');
+      // OPEN should appear before 35 (follows ageGroups array order)
+      expect(groupIds.indexOf('OPEN')).toBeLessThan(groupIds.indexOf('35'));
     });
   });
 

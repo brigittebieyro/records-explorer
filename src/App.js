@@ -78,7 +78,7 @@ function MainPage() {
       let recordSet = {};
 
       let weightClassIndicator = weightClass.maxBodyweight;
-      if (weightClass.maxBodyweight > 100) {
+      if (weightClass.maxBodyweight > 200) {
         weightClassIndicator = `>${parseInt(weightClass.minBodyweight)}`;
       }
       localStandards.filter((standard) => {

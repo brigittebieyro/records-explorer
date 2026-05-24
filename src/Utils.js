@@ -37,7 +37,7 @@ export const sortLifts = (lifts, key) => {
         keyB = new Date(b[useKey]);
       if (keyA > keyB) return -1;
       if (keyA < keyB) return 1;
-      return 0;
+      return (parseInt(b.total) || 0) - (parseInt(a.total) || 0);
     });
     let trimmedResult = [];
     for (let i = 0; i < result.length; i++) {
@@ -75,7 +75,7 @@ export const sortLifts = (lifts, key) => {
     var keyB = b[useKey] !== undefined && b[useKey] !== null ? parseInt(b[useKey]) : 0;
     if (keyA > keyB) return -1;
     if (keyA < keyB) return 1;
-    return 0;
+    return new Date(a.lift_date) - new Date(b.lift_date);
   });
 
   return result;

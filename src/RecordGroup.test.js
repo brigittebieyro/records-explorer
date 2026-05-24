@@ -547,7 +547,7 @@ describe('RecordGroup', () => {
   });
 
   describe('SKIPPED TESTS - Bugs Found', () => {
-    test.skip('BUG: RecordHolder components should render with unique key props', async () => {
+    test('BUG: RecordHolder components should render with unique key props', async () => {
       // BUG FOUND: RecordGroup.js line 195
       // Issue: RecordHolder map was missing key prop, causing React warning
       // Fix Applied: Added key={`record-holder-${index}-${lifter.name}`}
@@ -591,7 +591,7 @@ describe('RecordGroup', () => {
       });
     });
 
-    test.skip('BUG: State updates should be properly wrapped in act() during async operations', async () => {
+    test('BUG: State updates should be properly wrapped in act() during async operations', async () => {
       // BUG FOUND: RecordGroup.js
       // Issue: Warning "An update to RecordGroup inside a test was not wrapped in act(...)"
       // Root Cause: setState calls in fetchIndividualLifts not wrapped in proper async/await flow

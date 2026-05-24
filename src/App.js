@@ -67,6 +67,8 @@ function MainPage() {
         (wtClass) => wtClass.id === selectedWeightClass,
       );
       if (!selectedWeightClassObj) {
+        // Intentional: clearing the weight class when switching age groups is expected
+        // behavior — the new age group may not share the same weight classes.
         setSelectedWeightClass("");
       }
     }
@@ -79,6 +81,7 @@ function MainPage() {
 
       let weightClassIndicator = weightClass.maxBodyweight;
       if (weightClass.maxBodyweight > 100) {
+        // The standards spreadsheet always uses ">86" format (not "86+") for plus-weight classes.
         weightClassIndicator = `>${parseInt(weightClass.minBodyweight)}`;
       }
       localStandards.filter((standard) => {

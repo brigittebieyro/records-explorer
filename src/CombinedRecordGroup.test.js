@@ -457,7 +457,7 @@ describe('CombinedRecordGroup', () => {
   });
 
   describe('SKIPPED TESTS - Bugs Found', () => {
-    test.skip('BUG: Multiple fetches should not trigger during single timer advance', async () => {
+    test('BUG: Multiple fetches should not trigger during single timer advance', async () => {
       // BUG FOUND: CombinedRecordGroup.js line 85-115
       // Issue: First timer advance triggers 4 fetches instead of expected 1
       // Symptom: Expected 1 fetch call, received 4 calls
@@ -491,7 +491,7 @@ describe('CombinedRecordGroup', () => {
       expect(global.fetch).toHaveBeenCalledTimes(1);
     });
 
-    test.skip('BUG: CombinedRecordGroup state updates during fetch should be properly managed', async () => {
+    test('BUG: CombinedRecordGroup state updates during fetch should be properly managed', async () => {
       // BUG FOUND: CombinedRecordGroup.js line 67-77, 113-114
       // Issue: Warning "An update to CombinedRecordGroup inside a test was not wrapped in act(...)"
       // Root Cause: Multiple setState calls (setLifterGroups, setStatus) happening during async fetch
@@ -529,7 +529,7 @@ describe('CombinedRecordGroup', () => {
       consoleErrorSpy.mockRestore();
     });
 
-    test.skip('BUG: usePrevious hook should prevent duplicate lifter entries', async () => {
+    test('BUG: usePrevious hook should prevent duplicate lifter entries', async () => {
       // BUG FOUND: CombinedRecordGroup.js line 44-77
       // Issue: The usePrevious hook and duplicate prevention logic may not be working correctly
       // Symptom: Same lifter could appear multiple times in combinedLiftsData

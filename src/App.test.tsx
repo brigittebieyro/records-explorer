@@ -1,8 +1,9 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import App, { computeStandardsForWeightClass, buildAllCurrentRecords } from './App';
+import App, { buildAllCurrentRecords, computeStandardsForWeightClass } from './App';
 import * as RoutesAndSettings from './RoutesAndSettings';
 import * as Utils from './Utils';
+import { AgeGroup, WeightClass } from './types';
 
 jest.mock('./RecordGroup', () => {
   return function RecordGroup() {
@@ -29,7 +30,7 @@ jest.mock('./Header', () => {
 });
 
 jest.mock('./AllCurrentRecordsView', () => {
-  return function AllCurrentRecordsView({ data }) {
+  return function AllCurrentRecordsView({ data }: { data: unknown[] }) {
     return <div data-testid="all-current-records-view">All Records ({data.length})</div>;
   };
 });
@@ -84,22 +85,25 @@ const mockWeightClass = {
   maxBodyweight: '48',
   gender: 'female',
   start: '2025-06-01',
-};
+  previousAnalogs: [],
+} as unknown as WeightClass;
 
 const mockAgeGroup = {
   id: 'OPEN',
   name: 'Open',
   minimum_lifter_age: '20',
   maximum_lifter_age: '34',
-};
+} as unknown as AgeGroup;
 
 describe('App - MainPage Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     global.fetch = jest.fn();
-    Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-    Utils.getWeightClassSet.mockReturnValue([mockWeightClass]);
-    RoutesAndSettings.getSheetRoute.mockReturnValue('https://sheets.googleapis.com/v4/test');
+    jest.mocked(Utils.getAgeGroup).mockReturnValue(mockAgeGroup);
+    jest.mocked(Utils.getWeightClassSet).mockReturnValue([mockWeightClass]);
+    jest
+      .mocked(RoutesAndSettings.getSheetRoute)
+      .mockReturnValue('https://sheets.googleapis.com/v4/test');
   });
 
   afterEach(() => {
@@ -112,7 +116,7 @@ describe('App - MainPage Component', () => {
 
   describe('Rendering and Initialization', () => {
     test('renders main page with selection controls', () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
@@ -125,7 +129,7 @@ describe('App - MainPage Component', () => {
     });
 
     test('renders header component', () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
@@ -136,7 +140,7 @@ describe('App - MainPage Component', () => {
     });
 
     test('fetches standards on component mount', async () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
@@ -154,13 +158,10 @@ describe('App - MainPage Component', () => {
 
   describe('Age Group Selection', () => {
     test('populates age group options from ageGroups data', () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
-
-      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue([mockWeightClass]);
 
       renderApp();
 
@@ -171,29 +172,28 @@ describe('App - MainPage Component', () => {
     });
 
     test('defaults to OPEN age group', () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
-
-      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue([mockWeightClass]);
 
       renderApp();
 
       const ageGroupSelect = screen.getByRole('combobox', { name: /age group/i });
-      expect(ageGroupSelect.value).toBe('OPEN');
+      expect((ageGroupSelect as HTMLSelectElement).value).toBe('OPEN');
     });
 
     test('updates weight class options when age group changes', async () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
 
-      const womenWeightClasses = [mockWeightClass, { ...mockWeightClass, id: 'W53' }];
-      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue(womenWeightClasses);
+      const womenWeightClasses = [
+        mockWeightClass,
+        { ...mockWeightClass, id: 'W53' } as WeightClass,
+      ];
+      jest.mocked(Utils.getWeightClassSet).mockReturnValue(womenWeightClasses);
 
       renderApp();
 
@@ -206,16 +206,20 @@ describe('App - MainPage Component', () => {
     });
 
     test('clears weight class selection when age group changes', async () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
 
-      const u15AgeGroup = { ...mockAgeGroup, id: 'U15' };
-      Utils.getAgeGroup.mockImplementation((id) => (id === 'U15' ? u15AgeGroup : mockAgeGroup));
-      Utils.getWeightClassSet.mockImplementation((ageGroup) =>
-        ageGroup && ageGroup.id === 'U15' ? [] : [mockWeightClass]
-      );
+      const u15AgeGroup = { ...mockAgeGroup, id: 'U15' } as unknown as AgeGroup;
+      jest
+        .mocked(Utils.getAgeGroup)
+        .mockImplementation((id) => (id === 'U15' ? u15AgeGroup : mockAgeGroup));
+      jest
+        .mocked(Utils.getWeightClassSet)
+        .mockImplementation((ageGroup) =>
+          ageGroup && ageGroup.id === 'U15' ? [] : [mockWeightClass]
+        );
 
       renderApp();
 
@@ -223,25 +227,26 @@ describe('App - MainPage Component', () => {
       const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
 
       await userEvent.selectOptions(weightClassSelect, 'W48');
-      expect(weightClassSelect.value).toBe('W48');
+      expect((weightClassSelect as HTMLSelectElement).value).toBe('W48');
 
       await userEvent.selectOptions(ageGroupSelect, 'U15');
 
       await waitFor(() => {
-        expect(weightClassSelect.value).toBe('');
+        expect((weightClassSelect as HTMLSelectElement).value).toBe('');
       });
     });
   });
 
   describe('Weight Class Selection', () => {
     test('displays weight class options based on selected age group', () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
 
-      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue([mockWeightClass, { ...mockWeightClass, id: 'W53' }]);
+      jest
+        .mocked(Utils.getWeightClassSet)
+        .mockReturnValue([mockWeightClass, { ...mockWeightClass, id: 'W53' } as WeightClass]);
 
       renderApp();
 
@@ -252,31 +257,25 @@ describe('App - MainPage Component', () => {
     });
 
     test('shows placeholder text when no weight class selected', () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
 
-      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue([mockWeightClass]);
-
       renderApp();
 
       const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
-      expect(weightClassSelect.value).toBe('');
+      expect((weightClassSelect as HTMLSelectElement).value).toBe('');
       expect(screen.getByText('Select a Weight Class')).toBeInTheDocument();
     });
   });
 
   describe('Form Submission (Go Button)', () => {
     test('disables Go button when no weight class selected', () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
-
-      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue([mockWeightClass]);
 
       renderApp();
 
@@ -285,13 +284,10 @@ describe('App - MainPage Component', () => {
     });
 
     test('enables Go button when both age group and weight class selected', async () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
-
-      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue([mockWeightClass]);
 
       renderApp();
 
@@ -306,13 +302,10 @@ describe('App - MainPage Component', () => {
     });
 
     test('shows results when Go button clicked', async () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
-
-      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue([mockWeightClass]);
 
       renderApp();
 
@@ -330,13 +323,10 @@ describe('App - MainPage Component', () => {
 
   describe('Display Filtering Logic', () => {
     test('filters standards by weight class maxBodyweight for single digit limits', async () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
-
-      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue([mockWeightClass]);
 
       renderApp();
 
@@ -357,15 +347,14 @@ describe('App - MainPage Component', () => {
         id: 'W86plus',
         maxBodyweight: '1000',
         minBodyweight: '86.01',
-      };
+      } as unknown as WeightClass;
 
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
 
-      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue([plusWeightClass]);
+      jest.mocked(Utils.getWeightClassSet).mockReturnValue([plusWeightClass]);
 
       renderApp();
 
@@ -381,13 +370,10 @@ describe('App - MainPage Component', () => {
     });
 
     test('filters standards by gender of selected weight class', async () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
-
-      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue([mockWeightClass]);
 
       renderApp();
 
@@ -405,13 +391,10 @@ describe('App - MainPage Component', () => {
 
   describe('Results Display', () => {
     test('renders RecordGroup component after Go button clicked', async () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
-
-      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue([mockWeightClass]);
 
       renderApp();
 
@@ -427,13 +410,10 @@ describe('App - MainPage Component', () => {
     });
 
     test('renders both current and historical RecordGroup components after Go button clicked', async () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
-
-      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue([mockWeightClass]);
 
       renderApp();
 
@@ -449,13 +429,10 @@ describe('App - MainPage Component', () => {
     });
 
     test('renders Standards component with current standards', async () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
-
-      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue([mockWeightClass]);
 
       renderApp();
 
@@ -473,13 +450,10 @@ describe('App - MainPage Component', () => {
 
   describe('Standards Fetching and Parsing', () => {
     test('caches standards to prevent repeated API calls', async () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
-
-      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue([mockWeightClass]);
 
       renderApp();
 
@@ -491,7 +465,7 @@ describe('App - MainPage Component', () => {
     });
 
     test('handles standards fetch error gracefully', async () => {
-      global.fetch.mockRejectedValue(new Error('Network error'));
+      (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
 
       renderApp();
 
@@ -501,7 +475,7 @@ describe('App - MainPage Component', () => {
     });
 
     test('handles non-ok standards response status', async () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 403,
       });
@@ -516,17 +490,15 @@ describe('App - MainPage Component', () => {
 
   describe('Error Handling', () => {
     test('handles missing weight class object gracefully', async () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
 
-      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue([]);
+      jest.mocked(Utils.getWeightClassSet).mockReturnValue([]);
 
       renderApp();
 
-      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
       const goButton = screen.getByRole('button', { name: 'Go' });
 
       expect(goButton).toBeDisabled();
@@ -535,13 +507,10 @@ describe('App - MainPage Component', () => {
 
   describe('Display State Transitions', () => {
     test('shows initial options screen', () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
-
-      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue([mockWeightClass]);
 
       renderApp();
 
@@ -550,13 +519,10 @@ describe('App - MainPage Component', () => {
     });
 
     test('transitions to complete state when Go is clicked', async () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
-
-      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue([mockWeightClass]);
 
       renderApp();
 
@@ -572,13 +538,10 @@ describe('App - MainPage Component', () => {
     });
 
     test('transitions from loading to complete state', async () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
-
-      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue([mockWeightClass]);
 
       renderApp();
 
@@ -596,7 +559,7 @@ describe('App - MainPage Component', () => {
 
   describe('Reset Button and Empty State', () => {
     test('Reset button is not visible in the initial empty state', () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
@@ -607,7 +570,7 @@ describe('App - MainPage Component', () => {
     });
 
     test('shows AllCurrentRecordsView as the initial empty state', () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
@@ -618,7 +581,7 @@ describe('App - MainPage Component', () => {
     });
 
     test('Reset button appears after clicking Go', async () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
@@ -635,7 +598,7 @@ describe('App - MainPage Component', () => {
     });
 
     test('AllCurrentRecordsView is hidden while a specific weight class is being viewed', async () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
@@ -653,7 +616,7 @@ describe('App - MainPage Component', () => {
     });
 
     test('Reset button returns to empty state and hides itself', async () => {
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
       });
@@ -682,7 +645,7 @@ describe('App - MainPage Component', () => {
       maxBodyweight: '48',
       minBodyweight: '0',
       gender: 'female',
-    };
+    } as unknown as WeightClass;
 
     const maleM60 = {
       id: 'M60',
@@ -690,7 +653,7 @@ describe('App - MainPage Component', () => {
       maxBodyweight: '60',
       minBodyweight: '0',
       gender: 'male',
-    };
+    } as unknown as WeightClass;
 
     const plusClass = {
       id: 'W86plus',
@@ -698,7 +661,7 @@ describe('App - MainPage Component', () => {
       maxBodyweight: '1000',
       minBodyweight: '86.01',
       gender: 'female',
-    };
+    } as unknown as WeightClass;
 
     test('groups records by age group key', () => {
       const standards = [
@@ -845,32 +808,92 @@ describe('App - MainPage Component', () => {
       const result = buildAllCurrentRecords(standards);
       const w48 = result.find((r) => r.weightClass.id === 'W48');
       expect(w48).toBeDefined();
-      const groupIds = w48.groups.map((g) => g.ageGroup.id);
+      const groupIds = w48!.groups.map((g) => g.ageGroup.id);
       expect(groupIds).toContain('OPEN');
       expect(groupIds).toContain('35');
-      // OPEN should appear before 35 (follows ageGroups array order)
       expect(groupIds.indexOf('OPEN')).toBeLessThan(groupIds.indexOf('35'));
+    });
+  });
+
+  describe('Uncovered Branch Coverage', () => {
+    test('find callback returns false for non-matching items before finding selected weight class', async () => {
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: async () => ({ values: mockStandardsData }),
+      });
+
+      const w53 = { ...mockWeightClass, id: 'W53' } as WeightClass;
+      const u15AgeGroup = { ...mockAgeGroup, id: 'U15' } as unknown as AgeGroup;
+      jest
+        .mocked(Utils.getAgeGroup)
+        .mockImplementation((id) => (id === 'U15' ? u15AgeGroup : mockAgeGroup));
+      // When U15 is selected, return [W53, W48] so the callback visits W53 (false) then W48 (true)
+      jest
+        .mocked(Utils.getWeightClassSet)
+        .mockImplementation((ageGroup) =>
+          ageGroup && ageGroup.id === 'U15' ? [w53, mockWeightClass] : [mockWeightClass]
+        );
+
+      renderApp();
+
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
+      await userEvent.selectOptions(weightClassSelect, 'W48');
+
+      const ageGroupSelect = screen.getByRole('combobox', { name: /age group/i });
+      await userEvent.selectOptions(ageGroupSelect, 'U15');
+
+      await waitFor(() => {
+        // W48 found in [W53, W48] — weight class not cleared
+        expect((weightClassSelect as HTMLSelectElement).value).toBe('W48');
+      });
+    });
+
+    test('updateDisplayedStandards skips when localStandards is empty at time of Go click', async () => {
+      (global.fetch as jest.Mock).mockImplementation(() => new Promise(() => {}));
+
+      renderApp();
+
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
+      await userEvent.selectOptions(weightClassSelect, 'W48');
+
+      await userEvent.click(screen.getByRole('button', { name: 'Go' }));
+
+      await waitFor(() => {
+        // updateContents still completes: status becomes 'complete', record group renders
+        expect(screen.queryAllByTestId('record-group').length).toBeGreaterThan(0);
+      });
+    });
+
+    test('updateContents returns early when selected weight class is no longer in the list', async () => {
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: async () => ({ values: mockStandardsData }),
+      });
+
+      renderApp();
+
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
+      await userEvent.selectOptions(weightClassSelect, 'W48');
+
+      const w53 = { ...mockWeightClass, id: 'W53' } as WeightClass;
+      jest.mocked(Utils.getWeightClassSet).mockReturnValue([w53]);
+
+      await userEvent.click(screen.getByRole('button', { name: 'Go' }));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('record-group')).not.toBeInTheDocument();
+      });
     });
   });
 
   describe('SKIPPED TESTS - Bugs Found', () => {
     test.skip('BUG: Standards data structure should handle all column indices correctly', async () => {
-      // BUG POTENTIAL: App.js line 82-106
-      // Issue: Standards parsing uses hard-coded column indices that might not match all data formats
-      // Indices used: [2]=ageKey, [3]=genderKey, [4]=recordKey, [7]=weightClassIndicator, [8]=liftType, [9]=weight, [10]=lifter, [11]=event, [12]=date
-      // Risk: If Google Sheets format changes or has missing columns, this will break silently
-      // Test: Verify all standard fields are correctly extracted and displayed
-      const standardsWithMissingColumns = [
-        ['', '', 'OPEN', 'F', 'Total', '', '', '48'], // Missing columns 8-12
-      ];
+      const standardsWithMissingColumns = [['', '', 'OPEN', 'F', 'Total', '', '', '48']];
 
-      global.fetch.mockResolvedValue({
+      (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: standardsWithMissingColumns }),
       });
-
-      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue([mockWeightClass]);
 
       renderApp();
 
@@ -881,7 +904,6 @@ describe('App - MainPage Component', () => {
       await userEvent.click(goButton);
 
       await waitFor(() => {
-        // Should handle gracefully without crashing
         expect(screen.getByTestId('standards')).toBeInTheDocument();
       });
     });

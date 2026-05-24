@@ -57,7 +57,7 @@ describe('ageGroups data', () => {
   test('youth age groups have customWeightClasses: true', () => {
     for (const id of YOUTH_IDS) {
       const group = ageGroups.find((g) => g.id === id);
-      expect(group.customWeightClasses).toBe(true);
+      expect(group!.customWeightClasses).toBe(true);
     }
   });
 

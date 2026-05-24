@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import Standards from './Standards';
+import { AgeGroupRecordSet } from './types';
 
-const mockRecords = {
+const mockRecords: AgeGroupRecordSet = {
   ageGroup: 'OPEN',
   weightClass: '48',
   records: {

@@ -1,6 +1,12 @@
 import CompactRecordView from './CompactRecordView';
+import { AllCurrentRecordsGroup, WeightClass } from './types';
 
-function RecordListForWeightClass({ weightClass, groups }) {
+interface RecordListForWeightClassProps {
+  weightClass: WeightClass;
+  groups: AllCurrentRecordsGroup[];
+}
+
+function RecordListForWeightClass({ weightClass, groups }: RecordListForWeightClassProps) {
   return (
     <section className="all-records-weight-class-section">
       <h2 className="all-records-weight-class-header">{weightClass.name}</h2>

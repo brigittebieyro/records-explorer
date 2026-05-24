@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import Header from './Header';
 
 jest.mock('./RoutesAndSettings', () => ({
@@ -43,13 +43,13 @@ describe('Header', () => {
 
     test('clicking the menu icon shows the flyout', () => {
       const { container } = render(<Header />);
-      fireEvent.click(container.querySelector('.menu-icon'));
+      fireEvent.click(container.querySelector('.menu-icon')!);
       expect(container.querySelector('.menu-flyout')).not.toHaveClass('hidden');
     });
 
     test('clicking the menu icon again hides the flyout', () => {
       const { container } = render(<Header />);
-      const menuIcon = container.querySelector('.menu-icon');
+      const menuIcon = container.querySelector('.menu-icon')!;
       fireEvent.click(menuIcon);
       fireEvent.click(menuIcon);
       expect(container.querySelector('.menu-flyout')).toHaveClass('hidden');

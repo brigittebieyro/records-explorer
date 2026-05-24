@@ -1,6 +1,11 @@
 import RecordListForWeightClass from './RecordListForWeightClass';
+import { AllCurrentRecordsEntry } from './types';
 
-function AllCurrentRecordsView({ data }) {
+interface AllCurrentRecordsViewProps {
+  data: AllCurrentRecordsEntry[];
+}
+
+function AllCurrentRecordsView({ data }: AllCurrentRecordsViewProps) {
   const womensData = data.filter((item) => item.weightClass.gender === 'female');
   const mensData = data.filter((item) => item.weightClass.gender === 'male');
 

@@ -1,7 +1,16 @@
 import { CircleLoader } from 'react-spinners';
+import { CombinedLiftData, SortKey } from './types';
 import { getYear } from './Utils';
 
-function RecordHolder({ lifterData, index, individualLiftsData, sortType }) {
+interface RecordHolderProps {
+  lifterData: CombinedLiftData;
+  index: number;
+  individualLiftsData: CombinedLiftData[];
+  sortType: SortKey;
+  currentLeaders?: CombinedLiftData[];
+}
+
+function RecordHolder({ lifterData, index, individualLiftsData, sortType }: RecordHolderProps) {
   let lifter = lifterData;
   const club = typeof lifter.club === 'string' ? lifter.club : 'Unaffiliated';
   let classList = 'record-viewer-record-holder';
@@ -9,12 +18,6 @@ function RecordHolder({ lifterData, index, individualLiftsData, sortType }) {
     classList += ' record-viewer-record-current';
   }
 
-  // const isUbeatenByCurrentLifters = isFromPriorGroup && lifter.total > currentLeaders[0]?.total;
-  // if (isUbeatenByCurrentLifters) {
-  //   classList += " record-viewer-record-unbeaten";
-  // }
-
-  // const isAllTimeBest = isFromPriorGroup && index === 0 && isUbeatenByCurrentLifters;
   if (!lifter.best_snatch && lifter.best_snatch !== 0) {
     const liftData = individualLiftsData.find(
       (lift) =>
@@ -28,11 +31,8 @@ function RecordHolder({ lifterData, index, individualLiftsData, sortType }) {
   }
 
   const isFromPriorGroup = !!lifter.classData;
-  // if(isFromPriorGroup) {
-  //   debugger
-  // }
-  const startYear = getYear(lifter.classData?.start) || '';
-  const endYear = getYear(lifter.classData?.end) || '';
+  const startYear = getYear(lifter.classData?.start ?? '') || '';
+  const endYear = getYear(lifter.classData?.end ?? '') || '';
   const classYears = `${startYear} - ${endYear}`;
 
   return (
@@ -40,11 +40,10 @@ function RecordHolder({ lifterData, index, individualLiftsData, sortType }) {
       {isFromPriorGroup && (
         <div className="record-viewer-record-header">
           <p>
-            {lifter.classData.name} • {classYears}
+            {lifter.classData!.name} • {classYears}
           </p>
         </div>
       )}
-      {/* {isAllTimeBest && (<div className='record-viewer--record-undefeated'><p>Undefeated in the Total since {year}</p></div>)} */}
       <h4 className="record-viewer-record-title">
         {sortType !== 'lift_date' && <div className="record-viewer-ranking">{index + 1}</div>}
         {lifter.name}
@@ -78,18 +77,11 @@ function RecordHolder({ lifterData, index, individualLiftsData, sortType }) {
           <strong>Club:&nbsp;</strong>
           {club}
         </p>
-        {/* This is handy for debugging purposes. I do not want to show it to users.  */}
-        {/* {lifter.bodyweight > 0 && (
-          <p>
-            <strong>Bodyweight:&nbsp;</strong>
-            {lifter.bodyweight}
-          </p>
-        )} */}
       </div>
       {!!lifter.meet && <p className="record-viewer-full-width-detail">{lifter.meet}</p>}
       {!lifter.best_snatch && lifter?.best_snatch !== 0 && (
         <div className="records-viewer-content-spinner">
-          <CircleLoader loading={true} color="gold" size="18" />
+          <CircleLoader loading={true} color="gold" size="18px" />
         </div>
       )}
       <a

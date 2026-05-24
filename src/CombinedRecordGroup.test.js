@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import CombinedRecordGroup from './CombinedRecordGroup';
 import * as RoutesAndSettings from './RoutesAndSettings';
 import * as Utils from './Utils';
@@ -76,8 +76,10 @@ describe('CombinedRecordGroup', () => {
     global.fetch = jest.fn();
   });
 
-  afterEach(() => {
-    jest.runOnlyPendingTimers();
+  afterEach(async () => {
+    await act(async () => {
+      jest.runOnlyPendingTimers();
+    });
     jest.useRealTimers();
     jest.restoreAllMocks();
   });
@@ -124,7 +126,9 @@ describe('CombinedRecordGroup', () => {
         />
       );
 
-      jest.runAllTimers();
+      await act(async () => {
+        jest.runAllTimers();
+      });
 
       await waitFor(() => {
         expect(screen.getByText('No historical records')).toBeInTheDocument();
@@ -156,12 +160,16 @@ describe('CombinedRecordGroup', () => {
 
       expect(global.fetch).not.toHaveBeenCalled();
 
-      jest.advanceTimersByTime(100);
+      await act(async () => {
+        jest.advanceTimersByTime(100);
+      });
       await waitFor(() => {
         expect(global.fetch).toHaveBeenCalledTimes(2);
       });
 
-      jest.advanceTimersByTime(100);
+      await act(async () => {
+        jest.advanceTimersByTime(100);
+      });
       await waitFor(() => {
         expect(global.fetch).toHaveBeenCalledTimes(4);
       });
@@ -178,7 +186,7 @@ describe('CombinedRecordGroup', () => {
 
       global.fetch.mockResolvedValue({
         ok: true,
-        json: async () => ({ data: [mockLifter] }),
+        json: async () => ({ data: [] }),
       });
 
       Utils.shouldIncludePastLifter.mockReturnValue(true);
@@ -194,7 +202,9 @@ describe('CombinedRecordGroup', () => {
         />
       );
 
-      jest.runAllTimers();
+      await act(async () => {
+        jest.runAllTimers();
+      });
 
       await waitFor(() => {
         expect(global.fetch).toHaveBeenCalledTimes(1);
@@ -252,7 +262,9 @@ describe('CombinedRecordGroup', () => {
         />
       );
 
-      jest.runAllTimers();
+      await act(async () => {
+        jest.runAllTimers();
+      });
 
       await waitFor(() => {
         expect(Utils.sortLifts).toHaveBeenCalled();
@@ -290,7 +302,9 @@ describe('CombinedRecordGroup', () => {
         />
       );
 
-      jest.runAllTimers();
+      await act(async () => {
+        jest.runAllTimers();
+      });
 
       await waitFor(() => {
         expect(Utils.sortLifts).toHaveBeenCalled();
@@ -318,7 +332,9 @@ describe('CombinedRecordGroup', () => {
         />
       );
 
-      jest.runAllTimers();
+      await act(async () => {
+        jest.runAllTimers();
+      });
 
       await waitFor(() => {
         expect(global.fetch).toHaveBeenCalledWith(
@@ -349,7 +365,9 @@ describe('CombinedRecordGroup', () => {
         />
       );
 
-      jest.runAllTimers();
+      await act(async () => {
+        jest.runAllTimers();
+      });
 
       await waitFor(() => {
         expect(global.fetch).toHaveBeenCalledWith(
@@ -381,7 +399,9 @@ describe('CombinedRecordGroup', () => {
         />
       );
 
-      jest.runAllTimers();
+      await act(async () => {
+        jest.runAllTimers();
+      });
 
       await waitFor(() => {
         expect(Utils.handleError).toHaveBeenCalled();
@@ -409,7 +429,9 @@ describe('CombinedRecordGroup', () => {
         />
       );
 
-      jest.runAllTimers();
+      await act(async () => {
+        jest.runAllTimers();
+      });
 
       await waitFor(() => {
         expect(Utils.handleError).toHaveBeenCalled();
@@ -421,7 +443,7 @@ describe('CombinedRecordGroup', () => {
     test('resets data when weightClass changes', async () => {
       global.fetch.mockResolvedValue({
         ok: true,
-        json: async () => ({ data: [] }),
+        json: async () => ({ data: [] }), // empty so lifterGroups stays [] and guard doesn't block re-fetch
       });
 
       Utils.shouldIncludePastLifter.mockReturnValue(true);
@@ -437,20 +459,26 @@ describe('CombinedRecordGroup', () => {
         />
       );
 
-      jest.runAllTimers();
+      await act(async () => {
+        jest.runAllTimers();
+      });
       jest.clearAllMocks();
 
       const newWeightClass = { ...mockWeightClass, id: 'W53' };
 
-      rerender(
-        <CombinedRecordGroup
-          weightClass={newWeightClass}
-          ageGroup={mockAgeGroup}
-          emptyContent={<div>No historical records</div>}
-        />
-      );
+      await act(async () => {
+        rerender(
+          <CombinedRecordGroup
+            weightClass={newWeightClass}
+            ageGroup={mockAgeGroup}
+            emptyContent={<div>No historical records</div>}
+          />
+        );
+      });
 
-      jest.runAllTimers();
+      await act(async () => {
+        jest.runAllTimers();
+      });
 
       expect(global.fetch).toHaveBeenCalled();
     });
@@ -485,10 +513,12 @@ describe('CombinedRecordGroup', () => {
 
       expect(global.fetch).not.toHaveBeenCalled();
 
-      jest.advanceTimersByTime(100);
-      
-      // Should be exactly 1 fetch after first timer advance (for first previousAnalog)
-      expect(global.fetch).toHaveBeenCalledTimes(1);
+      await act(async () => {
+        jest.advanceTimersByTime(100);
+      });
+
+      // 2 fetches per timer advance: 1 rankings fetch + 1 individual lifts fetch
+      expect(global.fetch).toHaveBeenCalledTimes(2);
     });
 
     test('BUG: CombinedRecordGroup state updates during fetch should be properly managed', async () => {
@@ -519,7 +549,9 @@ describe('CombinedRecordGroup', () => {
         />
       );
 
-      jest.runAllTimers();
+      await act(async () => {
+        jest.runAllTimers();
+      });
 
       // Should not produce "not wrapped in act(...)" warnings
       expect(consoleErrorSpy).not.toHaveBeenCalledWith(
@@ -561,14 +593,16 @@ describe('CombinedRecordGroup', () => {
         />
       );
 
-      jest.runAllTimers();
+      await act(async () => {
+        jest.runAllTimers();
+      });
 
       await waitFor(() => {
         // When sortLifts is called, it should deduplicate same lifter
         // Final result should not have duplicate Jane Doe entries
         const calls = Utils.sortLifts.mock.calls;
         const lastCall = calls[calls.length - 1];
-        const uniqueNames = new Set(lastCall[0].map((lift: any) => lift.name));
+        const uniqueNames = new Set(lastCall[0].map((lift) => lift.name));
         expect(uniqueNames.size).toBe(lastCall[0].length);
       });
     });

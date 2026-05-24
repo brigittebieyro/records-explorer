@@ -80,8 +80,8 @@ function MainPage() {
       let recordSet = {};
 
       let weightClassIndicator = weightClass.maxBodyweight;
-      if (weightClass.maxBodyweight > 100) {
         // The standards spreadsheet always uses ">86" format (not "86+") for plus-weight classes.
+      if (weightClass.maxBodyweight > 200) {
         weightClassIndicator = `>${parseInt(weightClass.minBodyweight)}`;
       }
       localStandards.filter((standard) => {

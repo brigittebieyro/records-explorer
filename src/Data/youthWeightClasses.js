@@ -1407,29 +1407,499 @@ export const u15WeightClasses = [
   },
 ];
 
+export const u17WeightClasses = [
+   {
+            id: "W44",
+            name: "Girls 44kg",
+            sport80Id: 771,
+            minBodyweight: "0",
+            maxBodyweight: "44",
+            gender: "female",
+            start: "2025-06-01",
+            previousAnalogs: [
+                {
+                    name: "", // Haven't looked this up yet. Considering removing these since querying the current group works just fine. 
+                    sport80Id: 0,
+                    gender: "female",
+                    start: "1980-01-01",
+                    end: "2018-01-01"
+                }
+            ]
+        },
+        {
+            id: "W48",
+            name: "Girl's 48kg",
+            sport80Id: 709,
+            minBodyweight: "0",
+            maxBodyweight: "48",
+            gender: "female",
+            start: "2025-06-01",
+            previousAnalogs: [
+                {
+                    name: "Girl's 48kg", // Pre-2018?
+                    sport80Id: 362,
+                    gender: "female",
+                    start: "1980-01-01",
+                    end: "2018-01-01"
+                }, {
+                    name: "Girl's 45kg",
+                    sport80Id: 91,
+                    gender: "female",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                }, {
+                    name: "Girl's 49kg",
+                    sport80Id: 92,
+                    gender: "female",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                }
+            ]
+        },
+        {
+            id: "W53",
+            name: "Girl's 53kg",
+            sport80Id: 708,
+            minBodyweight: "48.01",
+            maxBodyweight: "53",
+            gender: "female",
+            start: "2025-06-01",
+            previousAnalogs: [
+                {
+                    name: "Girl's 53kg", // Pre-2018?
+                    sport80Id: 363,
+                    gender: "female",
+                    start: "1980-01-01",
+                    end: "2018-01-01"
+                }, {
+                    name: "Girl's 55kg",
+                    sport80Id: 93,
+                    gender: "female",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                }, {
+                    name: "Girl's 49kg",
+                    sport80Id: 92,
+                    gender: "female",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                }
+            ]
+        },
+        {
+            id: "W58",
+            name: "Girl's 58kg",
+            sport80Id: 707,
+            minBodyweight: "53.01",
+            maxBodyweight: "58",
+            gender: "female",
+            start: "2025-06-01",
+            previousAnalogs: [
+                {
+                    name: "Girl's 58", // Pre-2018?
+                    sport80Id: 364,
+                    gender: "female",
+                    start: "1980-01-01",
+                    end: "2018-01-01"
+                }, {
+                    name: "Girl's 59kg",
+                    sport80Id: 94,
+                    gender: "female",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                }
+            ]
+        },
+        {
+            id: "W63",
+            name: "Girl's 63kg",
+            sport80Id: 706,
+            minBodyweight: "58.01",
+            maxBodyweight: "63",
+            gender: "female",
+            start: "2025-06-01",
+            previousAnalogs: [
+                {
+                    name: "Girl's 63kg", // Pre-2018?
+                    sport80Id: 365,
+                    gender: "female",
+                    start: "1980-01-01",
+                    end: "2018-01-01"
+                }, {
+                    name: "Girl's 64kg",
+                    sport80Id: 95,
+                    gender: "female",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                }
+            ]
+        },
+        {
+            id: "W69",
+            name: "Girl's 69kg",
+            sport80Id: 705,
+            minBodyweight: "63.01",
+            maxBodyweight: "69",
+            gender: "female",
+            start: "2025-06-01",
+            previousAnalogs: [
+                {
+                    name: "Girl's 69kg", // Pre-2018?
+                    sport80Id: 366,
+                    gender: "female",
+                    start: "1980-01-01",
+                    end: "2018-01-01"
+                }, {
+                    name: "Girl's 64kg",
+                    sport80Id: 95,
+                    gender: "female",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                }, {
+                    name: "Girl's 71kg",
+                    sport80Id: 96,
+                    gender: "female",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                }
+            ]
+        },
+        {
+            id: "W77",
+            name: "Girl's 77kg",
+            sport80Id: 704,
+            minBodyweight: "69.01",
+            maxBodyweight: "77",
+            gender: "female",
+            start: "2025-06-01",
+            previousAnalogs: [
+                {
+                    name: "Girl's 76kg",
+                    sport80Id: 97,
+                    gender: "female",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                }, {
+                    name: "Girl's 81kg",
+                    sport80Id: 98,
+                    gender: "female",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                }, {
+                    name: "Girl's 75kg",
+                    sport80Id: 367,
+                    gender: "female",
+                    start: "1980-01-01",
+                    end: "2018-01-01"
+                }
+            ]
+        },
+        {
+            id: "W77plus",
+            name: "Girl's 77+kg",
+            sport80Id: 764,
+            minBodyweight: "77.01",
+            maxBodyweight: "1000",
+            gender: "female",
+            start: "2025-06-01",
+            previousAnalogs: [
+                {
+                    name: "Girl's 75+", // Youth only?
+                    sport80Id: 368,
+                    gender: "female",
+                    start: "1980-01-01",
+                    end: "2018-01-01"
+                }, {
+                    name: "Girl's 90+kg",
+                    sport80Id: 370,
+                    gender: "female",
+                    start: "1980-01-01",
+                    end: "2018-01-01"
+                }, {
+                    name: "Girl's 87+kg",
+                    sport80Id: 100,
+                    gender: "female",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                }
+            ]
+        },
+        {
+            id: "M56",
+            name: "Boy's 56kg",
+            sport80Id: 779,
+            minBodyweight: "0",
+            maxBodyweight: "56",
+            gender: "male",
+            start: "2025-06-01",
+            previousAnalogs: [
+                {
+                    name: "Boy's 55kg",
+                    sport80Id: 81,
+                    gender: "male",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                }, {
+                    name: "Boy's 56kg", //Pre-2018
+                    sport80Id: 354,
+                    gender: "male",
+                    start: "1980-01-01",
+                    end: "2018-01-01"
+                }, {
+                    name: "Boy's 61kg",
+                    sport80Id: 82,
+                    gender: "male",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                }, {
+                    name: "Boy's 62kg", // Pre 2018
+                    sport80Id: 355,
+                    gender: "male",
+                    start: "1980-01-01",
+                    end: "2018-01-01"
+                }
+            ]
+        }, {
+            id: "M60",
+            name: "Boy's 60kg",
+            sport80Id: 717,
+            minBodyweight: "0",
+            maxBodyweight: "60",
+            gender: "male",
+            start: "2025-06-01",
+            previousAnalogs: [
+                {
+                    name: "Boy's 55kg",
+                    sport80Id: 81,
+                    gender: "male",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                }, {
+                    name: "Boy's 56kg", //Pre-2018
+                    sport80Id: 354,
+                    gender: "male",
+                    start: "1980-01-01",
+                    end: "2018-01-01"
+                }, {
+                    name: "Boy's 61kg",
+                    sport80Id: 82,
+                    gender: "male",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                }, {
+                    name: "Boy's 62kg", // Pre 2018
+                    sport80Id: 355,
+                    gender: "male",
+                    start: "1980-01-01",
+                    end: "2018-01-01"
+                }
+            ]
+        },
+        {
+            id: "M65",
+            name: "Boy's 65kg",
+            sport80Id: 716,
+            minBodyweight: "60.01",
+            maxBodyweight: "65",
+            gender: "male",
+            start: "2025-06-01",
+            previousAnalogs: [
+                {
+                    name: "Boy's 61kg",
+                    sport80Id: 82,
+                    gender: "male",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                }, {
+                    name: "Boy's 62kg", // Pre 2018
+                    sport80Id: 355,
+                    gender: "male",
+                    start: "1980-01-01",
+                    end: "2018-01-01"
+                }, {
+                    name: "Boy's 67kg",
+                    sport80Id: 83,
+                    gender: "male",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                }, {
+                    name: "Boy's 69kg",
+                    sport80Id: 356,
+                    gender: "male",
+                    start: "1980-01-01",
+                    end: "2018-01-01"
+                }
+            ]
+        },
+        {
+            id: "M71",
+            name: "Boy's 71kg",
+            sport80Id: 715,
+            minBodyweight: "60.01",
+            maxBodyweight: "71",
+            gender: "male",
+            start: "2025-06-01",
+            previousAnalogs: [
+                {
+                    name: "Boy's 67kg",
+                    sport80Id: 83,
+                    gender: "male",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                }, {
+                    name: "Boy's 69kg",
+                    sport80Id: 356,
+                    gender: "male",
+                    start: "1980-01-01",
+                    end: "2018-01-01"
+                }, {
+                    name: "Boy's 73kg",
+                    sport80Id: 84,
+                    gender: "male",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                }, {
+                    name: "Boy's 77kg",
+                    sport80Id: 357,
+                    gender: "male",
+                    start: "1980-01-01",
+                    end: "2018-01-01"
+                }
+            ]
+        },
+        {
+            id: "M79",
+            name: "Boy's 79kg",
+            sport80Id: 714,
+            minBodyweight: "71.01",
+            maxBodyweight: "79",
+            gender: "male",
+            start: "2025-06-01",
+            previousAnalogs: [{
+                name: "Boy's 73kg",
+                sport80Id: 84,
+                gender: "male",
+                start: "2018-01-01",
+                end: "2025-06-01"
+            }, {
+                name: "Boy's 77kg",
+                sport80Id: 357,
+                gender: "male",
+                start: "1980-01-01",
+                end: "2018-01-01"
+            },
+            {
+                name: "Boy's 81kg",
+                sport80Id: 85,
+                gender: "male",
+                start: "2018-01-01",
+                end: "2025-06-01"
+            }
+            ]
+        },
+        {
+            id: "M88",
+            name: "Boy's 88kg",
+            sport80Id: 713,
+            minBodyweight: "79.01",
+            maxBodyweight: "88",
+            gender: "male",
+            start: "2025-06-01",
+            previousAnalogs: [
+                {
+                    name: "Boy's 85kg",
+                    sport80Id: 358,
+                    gender: "male",
+                    start: "1980-01-01",
+                    end: "2018-01-01"
+                }, {
+                    name: "Boy's 89kg",
+                    sport80Id: 86,
+                    gender: "male",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                }
+            ]
+        },
+        {
+            id: "M94",
+            name: "Boy's 94kg",
+            sport80Id: 712,
+            minBodyweight: "88.01",
+            maxBodyweight: "94",
+            gender: "male",
+            start: "2025-06-01",
+            previousAnalogs: [
+                {
+                    name: "Boy's 94kg", //Pre-2018
+                    sport80Id: 359,
+                    gender: "male",
+                    start: "1980-01-01",
+                    end: "2018-01-01"
+                }, {
+                    name: "Boy's 96kg",
+                    sport80Id: 87,
+                    gender: "male",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                },
+                {
+                    name: "Boy's 102kg",
+                    sport80Id: 88,
+                    gender: "male",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                }
+            ]
+        },
+        {
+            id: "M94plus",
+            name: "Boy's 94+kg",
+            sport80Id: 772,
+            minBodyweight: "94.01",
+            maxBodyweight: "1000",
+            gender: "male",
+            start: "2025-06-01",
+            previousAnalogs: [
+                {
+                    name: "Boy's 109+kg",
+                    sport80Id: 90,
+                    gender: "male",
+                    start: "2018-01-01",
+                    end: "2025-06-01"
+                },
+                {
+                    name: "Boy's 105+kg",
+                    sport80Id: 361,
+                    gender: "male",
+                    start: "1980-01-01",
+                    end: "2018-01-01"
+                }
+            ]
+        }];
 /// U15:
 // W40kg 755
 // W44 754
 // W48 753
 // 53 and up, can run squential OR use general until 69+ with same results
-// Recommend using general to avoid having to painstakingly pull ids out of the web inspector for all previous classes.
+// RecomBoyd using general to avoid having to painstakingly pull ids out of the web inspector for all previous classes.
 // W69+ 748
 // M48 763
 // M52 762
 // M56 761
 // M60 760
 // 65 and up, can run squential OR use general until 69+ with same results
-// Recommend using general to avoid having to painstakingly pull ids out of the web inspector for all previous classes.
+// RecomBoyd using general to avoid having to painstakingly pull ids out of the web inspector for all previous classes.
 // 79+ 756
 
 /// U17:
 // W44 771
 // W48 770
 // 53 and up, can run squential OR use general until 77+ with same results
-// Recommend using general to avoid having to painstakingly pull ids out of the web inspector for all previous classes.
+// RecomBoyd using general to avoid having to painstakingly pull ids out of the web inspector for all previous classes.
 // W77+ 764
 // M56 779
 // M60 778
 // 65 and up, can run squential OR use general until 94+ with same results
-// Recommend using general to avoid having to painstakingly pull ids out of the web inspector for all previous classes.
+// RecomBoyd using general to avoid having to painstakingly pull ids out of the web inspector for all previous classes.
 // 94+ 772

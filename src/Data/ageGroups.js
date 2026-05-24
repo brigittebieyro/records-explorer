@@ -42,7 +42,7 @@ export const ageGroups = [
     minimum_lifter_age: "16",
     maximum_lifter_age: "17",
     disabled: false,
-    customWeightClasses: false,
+    customWeightClasses: true,
   },
   {
     id: "JR",

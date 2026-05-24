@@ -455,4 +455,122 @@ describe('CombinedRecordGroup', () => {
       expect(global.fetch).toHaveBeenCalled();
     });
   });
+
+  describe('SKIPPED TESTS - Bugs Found', () => {
+    test.skip('BUG: Multiple fetches should not trigger during single timer advance', async () => {
+      // BUG FOUND: CombinedRecordGroup.js line 85-115
+      // Issue: First timer advance triggers 4 fetches instead of expected 1
+      // Symptom: Expected 1 fetch call, received 4 calls
+      // Root Cause: Likely multiple useEffect hooks firing or state update causing re-renders
+      // This test should only see ONE fetch per 100ms timer advance
+      global.fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ data: [mockLifter] }),
+      });
+
+      Utils.shouldIncludePastLifter.mockReturnValue(true);
+      Utils.sortLifts.mockImplementation((lifts) => lifts);
+      RoutesAndSettings.getRankingsRoute.mockReturnValue('/api/rankings');
+      RoutesAndSettings.getLifterDataRoute.mockReturnValue('/api/lifter/12345');
+      RoutesAndSettings.getLifterId.mockReturnValue('12345');
+      RoutesAndSettings.headers = {};
+
+      render(
+        <CombinedRecordGroup
+          weightClass={mockWeightClass}
+          ageGroup={mockAgeGroup}
+          emptyContent={<div>No historical records</div>}
+        />
+      );
+
+      expect(global.fetch).not.toHaveBeenCalled();
+
+      jest.advanceTimersByTime(100);
+      
+      // Should be exactly 1 fetch after first timer advance (for first previousAnalog)
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    test.skip('BUG: CombinedRecordGroup state updates during fetch should be properly managed', async () => {
+      // BUG FOUND: CombinedRecordGroup.js line 67-77, 113-114
+      // Issue: Warning "An update to CombinedRecordGroup inside a test was not wrapped in act(...)"
+      // Root Cause: Multiple setState calls (setLifterGroups, setStatus) happening during async fetch
+      // Potential Race Condition: If multiple fetches resolve simultaneously, state updates could conflict
+      // Fix: Ensure setState operations are properly sequenced and components cleanup properly
+      global.fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ data: [mockLifter] }),
+      });
+
+      Utils.shouldIncludePastLifter.mockReturnValue(true);
+      Utils.sortLifts.mockImplementation((lifts) => lifts);
+      RoutesAndSettings.getRankingsRoute.mockReturnValue('/api/rankings');
+      RoutesAndSettings.getLifterDataRoute.mockReturnValue('/api/lifter/12345');
+      RoutesAndSettings.getLifterId.mockReturnValue('12345');
+      RoutesAndSettings.headers = {};
+
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      render(
+        <CombinedRecordGroup
+          weightClass={mockWeightClass}
+          ageGroup={mockAgeGroup}
+          emptyContent={<div>No historical records</div>}
+        />
+      );
+
+      jest.runAllTimers();
+
+      // Should not produce "not wrapped in act(...)" warnings
+      expect(consoleErrorSpy).not.toHaveBeenCalledWith(
+        expect.stringContaining('not wrapped in act')
+      );
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    test.skip('BUG: usePrevious hook should prevent duplicate lifter entries', async () => {
+      // BUG FOUND: CombinedRecordGroup.js line 44-77
+      // Issue: The usePrevious hook and duplicate prevention logic may not be working correctly
+      // Symptom: Same lifter could appear multiple times in combinedLiftsData
+      // Root Cause: Logic in useEffect[newLiftsData] may not properly deduplicate
+      // Expected Behavior: When same lifter appears in multiple analogs, should only keep best version
+      const lifter1 = { ...mockLifter, name: 'Jane Doe', total: 245 };
+      const lifter2 = { ...mockLifter, name: 'Jane Doe', total: 250 }; // Same person, better total
+
+      global.fetch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ data: [lifter1] }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ data: [lifter2] }),
+        });
+
+      Utils.shouldIncludePastLifter.mockReturnValue(true);
+      Utils.sortLifts.mockImplementation((lifts) => lifts);
+      RoutesAndSettings.getRankingsRoute.mockReturnValue('/api/rankings');
+      RoutesAndSettings.headers = {};
+
+      render(
+        <CombinedRecordGroup
+          weightClass={mockWeightClass}
+          ageGroup={mockAgeGroup}
+          emptyContent={<div>No historical records</div>}
+        />
+      );
+
+      jest.runAllTimers();
+
+      await waitFor(() => {
+        // When sortLifts is called, it should deduplicate same lifter
+        // Final result should not have duplicate Jane Doe entries
+        const calls = Utils.sortLifts.mock.calls;
+        const lastCall = calls[calls.length - 1];
+        const uniqueNames = new Set(lastCall[0].map((lift: any) => lift.name));
+        expect(uniqueNames.size).toBe(lastCall[0].length);
+      });
+    });
+  });
 });

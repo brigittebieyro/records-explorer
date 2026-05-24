@@ -558,4 +558,112 @@ describe('App - MainPage Component', () => {
       });
     });
   });
+
+  describe('SKIPPED TESTS - Bugs Found', () => {
+    test.skip('BUG: Standards indicator calculation for plus-weight classes should use correct format', async () => {
+      // BUG POTENTIAL: App.js line 82-85
+      // Issue: Weight class indicator calculation may not correctly handle plus sizes
+      // Current Logic: if (maxBodyweight > 100) { weightClassIndicator = `>${parseInt(minBodyweight)}`; }
+      // Problem: For W86plus (86.01 to 1000), this creates indicator ">86" but standards might use "86+" format
+      // Test to verify: Standards filtering works correctly for W86plus and other plus classes
+      const plusWeightClass = { 
+        ...mockWeightClass, 
+        id: 'W86plus', 
+        maxBodyweight: '1000', 
+        minBodyweight: '86.01',
+        gender: 'female'
+      };
+
+      const standardsWithPlusFormat = [
+        ['', '', 'OPEN', 'F', 'Total', '', '', '86+', 'Total', '350', 'Strong Lifter', 'Competition', '2025-10-15'],
+      ];
+
+      global.fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ values: standardsWithPlusFormat }),
+      });
+
+      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
+      Utils.getWeightClassSet.mockReturnValue([plusWeightClass]);
+
+      renderApp();
+
+      const weightClassSelect = screen.getByName('weight-class');
+      await userEvent.selectOption(weightClassSelect, 'W86plus');
+
+      const goButton = screen.getByRole('button', { name: 'Go' });
+      await userEvent.click(goButton);
+
+      await waitFor(() => {
+        // Standards should be found and displayed even with different plus format
+        expect(screen.getByTestId('standards')).toBeInTheDocument();
+      });
+    });
+
+    test.skip('BUG: Weight class selection should maintain consistency across age group changes', async () => {
+      // BUG POTENTIAL: App.js line 59-71
+      // Issue: useEffect that clears weight class when age group changes may need optimization
+      // Current Logic: If selected weight class is not in new age group's classes, clear selection
+      // Potential Problem: This logic might clear selection too aggressively or not update properly
+      // Test Case: Select a weight class, change age group, verify selection is cleared appropriately
+      global.fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ values: mockStandardsData }),
+      });
+
+      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
+      Utils.getWeightClassSet
+        .mockReturnValueOnce([mockWeightClass]) // OPEN age group
+        .mockReturnValueOnce([{ ...mockWeightClass, name: 'Youth W42kg' }]); // Different weight class for U15
+
+      renderApp();
+
+      const ageGroupSelect = screen.getByName('age-group');
+      const weightClassSelect = screen.getByName('weight-class');
+
+      // Select a weight class in OPEN
+      await userEvent.selectOption(weightClassSelect, 'W48');
+      expect(weightClassSelect.value).toBe('W48');
+
+      // Change to age group with different weight classes
+      await userEvent.selectOption(ageGroupSelect, 'U15');
+
+      // Weight class should be cleared since U15 doesn't have W48
+      await waitFor(() => {
+        expect(weightClassSelect.value).toBe('');
+      });
+    });
+
+    test.skip('BUG: Standards data structure should handle all column indices correctly', async () => {
+      // BUG POTENTIAL: App.js line 82-106
+      // Issue: Standards parsing uses hard-coded column indices that might not match all data formats
+      // Indices used: [2]=ageKey, [3]=genderKey, [4]=recordKey, [7]=weightClassIndicator, [8]=liftType, [9]=weight, [10]=lifter, [11]=event, [12]=date
+      // Risk: If Google Sheets format changes or has missing columns, this will break silently
+      // Test: Verify all standard fields are correctly extracted and displayed
+      const standardsWithMissingColumns = [
+        ['', '', 'OPEN', 'F', 'Total', '', '', '48'], // Missing columns 8-12
+      ];
+
+      global.fetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({ values: standardsWithMissingColumns }),
+      });
+
+      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
+      Utils.getWeightClassSet.mockReturnValue([mockWeightClass]);
+
+      renderApp();
+
+      const weightClassSelect = screen.getByName('weight-class');
+      await userEvent.selectOption(weightClassSelect, 'W48');
+
+      const goButton = screen.getByRole('button', { name: 'Go' });
+      await userEvent.click(goButton);
+
+      await waitFor(() => {
+        // Should handle gracefully without crashing
+        expect(screen.getByTestId('standards')).toBeInTheDocument();
+      });
+    });
+  });
 });

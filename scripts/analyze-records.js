@@ -194,27 +194,38 @@ async function fetchCurrentRecords() {
 
 /**
  * Parse records from Google Sheets data into a normalized map
- * Format: [index, unknown, ageGroup, gender, unknown, unknown, unknown, weightClassIndicator, liftType, weight, lifter, event, date, ...]
+ * Format: [index, unknown, ageGroupLabel, gender, ageGroupId, unknown, unknown, weightClassIndicator, liftType, weight, lifter, event, date, ...]
+ * Column 2 (ageGroupLabel): raw label e.g. 'OPEN', 'MASTERS_40-44'
+ * Column 4 (ageGroupId): normalized age group ID e.g. 'OPEN', '40' (used when label starts with W or M)
  */
 function parseCurrentRecords(sheetData) {
   const records = {};
   let validRecords = 0;
-  
+
   // Skip header row
   sheetData.forEach((row, index) => {
     if (index === 0) return;
     if (!row || row.length < 13) return;
-    
-    const [, , ageGroup, gender, , , , weightClassIndicator, liftType, weight, lifter, event, date] = row;
-    
+
+    const [, , ageGroupLabel, gender, ageGroupId, , , weightClassIndicator, liftType, weight, lifter, event, date] = row;
+
     // Filter out invalid entries and STANDARD placeholders
     if (!liftType || !weight || !lifter || lifter === 'STANDARD') return;
-    if (!ageGroup || !gender) return;
-    
+    if (!ageGroupLabel || !gender) return;
+
     const numWeight = parseFloat(weight);
     if (isNaN(numWeight)) return;
-    
-    const recordKey = `${gender}_${ageGroup}_${weightClassIndicator}_${liftType.toLowerCase()}`;
+
+    // Normalize age group to match ageGroup.id format used in analyzeRecords.
+    // Spreadsheet column 2 may use labels like 'MASTERS_40-44'; column 4 holds the
+    // canonical ID ('40') for rows where the label starts with 'W' or 'M'.
+    const ageKeyRaw = String(ageGroupLabel).toUpperCase();
+    const indicator = ageKeyRaw[0];
+    const normalizedAgeGroup = (indicator === 'W' || indicator === 'M')
+      ? String(ageGroupId).toUpperCase()
+      : ageKeyRaw;
+
+    const recordKey = `${gender}_${normalizedAgeGroup}_${weightClassIndicator}_${liftType.toLowerCase()}`;
     
     // Keep only the highest weight for each record type
     if (!records[recordKey] || numWeight > records[recordKey].weight) {
@@ -223,7 +234,7 @@ function parseCurrentRecords(sheetData) {
         lifter,
         date: date || '',
         liftType,
-        ageGroup,
+        ageGroup: normalizedAgeGroup,
         gender,
         weightClass: weightClassIndicator,
       };
@@ -341,7 +352,7 @@ async function analyzeRecords() {
         for (const athlete of athletes) {
           if (!athlete.action || athlete.action.length === 0) continue;
           
-          // Extract athlete ID from the action route
+          // Extract athlete ID from the action route (API returns 'route', not 'url')
           const route = athlete.action[0].route;
           const lifterId = route && route.split('/member/')[1];
           if (!lifterId) continue;
@@ -377,6 +388,8 @@ async function analyzeRecords() {
                 date: liftData.date || '',
                 wouldBreak: currentRecord ? currentRecord.weight : null,
                 currentHolder: currentRecord ? currentRecord.lifter : null,
+                ageGroupIndex: ageGroups.indexOf(ageGroup),
+                weightClassIndex: weightClassSet.indexOf(weightClass),
               });
             }
           }
@@ -405,72 +418,43 @@ function delay(ms) {
 }
 
 /**
- * Generate markdown report from record breakers
+ * Escape a CSV field value
  */
-function generateReport(recordBreakers) {
-  let report = `# Record Breaking Analysis Report\n\n`;
-  report += `**Generated:** ${new Date().toISOString()}\n`;
-  report += `**Total Record Breakers:** ${recordBreakers.length}\n\n`;
-  
-  if (recordBreakers.length === 0) {
-    report += `_No record-breaking lifts found in the current top athletes._\n`;
-    return report;
-  }
-  
-  // Group by lift type
-  const byLiftType = {
-    'snatch': [],
-    'clean & jerk': [],
-    'total': [],
-  };
-  
-  recordBreakers.forEach(breaker => {
-    if (byLiftType[breaker.liftType]) {
-      byLiftType[breaker.liftType].push(breaker);
-    }
+function csvField(value) {
+  const str = String(value ?? '');
+  return str.includes(',') || str.includes('"') || str.includes('\n')
+    ? `"${str.replace(/"/g, '""')}"`
+    : str;
+}
+
+/**
+ * Generate CSV output from record breakers
+ */
+function generateCsv(recordBreakers) {
+  const liftOrder = { 'snatch': 0, 'clean & jerk': 1, 'total': 2 };
+  const liftLabel = { 'snatch': 'Snatch', 'clean & jerk': 'Clean & Jerk', 'total': 'Total' };
+
+  const sorted = [...recordBreakers].sort((a, b) => {
+    if (a.ageGroupIndex !== b.ageGroupIndex) return a.ageGroupIndex - b.ageGroupIndex;
+    if (a.weightClassIndex !== b.weightClassIndex) return a.weightClassIndex - b.weightClassIndex;
+    return (liftOrder[a.liftType] ?? 99) - (liftOrder[b.liftType] ?? 99);
   });
-  
-  // Sort by weight (descending)
-  for (const liftType of Object.keys(byLiftType)) {
-    byLiftType[liftType].sort((a, b) => b.weight - a.weight);
-  }
-  
-  // Generate tables for each lift type
-  const sections = [
-    { type: 'snatch', title: 'Best Snatch' },
-    { type: 'clean & jerk', title: 'Best Clean & Jerk' },
-    { type: 'total', title: 'Best Total' },
+
+  const rows = [
+    ['Age Group', 'Weight Class', 'Lift', 'Athlete', 'Weight (kg)', 'Current Record (kg)', 'Current Holder', 'Date'],
+    ...sorted.map(lift => [
+      lift.ageGroup,
+      lift.weightClass,
+      liftLabel[lift.liftType] || lift.liftType,
+      lift.athlete,
+      lift.weight,
+      lift.wouldBreak ?? '',
+      lift.currentHolder || '',
+      lift.date,
+    ]),
   ];
-  
-  for (const section of sections) {
-    report += `## ${section.title}\n\n`;
-    
-    const lifts = byLiftType[section.type];
-    
-    if (lifts.length === 0) {
-      report += `_No record-breaking ${section.type}s found._\n\n`;
-    } else {
-      report += `| # | Athlete | Weight | Weight Class | Age Group | Current Record | Holder | Date |\n`;
-      report += `|---|---------|--------|--------------|-----------|---|---|------|\n`;
-      
-      lifts.forEach((lift, idx) => {
-        const record = lift.wouldBreak ? `${lift.wouldBreak}kg` : 'No Record';
-        const holder = lift.currentHolder ? lift.currentHolder : '—';
-        report += `| ${idx + 1} | ${lift.athlete} | **${lift.weight}kg** | ${lift.weightClass} | ${lift.ageGroup} | ${record} | ${holder} | ${lift.date} |\n`;
-      });
-      
-      report += `\n`;
-    }
-  }
-  
-  report += `---\n\n`;
-  report += `## Summary\n\n`;
-  report += `- **Total combinations checked:** ${ageGroups.length} age groups\n`;
-  report += `- **Best Snatch:** ${byLiftType.snatch.length > 0 ? byLiftType.snatch[0].weight + 'kg' : 'N/A'}\n`;
-  report += `- **Best Clean & Jerk:** ${byLiftType['clean & jerk'].length > 0 ? byLiftType['clean & jerk'][0].weight + 'kg' : 'N/A'}\n`;
-  report += `- **Best Total:** ${byLiftType.total.length > 0 ? byLiftType.total[0].weight + 'kg' : 'N/A'}\n`;
-  
-  return report;
+
+  return rows.map(row => row.map(csvField).join(',')).join('\n') + '\n';
 }
 
 /**
@@ -482,11 +466,11 @@ async function main() {
     console.log('=' .repeat(50) + '\n');
     
     const recordBreakers = await analyzeRecords();
-    const report = generateReport(recordBreakers);
-    
-    const outputPath = path.join(process.cwd(), 'record-breaking-analysis.md');
-    fs.writeFileSync(outputPath, report, 'utf-8');
-    
+    const csv = generateCsv(recordBreakers);
+
+    const outputPath = path.join(process.cwd(), 'record-breaking-analysis.csv');
+    fs.writeFileSync(outputPath, csv, 'utf-8');
+
     console.log(`\n📄 Report generated: ${path.relative(process.cwd(), outputPath)}`);
     console.log(`✨ Done!\n`);
     

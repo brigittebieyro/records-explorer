@@ -321,3 +321,97 @@ right: 50px;
   display: flex;
   padding: 0 75px 0 50px;
 }
+
+/* All Current Records View */
+.all-records-view-parent {
+  text-align: center;
+  padding: 0 50px 50px 50px;
+}
+
+.reset-button {
+  margin-left: 24px;
+}
+
+.all-records-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 50px;
+  justify-content: center;
+  align-items: start;
+}
+
+.all-records-column {
+  border: 1px solid var(--soft-border-color);
+  border-radius: 4px;
+  padding: 15px;
+  max-width: 480px;
+}
+
+.all-records-gender-header {
+  color: var(--main-accent-color);
+  border-bottom: 1px solid var(--main-border-color);
+  padding-bottom: 8px;
+  margin-top: 0;
+}
+
+.all-records-weight-class-section {
+  margin-bottom: 20px;
+}
+
+.all-records-weight-class-header {
+  font-size: 14px;
+  margin: 0 0 6px 0;
+  border-bottom: 1px solid var(--soft-border-color);
+  padding-bottom: 4px;
+}
+
+.all-records-age-group-row {
+  margin-bottom: 10px;
+  padding-left: 8px;
+  padding-bottom: 16px;
+}
+
+.all-records-age-group-name {
+  font-size: 12px;
+  margin: 0 0 4px 0;
+  display: inline-block;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--main-accent-color);
+}
+
+.all-records-lift-set {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.all-records-lift {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 11px;
+  border-bottom: 1px solid var(--soft-border-color);
+  padding: 3px 0;
+}
+
+.all-records-lift-label {
+  font-weight: bold;
+  color: var(--main-accent-color);
+  font-size: 11px;
+  min-width: 70px;
+  flex-shrink: 0;
+}
+
+.all-records-lift p {
+  margin: 1px 0;
+}
+
+.all-records-record p {
+  margin: 1px 0;
+}
+
+.all-records-empty {
+  padding: 40px;
+  font-style: italic;
+  color: var(--main-border-color);
+}

@@ -16,7 +16,11 @@ RUN npm install --no-audit --no-fund --legacy-peer-deps
 
 # Copy source and build the React app
 COPY . ./
-RUN npm run build
+RUN --mount=type=secret,id=REACT_APP_SPORT80_API_TOKEN \
+    --mount=type=secret,id=REACT_APP_GOOGLE_API_KEY \
+    REACT_APP_SPORT80_API_TOKEN=$(cat /run/secrets/REACT_APP_SPORT80_API_TOKEN 2>/dev/null || true) \
+    REACT_APP_GOOGLE_API_KEY=$(cat /run/secrets/REACT_APP_GOOGLE_API_KEY 2>/dev/null || true) \
+    npm run build
 
 # Final image: copy built assets and production node_modules
 FROM node:${NODE_VERSION}-slim AS runtime

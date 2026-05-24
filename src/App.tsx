@@ -150,13 +150,13 @@ function MainPage() {
   }, [selectedAgeGroup]);
 
   useEffect(() => {
-    if (localStandards.length) {
+    if (localStandards?.length) {
       setAllRecordsData(buildAllCurrentRecords(localStandards));
     }
   }, [localStandards]);
 
   const updateDisplayedStandards = async (weightClass: WeightClass): Promise<void> => {
-    if (!!weightClass && localStandards.length) {
+    if (!!weightClass && localStandards?.length) {
       setDisplayedStandards(computeStandardsForWeightClass(weightClass, localStandards));
     }
   };

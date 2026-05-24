@@ -415,3 +415,13 @@ body {
   font-style: italic;
   color: var(--main-border-color);
 }
+
+.info-page-parent {
+  margin: 50px;
+}
+
+.info-page-box {
+  border: 1px solid var(--main-border-color);
+  border-radius: 4px;
+  padding: 0px 24px 12px;
+}

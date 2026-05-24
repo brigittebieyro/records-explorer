@@ -188,6 +188,7 @@ function RecordGroup({
         !!leadingLifters.length &&
         leadingLifters.map((lifter, index) => (
           <RecordHolder
+            key={`record-holder-${index}-${lifter.name}`}
             lifterData={lifter}
             index={index}
             individualLiftsData={combinedLiftsData}

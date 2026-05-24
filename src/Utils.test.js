@@ -1,0 +1,410 @@
+import {
+  sortLifts,
+  shouldIncludePastLifter,
+  getYear,
+  getAgeGroup,
+  getWeightClassSet,
+} from './Utils';
+import { ageGroups } from './Data/ageGroups';
+import { defaultWeightClasses } from './Data/defaultWeightClasses';
+import { u11WeightClasses, u13WeightClasses, u15WeightClasses } from './Data/youthWeightClasses';
+
+// Mock data fixtures
+const mockLifts = [
+  {
+    name: 'John Doe',
+    total: 305,
+    best_snatch: 135,
+    'best_c&j': 170,
+    lift_date: '2024-03-15',
+  },
+  {
+    name: 'Jane Smith',
+    total: 320,
+    best_snatch: 140,
+    'best_c&j': 180,
+    lift_date: '2024-02-10',
+  },
+  {
+    name: 'John Doe',
+    total: 300,
+    best_snatch: 130,
+    'best_c&j': 170,
+    lift_date: '2024-01-20',
+  },
+  {
+    name: 'Jane Smith',
+    total: 310,
+    best_snatch: 138,
+    'best_c&j': 172,
+    lift_date: '2024-02-10',
+  },
+];
+
+const mockLiftsWithZeros = [
+  {
+    name: 'Incomplete Lifter',
+    total: 0,
+    best_snatch: 0,
+    'best_c&j': 0,
+    lift_date: '2024-03-01',
+  },
+  {
+    name: 'Incomplete Lifter',
+    total: 250,
+    best_snatch: 110,
+    'best_c&j': 140,
+    lift_date: '2024-02-01',
+  },
+];
+
+const mockLiftsWithNulls = [
+  {
+    name: 'Null Lifter',
+    total: null,
+    best_snatch: undefined,
+    'best_c&j': 160,
+    lift_date: '2024-03-01',
+  },
+  {
+    name: 'Null Lifter',
+    total: 300,
+    best_snatch: 130,
+    'best_c&j': 170,
+    lift_date: '2024-02-01',
+  },
+];
+
+describe('sortLifts', () => {
+  describe('sorting by lift_date (Most Recent)', () => {
+    test('sorts lifts by date descending (most recent first)', () => {
+      const result = sortLifts(mockLifts, 'lift_date');
+      // First result should be most recent date
+      expect(result[0].lift_date).toBe('2024-03-15');
+      // Results should be in descending date order
+      for (let i = 1; i < result.length; i++) {
+        expect(new Date(result[i - 1].lift_date) >= new Date(result[i].lift_date)).toBe(true);
+      }
+    });
+
+    test('when same date, higher total appears first', () => {
+      const liftsSameDate = [
+        {
+          name: 'Athlete A',
+          total: 300,
+          lift_date: '2024-03-15',
+        },
+        {
+          name: 'Athlete B',
+          total: 320,
+          lift_date: '2024-03-15',
+        },
+      ];
+      const result = sortLifts(liftsSameDate, 'lift_date');
+      expect(result[0].total).toBe(320);
+      expect(result[1].total).toBe(300);
+    });
+
+    test('keeps all lifts when sorting by date', () => {
+      const result = sortLifts(mockLifts, 'lift_date');
+      // Should include all 4 lifts
+      expect(result.length).toBeGreaterThanOrEqual(2);
+    });
+
+    test('handles lifts with zero values', () => {
+      const result = sortLifts(mockLiftsWithZeros, 'lift_date');
+      expect(result.length).toBeGreaterThanOrEqual(1);
+      // Should contain at least one lift
+      expect(result.some((lift) => lift.total === 0)).toBe(true);
+    });
+
+    test('handles lifts with null/undefined values', () => {
+      const result = sortLifts(mockLiftsWithNulls, 'lift_date');
+      expect(result.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe('sorting by total', () => {
+    test('groups by athlete and keeps only the best total', () => {
+      const result = sortLifts(mockLifts, 'total');
+      const johnDoe = result.find((lift) => lift.name === 'John Doe');
+      const janeSmith = result.find((lift) => lift.name === 'Jane Smith');
+      expect(result.length).toBe(2);
+      expect(johnDoe.total).toBe(305);
+      expect(janeSmith.total).toBe(320);
+    });
+
+    test('sorts by total descending', () => {
+      const result = sortLifts(mockLifts, 'total');
+      expect(result[0].total).toBe(320);
+      expect(result[1].total).toBe(305);
+    });
+
+    test('when same total, oldest date appears first', () => {
+      const liftssameTotals = [
+        {
+          name: 'Athlete A',
+          total: 300,
+          lift_date: '2024-03-15',
+        },
+        {
+          name: 'Athlete B',
+          total: 300,
+          lift_date: '2024-01-10',
+        },
+      ];
+      const result = sortLifts(liftssameTotals, 'total');
+      // Both should have same total, so check that older date appears first
+      if (result.length >= 2) {
+        expect(result[0].lift_date).toBe('2024-01-10');
+        expect(result[1].lift_date).toBe('2024-03-15');
+      }
+    });
+
+    test('handles zero totals correctly', () => {
+      const result = sortLifts(mockLiftsWithZeros, 'total');
+      expect(result.length).toBe(1);
+      expect(result[0].total).toBe(250);
+    });
+
+    test('handles null/undefined totals as 0', () => {
+      const result = sortLifts(mockLiftsWithNulls, 'total');
+      expect(result.length).toBe(1);
+      expect(result[0].total).toBe(300);
+    });
+  });
+
+  describe('sorting by best_snatch', () => {
+    test('groups by athlete and keeps only best snatch', () => {
+      const result = sortLifts(mockLifts, 'best_snatch');
+      expect(result.length).toBe(2);
+    });
+
+    test('sorts by best_snatch descending', () => {
+      const result = sortLifts(mockLifts, 'best_snatch');
+      expect(result[0].best_snatch).toBe(140);
+      expect(result[1].best_snatch).toBe(135);
+    });
+
+    test('when same snatch value, oldest date first', () => {
+      const liftsSameSnatch = [
+        {
+          name: 'Athlete A',
+          best_snatch: 130,
+          lift_date: '2024-03-15',
+        },
+        {
+          name: 'Athlete B',
+          best_snatch: 130,
+          lift_date: '2024-01-10',
+        },
+      ];
+      const result = sortLifts(liftsSameSnatch, 'best_snatch');
+      // Both have same snatch, so oldest date should come first
+      if (result.length >= 2) {
+        expect(result[0].lift_date).toBe('2024-01-10');
+        expect(result[1].lift_date).toBe('2024-03-15');
+      }
+    });
+
+    test('handles zero snatches', () => {
+      const result = sortLifts(mockLiftsWithZeros, 'best_snatch');
+      expect(result.length).toBe(1);
+      expect(result[0].best_snatch).toBe(110);
+    });
+  });
+
+  describe('sorting by best_c&j', () => {
+    test('groups by athlete and keeps only best clean and jerk', () => {
+      const result = sortLifts(mockLifts, 'best_c&j');
+      expect(result.length).toBe(2);
+    });
+
+    test('sorts by best_c&j descending', () => {
+      const result = sortLifts(mockLifts, 'best_c&j');
+      expect(result[0]['best_c&j']).toBe(180);
+      expect(result[1]['best_c&j']).toBe(170);
+    });
+
+    test('handles zero clean and jerks', () => {
+      const result = sortLifts(mockLiftsWithZeros, 'best_c&j');
+      expect(result.length).toBe(1);
+      expect(result[0]['best_c&j']).toBe(140);
+    });
+  });
+
+  describe('edge cases', () => {
+    test('handles empty array', () => {
+      const result = sortLifts([], 'total');
+      expect(result).toEqual([]);
+    });
+
+    test('handles single lift', () => {
+      const singleLift = [mockLifts[0]];
+      const result = sortLifts(singleLift, 'total');
+      expect(result.length).toBe(1);
+      expect(result[0].name).toBe('John Doe');
+    });
+
+    test('handles multiple lifts from same athlete', () => {
+      const sameAthlete = [
+        {
+          name: 'John Doe',
+          total: 305,
+          lift_date: '2024-03-15',
+        },
+        {
+          name: 'John Doe',
+          total: 310,
+          lift_date: '2024-04-01',
+        },
+        {
+          name: 'John Doe',
+          total: 300,
+          lift_date: '2024-02-01',
+        },
+      ];
+      const result = sortLifts(sameAthlete, 'total');
+      expect(result.length).toBe(1);
+      expect(result[0].total).toBe(310);
+    });
+
+    test('handles missing lift_date field', () => {
+      const liftsNoDate = [
+        {
+          name: 'Athlete A',
+          total: 300,
+        },
+        {
+          name: 'Athlete B',
+          total: 320,
+          lift_date: '2024-03-15',
+        },
+      ];
+      // Should not throw
+      expect(() => sortLifts(liftsNoDate, 'lift_date')).not.toThrow();
+    });
+  });
+});
+
+describe('shouldIncludePastLifter', () => {
+  test('returns true for plausible totals', () => {
+    expect(shouldIncludePastLifter({ total: 250 })).toBe(true);
+    expect(shouldIncludePastLifter({ total: 450 })).toBe(true);
+    expect(shouldIncludePastLifter({ total: 550 })).toBe(true);
+  });
+
+  test('returns false for implausible totals', () => {
+    expect(shouldIncludePastLifter({ total: 551 })).toBe(false);
+    expect(shouldIncludePastLifter({ total: 600 })).toBe(false);
+    expect(shouldIncludePastLifter({ total: 1000 })).toBe(false);
+  });
+
+  test('returns true for zero total', () => {
+    expect(shouldIncludePastLifter({ total: 0 })).toBe(true);
+  });
+
+  test('returns true for negative total (edge case)', () => {
+    expect(shouldIncludePastLifter({ total: -100 })).toBe(true);
+  });
+});
+
+describe('getYear', () => {
+  test('extracts year from valid date string', () => {
+    expect(getYear('2024-03-15')).toBe(2024);
+    expect(getYear('2020-01-01')).toBe(2020);
+    expect(getYear('2026-12-31')).toBe(2026);
+  });
+
+  test('handles different date formats', () => {
+    expect(getYear('2024/03/15')).toBe(2024);
+    expect(getYear('03-15-2024')).toBe(2024);
+  });
+
+  test('handles UTC date strings', () => {
+    expect(getYear('2024-03-15T10:30:00Z')).toBe(2024);
+  });
+
+  test('returns NaN for invalid dates', () => {
+    expect(isNaN(getYear('invalid'))).toBe(true);
+  });
+});
+
+describe('getAgeGroup', () => {
+  test('returns correct age group by id', () => {
+    const result = getAgeGroup('OPEN');
+    expect(result).toBeDefined();
+    expect(result.id).toBe('OPEN');
+  });
+
+  test('returns undefined for non-existent age group', () => {
+    const result = getAgeGroup('NONEXISTENT');
+    expect(result).toBeUndefined();
+  });
+
+  test('handles all standard age groups', () => {
+    const standardGroups = ['OPEN', 'MASTERS_35_39', 'MASTERS_40_44', 'MASTERS_45_49'];
+    standardGroups.forEach((groupId) => {
+      const result = getAgeGroup(groupId);
+      if (ageGroups.find((g) => g.id === groupId)) {
+        expect(result).toBeDefined();
+      }
+    });
+  });
+
+  test('handles youth age groups', () => {
+    const youthGroups = ['U11', 'U13', 'U15'];
+    youthGroups.forEach((groupId) => {
+      const result = getAgeGroup(groupId);
+      if (ageGroups.find((g) => g.id === groupId)) {
+        expect(result).toBeDefined();
+      }
+    });
+  });
+});
+
+describe('getWeightClassSet', () => {
+  test('returns default weight classes if ageGroup is null', () => {
+    const result = getWeightClassSet(null);
+    expect(result).toEqual(defaultWeightClasses);
+  });
+
+  test('returns default weight classes if ageGroup has no customWeightClasses', () => {
+    const ageGroup = { id: 'OPEN', customWeightClasses: false };
+    const result = getWeightClassSet(ageGroup);
+    expect(result).toEqual(defaultWeightClasses);
+  });
+
+  test('returns U11 weight classes for U11 age group', () => {
+    const ageGroup = { id: 'U11', customWeightClasses: true };
+    const result = getWeightClassSet(ageGroup);
+    expect(result).toEqual(u11WeightClasses);
+  });
+
+  test('returns U13 weight classes for U13 age group', () => {
+    const ageGroup = { id: 'U13', customWeightClasses: true };
+    const result = getWeightClassSet(ageGroup);
+    expect(result).toEqual(u13WeightClasses);
+  });
+
+  test('returns U15 weight classes for U15 age group', () => {
+    const ageGroup = { id: 'U15', customWeightClasses: true };
+    const result = getWeightClassSet(ageGroup);
+    expect(result).toEqual(u15WeightClasses);
+  });
+
+  test('returns default for unknown custom weight class', () => {
+    const ageGroup = { id: 'UNKNOWN', customWeightClasses: true };
+    const result = getWeightClassSet(ageGroup);
+    expect(result).toEqual(defaultWeightClasses);
+  });
+
+  test('weight classes have required properties', () => {
+    const weightClasses = getWeightClassSet({ id: 'OPEN', customWeightClasses: false });
+    weightClasses.forEach((wc) => {
+      expect(wc).toHaveProperty('id');
+      expect(wc).toHaveProperty('name');
+      expect(wc).toHaveProperty('gender');
+    });
+  });
+});

@@ -167,9 +167,7 @@ describe('RecordGroup', () => {
 
   describe('Bodyweight Filtering', () => {
     test('includes lifter at minimum bodyweight boundary', async () => {
-      const liftersAtMin = [
-        { ...mockLifter, 'body_weight_(kg)': '0' },
-      ];
+      const liftersAtMin = [{ ...mockLifter, 'body_weight_(kg)': '0' }];
 
       global.fetch
         .mockResolvedValueOnce({
@@ -205,9 +203,7 @@ describe('RecordGroup', () => {
     });
 
     test('includes lifter at maximum bodyweight boundary', async () => {
-      const liftersAtMax = [
-        { ...mockLifter, 'body_weight_(kg)': '48' },
-      ];
+      const liftersAtMax = [{ ...mockLifter, 'body_weight_(kg)': '48' }];
 
       global.fetch
         .mockResolvedValueOnce({
@@ -243,9 +239,7 @@ describe('RecordGroup', () => {
     });
 
     test('filters out lifter exceeding maximum bodyweight', async () => {
-      const lifterTooHeavy = [
-        { ...mockLifter, 'body_weight_(kg)': '48.5' },
-      ];
+      const lifterTooHeavy = [{ ...mockLifter, 'body_weight_(kg)': '48.5' }];
 
       const meetAtBoundary = { ...mockMeetData, 'body_weight_(kg)': '48.5' };
 
@@ -459,10 +453,7 @@ describe('RecordGroup', () => {
       await userEvent.selectOptions(select, 'best_snatch');
 
       await waitFor(() => {
-        expect(Utils.sortLifts).toHaveBeenCalledWith(
-          expect.any(Array),
-          'best_snatch'
-        );
+        expect(Utils.sortLifts).toHaveBeenCalledWith(expect.any(Array), 'best_snatch');
       });
     });
 

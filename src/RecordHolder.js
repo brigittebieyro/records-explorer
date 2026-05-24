@@ -1,12 +1,12 @@
-import { CircleLoader } from "react-spinners";
-import { getYear } from "./Utils";
+import { CircleLoader } from 'react-spinners';
+import { getYear } from './Utils';
 
 function RecordHolder({ lifterData, index, individualLiftsData, sortType }) {
   let lifter = lifterData;
-  const club = typeof lifter.club === "string" ? lifter.club : "Unaffiliated";
-  let classList = "record-viewer-record-holder";
+  const club = typeof lifter.club === 'string' ? lifter.club : 'Unaffiliated';
+  let classList = 'record-viewer-record-holder';
   if (index === 0) {
-    classList += " record-viewer-record-current";
+    classList += ' record-viewer-record-current';
   }
 
   // const isUbeatenByCurrentLifters = isFromPriorGroup && lifter.total > currentLeaders[0]?.total;
@@ -20,7 +20,7 @@ function RecordHolder({ lifterData, index, individualLiftsData, sortType }) {
       (lift) =>
         lift?.name === lifter?.name &&
         lift?.total === lifter?.total &&
-        lift?.date === lifter?.lift_date,
+        lift?.date === lifter?.lift_date
     );
     if (liftData) {
       lifter = { ...lifter, ...liftData };
@@ -31,15 +31,12 @@ function RecordHolder({ lifterData, index, individualLiftsData, sortType }) {
   // if(isFromPriorGroup) {
   //   debugger
   // }
-  const startYear = getYear(lifter.classData?.start) || "";
-  const endYear = getYear(lifter.classData?.end) || "";
+  const startYear = getYear(lifter.classData?.start) || '';
+  const endYear = getYear(lifter.classData?.end) || '';
   const classYears = `${startYear} - ${endYear}`;
 
   return (
-    <div
-      className={classList}
-      key={`record-holder-${index}-${lifter.lift_date}`}
-    >
+    <div className={classList} key={`record-holder-${index}-${lifter.lift_date}`}>
       {isFromPriorGroup && (
         <div className="record-viewer-record-header">
           <p>
@@ -49,9 +46,7 @@ function RecordHolder({ lifterData, index, individualLiftsData, sortType }) {
       )}
       {/* {isAllTimeBest && (<div className='record-viewer--record-undefeated'><p>Undefeated in the Total since {year}</p></div>)} */}
       <h4 className="record-viewer-record-title">
-        {sortType !== "lift_date" && (
-          <div className="record-viewer-ranking">{index + 1}</div>
-        )}
+        {sortType !== 'lift_date' && <div className="record-viewer-ranking">{index + 1}</div>}
         {lifter.name}
       </h4>
       <div className="record-viewer-columns">
@@ -64,10 +59,10 @@ function RecordHolder({ lifterData, index, individualLiftsData, sortType }) {
             {lifter.best_snatch}
           </p>
         )}
-        {!!String(lifter["best_c&j"]) && (
+        {!!String(lifter['best_c&j']) && (
           <p>
             <strong>Clean and Jerk:&nbsp;</strong>
-            {lifter["best_c&j"]}
+            {lifter['best_c&j']}
           </p>
         )}
       </div>
@@ -91,9 +86,7 @@ function RecordHolder({ lifterData, index, individualLiftsData, sortType }) {
           </p>
         )} */}
       </div>
-      {!!lifter.meet && (
-        <p className="record-viewer-full-width-detail">{lifter.meet}</p>
-      )}
+      {!!lifter.meet && <p className="record-viewer-full-width-detail">{lifter.meet}</p>}
       {!lifter.best_snatch && lifter?.best_snatch !== 0 && (
         <div className="records-viewer-content-spinner">
           <CircleLoader loading={true} color="gold" size="18" />

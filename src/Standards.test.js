@@ -7,14 +7,21 @@ const mockRecords = {
   records: {
     Total: { weight: '200', lifter: 'Jane Smith', event: 'State Championship', date: '2023-05-15' },
     Snatch: { weight: '90', lifter: 'STANDARD', event: null, date: null },
-    'Clean & Jerk': { weight: '110', lifter: 'Bob Jones', event: 'Regional Meet', date: '2022-11-01' },
+    'Clean & Jerk': {
+      weight: '110',
+      lifter: 'Bob Jones',
+      event: 'Regional Meet',
+      date: '2022-11-01',
+    },
   },
 };
 
 describe('Standards', () => {
   describe('Title and Fine Print', () => {
     test('renders title with weight class and age group names', () => {
-      render(<Standards weightClassName="48kg" ageGroupName="Open" relevantRecords={mockRecords} />);
+      render(
+        <Standards weightClassName="48kg" ageGroupName="Open" relevantRecords={mockRecords} />
+      );
       expect(screen.getByText(/Officially Recognized Records.*48kg.*Open/)).toBeInTheDocument();
     });
 
@@ -34,28 +41,36 @@ describe('Standards', () => {
 
   describe('When relevantRecords is provided', () => {
     test('renders Total, Snatch, and Clean & Jerk headings', () => {
-      render(<Standards weightClassName="48kg" ageGroupName="Open" relevantRecords={mockRecords} />);
+      render(
+        <Standards weightClassName="48kg" ageGroupName="Open" relevantRecords={mockRecords} />
+      );
       expect(screen.getByRole('heading', { name: 'Total' })).toBeInTheDocument();
       expect(screen.getByRole('heading', { name: 'Snatch' })).toBeInTheDocument();
       expect(screen.getByRole('heading', { name: 'Clean & Jerk' })).toBeInTheDocument();
     });
 
     test('displays weight for each standard', () => {
-      render(<Standards weightClassName="48kg" ageGroupName="Open" relevantRecords={mockRecords} />);
+      render(
+        <Standards weightClassName="48kg" ageGroupName="Open" relevantRecords={mockRecords} />
+      );
       expect(screen.getByText('200kg')).toBeInTheDocument();
       expect(screen.getByText('90kg')).toBeInTheDocument();
       expect(screen.getByText('110kg')).toBeInTheDocument();
     });
 
     test('displays lifter name for each standard', () => {
-      render(<Standards weightClassName="48kg" ageGroupName="Open" relevantRecords={mockRecords} />);
+      render(
+        <Standards weightClassName="48kg" ageGroupName="Open" relevantRecords={mockRecords} />
+      );
       expect(screen.getByText('Jane Smith')).toBeInTheDocument();
       expect(screen.getByText('STANDARD')).toBeInTheDocument();
       expect(screen.getByText('Bob Jones')).toBeInTheDocument();
     });
 
     test('shows event and date for non-STANDARD records', () => {
-      render(<Standards weightClassName="48kg" ageGroupName="Open" relevantRecords={mockRecords} />);
+      render(
+        <Standards weightClassName="48kg" ageGroupName="Open" relevantRecords={mockRecords} />
+      );
       expect(screen.getByText('State Championship')).toBeInTheDocument();
       expect(screen.getByText('2023-05-15')).toBeInTheDocument();
       expect(screen.getByText('Regional Meet')).toBeInTheDocument();

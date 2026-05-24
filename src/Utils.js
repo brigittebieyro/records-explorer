@@ -1,6 +1,11 @@
-import { ageGroups } from "./Data/ageGroups";
-import { defaultWeightClasses } from "./Data/defaultWeightClasses";
-import { u11WeightClasses, u13WeightClasses, u15WeightClasses, u17WeightClasses } from "./Data/youthWeightClasses";
+import { ageGroups } from './Data/ageGroups';
+import { defaultWeightClasses } from './Data/defaultWeightClasses';
+import {
+  u11WeightClasses,
+  u13WeightClasses,
+  u15WeightClasses,
+  u17WeightClasses,
+} from './Data/youthWeightClasses';
 
 export const getAgeGroup = (ageGroupId) => {
   return ageGroups.find((group) => group.id === ageGroupId);
@@ -10,16 +15,16 @@ export const getWeightClassSet = (ageGroup) => {
   if (!ageGroup || !ageGroup.customWeightClasses) {
     return defaultWeightClasses;
   }
-  if (ageGroup.id === "U11") {
+  if (ageGroup.id === 'U11') {
     return u11WeightClasses;
   }
-  if (ageGroup.id === "U13") {
+  if (ageGroup.id === 'U13') {
     return u13WeightClasses;
   }
-  if (ageGroup.id === "U15") {
+  if (ageGroup.id === 'U15') {
     return u15WeightClasses;
   }
-  if (ageGroup.id === "U17") {
+  if (ageGroup.id === 'U17') {
     return u17WeightClasses;
   }
   console.log(`Could not find custom weight classes for ${ageGroup.id}`);
@@ -31,10 +36,10 @@ export const handleError = (error) => {
 };
 
 export const sortLifts = (lifts, key) => {
-  let useKey = key || "total";
+  let useKey = key || 'total';
 
   // For date sorting, keep all lifts
-  if (useKey === "lift_date") {
+  if (useKey === 'lift_date') {
     let result = lifts.sort(function (a, b) {
       var keyA = new Date(a[useKey]),
         keyB = new Date(b[useKey]);
@@ -57,13 +62,17 @@ export const sortLifts = (lifts, key) => {
   for (let lift of lifts) {
     const athleteName = lift.name;
     // Handle zero and non-zero values correctly
-    const liftValue = lift[useKey] !== undefined && lift[useKey] !== null ? parseInt(lift[useKey]) : 0;
+    const liftValue =
+      lift[useKey] !== undefined && lift[useKey] !== null ? parseInt(lift[useKey]) : 0;
 
     if (!athleteMap.has(athleteName)) {
       athleteMap.set(athleteName, lift);
     } else {
       const existingLift = athleteMap.get(athleteName);
-      const existingValue = existingLift[useKey] !== undefined && existingLift[useKey] !== null ? parseInt(existingLift[useKey]) : 0;
+      const existingValue =
+        existingLift[useKey] !== undefined && existingLift[useKey] !== null
+          ? parseInt(existingLift[useKey])
+          : 0;
       // Only replace if new value is strictly greater
       if (liftValue > existingValue) {
         athleteMap.set(athleteName, lift);

@@ -1,8 +1,8 @@
-import RecordListForWeightClass from "./RecordListForWeightClass";
+import RecordListForWeightClass from './RecordListForWeightClass';
 
 function AllCurrentRecordsView({ data }) {
-  const womensData = data.filter((item) => item.weightClass.gender === "female");
-  const mensData = data.filter((item) => item.weightClass.gender === "male");
+  const womensData = data.filter((item) => item.weightClass.gender === 'female');
+  const mensData = data.filter((item) => item.weightClass.gender === 'male');
 
   if (!data.length) {
     return (

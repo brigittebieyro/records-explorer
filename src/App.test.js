@@ -44,8 +44,36 @@ jest.mock('./RoutesAndSettings');
 jest.mock('./Utils');
 
 const mockStandardsData = [
-  ['', '', 'OPEN', 'F', 'Total', '', '', '48', 'Total', '250', 'Jane Doe', 'Competition', '2025-10-15'],
-  ['', '', 'OPEN', 'F', 'Snatch', '', '', '48', 'Snatch', '110', 'Jane Doe', 'Competition', '2025-10-15'],
+  [
+    '',
+    '',
+    'OPEN',
+    'F',
+    'Total',
+    '',
+    '',
+    '48',
+    'Total',
+    '250',
+    'Jane Doe',
+    'Competition',
+    '2025-10-15',
+  ],
+  [
+    '',
+    '',
+    'OPEN',
+    'F',
+    'Snatch',
+    '',
+    '',
+    '48',
+    'Snatch',
+    '110',
+    'Jane Doe',
+    'Competition',
+    '2025-10-15',
+  ],
 ];
 
 const mockWeightClass = {
@@ -184,7 +212,7 @@ describe('App - MainPage Component', () => {
       });
 
       const u15AgeGroup = { ...mockAgeGroup, id: 'U15' };
-      Utils.getAgeGroup.mockImplementation((id) => id === 'U15' ? u15AgeGroup : mockAgeGroup);
+      Utils.getAgeGroup.mockImplementation((id) => (id === 'U15' ? u15AgeGroup : mockAgeGroup));
       Utils.getWeightClassSet.mockImplementation((ageGroup) =>
         ageGroup && ageGroup.id === 'U15' ? [] : [mockWeightClass]
       );
@@ -213,10 +241,7 @@ describe('App - MainPage Component', () => {
       });
 
       Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue([
-        mockWeightClass,
-        { ...mockWeightClass, id: 'W53' },
-      ]);
+      Utils.getWeightClassSet.mockReturnValue([mockWeightClass, { ...mockWeightClass, id: 'W53' }]);
 
       renderApp();
 
@@ -239,9 +264,7 @@ describe('App - MainPage Component', () => {
 
       const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
       expect(weightClassSelect.value).toBe('');
-      expect(
-        screen.getByText('Select a Weight Class')
-      ).toBeInTheDocument();
+      expect(screen.getByText('Select a Weight Class')).toBeInTheDocument();
     });
   });
 
@@ -329,7 +352,12 @@ describe('App - MainPage Component', () => {
     });
 
     test('filters standards by calculated weight class range for plus sizes (>100kg)', async () => {
-      const plusWeightClass = { ...mockWeightClass, id: 'W86plus', maxBodyweight: '1000', minBodyweight: '86.01' };
+      const plusWeightClass = {
+        ...mockWeightClass,
+        id: 'W86plus',
+        maxBodyweight: '1000',
+        minBodyweight: '86.01',
+      };
 
       global.fetch.mockResolvedValue({
         ok: true,
@@ -710,7 +738,21 @@ describe('App - MainPage Component', () => {
 
     test('uses standard[4] as key for Masters age groups (M prefix)', () => {
       const standards = [
-        ['', '', 'MASTERS_35-39', 'F', '35', '', '', '48', 'Total', '180', 'Jane', 'Meet', '2024-01-01'],
+        [
+          '',
+          '',
+          'MASTERS_35-39',
+          'F',
+          '35',
+          '',
+          '',
+          '48',
+          'Total',
+          '180',
+          'Jane',
+          'Meet',
+          '2024-01-01',
+        ],
       ];
       const result = computeStandardsForWeightClass(femaleW48, standards);
       expect(result['35']).toBeDefined();
@@ -743,7 +785,21 @@ describe('App - MainPage Component', () => {
 
     test('includes entries where at least one lift has a real record holder', () => {
       const standards = [
-        ['', '', 'OPEN', 'F', 'OPEN', '', '', '48', 'Total', '250', 'Jane Smith', 'Meet', '2024-01-01'],
+        [
+          '',
+          '',
+          'OPEN',
+          'F',
+          'OPEN',
+          '',
+          '',
+          '48',
+          'Total',
+          '250',
+          'Jane Smith',
+          'Meet',
+          '2024-01-01',
+        ],
         ['', '', 'OPEN', 'F', 'OPEN', '', '', '48', 'Snatch', '110', 'STANDARD', '', ''],
       ];
       const result = buildAllCurrentRecords(standards);
@@ -760,8 +816,8 @@ describe('App - MainPage Component', () => {
       ];
       const result = buildAllCurrentRecords(standards);
       expect(result[0].weightClass.gender).toBe('female');
-      const maleEntries = result.filter(r => r.weightClass.gender === 'male');
-      const femaleEntries = result.filter(r => r.weightClass.gender === 'female');
+      const maleEntries = result.filter((r) => r.weightClass.gender === 'male');
+      const femaleEntries = result.filter((r) => r.weightClass.gender === 'female');
       const lastFemaleIdx = result.indexOf(femaleEntries[femaleEntries.length - 1]);
       const firstMaleIdx = result.indexOf(maleEntries[0]);
       expect(lastFemaleIdx).toBeLessThan(firstMaleIdx);
@@ -770,12 +826,26 @@ describe('App - MainPage Component', () => {
     test('groups records by weight class with age groups nested', () => {
       const standards = [
         ['', '', 'OPEN', 'F', 'OPEN', '', '', '48', 'Total', '225', 'Jane', 'Meet A', '2024-01-01'],
-        ['', '', 'MASTERS_35-39', 'F', '35', '', '', '48', 'Total', '200', 'Joan', 'Meet B', '2024-02-01'],
+        [
+          '',
+          '',
+          'MASTERS_35-39',
+          'F',
+          '35',
+          '',
+          '',
+          '48',
+          'Total',
+          '200',
+          'Joan',
+          'Meet B',
+          '2024-02-01',
+        ],
       ];
       const result = buildAllCurrentRecords(standards);
-      const w48 = result.find(r => r.weightClass.id === 'W48');
+      const w48 = result.find((r) => r.weightClass.id === 'W48');
       expect(w48).toBeDefined();
-      const groupIds = w48.groups.map(g => g.ageGroup.id);
+      const groupIds = w48.groups.map((g) => g.ageGroup.id);
       expect(groupIds).toContain('OPEN');
       expect(groupIds).toContain('35');
       // OPEN should appear before 35 (follows ageGroups array order)

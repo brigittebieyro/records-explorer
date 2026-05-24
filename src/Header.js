@@ -1,13 +1,13 @@
-import { useState } from "react";
-import { wsoName } from "./RoutesAndSettings";
+import { useState } from 'react';
+import { wsoName } from './RoutesAndSettings';
 
 function Header() {
   const [menuVisible, setMenuVisible] = useState(false);
 
   const getMenuStyles = () => {
-    let styles = "menu-flyout";
+    let styles = 'menu-flyout';
     if (!menuVisible) {
-      styles += " hidden";
+      styles += ' hidden';
     }
     return styles;
   };
@@ -20,13 +20,7 @@ function Header() {
     <div>
       <div className="App">
         <header className="App-header">
-          <img
-            className="header-logo"
-            src="/WSOLogo.png"
-            width="150"
-            height="150"
-            alt="WSO logo"
-          />
+          <img className="header-logo" src="/WSOLogo.png" width="150" height="150" alt="WSO logo" />
           {wsoName} WSO Records Explorer
         </header>
 

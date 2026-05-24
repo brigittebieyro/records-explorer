@@ -1,10 +1,10 @@
-import "./App.css";
-import { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Info from "./Info";
-import { ageGroups } from "./Data/ageGroups";
-import { defaultWeightClasses } from "./Data/defaultWeightClasses";
-import { CircleLoader } from "react-spinners";
+import './App.css';
+import { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Info from './Info';
+import { ageGroups } from './Data/ageGroups';
+import { defaultWeightClasses } from './Data/defaultWeightClasses';
+import { CircleLoader } from 'react-spinners';
 import {
   endDate,
   allTimeStartDate,
@@ -13,12 +13,12 @@ import {
   currentRecordsSheetName,
   wsoName,
   youthAllTimeStartDate,
-} from "./RoutesAndSettings";
-import { getAgeGroup, getWeightClassSet } from "./Utils";
-import Standards from "./Standards";
-import RecordGroup from "./RecordGroup";
-import Header from "./Header";
-import AllCurrentRecordsView from "./AllCurrentRecordsView";
+} from './RoutesAndSettings';
+import { getAgeGroup, getWeightClassSet } from './Utils';
+import Standards from './Standards';
+import RecordGroup from './RecordGroup';
+import Header from './Header';
+import AllCurrentRecordsView from './AllCurrentRecordsView';
 
 export function computeStandardsForWeightClass(weightClass, standards) {
   const recordSet = {};
@@ -30,12 +30,11 @@ export function computeStandardsForWeightClass(weightClass, standards) {
     if (standard[7] === weightClassIndicator) {
       const ageKey = String(standard[2]).toUpperCase();
       const indicator = ageKey[0];
-      const recordKey =
-        indicator === "W" || indicator === "M" ? standard[4] : ageKey;
+      const recordKey = indicator === 'W' || indicator === 'M' ? standard[4] : ageKey;
       const genderKey = standard[3];
       if (
-        (weightClass.gender === "female" && genderKey === "F") ||
-        (weightClass.gender === "male" && genderKey === "M")
+        (weightClass.gender === 'female' && genderKey === 'F') ||
+        (weightClass.gender === 'male' && genderKey === 'M')
       ) {
         if (!recordSet[recordKey]) {
           recordSet[recordKey] = {
@@ -66,7 +65,7 @@ export function buildAllCurrentRecords(standards) {
       if (!ageGroupData) continue;
       const realRecords = {};
       Object.entries(ageGroupData.records).forEach(([liftType, record]) => {
-        if (record.lifter !== "STANDARD") {
+        if (record.lifter !== 'STANDARD') {
           realRecords[liftType] = record;
         }
       });
@@ -86,8 +85,8 @@ function MainPage() {
   const [currentAgeGroup, setCurrentAgeGroup] = useState();
   const [localStandards, setLocalStandards] = useState([]);
   const [standardsStatus, setStandardsStatus] = useState();
-  const [selectedWeightClass, setSelectedWeightClass] = useState("");
-  const [selectedAgeGroup, setSelectedAgeGroup] = useState("OPEN");
+  const [selectedWeightClass, setSelectedWeightClass] = useState('');
+  const [selectedAgeGroup, setSelectedAgeGroup] = useState('OPEN');
   const [displayedStandards, setDisplayedStandards] = useState([]);
   const [allRecordsData, setAllRecordsData] = useState([]);
 
@@ -95,23 +94,23 @@ function MainPage() {
     if (standardsStatus) {
       return;
     }
-    setStandardsStatus("inprogress");
+    setStandardsStatus('inprogress');
     const route = getSheetRoute(currentRecordsSheetId, currentRecordsSheetName);
 
     try {
       const response = await fetch(route, {
-        method: "GET",
+        method: 'GET',
       });
       if (!response.ok) {
-        setStandardsStatus("error");
+        setStandardsStatus('error');
         Promise.resolve();
       }
       await response.json().then((response) => {
         setLocalStandards(response.values);
-        setStandardsStatus("complete");
+        setStandardsStatus('complete');
       });
     } catch (error) {
-      setStandardsStatus("error");
+      setStandardsStatus('error');
     }
   };
   fetchCurrentStandards();
@@ -127,12 +126,12 @@ function MainPage() {
       const ageGroupObj = getAgeGroup(selectedAgeGroup);
       const weightClasses = getWeightClassSet(ageGroupObj);
       const selectedWeightClassObj = weightClasses.find(
-        (wtClass) => wtClass.id === selectedWeightClass,
+        (wtClass) => wtClass.id === selectedWeightClass
       );
       if (!selectedWeightClassObj) {
         // Intentional: clearing the weight class when switching age groups is expected
         // behavior — the new age group may not share the same weight classes.
-        setSelectedWeightClass("");
+        setSelectedWeightClass('');
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -147,9 +146,7 @@ function MainPage() {
   const updateDisplayedStandards = async (weightClass, ageGroup) => {
     if (!!weightClass && localStandards.length) {
       // The standards spreadsheet always uses ">86" format (not "86+") for plus-weight classes.
-      setDisplayedStandards(
-        computeStandardsForWeightClass(weightClass, localStandards)
-      );
+      setDisplayedStandards(computeStandardsForWeightClass(weightClass, localStandards));
     }
   };
 
@@ -158,33 +155,27 @@ function MainPage() {
       // TODO handle error
       return;
     }
-    const currentAge = getAgeGroup(selectedAgeGroup || "OPEN");
+    const currentAge = getAgeGroup(selectedAgeGroup || 'OPEN');
     const weightClasses = getWeightClassSet(currentAge);
-    const currentWtClass = weightClasses.find(
-      (wtClass) => wtClass.id === selectedWeightClass,
-    );
+    const currentWtClass = weightClasses.find((wtClass) => wtClass.id === selectedWeightClass);
 
     if (!currentWtClass) {
       // TODO handle error
       return;
     }
 
-    setStatus("inprogress");
+    setStatus('inprogress');
     resetAllData();
 
     updateDisplayedStandards(currentWtClass, selectedAgeGroup);
     setCurrentWeightClass(currentWtClass);
     setCurrentAgeGroup(currentAge);
-    setStatus("complete");
+    setStatus('complete');
   }
-
-  
-
 
   // menu handling moved into `Header` component; keep state for future use
   return (
     <div className="App">
-
       <div className="record-viewer-options-bar">
         <span>Select a weight class & group: </span>
         <select
@@ -218,19 +209,12 @@ function MainPage() {
             setSelectedWeightClass(e.target.value);
           }}
         >
-          {!selectedWeightClass && (
-            <option value="">Select a Weight Class</option>
-          )}
-          {getWeightClassSet(getAgeGroup(selectedAgeGroup)).map(
-            (wtClass, index) => (
-              <option
-                value={wtClass.id}
-                key={`wtClass-selector-${index}-${wtClass.id}`}
-              >
-                {wtClass.name}
-              </option>
-            ),
-          )}
+          {!selectedWeightClass && <option value="">Select a Weight Class</option>}
+          {getWeightClassSet(getAgeGroup(selectedAgeGroup)).map((wtClass, index) => (
+            <option value={wtClass.id} key={`wtClass-selector-${index}-${wtClass.id}`}>
+              {wtClass.name}
+            </option>
+          ))}
         </select>
 
         <button
@@ -241,12 +225,12 @@ function MainPage() {
           Go
         </button>
 
-        {status === "complete" && (
+        {status === 'complete' && (
           <button
             className="header-button reset-button"
             onClick={() => {
-              setSelectedAgeGroup("OPEN");
-              setSelectedWeightClass("");
+              setSelectedAgeGroup('OPEN');
+              setSelectedWeightClass('');
               resetAllData();
               setStatus(undefined);
             }}
@@ -256,27 +240,25 @@ function MainPage() {
         )}
       </div>
 
-      {!status && (
-        <AllCurrentRecordsView data={allRecordsData} />
-      )}
+      {!status && <AllCurrentRecordsView data={allRecordsData} />}
 
-      {status === "inprogress" && (
+      {status === 'inprogress' && (
         <div className="records-viewer-loading-container">
           <CircleLoader loading={true} color="gold" />
         </div>
       )}
 
-      {status === "complete" && (
+      {status === 'complete' && (
         <div className="record-viewer-results-parent">
           <div className="current-leaders-group">
             <div className="record-group-info">
               <p className="record-group-title">Current Top Athletes</p>
               <p className="record-group-description">
-                These are the {wsoName} WSO's top ranked lifters in the current{" "}
-                <strong>{currentWeightClass.name}</strong> weight class, active{" "}
+                These are the {wsoName} WSO's top ranked lifters in the current{' '}
+                <strong>{currentWeightClass.name}</strong> weight class, active{' '}
                 <strong>
-                  from {new Date(currentWeightClass.start).getUTCFullYear()},
-                  originally fetched by total.
+                  from {new Date(currentWeightClass.start).getUTCFullYear()}, originally fetched by
+                  total.
                 </strong>
               </p>
             </div>
@@ -287,10 +269,7 @@ function MainPage() {
               startDate={currentWeightClass.start}
               endDate={endDate}
               emptyContent={
-                <div>
-                  Looks like nobody's competed in this division yet! Could be
-                  you?
-                </div>
+                <div>Looks like nobody's competed in this division yet! Could be you?</div>
               }
             />
           </div>
@@ -303,13 +282,10 @@ function MainPage() {
             />
 
             <div className="record-group-info">
-              <p className="record-group-title">
-                All time bests from this bodyweight
-              </p>
+              <p className="record-group-title">All time bests from this bodyweight</p>
               <p className="record-group-description">
-                What if the current weight class were active earlier? Who would
-                hold our all time records? Here are the top lifters by total in
-                overlapping weight classes, prior to{" "}
+                What if the current weight class were active earlier? Who would hold our all time
+                records? Here are the top lifters by total in overlapping weight classes, prior to{' '}
                 {new Date(currentWeightClass.start).getUTCFullYear()}.
               </p>
             </div>
@@ -317,15 +293,14 @@ function MainPage() {
               weightClass={currentWeightClass}
               ageGroup={currentAgeGroup}
               count={12}
-              startDate={(currentAgeGroup.id === "U11" || currentAgeGroup.id === "U13") ? youthAllTimeStartDate : allTimeStartDate}
-              endDate={endDate}
-              emptyContent={
-                <div>
-                  No history found for this age division and weight class.
-                </div>
+              startDate={
+                currentAgeGroup.id === 'U11' || currentAgeGroup.id === 'U13'
+                  ? youthAllTimeStartDate
+                  : allTimeStartDate
               }
+              endDate={endDate}
+              emptyContent={<div>No history found for this age division and weight class.</div>}
             />
-            
           </div>
         </div>
       )}

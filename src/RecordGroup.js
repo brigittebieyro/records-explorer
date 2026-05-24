@@ -1,42 +1,35 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   headers,
   getRankingsRoute,
   wsoId,
   getLifterId,
   getLifterDataRoute,
-} from "./RoutesAndSettings";
-import { handleError, shouldIncludePastLifter, sortLifts } from "./Utils";
-import RecordHolder from "./RecordHolder";
-import { CircleLoader } from "react-spinners";
+} from './RoutesAndSettings';
+import { handleError, shouldIncludePastLifter, sortLifts } from './Utils';
+import RecordHolder from './RecordHolder';
+import { CircleLoader } from 'react-spinners';
 
-function RecordGroup({
-  weightClass,
-  ageGroup,
-  count,
-  startDate,
-  endDate,
-  emptyContent,
-}) {
+function RecordGroup({ weightClass, ageGroup, count, startDate, endDate, emptyContent }) {
   const [status, setStatus] = useState();
   const [leadingLifters, setLeadingLifters] = useState([]);
   const [combinedLiftsData, setCombinedLiftsData] = useState([]);
-  const [sortType, setSortType] = useState("total");
+  const [sortType, setSortType] = useState('total');
 
   const sortTypeDescriptions = [
-    { id: "total", name: "Overall Total" },
-    { id: "best_snatch", name: "Snatch" },
-    { id: "best_c&j", name: "Clean and Jerk" },
-    { id: "lift_date", name: "Most Recent" },
+    { id: 'total', name: 'Overall Total' },
+    { id: 'best_snatch', name: 'Snatch' },
+    { id: 'best_c&j', name: 'Clean and Jerk' },
+    { id: 'lift_date', name: 'Most Recent' },
     // {id: "bodyweight", name: "Bodyweight"},
     // Weight class?
   ];
 
   const resetAllData = () => {
-    setStatus("inprogress");
+    setStatus('inprogress');
     setLeadingLifters([]);
     setCombinedLiftsData([]);
-    setSortType("total");
+    setSortType('total');
   };
 
   useEffect(() => {
@@ -56,12 +49,9 @@ function RecordGroup({
   }, [combinedLiftsData, sortType]);
 
   const updateSortType = (newType) => {
-    console.log(
-      "Fetch is complete, proceeding to re-sort lifters",
-      combinedLiftsData,
-    );
+    console.log('Fetch is complete, proceeding to re-sort lifters', combinedLiftsData);
     const newSortedLifts = sortLifts(combinedLiftsData, newType);
-    console.log("Updated version:", newSortedLifts);
+    console.log('Updated version:', newSortedLifts);
     setLeadingLifters(newSortedLifts);
     setSortType(newType);
   };
@@ -82,7 +72,7 @@ function RecordGroup({
       const response = await fetch(getRankingsRoute(count), {
         headers,
         body,
-        method: "POST",
+        method: 'POST',
       });
       if (!response.ok) {
         handleError(response.status);
@@ -97,7 +87,7 @@ function RecordGroup({
           }
         }
         setLeadingLifters(result);
-        setStatus("complete");
+        setStatus('complete');
 
         for (let i = 0; i < result.length; i++) {
           await fetchIndividualLifts(result[i]);
@@ -115,7 +105,7 @@ function RecordGroup({
     try {
       const response = await fetch(route, {
         headers,
-        method: "POST",
+        method: 'POST',
       });
       if (!response.ok) {
         // handleError(response.status)
@@ -127,20 +117,23 @@ function RecordGroup({
           // Get a min and max year for the lifter based on the age group
           const ageAtRankingTime = parseInt(lifter.lifter_age);
           const rankingYear = new Date(lifter.lift_date).getFullYear();
-          const minYearForLifter = rankingYear - (ageAtRankingTime - parseInt(ageGroup.minimum_lifter_age));
-          const maxYearForLifter = rankingYear + (parseInt(ageGroup.maximum_lifter_age) - ageAtRankingTime) ;
-          
+          const minYearForLifter =
+            rankingYear - (ageAtRankingTime - parseInt(ageGroup.minimum_lifter_age));
+          const maxYearForLifter =
+            rankingYear + (parseInt(ageGroup.maximum_lifter_age) - ageAtRankingTime);
+
           // Collect all lifts within the date range for this bodyweight category
           const matchingLifts = [];
           for (let meet of meets) {
             const meetYear = new Date(meet.date).getFullYear();
-            if (meet.date >= startDate && 
-                meet.date <= endDate &&
-                meet["body_weight_(kg)"] >= weightClass.minBodyweight &&
-                meet["body_weight_(kg)"] <= weightClass.maxBodyweight &&
-                meetYear >= minYearForLifter &&
-                meetYear <= maxYearForLifter 
-              ) {
+            if (
+              meet.date >= startDate &&
+              meet.date <= endDate &&
+              meet['body_weight_(kg)'] >= weightClass.minBodyweight &&
+              meet['body_weight_(kg)'] <= weightClass.maxBodyweight &&
+              meetYear >= minYearForLifter &&
+              meetYear <= maxYearForLifter
+            ) {
               matchingLifts.push({ ...lifter, ...meet });
             }
           }
@@ -160,10 +153,10 @@ function RecordGroup({
 
   return (
     <div className="record-viewer-parent">
-      {status !== "complete" && <CircleLoader loading={true} color="gold" />}
+      {status !== 'complete' && <CircleLoader loading={true} color="gold" />}
       {combinedLiftsData.length > 0 && (
         <div className="sort-select-parent">
-          <label htmlFor="sort-select">Sort</label>{" "}
+          <label htmlFor="sort-select">Sort</label>{' '}
           <select
             aria-label="Sort"
             name="sort-selection"
@@ -171,7 +164,7 @@ function RecordGroup({
             onChange={(e) => {
               updateSortType(e.target.value);
             }}
-            disabled={status !== "complete"}
+            disabled={status !== 'complete'}
           >
             {sortTypeDescriptions.map((sort, index) => (
               <option
@@ -179,13 +172,13 @@ function RecordGroup({
                 key={`sort-selector-${index}-${sort.id}`}
                 selected={sortType === sort.id}
               >
-                {sort.name}{" "}
+                {sort.name}{' '}
               </option>
             ))}
           </select>
         </div>
       )}
-      {status === "complete" &&
+      {status === 'complete' &&
         !!leadingLifters.length &&
         leadingLifters.map((lifter, index) => (
           <RecordHolder

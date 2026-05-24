@@ -11,21 +11,21 @@ body {
   background-color: var(--main-background-color);
 }
 
-.menu-container { 
-    display: flex;
-    width: 100%;
-    justify-content: right;
-    position: absolute;
-    top: 15px;
+.menu-container {
+  display: flex;
+  width: 100%;
+  justify-content: right;
+  position: absolute;
+  top: 15px;
 }
 
 .menu-icon {
-background-image: url('data:image/svg+xml,<svg width="50px" height="50px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="%23ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M4 18L20 18" stroke="%23ffffff" stroke-width="2" stroke-linecap="round"></path><path d="M4 12L20 12" stroke="%23ffffff" stroke-width="2" stroke-linecap="round"></path><path d="M4 6L20 6" stroke="%23ffffff" stroke-width="2" stroke-linecap="round"></path></g></svg>');
-height: 50px;
-width: 50px;
-display: block;
-position: absolute;
-right: 50px;
+  background-image: url('data:image/svg+xml,<svg width="50px" height="50px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="%23ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M4 18L20 18" stroke="%23ffffff" stroke-width="2" stroke-linecap="round"></path><path d="M4 12L20 12" stroke="%23ffffff" stroke-width="2" stroke-linecap="round"></path><path d="M4 6L20 6" stroke="%23ffffff" stroke-width="2" stroke-linecap="round"></path></g></svg>');
+  height: 50px;
+  width: 50px;
+  display: block;
+  position: absolute;
+  right: 50px;
   cursor: pointer;
 }
 .menu-icon:hover {
@@ -42,12 +42,12 @@ right: 50px;
 }
 
 .menu-flyout {
-    font-size: 12pt;
-    text-align: left;
-    padding: 0 15px;
-    position: absolute;
-    right: -10px;
-    top: 32px;
+  font-size: 12pt;
+  text-align: left;
+  padding: 0 15px;
+  position: absolute;
+  right: -10px;
+  top: 32px;
   cursor: pointer;
 }
 .menu-flyout ul {
@@ -62,8 +62,8 @@ right: 50px;
   text-decoration: none;
   font-weight: bold;
   border: 2px solid #bbb;
-  margin-bottom:1px; 
-  padding:8px;
+  margin-bottom: 1px;
+  padding: 8px;
   display: block;
   cursor: pointer;
 }
@@ -78,7 +78,7 @@ right: 50px;
   align-items: center;
   justify-content: center;
   color: var(--main-text-color);
-    min-width: 1000px;
+  min-width: 1000px;
 }
 
 .App-header {
@@ -102,11 +102,11 @@ right: 50px;
   display: block;
   width: 100%;
   border: 1px solid var(--main-border-color);
-    border-width: 1px 0;
+  border-width: 1px 0;
   padding: 15px;
   margin-bottom: 25px;
   font-style: italic;
-    padding-right: 100px;
+  padding-right: 100px;
 }
 
 .record-viewer-options-bar select {

@@ -3,18 +3,18 @@
 // ----------------------------------------------------------------------------------------------------------------
 //
 export const wsoId = 21;
-export const wsoName = "California North Central";
+export const wsoName = 'California North Central';
 //
-// Use a relative local base path so the client works when deployed behind a reverse proxy. 
-const _baseUrl = "/api/lifter-data"; // instead of https://admin-usaw-rankings.sport80.com/ !
+// Use a relative local base path so the client works when deployed behind a reverse proxy.
+const _baseUrl = '/api/lifter-data'; // instead of https://admin-usaw-rankings.sport80.com/ !
 export const getRankingsRoute = (count) => {
-  const limit = typeof count === "number" && count > 0 ? count : 3;
+  const limit = typeof count === 'number' && count > 0 ? count : 3;
   return `${_baseUrl}/categories/all/rankings/table/data?platform=1&p=0&l=${limit}&sort=action&d=asc&s=&st=`;
 };
 
 export const getLifterId = (lifterActionRoute) => {
   return lifterActionRoute[0].url.split(
-    "https://usaweightlifting.sport80.com/public/rankings/member/",
+    'https://usaweightlifting.sport80.com/public/rankings/member/'
   )[1];
 };
 export const getLifterDataRoute = (publicLifterId) => {
@@ -23,28 +23,27 @@ export const getLifterDataRoute = (publicLifterId) => {
   return `${_baseUrl}/athletes/${publicLifterId}/table/data${pageParams}`;
 };
 export const headers = {
-  accept: "application/json, text/plain, */*",
-  "accept-language": "en-US,en;q=0.9",
-  "content-type": "application/json",
-  "x-api-token": "14ced0f3-421f-4acf-94ad-cc63a371af19",
-  "Access-Control-Allow-Origin": "*",
+  accept: 'application/json, text/plain, */*',
+  'accept-language': 'en-US,en;q=0.9',
+  'content-type': 'application/json',
+  'x-api-token': '14ced0f3-421f-4acf-94ad-cc63a371af19',
+  'Access-Control-Allow-Origin': '*',
 };
 // New weight classes begin August 1, 2026
-export const endDate = "2026-08-01";
+export const endDate = '2026-08-01';
 // New york WSO starts tracking records in 1998, no reason we can't do the same.
-export const allTimeStartDate = "1998-01-01";
-export const youthAllTimeStartDate = "2014-01-01"; // This is a magic number - looking for a date which captures history, without the source API throwing errors. 
+export const allTimeStartDate = '1998-01-01';
+export const youthAllTimeStartDate = '2014-01-01'; // This is a magic number - looking for a date which captures history, without the source API throwing errors.
 
 // ----------------------------------------------------------------------------------------------------------------
 // Google Sheets Routes for Prior Recognized Records
 // ----------------------------------------------------------------------------------------------------------------
 //
-const _sheetsBaseUrl = "https://sheets.googleapis.com/v4/spreadsheets";
-const _googleKey = "AIzaSyB3tiu4QqJb-brY0MzE-e6J6rac-Lcn2_A";
+const _sheetsBaseUrl = 'https://sheets.googleapis.com/v4/spreadsheets';
+const _googleKey = 'AIzaSyB3tiu4QqJb-brY0MzE-e6J6rac-Lcn2_A';
 export const getSheetRoute = (sheetId, sheetName) => {
   return `${_sheetsBaseUrl}/${sheetId}/values/${sheetName}?key=${_googleKey}`;
 };
 // for current records:
-export const currentRecordsSheetId =
-  "1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ";
-export const currentRecordsSheetName = "Raw_Data";
+export const currentRecordsSheetId = '1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ';
+export const currentRecordsSheetName = 'Raw_Data';

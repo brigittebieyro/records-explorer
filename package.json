@@ -22,13 +22,18 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "server": "node-env-run server --exec nodemon | pino-colada"
+    "server": "node-env-run server --exec nodemon | pino-colada",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,json}\""
   },
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
-    ]
+    ],
+    "rules": {
+      "no-unused-vars": "error",
+      "@typescript-eslint/ban-ts-comment": "error"
+    }
   },
   "browserslist": {
     "production": [
@@ -48,6 +53,7 @@
     "express-pino-logger": "^7.0.0",
     "node-env-run": "^4.0.2",
     "nodemon": "^3.1.11",
-    "pino-colada": "^2.2.2"
+    "pino-colada": "^2.2.2",
+    "prettier": "^3.8.3"
   }
 }

@@ -52,9 +52,7 @@ function sharedWeightClassTests(weightClasses) {
   });
 
   test('plus-weight classes have maxBodyweight of "1000"', () => {
-    const plusClasses = weightClasses.filter(
-      (wc) => wc.id.endsWith('plus') || wc.id.endsWith('+')
-    );
+    const plusClasses = weightClasses.filter((wc) => wc.id.endsWith('plus') || wc.id.endsWith('+'));
     for (const wc of plusClasses) {
       expect(wc.maxBodyweight).toBe('1000');
     }
@@ -107,15 +105,15 @@ function sharedWeightClassTests(weightClasses) {
 describe('defaultWeightClasses', () => {
   sharedWeightClassTests(defaultWeightClasses);
 
-  test('has exactly 8 women\'s weight classes', () => {
+  test("has exactly 8 women's weight classes", () => {
     expect(defaultWeightClasses.filter((wc) => wc.gender === 'female')).toHaveLength(8);
   });
 
-  test('has exactly 8 men\'s weight classes', () => {
+  test("has exactly 8 men's weight classes", () => {
     expect(defaultWeightClasses.filter((wc) => wc.gender === 'male')).toHaveLength(8);
   });
 
-  test('W48 is the lightest women\'s class', () => {
+  test("W48 is the lightest women's class", () => {
     const femaleClasses = defaultWeightClasses.filter((wc) => wc.gender === 'female');
     const lightest = femaleClasses.reduce((a, b) =>
       parseFloat(a.maxBodyweight) < parseFloat(b.maxBodyweight) ? a : b
@@ -123,7 +121,7 @@ describe('defaultWeightClasses', () => {
     expect(lightest.id).toBe('W48');
   });
 
-  test('M60 is the lightest men\'s class', () => {
+  test("M60 is the lightest men's class", () => {
     const maleClasses = defaultWeightClasses.filter((wc) => wc.gender === 'male');
     const lightest = maleClasses.reduce((a, b) =>
       parseFloat(a.maxBodyweight) < parseFloat(b.maxBodyweight) ? a : b
@@ -131,7 +129,7 @@ describe('defaultWeightClasses', () => {
     expect(lightest.id).toBe('M60');
   });
 
-  test('women\'s weight classes have continuous boundaries with no gaps', () => {
+  test("women's weight classes have continuous boundaries with no gaps", () => {
     const femaleClasses = defaultWeightClasses
       .filter((wc) => wc.gender === 'female')
       .sort((a, b) => parseFloat(a.minBodyweight) - parseFloat(b.minBodyweight));
@@ -145,7 +143,6 @@ describe('defaultWeightClasses', () => {
       expect(currMin).toBeCloseTo(prevMax + 0.01, 2);
     }
   });
-
 });
 
 describe('u11WeightClasses', () => {

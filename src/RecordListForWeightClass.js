@@ -1,4 +1,4 @@
-import CompactRecordView from "./CompactRecordView";
+import CompactRecordView from './CompactRecordView';
 
 function RecordListForWeightClass({ weightClass, groups }) {
   return (
@@ -10,22 +10,22 @@ function RecordListForWeightClass({ weightClass, groups }) {
             <strong>{ageGroup.name}</strong>
           </p>
           <div className="all-records-lift-set">
-            {records["Snatch"] && (
+            {records['Snatch'] && (
               <div className="all-records-lift">
                 <span className="all-records-lift-label">Snatch</span>
-                <CompactRecordView record={records["Snatch"]} />
+                <CompactRecordView record={records['Snatch']} />
               </div>
             )}
-            {records["Clean & Jerk"] && (
+            {records['Clean & Jerk'] && (
               <div className="all-records-lift">
                 <span className="all-records-lift-label">Clean & Jerk</span>
-                <CompactRecordView record={records["Clean & Jerk"]} />
+                <CompactRecordView record={records['Clean & Jerk']} />
               </div>
             )}
-            {records["Total"] && (
+            {records['Total'] && (
               <div className="all-records-lift">
                 <span className="all-records-lift-label">Total</span>
-                <CompactRecordView record={records["Total"]} />
+                <CompactRecordView record={records['Total']} />
               </div>
             )}
           </div>

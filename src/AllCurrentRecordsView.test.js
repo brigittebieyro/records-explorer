@@ -17,13 +17,28 @@ const openAgeGroup = { id: 'OPEN', name: 'Open' };
 const masters35AgeGroup = { id: '35', name: '35 - 39 years old' };
 
 const fullRecords = {
-  'Total': { weight: '225', lifter: 'Jane Smith', event: 'National Championships', date: '2024-05-01' },
-  'Snatch': { weight: '102', lifter: 'Jane Smith', event: 'National Championships', date: '2024-05-01' },
-  'Clean & Jerk': { weight: '123', lifter: 'Jane Smith', event: 'National Championships', date: '2024-05-01' },
+  Total: {
+    weight: '225',
+    lifter: 'Jane Smith',
+    event: 'National Championships',
+    date: '2024-05-01',
+  },
+  Snatch: {
+    weight: '102',
+    lifter: 'Jane Smith',
+    event: 'National Championships',
+    date: '2024-05-01',
+  },
+  'Clean & Jerk': {
+    weight: '123',
+    lifter: 'Jane Smith',
+    event: 'National Championships',
+    date: '2024-05-01',
+  },
 };
 
 const partialRecords = {
-  'Total': { weight: '200', lifter: 'Joan Doe', event: 'State Meet', date: '2023-11-01' },
+  Total: { weight: '200', lifter: 'Joan Doe', event: 'State Meet', date: '2023-11-01' },
 };
 
 const mockData = [
@@ -37,7 +52,12 @@ const mockData = [
   {
     weightClass: menM60,
     groups: [
-      { ageGroup: openAgeGroup, records: { 'Total': { weight: '310', lifter: 'John Smith', event: 'Nationals', date: '2024-03-01' } } },
+      {
+        ageGroup: openAgeGroup,
+        records: {
+          Total: { weight: '310', lifter: 'John Smith', event: 'Nationals', date: '2024-03-01' },
+        },
+      },
     ],
   },
 ];
@@ -77,8 +97,14 @@ describe('AllCurrentRecordsView', () => {
 
     test('renders multiple weight classes in each column', () => {
       const data = [
-        { weightClass: { id: 'W48', name: "Women's 48kg", gender: 'female' }, groups: [{ ageGroup: openAgeGroup, records: partialRecords }] },
-        { weightClass: { id: 'W53', name: "Women's 53kg", gender: 'female' }, groups: [{ ageGroup: openAgeGroup, records: partialRecords }] },
+        {
+          weightClass: { id: 'W48', name: "Women's 48kg", gender: 'female' },
+          groups: [{ ageGroup: openAgeGroup, records: partialRecords }],
+        },
+        {
+          weightClass: { id: 'W53', name: "Women's 53kg", gender: 'female' },
+          groups: [{ ageGroup: openAgeGroup, records: partialRecords }],
+        },
       ];
       render(<AllCurrentRecordsView data={data} />);
       expect(screen.getByText("Women's 48kg")).toBeInTheDocument();

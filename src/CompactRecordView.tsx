@@ -1,4 +1,10 @@
-function CompactRecordView({ record }) {
+import { StandardRecord } from './types';
+
+interface CompactRecordViewProps {
+  record?: StandardRecord;
+}
+
+function CompactRecordView({ record }: CompactRecordViewProps) {
   if (!record) return null;
   return (
     <span className="all-records-record">

@@ -1,31 +1,51 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { CircleLoader } from 'react-spinners';
+import RecordHolder from './RecordHolder';
 import {
-  headers,
-  getRankingsRoute,
-  wsoId,
-  getLifterId,
   getLifterDataRoute,
+  getLifterId,
+  getRankingsRoute,
+  headers,
+  wsoId,
 } from './RoutesAndSettings';
 import { handleError, shouldIncludePastLifter, sortLifts } from './Utils';
-import RecordHolder from './RecordHolder';
-import { CircleLoader } from 'react-spinners';
+import { AgeGroup, CombinedLiftData, MeetRecord, SortKey, WeightClass } from './types';
 
-function RecordGroup({ weightClass, ageGroup, count, startDate, endDate, emptyContent }) {
-  const [status, setStatus] = useState();
-  const [leadingLifters, setLeadingLifters] = useState([]);
-  const [combinedLiftsData, setCombinedLiftsData] = useState([]);
-  const [sortType, setSortType] = useState('total');
+interface SortTypeDescription {
+  id: SortKey;
+  name: string;
+}
 
-  const sortTypeDescriptions = [
+interface RecordGroupProps {
+  weightClass: WeightClass;
+  ageGroup: AgeGroup;
+  count: number;
+  startDate: string;
+  endDate: string;
+  emptyContent: React.ReactNode;
+}
+
+function RecordGroup({
+  weightClass,
+  ageGroup,
+  count,
+  startDate,
+  endDate,
+  emptyContent,
+}: RecordGroupProps) {
+  const [status, setStatus] = useState<string | undefined>();
+  const [leadingLifters, setLeadingLifters] = useState<CombinedLiftData[]>([]);
+  const [combinedLiftsData, setCombinedLiftsData] = useState<CombinedLiftData[]>([]);
+  const [sortType, setSortType] = useState<SortKey>('total');
+
+  const sortTypeDescriptions: SortTypeDescription[] = [
     { id: 'total', name: 'Overall Total' },
     { id: 'best_snatch', name: 'Snatch' },
     { id: 'best_c&j', name: 'Clean and Jerk' },
     { id: 'lift_date', name: 'Most Recent' },
-    // {id: "bodyweight", name: "Bodyweight"},
-    // Weight class?
   ];
 
-  const resetAllData = () => {
+  const resetAllData = (): void => {
     setStatus('inprogress');
     setLeadingLifters([]);
     setCombinedLiftsData([]);
@@ -48,7 +68,7 @@ function RecordGroup({ weightClass, ageGroup, count, startDate, endDate, emptyCo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [combinedLiftsData, sortType]);
 
-  const updateSortType = (newType) => {
+  const updateSortType = (newType: SortKey): void => {
     console.log('Fetch is complete, proceeding to re-sort lifters', combinedLiftsData);
     const newSortedLifts = sortLifts(combinedLiftsData, newType);
     console.log('Updated version:', newSortedLifts);
@@ -56,7 +76,7 @@ function RecordGroup({ weightClass, ageGroup, count, startDate, endDate, emptyCo
     setSortType(newType);
   };
 
-  const fetchRecordGroup = async (wtClass, ageGroup) => {
+  const fetchRecordGroup = async (wtClass: WeightClass, ageGroup: AgeGroup): Promise<void> => {
     try {
       const body = JSON.stringify({
         columns: [],
@@ -78,8 +98,8 @@ function RecordGroup({ weightClass, ageGroup, count, startDate, endDate, emptyCo
         handleError(response.status);
         throw new Error(`Response status: ${response.status}`);
       }
-      await response.json().then(async (response) => {
-        let result = [];
+      await response.json().then(async (response: { data: CombinedLiftData[] }) => {
+        const result: CombinedLiftData[] = [];
         for (let i = 0; i < response.data.length; i++) {
           const lifter = response.data[i];
           if (shouldIncludePastLifter(lifter)) {
@@ -98,7 +118,7 @@ function RecordGroup({ weightClass, ageGroup, count, startDate, endDate, emptyCo
     }
   };
 
-  const fetchIndividualLifts = async (lifter) => {
+  const fetchIndividualLifts = async (lifter: CombinedLiftData): Promise<void> => {
     const publicLifterId = getLifterId(lifter.action);
     const route = getLifterDataRoute(publicLifterId);
 
@@ -108,13 +128,11 @@ function RecordGroup({ weightClass, ageGroup, count, startDate, endDate, emptyCo
         method: 'POST',
       });
       if (!response.ok) {
-        // handleError(response.status)
-        Promise.resolve();
+        return;
       }
-      await response.json().then((response) => {
+      await response.json().then((response: { data: MeetRecord[] }) => {
         if (response.data.length) {
-          let meets = response.data;
-          // Get a min and max year for the lifter based on the age group
+          const meets = response.data;
           const ageAtRankingTime = parseInt(lifter.lifter_age);
           const rankingYear = new Date(lifter.lift_date).getFullYear();
           const minYearForLifter =
@@ -122,22 +140,23 @@ function RecordGroup({ weightClass, ageGroup, count, startDate, endDate, emptyCo
           const maxYearForLifter =
             rankingYear + (parseInt(ageGroup.maximum_lifter_age) - ageAtRankingTime);
 
-          // Collect all lifts within the date range for this bodyweight category
-          const matchingLifts = [];
-          for (let meet of meets) {
+          const matchingLifts: CombinedLiftData[] = [];
+          const minBw = parseFloat(weightClass.minBodyweight);
+          const maxBw = parseFloat(weightClass.maxBodyweight);
+          for (const meet of meets) {
+            const meetBw = parseFloat(String(meet['body_weight_(kg)'] ?? 0));
             const meetYear = new Date(meet.date).getFullYear();
             if (
               meet.date >= startDate &&
               meet.date <= endDate &&
-              meet['body_weight_(kg)'] >= weightClass.minBodyweight &&
-              meet['body_weight_(kg)'] <= weightClass.maxBodyweight &&
+              meetBw >= minBw &&
+              meetBw <= maxBw &&
               meetYear >= minYearForLifter &&
               meetYear <= maxYearForLifter
             ) {
               matchingLifts.push({ ...lifter, ...meet });
             }
           }
-          // Add all matching lifts at once
           if (matchingLifts.length > 0) {
             setCombinedLiftsData((prevData) => {
               const updated = [...prevData, ...matchingLifts];
@@ -162,7 +181,7 @@ function RecordGroup({ weightClass, ageGroup, count, startDate, endDate, emptyCo
             name="sort-selection"
             id="sort-select"
             onChange={(e) => {
-              updateSortType(e.target.value);
+              updateSortType(e.target.value as SortKey);
             }}
             disabled={status !== 'complete'}
           >

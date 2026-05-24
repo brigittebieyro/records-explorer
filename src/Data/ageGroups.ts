@@ -1,4 +1,6 @@
-export const ageGroups = [
+import { AgeGroup } from '../types';
+
+export const ageGroups: AgeGroup[] = [
   {
     id: 'OPEN',
     name: 'Open',

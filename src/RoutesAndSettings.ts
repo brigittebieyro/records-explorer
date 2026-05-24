@@ -7,22 +7,21 @@ export const wsoName = 'California North Central';
 //
 // Use a relative local base path so the client works when deployed behind a reverse proxy.
 const _baseUrl = '/api/lifter-data'; // instead of https://admin-usaw-rankings.sport80.com/ !
-export const getRankingsRoute = (count) => {
+export const getRankingsRoute = (count?: number): string => {
   const limit = typeof count === 'number' && count > 0 ? count : 3;
   return `${_baseUrl}/categories/all/rankings/table/data?platform=1&p=0&l=${limit}&sort=action&d=asc&s=&st=`;
 };
 
-export const getLifterId = (lifterActionRoute) => {
+export const getLifterId = (lifterActionRoute: Array<{ url: string }>): string => {
   return lifterActionRoute[0].url.split(
     'https://usaweightlifting.sport80.com/public/rankings/member/'
   )[1];
 };
-export const getLifterDataRoute = (publicLifterId) => {
+export const getLifterDataRoute = (publicLifterId: string): string => {
   const pageParams = `?p=0&l=100&sort=&d=asc&s=&st=`;
-  // https://admin-usaw-rankings.sport80.com/api/athletes/29927/table/data?p=1&l=30&sort=&d=asc&s=&st=
   return `${_baseUrl}/athletes/${publicLifterId}/table/data${pageParams}`;
 };
-export const headers = {
+export const headers: Record<string, string> = {
   accept: 'application/json, text/plain, */*',
   'accept-language': 'en-US,en;q=0.9',
   'content-type': 'application/json',
@@ -41,9 +40,16 @@ export const youthAllTimeStartDate = '2014-01-01'; // This is a magic number - l
 //
 const _sheetsBaseUrl = 'https://sheets.googleapis.com/v4/spreadsheets';
 const _googleKey = 'AIzaSyB3tiu4QqJb-brY0MzE-e6J6rac-Lcn2_A';
-export const getSheetRoute = (sheetId, sheetName) => {
+export const getSheetRoute = (sheetId: string, sheetName: string): string => {
   return `${_sheetsBaseUrl}/${sheetId}/values/${sheetName}?key=${_googleKey}`;
 };
 // for current records:
 export const currentRecordsSheetId = '1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ';
 export const currentRecordsSheetName = 'Raw_Data';
+
+// ----------------------------------------------------------------------------------------------------------------
+// External Links
+// ----------------------------------------------------------------------------------------------------------------
+//
+type WebUrl = `https://${string}` | `http://${string}`;
+export const localScheduleUrl: WebUrl = 'https://canorthcentralwso.org/meet-schedule';

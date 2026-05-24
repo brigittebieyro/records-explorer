@@ -1,3 +1,7 @@
+# Records Explorer
+
+Records Explorer is a React app for browsing and comparing weightlifting records across age groups, weight classes, and historical classifications. It shows combined lift totals, snatch and clean-and-jerk bests, athlete details, meet information, and provides quick access to source meet results.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

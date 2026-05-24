@@ -1,20 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import AllCurrentRecordsView from './AllCurrentRecordsView';
+import { AgeGroup, AllCurrentRecordsEntry, WeightClass } from './types';
 
-const womenW48 = {
-  id: 'W48',
-  name: "Women's 48kg",
-  gender: 'female',
-};
-
-const menM60 = {
-  id: 'M60',
-  name: "Men's 60kg",
-  gender: 'male',
-};
-
-const openAgeGroup = { id: 'OPEN', name: 'Open' };
-const masters35AgeGroup = { id: '35', name: '35 - 39 years old' };
+const womenW48 = { id: 'W48', name: "Women's 48kg", gender: 'female' } as unknown as WeightClass;
+const menM60 = { id: 'M60', name: "Men's 60kg", gender: 'male' } as unknown as WeightClass;
+const openAgeGroup = { id: 'OPEN', name: 'Open' } as unknown as AgeGroup;
+const masters35AgeGroup = { id: '35', name: '35 - 39 years old' } as unknown as AgeGroup;
 
 const fullRecords = {
   Total: {
@@ -41,7 +32,7 @@ const partialRecords = {
   Total: { weight: '200', lifter: 'Joan Doe', event: 'State Meet', date: '2023-11-01' },
 };
 
-const mockData = [
+const mockData: AllCurrentRecordsEntry[] = [
   {
     weightClass: womenW48,
     groups: [
@@ -96,13 +87,21 @@ describe('AllCurrentRecordsView', () => {
     });
 
     test('renders multiple weight classes in each column', () => {
-      const data = [
+      const data: AllCurrentRecordsEntry[] = [
         {
-          weightClass: { id: 'W48', name: "Women's 48kg", gender: 'female' },
+          weightClass: {
+            id: 'W48',
+            name: "Women's 48kg",
+            gender: 'female',
+          } as unknown as WeightClass,
           groups: [{ ageGroup: openAgeGroup, records: partialRecords }],
         },
         {
-          weightClass: { id: 'W53', name: "Women's 53kg", gender: 'female' },
+          weightClass: {
+            id: 'W53',
+            name: "Women's 53kg",
+            gender: 'female',
+          } as unknown as WeightClass,
           groups: [{ ageGroup: openAgeGroup, records: partialRecords }],
         },
       ];
@@ -164,14 +163,17 @@ describe('AllCurrentRecordsView', () => {
     });
 
     test('omits lift type when not present in records', () => {
-      const dataWithPartialOnly = [
+      const dataWithPartialOnly: AllCurrentRecordsEntry[] = [
         {
-          weightClass: { id: 'W48', name: "Women's 48kg", gender: 'female' },
+          weightClass: {
+            id: 'W48',
+            name: "Women's 48kg",
+            gender: 'female',
+          } as unknown as WeightClass,
           groups: [{ ageGroup: openAgeGroup, records: partialRecords }],
         },
       ];
       render(<AllCurrentRecordsView data={dataWithPartialOnly} />);
-      // Only Total present; Snatch and C&J labels should not appear
       expect(screen.getAllByText('Total').length).toBeGreaterThan(0);
       expect(screen.queryByText('Snatch')).not.toBeInTheDocument();
       expect(screen.queryByText('Clean & Jerk')).not.toBeInTheDocument();

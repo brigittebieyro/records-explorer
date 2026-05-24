@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { wsoName } from './RoutesAndSettings';
+import { localScheduleUrl, wsoName } from './RoutesAndSettings';
 
 function Header() {
   const [menuVisible, setMenuVisible] = useState(false);
 
-  const getMenuStyles = () => {
+  const getMenuStyles = (): string => {
     let styles = 'menu-flyout';
     if (!menuVisible) {
       styles += ' hidden';
@@ -12,7 +12,7 @@ function Header() {
     return styles;
   };
 
-  const toggleMenu = () => {
+  const toggleMenu = (): void => {
     setMenuVisible(!menuVisible);
   };
 
@@ -35,9 +35,7 @@ function Header() {
                   <a href="/info">How Records Work</a>
                 </li>
                 <li>
-                  <a href="https://www.pacificweightliftingassociation.org/meet-schedule">
-                    Local Meet Schedule
-                  </a>
+                  <a href={localScheduleUrl}>Local Meet Schedule</a>
                 </li>
               </ul>
             </div>

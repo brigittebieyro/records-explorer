@@ -1,15 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import RecordHolder from './RecordHolder';
+import { CombinedLiftData } from './types';
 
 jest.mock('react-spinners', () => ({
   CircleLoader: () => <div data-testid="loading-spinner" />,
 }));
 
-const mockLifter = {
+const mockLifter: CombinedLiftData = {
   name: 'Jane Smith',
-  total: '200',
-  best_snatch: '90',
-  'best_c&j': '110',
+  total: 200,
+  best_snatch: 90,
+  'best_c&j': 110,
   lifter_age: '25',
   lift_date: '2023-05-15',
   club: 'Test Club',
@@ -17,12 +18,19 @@ const mockLifter = {
   action: [{ url: 'https://usaweightlifting.sport80.com/public/rankings/member/12345' }],
 };
 
-const renderHolder = (overrides = {}) => {
+const renderHolder = (
+  overrides: Partial<{
+    lifterData: CombinedLiftData;
+    index: number;
+    individualLiftsData: CombinedLiftData[];
+    sortType: 'total' | 'best_snatch' | 'best_c&j' | 'lift_date';
+  }> = {}
+) => {
   const props = {
     lifterData: mockLifter,
     index: 0,
-    individualLiftsData: [],
-    sortType: 'total',
+    individualLiftsData: [] as CombinedLiftData[],
+    sortType: 'total' as const,
     ...overrides,
   };
   return render(<RecordHolder {...props} />);
@@ -71,7 +79,9 @@ describe('RecordHolder', () => {
     });
 
     test('shows Unaffiliated when club is a number', () => {
-      const { container } = renderHolder({ lifterData: { ...mockLifter, club: 42 } });
+      const { container } = renderHolder({
+        lifterData: { ...mockLifter, club: 42 as unknown as string },
+      });
       expect(container).toHaveTextContent('Unaffiliated');
     });
 
@@ -143,12 +153,15 @@ describe('RecordHolder', () => {
 
   describe('Individual Lift Data Enrichment', () => {
     test('enriches lifter data from individualLiftsData when best_snatch is missing', () => {
-      const liftData = {
+      const liftData: CombinedLiftData = {
         name: 'Jane Smith',
-        total: '200',
+        total: 200,
         date: '2023-05-15',
-        best_snatch: '95',
-        'best_c&j': '115',
+        best_snatch: 95,
+        'best_c&j': 115,
+        lift_date: '2023-05-15',
+        lifter_age: '25',
+        action: [{ url: 'https://usaweightlifting.sport80.com/public/rankings/member/12345' }],
       };
       const { container } = renderHolder({
         lifterData: { ...mockLifter, best_snatch: undefined },
@@ -159,11 +172,14 @@ describe('RecordHolder', () => {
     });
 
     test('does not enrich when no lifter in individualLiftsData matches', () => {
-      const liftData = {
+      const liftData: CombinedLiftData = {
         name: 'Different Lifter',
-        total: '200',
+        total: 200,
         date: '2023-05-15',
-        best_snatch: '99',
+        best_snatch: 99,
+        lift_date: '2023-05-15',
+        lifter_age: '25',
+        action: [{ url: 'https://example.com' }],
       };
       renderHolder({
         lifterData: { ...mockLifter, best_snatch: undefined },
@@ -174,12 +190,14 @@ describe('RecordHolder', () => {
   });
 
   describe('Prior Group Display', () => {
-    const lifterWithClassData = {
+    const lifterWithClassData: CombinedLiftData = {
       ...mockLifter,
       classData: {
         name: 'Historic Weight Class',
         start: '2015-01-01',
         end: '2020-12-31',
+        sport80Id: 999,
+        gender: 'female',
       },
     };
 

@@ -1,12 +1,12 @@
 import {
-  getRankingsRoute,
-  getLifterId,
+  allTimeStartDate,
+  endDate,
   getLifterDataRoute,
+  getLifterId,
+  getRankingsRoute,
   getSheetRoute,
   wsoId,
   wsoName,
-  endDate,
-  allTimeStartDate,
   youthAllTimeStartDate,
 } from './RoutesAndSettings';
 
@@ -29,6 +29,7 @@ describe('RoutesAndSettings', () => {
     });
 
     test('defaults to 3 for non-number input', () => {
+      // @ts-expect-error testing invalid input type
       expect(getRankingsRoute('hello')).toContain('l=3');
     });
 

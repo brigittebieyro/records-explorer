@@ -5,6 +5,7 @@ import {
   u15WeightClasses,
   u17WeightClasses,
 } from './Data/youthWeightClasses';
+import { WeightClass } from './types';
 
 const REQUIRED_FIELDS = [
   'id',
@@ -19,8 +20,7 @@ const REQUIRED_FIELDS = [
 
 const ANALOG_FIELDS = ['name', 'sport80Id', 'gender', 'start', 'end'];
 
-// Shared structural tests called directly inside a describe block
-function sharedWeightClassTests(weightClasses) {
+function sharedWeightClassTests(weightClasses: WeightClass[]) {
   test('is a non-empty array', () => {
     expect(Array.isArray(weightClasses)).toBe(true);
     expect(weightClasses.length).toBeGreaterThan(0);
@@ -86,7 +86,7 @@ function sharedWeightClassTests(weightClasses) {
   });
 
   test('no two classes of the same gender share a minBodyweight', () => {
-    for (const gender of ['male', 'female']) {
+    for (const gender of ['male', 'female'] as const) {
       const classes = weightClasses.filter((wc) => wc.gender === gender);
       const mins = classes.map((wc) => wc.minBodyweight);
       expect(new Set(mins).size).toBe(mins.length);
@@ -94,7 +94,7 @@ function sharedWeightClassTests(weightClasses) {
   });
 
   test('no two classes of the same gender share a maxBodyweight', () => {
-    for (const gender of ['male', 'female']) {
+    for (const gender of ['male', 'female'] as const) {
       const classes = weightClasses.filter((wc) => wc.gender === gender);
       const maxes = classes.map((wc) => wc.maxBodyweight);
       expect(new Set(maxes).size).toBe(maxes.length);

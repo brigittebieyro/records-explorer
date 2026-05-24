@@ -1,23 +1,18 @@
-function Standards({ relevantRecords, weightClassName, ageGroupName }) {
-  const renderIndividualStandard = (standardData) => {
+import { AgeGroupRecordSet, StandardRecord } from './types';
+
+interface StandardsProps {
+  relevantRecords?: AgeGroupRecordSet | null;
+  weightClassName: string;
+  ageGroupName: string;
+}
+
+function Standards({ relevantRecords, weightClassName, ageGroupName }: StandardsProps) {
+  const renderIndividualStandard = (standardData: StandardRecord) => {
     return (
       <div>
         <p>
           <strong>{standardData.weight}kg</strong>
         </p>
-        {/* {standardData.lifter === "STANDARD" && (
-          <p>
-            When the recordholder is "STANDARD", this indicates that rur WSO has
-            chosen this as the record standar, and are not yet aware of anyone
-            reaching it in competition. To hold the record, an athlete must lift
-            one kilo &nbsp;
-            <b>
-              <i>more</i>
-            </b>
-            &nbsp; in a sanctioned competition.
-          </p>
-        )} */}
-
         <p>
           <strong>{standardData.lifter}</strong>
         </p>

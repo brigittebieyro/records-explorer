@@ -1,4 +1,6 @@
-export const u11WeightClasses = [
+import { WeightClass } from '../types';
+
+export const u11WeightClasses: WeightClass[] = [
   {
     id: 'W30',
     name: 'Girls 30kg',
@@ -501,7 +503,7 @@ export const u11WeightClasses = [
   },
 ];
 
-export const u13WeightClasses = [
+export const u13WeightClasses: WeightClass[] = [
   {
     id: 'W30',
     name: 'Girls 30kg',
@@ -1004,7 +1006,7 @@ export const u13WeightClasses = [
   },
 ];
 
-export const u15WeightClasses = [
+export const u15WeightClasses: WeightClass[] = [
   {
     id: 'W40',
     name: 'Girls 40kg',
@@ -1407,7 +1409,7 @@ export const u15WeightClasses = [
   },
 ];
 
-export const u17WeightClasses = [
+export const u17WeightClasses: WeightClass[] = [
   {
     id: 'W44',
     name: 'Girls 44kg',
@@ -1907,29 +1909,3 @@ export const u17WeightClasses = [
     ],
   },
 ];
-/// U15:
-// W40kg 755
-// W44 754
-// W48 753
-// 53 and up, can run squential OR use general until 69+ with same results
-// RecomBoyd using general to avoid having to painstakingly pull ids out of the web inspector for all previous classes.
-// W69+ 748
-// M48 763
-// M52 762
-// M56 761
-// M60 760
-// 65 and up, can run squential OR use general until 69+ with same results
-// RecomBoyd using general to avoid having to painstakingly pull ids out of the web inspector for all previous classes.
-// 79+ 756
-
-/// U17:
-// W44 771
-// W48 770
-// 53 and up, can run squential OR use general until 77+ with same results
-// RecomBoyd using general to avoid having to painstakingly pull ids out of the web inspector for all previous classes.
-// W77+ 764
-// M56 779
-// M60 778
-// 65 and up, can run squential OR use general until 94+ with same results
-// RecomBoyd using general to avoid having to painstakingly pull ids out of the web inspector for all previous classes.
-// 94+ 772

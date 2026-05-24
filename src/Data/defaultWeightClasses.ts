@@ -1,4 +1,6 @@
-export const defaultWeightClasses = [
+import { WeightClass } from '../types';
+
+export const defaultWeightClasses: WeightClass[] = [
   {
     id: 'W48',
     name: "Women's 48kg",

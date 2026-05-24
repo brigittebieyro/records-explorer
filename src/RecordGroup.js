@@ -141,9 +141,6 @@ function RecordGroup({
                 meetYear >= minYearForLifter &&
                 meetYear <= maxYearForLifter 
               ) {
-                // if(lifter.name.indexOf("Brigitte") >= 0) {
-                //   debugger
-                // }
               matchingLifts.push({ ...lifter, ...meet });
             }
           }

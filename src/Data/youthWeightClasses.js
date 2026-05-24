@@ -154,19 +154,19 @@ export const u11WeightClasses = [
     name: "Girls 53kg",
     sport80Id: 537,
     minBodyweight: "48.01",
-    maxBodyweight: "1000",
+    maxBodyweight: "53",
     gender: "female",
     start: "2025-06-01",
     previousAnalogs: [
       {
-        name: " ", // Pre-2018
+        name: "Girls 53kg", // Pre-2018
         sport80Id: 1111,
         gender: "female",
         start: "2004-01-01",
         end: "2018-01-01",
       },
       {
-        name: " ",
+        name: "Girls 53kg",
         sport80Id: 1111,
         gender: "female",
         start: "2018-01-01",
@@ -228,7 +228,7 @@ export const u11WeightClasses = [
     id: "W63plus",
     name: "Girls 63+ kg",
     sport80Id: 534,
-    minBodyweight: "0",
+    minBodyweight: "63.01",
     maxBodyweight: "1000",
     gender: "female",
     start: "2025-06-01",

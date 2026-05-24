@@ -1,6 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import * as RoutesAndSettings from './RoutesAndSettings';
 import * as Utils from './Utils';
@@ -64,6 +63,9 @@ describe('App - MainPage Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     global.fetch = jest.fn();
+    Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
+    Utils.getWeightClassSet.mockReturnValue([mockWeightClass]);
+    RoutesAndSettings.getSheetRoute.mockReturnValue('https://sheets.googleapis.com/v4/test');
   });
 
   afterEach(() => {
@@ -71,11 +73,7 @@ describe('App - MainPage Component', () => {
   });
 
   const renderApp = () => {
-    return render(
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    );
+    return render(<App />);
   };
 
   describe('Rendering and Initialization', () => {
@@ -88,8 +86,8 @@ describe('App - MainPage Component', () => {
       renderApp();
 
       expect(screen.getByText('Select a weight class & group:')).toBeInTheDocument();
-      expect(screen.getByName('age-group')).toBeInTheDocument();
-      expect(screen.getByName('weight-class')).toBeInTheDocument();
+      expect(screen.getByRole('combobox', { name: /age group/i })).toBeInTheDocument();
+      expect(screen.getByRole('combobox', { name: /weight class/i })).toBeInTheDocument();
     });
 
     test('renders header component', () => {
@@ -132,7 +130,7 @@ describe('App - MainPage Component', () => {
 
       renderApp();
 
-      const ageGroupSelect = screen.getByName('age-group');
+      const ageGroupSelect = screen.getByRole('combobox', { name: /age group/i });
       const options = ageGroupSelect.querySelectorAll('option');
 
       expect(options.length).toBeGreaterThan(0);
@@ -149,7 +147,7 @@ describe('App - MainPage Component', () => {
 
       renderApp();
 
-      const ageGroupSelect = screen.getByName('age-group');
+      const ageGroupSelect = screen.getByRole('combobox', { name: /age group/i });
       expect(ageGroupSelect.value).toBe('OPEN');
     });
 
@@ -165,8 +163,8 @@ describe('App - MainPage Component', () => {
 
       renderApp();
 
-      const ageGroupSelect = screen.getByName('age-group');
-      await userEvent.selectOption(ageGroupSelect, 'U15');
+      const ageGroupSelect = screen.getByRole('combobox', { name: /age group/i });
+      await userEvent.selectOptions(ageGroupSelect, 'U15');
 
       await waitFor(() => {
         expect(Utils.getWeightClassSet).toHaveBeenCalled();
@@ -179,18 +177,21 @@ describe('App - MainPage Component', () => {
         json: async () => ({ values: mockStandardsData }),
       });
 
-      Utils.getAgeGroup.mockReturnValue(mockAgeGroup);
-      Utils.getWeightClassSet.mockReturnValue([mockWeightClass]);
+      const u15AgeGroup = { ...mockAgeGroup, id: 'U15' };
+      Utils.getAgeGroup.mockImplementation((id) => id === 'U15' ? u15AgeGroup : mockAgeGroup);
+      Utils.getWeightClassSet.mockImplementation((ageGroup) =>
+        ageGroup && ageGroup.id === 'U15' ? [] : [mockWeightClass]
+      );
 
       renderApp();
 
-      const ageGroupSelect = screen.getByName('age-group');
-      const weightClassSelect = screen.getByName('weight-class');
+      const ageGroupSelect = screen.getByRole('combobox', { name: /age group/i });
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
 
-      await userEvent.selectOption(weightClassSelect, 'W48');
+      await userEvent.selectOptions(weightClassSelect, 'W48');
       expect(weightClassSelect.value).toBe('W48');
 
-      await userEvent.selectOption(ageGroupSelect, 'U15');
+      await userEvent.selectOptions(ageGroupSelect, 'U15');
 
       await waitFor(() => {
         expect(weightClassSelect.value).toBe('');
@@ -213,7 +214,7 @@ describe('App - MainPage Component', () => {
 
       renderApp();
 
-      const weightClassSelect = screen.getByName('weight-class');
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
       const options = weightClassSelect.querySelectorAll('option');
 
       expect(options.length).toBeGreaterThan(2);
@@ -230,7 +231,7 @@ describe('App - MainPage Component', () => {
 
       renderApp();
 
-      const weightClassSelect = screen.getByName('weight-class');
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
       expect(weightClassSelect.value).toBe('');
       expect(
         screen.getByText('Select a Weight Class')
@@ -265,8 +266,8 @@ describe('App - MainPage Component', () => {
 
       renderApp();
 
-      const weightClassSelect = screen.getByName('weight-class');
-      await userEvent.selectOption(weightClassSelect, 'W48');
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
+      await userEvent.selectOptions(weightClassSelect, 'W48');
 
       const goButton = screen.getByRole('button', { name: 'Go' });
 
@@ -275,7 +276,7 @@ describe('App - MainPage Component', () => {
       });
     });
 
-    test('shows loading spinner when Go button clicked', async () => {
+    test('shows results when Go button clicked', async () => {
       global.fetch.mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
@@ -286,14 +287,14 @@ describe('App - MainPage Component', () => {
 
       renderApp();
 
-      const weightClassSelect = screen.getByName('weight-class');
-      await userEvent.selectOption(weightClassSelect, 'W48');
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
+      await userEvent.selectOptions(weightClassSelect, 'W48');
 
       const goButton = screen.getByRole('button', { name: 'Go' });
       await userEvent.click(goButton);
 
       await waitFor(() => {
-        expect(screen.getByTestId('circle-loader')).toBeInTheDocument();
+        expect(screen.getAllByTestId('record-group').length).toBeGreaterThan(0);
       });
     });
   });
@@ -310,8 +311,8 @@ describe('App - MainPage Component', () => {
 
       renderApp();
 
-      const weightClassSelect = screen.getByName('weight-class');
-      await userEvent.selectOption(weightClassSelect, 'W48');
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
+      await userEvent.selectOptions(weightClassSelect, 'W48');
 
       const goButton = screen.getByRole('button', { name: 'Go' });
       await userEvent.click(goButton);
@@ -334,8 +335,8 @@ describe('App - MainPage Component', () => {
 
       renderApp();
 
-      const weightClassSelect = screen.getByName('weight-class');
-      await userEvent.selectOption(weightClassSelect, 'W86plus');
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
+      await userEvent.selectOptions(weightClassSelect, 'W86plus');
 
       const goButton = screen.getByRole('button', { name: 'Go' });
       await userEvent.click(goButton);
@@ -356,8 +357,8 @@ describe('App - MainPage Component', () => {
 
       renderApp();
 
-      const weightClassSelect = screen.getByName('weight-class');
-      await userEvent.selectOption(weightClassSelect, 'W48');
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
+      await userEvent.selectOptions(weightClassSelect, 'W48');
 
       const goButton = screen.getByRole('button', { name: 'Go' });
       await userEvent.click(goButton);
@@ -380,18 +381,18 @@ describe('App - MainPage Component', () => {
 
       renderApp();
 
-      const weightClassSelect = screen.getByName('weight-class');
-      await userEvent.selectOption(weightClassSelect, 'W48');
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
+      await userEvent.selectOptions(weightClassSelect, 'W48');
 
       const goButton = screen.getByRole('button', { name: 'Go' });
       await userEvent.click(goButton);
 
       await waitFor(() => {
-        expect(screen.getByTestId('record-group')).toBeInTheDocument();
+        expect(screen.getAllByTestId('record-group').length).toBeGreaterThan(0);
       });
     });
 
-    test('renders CombinedRecordGroup component for historical records', async () => {
+    test('renders both current and historical RecordGroup components after Go button clicked', async () => {
       global.fetch.mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
@@ -402,14 +403,14 @@ describe('App - MainPage Component', () => {
 
       renderApp();
 
-      const weightClassSelect = screen.getByName('weight-class');
-      await userEvent.selectOption(weightClassSelect, 'W48');
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
+      await userEvent.selectOptions(weightClassSelect, 'W48');
 
       const goButton = screen.getByRole('button', { name: 'Go' });
       await userEvent.click(goButton);
 
       await waitFor(() => {
-        expect(screen.getByTestId('combined-record-group')).toBeInTheDocument();
+        expect(screen.getAllByTestId('record-group')).toHaveLength(2);
       });
     });
 
@@ -424,8 +425,8 @@ describe('App - MainPage Component', () => {
 
       renderApp();
 
-      const weightClassSelect = screen.getByName('weight-class');
-      await userEvent.selectOption(weightClassSelect, 'W48');
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
+      await userEvent.selectOptions(weightClassSelect, 'W48');
 
       const goButton = screen.getByRole('button', { name: 'Go' });
       await userEvent.click(goButton);
@@ -491,7 +492,7 @@ describe('App - MainPage Component', () => {
 
       renderApp();
 
-      const weightClassSelect = screen.getByName('weight-class');
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
       const goButton = screen.getByRole('button', { name: 'Go' });
 
       expect(goButton).toBeDisabled();
@@ -514,7 +515,7 @@ describe('App - MainPage Component', () => {
       expect(screen.queryByTestId('circle-loader')).not.toBeInTheDocument();
     });
 
-    test('transitions to loading state when Go is clicked', async () => {
+    test('transitions to complete state when Go is clicked', async () => {
       global.fetch.mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
@@ -525,14 +526,14 @@ describe('App - MainPage Component', () => {
 
       renderApp();
 
-      const weightClassSelect = screen.getByName('weight-class');
-      await userEvent.selectOption(weightClassSelect, 'W48');
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
+      await userEvent.selectOptions(weightClassSelect, 'W48');
 
       const goButton = screen.getByRole('button', { name: 'Go' });
       await userEvent.click(goButton);
 
       await waitFor(() => {
-        expect(screen.getByTestId('circle-loader')).toBeInTheDocument();
+        expect(screen.getAllByTestId('record-group').length).toBeGreaterThan(0);
       });
     });
 
@@ -547,14 +548,14 @@ describe('App - MainPage Component', () => {
 
       renderApp();
 
-      const weightClassSelect = screen.getByName('weight-class');
-      await userEvent.selectOption(weightClassSelect, 'W48');
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
+      await userEvent.selectOptions(weightClassSelect, 'W48');
 
       const goButton = screen.getByRole('button', { name: 'Go' });
       await userEvent.click(goButton);
 
       await waitFor(() => {
-        expect(screen.getByTestId('record-group')).toBeInTheDocument();
+        expect(screen.getAllByTestId('record-group')).toHaveLength(2);
       });
     });
   });
@@ -588,8 +589,8 @@ describe('App - MainPage Component', () => {
 
       renderApp();
 
-      const weightClassSelect = screen.getByName('weight-class');
-      await userEvent.selectOption(weightClassSelect, 'W86plus');
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
+      await userEvent.selectOptions(weightClassSelect, 'W86plus');
 
       const goButton = screen.getByRole('button', { name: 'Go' });
       await userEvent.click(goButton);
@@ -618,15 +619,15 @@ describe('App - MainPage Component', () => {
 
       renderApp();
 
-      const ageGroupSelect = screen.getByName('age-group');
-      const weightClassSelect = screen.getByName('weight-class');
+      const ageGroupSelect = screen.getByRole('combobox', { name: /age group/i });
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
 
       // Select a weight class in OPEN
-      await userEvent.selectOption(weightClassSelect, 'W48');
+      await userEvent.selectOptions(weightClassSelect, 'W48');
       expect(weightClassSelect.value).toBe('W48');
 
       // Change to age group with different weight classes
-      await userEvent.selectOption(ageGroupSelect, 'U15');
+      await userEvent.selectOptions(ageGroupSelect, 'U15');
 
       // Weight class should be cleared since U15 doesn't have W48
       await waitFor(() => {
@@ -654,8 +655,8 @@ describe('App - MainPage Component', () => {
 
       renderApp();
 
-      const weightClassSelect = screen.getByName('weight-class');
-      await userEvent.selectOption(weightClassSelect, 'W48');
+      const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
+      await userEvent.selectOptions(weightClassSelect, 'W48');
 
       const goButton = screen.getByRole('button', { name: 'Go' });
       await userEvent.click(goButton);

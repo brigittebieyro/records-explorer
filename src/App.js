@@ -150,6 +150,7 @@ function MainPage() {
       <div className="record-viewer-options-bar">
         <span>Select a weight class & group: </span>
         <select
+          aria-label="Age Group"
           className="header-button"
           name="age-group"
           id="age-group-select"
@@ -170,6 +171,7 @@ function MainPage() {
         </select>
 
         <select
+          aria-label="Weight Class"
           className="header-button"
           name="weight-class"
           id="weight-class-select"

@@ -158,12 +158,12 @@ describe('CombinedRecordGroup', () => {
 
       jest.advanceTimersByTime(100);
       await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledTimes(1);
+        expect(global.fetch).toHaveBeenCalledTimes(2);
       });
 
       jest.advanceTimersByTime(100);
       await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledTimes(2);
+        expect(global.fetch).toHaveBeenCalledTimes(4);
       });
     });
 

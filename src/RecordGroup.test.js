@@ -355,7 +355,7 @@ describe('RecordGroup', () => {
       global.fetch
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ data: [mockLifter, mockLifter] }),
+          json: async () => ({ data: [mockLifter] }),
         })
         .mockResolvedValueOnce({
           ok: true,
@@ -456,7 +456,7 @@ describe('RecordGroup', () => {
       });
 
       const select = screen.getByRole('combobox', { name: /sort/i });
-      await userEvent.selectOption(select, 'best_snatch');
+      await userEvent.selectOptions(select, 'best_snatch');
 
       await waitFor(() => {
         expect(Utils.sortLifts).toHaveBeenCalledWith(

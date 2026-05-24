@@ -49,6 +49,7 @@ function parseWeightClassesFromContent(content, variableName) {
         const objStr = content.slice(objStart, i + 1);
         const idMatch = objStr.match(/id:\s*'([^']+)'/);
         const sportIdMatch = objStr.match(/sport80Id:\s*(\d+)/);
+        const nameMatch = objStr.match(/name:\s*"([^"]+)"/) || objStr.match(/name:\s*'([^']+)'/);
         const maxMatch = objStr.match(/maxBodyweight:\s*'([^']+)'/);
         const minMatch = objStr.match(/minBodyweight:\s*'([^']+)'/);
         const genderMatch = objStr.match(/gender:\s*'([^']+)'/);
@@ -56,6 +57,7 @@ function parseWeightClassesFromContent(content, variableName) {
         if (idMatch && sportIdMatch) {
           result.push({
             id: idMatch[1],
+            name: nameMatch ? nameMatch[1] : undefined,
             sport80Id: parseInt(sportIdMatch[1]),
             maxBodyweight: maxMatch ? maxMatch[1] : undefined,
             minBodyweight: minMatch ? minMatch[1] : undefined,
@@ -83,6 +85,7 @@ function loadYouthWeightClasses() {
     mapping[ageId] = parseWeightClassesFromContent(content, varName);
   });
   return mapping;
+}
 
 /**
  * Load age groups from TypeScript source
@@ -130,9 +133,10 @@ function loadAgeGroups() {
 }
 
 const defaultWeightClasses = loadWeightClasses();
+const youthWeightClassMap = loadYouthWeightClasses();
 const ageGroups = loadAgeGroups();
 
-console.log(`✓ Loaded ${defaultWeightClasses.length} weight classes`);
+console.log(`✓ Loaded ${defaultWeightClasses.length} default weight classes`);
 console.log(`✓ Loaded ${ageGroups.length} age groups\n`);
 
 /**
@@ -141,10 +145,8 @@ console.log(`✓ Loaded ${ageGroups.length} age groups\n`);
 function getWeightClassSetForAgeGroup(ageGroup) {
   if (!ageGroup) return defaultWeightClasses;
   if (!ageGroup.customWeightClasses) return defaultWeightClasses;
-  // Load youth weight classes mapping
-  const youthMap = loadYouthWeightClasses();
-  if (youthMap && youthMap[ageGroup.id] && youthMap[ageGroup.id].length) {
-    return youthMap[ageGroup.id];
+  if (youthWeightClassMap[ageGroup.id] && youthWeightClassMap[ageGroup.id].length) {
+    return youthWeightClassMap[ageGroup.id];
   }
   return defaultWeightClasses;
 }
@@ -212,7 +214,7 @@ function parseCurrentRecords(sheetData) {
     const numWeight = parseFloat(weight);
     if (isNaN(numWeight)) return;
     
-    const recordKey = `${gender}_${ageGroup}_${weightClassIndicator}_${liftType}`;
+    const recordKey = `${gender}_${ageGroup}_${weightClassIndicator}_${liftType.toLowerCase()}`;
     
     // Keep only the highest weight for each record type
     if (!records[recordKey] || numWeight > records[recordKey].weight) {
@@ -296,13 +298,13 @@ function extractBestLifts(athleteData) {
   
   for (const lift of athleteData) {
     if (lift.best_snatch && (!bestLifts.snatch || lift.best_snatch > bestLifts.snatch.weight)) {
-      bestLifts.snatch = { weight: lift.best_snatch, date: lift.lift_date };
+      bestLifts.snatch = { weight: lift.best_snatch, date: lift.date };
     }
     if (lift['best_c&j'] && (!bestLifts['clean & jerk'] || lift['best_c&j'] > bestLifts['clean & jerk'].weight)) {
-      bestLifts['clean & jerk'] = { weight: lift['best_c&j'], date: lift.lift_date };
+      bestLifts['clean & jerk'] = { weight: lift['best_c&j'], date: lift.date };
     }
     if (lift.total && (!bestLifts.total || lift.total > bestLifts.total.weight)) {
-      bestLifts.total = { weight: lift.total, date: lift.lift_date };
+      bestLifts.total = { weight: lift.total, date: lift.date };
     }
   }
   
@@ -319,13 +321,14 @@ async function analyzeRecords() {
   const sheetData = await fetchCurrentRecords();
   const currentRecords = parseCurrentRecords(sheetData);
   
-  console.log(`🔍 Analyzing ${defaultWeightClasses.length} weight classes × ${ageGroups.length} age groups...\n`);
-  
+  const total = ageGroups.reduce((sum, ag) => sum + getWeightClassSetForAgeGroup(ag).length, 0);
+  console.log(`🔍 Analyzing ${ageGroups.length} age groups (${total} total combinations)...\n`);
+
   let processed = 0;
-  const total = defaultWeightClasses.length * ageGroups.length;
-  
-  for (const weightClass of defaultWeightClasses) {
-    for (const ageGroup of ageGroups) {
+
+  for (const ageGroup of ageGroups) {
+    const weightClassSet = getWeightClassSetForAgeGroup(ageGroup);
+    for (const weightClass of weightClassSet) {
       processed++;
       const pct = Math.round((processed / total) * 100);
       process.stdout.write(`\r  [${pct}%] ${processed}/${total} combinations analyzed...`);
@@ -338,9 +341,9 @@ async function analyzeRecords() {
         for (const athlete of athletes) {
           if (!athlete.action || athlete.action.length === 0) continue;
           
-          // Extract athlete ID from the action URL
-          const url = athlete.action[0].url;
-          const lifterId = url.split('/member/')[1];
+          // Extract athlete ID from the action route
+          const route = athlete.action[0].route;
+          const lifterId = route && route.split('/member/')[1];
           if (!lifterId) continue;
           
           // Fetch this athlete's historical lifts
@@ -355,12 +358,16 @@ async function analyzeRecords() {
             
             // Build record key to look up current record
             // Match format: GENDER_AGEGROUP_WEIGHTCLASS_LIFTTYPE
+            // Sheet uses '>X' for the heaviest class; TS source stores '1000' as sentinel
             const genderKey = weightClass.gender === 'female' ? 'F' : 'M';
-            const recordKey = `${genderKey}_${ageGroup.id}_${weightClass.maxBodyweight}_${liftType}`;
+            const wcKey = weightClass.maxBodyweight === '1000'
+              ? '>' + parseInt(weightClass.minBodyweight)
+              : weightClass.maxBodyweight;
+            const recordKey = `${genderKey}_${ageGroup.id}_${wcKey}_${liftType}`;
             const currentRecord = currentRecords[recordKey];
             
-            // Check if this lift would break the record
-            if (!currentRecord || liftData.weight > currentRecord.weight) {
+            // Check if this lift would break an existing record
+            if (currentRecord && liftData.weight > currentRecord.weight) {
               recordBreakers.push({
                 liftType,
                 athlete: athlete.name || 'Unknown',
@@ -386,7 +393,7 @@ async function analyzeRecords() {
     }
   }
   
-  console.log(`\r✓ Analysis complete. Found ${recordBreakers.length} potential record breakers.   \n`);
+  console.log(`\r✓ Analysis complete. Found ${recordBreakers.length} record breakers.   \n`);
   return recordBreakers;
 }
 
@@ -403,7 +410,7 @@ function delay(ms) {
 function generateReport(recordBreakers) {
   let report = `# Record Breaking Analysis Report\n\n`;
   report += `**Generated:** ${new Date().toISOString()}\n`;
-  report += `**Total Potential Record Breakers:** ${recordBreakers.length}\n\n`;
+  report += `**Total Record Breakers:** ${recordBreakers.length}\n\n`;
   
   if (recordBreakers.length === 0) {
     report += `_No record-breaking lifts found in the current top athletes._\n`;
@@ -458,7 +465,7 @@ function generateReport(recordBreakers) {
   
   report += `---\n\n`;
   report += `## Summary\n\n`;
-  report += `- **Total combinations checked:** ${defaultWeightClasses.length} weight classes × ${ageGroups.length} age groups = ${defaultWeightClasses.length * ageGroups.length}\n`;
+  report += `- **Total combinations checked:** ${ageGroups.length} age groups\n`;
   report += `- **Best Snatch:** ${byLiftType.snatch.length > 0 ? byLiftType.snatch[0].weight + 'kg' : 'N/A'}\n`;
   report += `- **Best Clean & Jerk:** ${byLiftType['clean & jerk'].length > 0 ? byLiftType['clean & jerk'][0].weight + 'kg' : 'N/A'}\n`;
   report += `- **Best Total:** ${byLiftType.total.length > 0 ? byLiftType.total[0].weight + 'kg' : 'N/A'}\n`;

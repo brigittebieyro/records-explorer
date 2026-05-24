@@ -86,6 +86,22 @@ function sharedWeightClassTests(weightClasses) {
     expect(weightClasses.some((wc) => wc.gender === 'female')).toBe(true);
     expect(weightClasses.some((wc) => wc.gender === 'male')).toBe(true);
   });
+
+  test('no two classes of the same gender share a minBodyweight', () => {
+    for (const gender of ['male', 'female']) {
+      const classes = weightClasses.filter((wc) => wc.gender === gender);
+      const mins = classes.map((wc) => wc.minBodyweight);
+      expect(new Set(mins).size).toBe(mins.length);
+    }
+  });
+
+  test('no two classes of the same gender share a maxBodyweight', () => {
+    for (const gender of ['male', 'female']) {
+      const classes = weightClasses.filter((wc) => wc.gender === gender);
+      const maxes = classes.map((wc) => wc.maxBodyweight);
+      expect(new Set(maxes).size).toBe(maxes.length);
+    }
+  });
 }
 
 describe('defaultWeightClasses', () => {
@@ -130,35 +146,14 @@ describe('defaultWeightClasses', () => {
     }
   });
 
-  test.skip('BUG POTENTIAL: M71 minBodyweight overlaps with M65 range', () => {
-    // Data shows M65 covers 60.01–65 and M71 covers 60.01–71 (same lower bound).
-    // M71.minBodyweight should likely be "65.01" to be non-overlapping.
-    const m65 = defaultWeightClasses.find((wc) => wc.id === 'M65');
-    const m71 = defaultWeightClasses.find((wc) => wc.id === 'M71');
-    expect(parseFloat(m71.minBodyweight)).toBeGreaterThan(parseFloat(m65.maxBodyweight));
-  });
 });
 
 describe('u11WeightClasses', () => {
   sharedWeightClassTests(u11WeightClasses);
-
-  test.skip('BUG POTENTIAL: U11 W53 and W58 share the same minBodyweight', () => {
-    // Both W53 and W58 have minBodyweight "48.01" — W58 should start at "53.01".
-    const w53 = u11WeightClasses.find((wc) => wc.id === 'W53');
-    const w58 = u11WeightClasses.find((wc) => wc.id === 'W58');
-    expect(parseFloat(w58.minBodyweight)).toBeGreaterThan(parseFloat(w53.maxBodyweight));
-  });
 });
 
 describe('u13WeightClasses', () => {
   sharedWeightClassTests(u13WeightClasses);
-
-  test.skip('BUG POTENTIAL: U13 W63 and W58 share the same minBodyweight', () => {
-    // Both W58 and W63 have minBodyweight "53.01" — W63 should start at "58.01".
-    const w58 = u13WeightClasses.find((wc) => wc.id === 'W58');
-    const w63 = u13WeightClasses.find((wc) => wc.id === 'W63');
-    expect(parseFloat(w63.minBodyweight)).toBeGreaterThan(parseFloat(w58.maxBodyweight));
-  });
 });
 
 describe('u15WeightClasses', () => {
@@ -167,18 +162,4 @@ describe('u15WeightClasses', () => {
 
 describe('u17WeightClasses', () => {
   sharedWeightClassTests(u17WeightClasses);
-
-  test.skip('BUG POTENTIAL: U17 W44 and W48 both start at minBodyweight "0"', () => {
-    // Both W44 and W48 have minBodyweight "0" — W48 should start at "44.01".
-    const w44 = u17WeightClasses.find((wc) => wc.id === 'W44');
-    const w48 = u17WeightClasses.find((wc) => wc.id === 'W48');
-    expect(parseFloat(w48.minBodyweight)).toBeGreaterThan(parseFloat(w44.maxBodyweight));
-  });
-
-  test.skip('BUG POTENTIAL: U17 M56 and M60 both start at minBodyweight "0"', () => {
-    // Both M56 and M60 have minBodyweight "0" — M60 should start at "56.01".
-    const m56 = u17WeightClasses.find((wc) => wc.id === 'M56');
-    const m60 = u17WeightClasses.find((wc) => wc.id === 'M60');
-    expect(parseFloat(m60.minBodyweight)).toBeGreaterThan(parseFloat(m56.maxBodyweight));
-  });
 });

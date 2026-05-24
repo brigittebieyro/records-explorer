@@ -304,7 +304,7 @@ export const defaultWeightClasses =
             id: "M71",
             name: "Men's 71kg",
             sport80Id: 715,
-            minBodyweight: "60.01",
+            minBodyweight: "65.01",
             maxBodyweight: "71",
             gender: "male",
             start: "2025-06-01",

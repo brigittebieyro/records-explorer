@@ -30,13 +30,20 @@ const path = require('path');
 const fs = require('fs');
 const buildDir = path.join(__dirname, '..', 'build');
 
+const envConfig = {
+  REACT_APP_GOOGLE_API_KEY: process.env.REACT_APP_GOOGLE_API_KEY ?? '',
+  REACT_APP_SPORT80_API_TOKEN: process.env.REACT_APP_SPORT80_API_TOKEN ?? '',
+};
+
 if (fs.existsSync(buildDir)) {
   // Serve static files from build directory
   app.use(express.static(buildDir));
-  
-  // Fallback to index.html for SPA routing (for all non-API routes)
+
+  // Inject runtime secrets into index.html for SPA routing
   app.get('*', (req, res) => {
-    res.sendFile(path.join(buildDir, 'index.html'));
+    const html = fs.readFileSync(path.join(buildDir, 'index.html'), 'utf8');
+    const envScript = `<script>window.__ENV__ = ${JSON.stringify(envConfig)};</script>`;
+    res.send(html.replace('</head>', `${envScript}</head>`));
   });
 }
 

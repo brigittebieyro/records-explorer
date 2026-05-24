@@ -25,7 +25,7 @@ export const headers: Record<string, string> = {
   accept: 'application/json, text/plain, */*',
   'accept-language': 'en-US,en;q=0.9',
   'content-type': 'application/json',
-  'x-api-token': process.env.REACT_APP_SPORT80_API_TOKEN ?? '',
+  'x-api-token': (window as any).__ENV__?.REACT_APP_SPORT80_API_TOKEN ?? process.env.REACT_APP_SPORT80_API_TOKEN ?? '',
   'Access-Control-Allow-Origin': '*',
 };
 // New weight classes begin August 1, 2026
@@ -39,7 +39,7 @@ export const youthAllTimeStartDate = '2014-01-01'; // This is a magic number - l
 // ----------------------------------------------------------------------------------------------------------------
 //
 const _sheetsBaseUrl = 'https://sheets.googleapis.com/v4/spreadsheets';
-const _googleKey = process.env.REACT_APP_GOOGLE_API_KEY ?? '';
+const _googleKey = (window as any).__ENV__?.REACT_APP_GOOGLE_API_KEY ?? process.env.REACT_APP_GOOGLE_API_KEY ?? '';
 export const getSheetRoute = (sheetId: string, sheetName: string): string => {
   return `${_sheetsBaseUrl}/${sheetId}/values/${sheetName}?key=${_googleKey}`;
 };

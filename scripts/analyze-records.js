@@ -162,6 +162,12 @@ const WSO_ID = 21; // California North Central
 // Query end date is when new weight classes began
 const DATE_RANGE_END = '2026-08-01';
 
+// Athletes who appear in WSO rankings but are not eligible for CANCA records
+const INELIGIBLE_ATHLETES = new Set([
+  'Aurora van Ulft',
+  'Bekdoolot Rasulbekov',
+]);
+
 const headers = {
   accept: 'application/json, text/plain, */*',
   'accept-language': 'en-US,en;q=0.9',
@@ -205,12 +211,12 @@ function parseCurrentRecords(sheetData) {
   // Skip header row
   sheetData.forEach((row, index) => {
     if (index === 0) return;
-    if (!row || row.length < 13) return;
+    if (!row || row.length < 11) return;
 
     const [, , ageGroupLabel, gender, ageGroupId, , , weightClassIndicator, liftType, weight, lifter, event, date] = row;
 
-    // Filter out invalid entries and STANDARD placeholders
-    if (!liftType || !weight || !lifter || lifter === 'STANDARD') return;
+    // Filter out invalid entries (keep STANDARD placeholders — they are the baseline to beat)
+    if (!liftType || !weight || !lifter) return;
     if (!ageGroupLabel || !gender) return;
 
     const numWeight = parseFloat(weight);
@@ -263,7 +269,7 @@ async function fetchTopAthletes(weightClass, ageGroup, dateRangeStart) {
   });
   
   try {
-    const response = await fetch(`${USAW_API}/categories/all/rankings/table/data?p=0&l=5&sort=action&d=asc`, {
+    const response = await fetch(`${USAW_API}/categories/all/rankings/table/data?platform=1&p=0&l=5&sort=action&d=asc&s=&st=`, {
       method: 'POST',
       headers,
       body,
@@ -272,7 +278,7 @@ async function fetchTopAthletes(weightClass, ageGroup, dateRangeStart) {
       return [];
     }
     const data = await response.json();
-    const athletes = (data.data || []).slice(0, 5);
+    const athletes = data.data || [];
     
     return athletes;
   } catch (error) {
@@ -283,15 +289,16 @@ async function fetchTopAthletes(weightClass, ageGroup, dateRangeStart) {
 /**
  * Fetch detailed lifts for an athlete
  */
-async function fetchAthleteLifts(lifterId) {
+async function fetchAthleteLifts(lifterId, dateRangeStart, dateRangeEnd) {
   try {
-    const response = await fetch(`${USAW_API}/athletes/${lifterId}/table/data?p=0&l=100`, {
+    const response = await fetch(`${USAW_API}/athletes/${lifterId}/table/data?p=0&l=100&sort=&d=asc&s=&st=`, {
       method: 'POST',
       headers,
     });
     if (!response.ok) return [];
     const data = await response.json();
-    return data.data || [];
+    const lifts = data.data || [];
+    return lifts.filter(lift => lift.date && lift.date >= dateRangeStart && lift.date <= dateRangeEnd);
   } catch (error) {
     return [];
   }
@@ -300,25 +307,39 @@ async function fetchAthleteLifts(lifterId) {
 /**
  * Extract best lifts by type from athlete's historical data
  */
-function extractBestLifts(athleteData) {
+function extractBestLifts(athleteData, weightClass, ageGroup, lifter) {
+  const minBw = parseFloat(weightClass.minBodyweight);
+  const maxBw = parseFloat(weightClass.maxBodyweight); // 1000 = super heavyweight sentinel
+
+  // Compute athlete's eligible year range — matches RecordGroup.tsx:136-141
+  const ageAtRankingTime = parseInt(lifter.lifter_age);
+  const rankingYear = new Date(lifter.lift_date).getFullYear();
+  const minYearForLifter = rankingYear - (ageAtRankingTime - parseInt(ageGroup.minimum_lifter_age));
+  const maxYearForLifter = rankingYear + (parseInt(ageGroup.maximum_lifter_age) - ageAtRankingTime);
+
   const bestLifts = {
     snatch: null,
     'clean & jerk': null,
     total: null,
   };
-  
+
   for (const lift of athleteData) {
+    const bw = parseFloat(String(lift['body_weight_(kg)'] ?? 0));
+    const meetYear = new Date(lift.date).getFullYear();
+    if (bw < minBw || bw > maxBw) continue;
+    if (meetYear < minYearForLifter || meetYear > maxYearForLifter) continue;
+
     if (lift.best_snatch && (!bestLifts.snatch || lift.best_snatch > bestLifts.snatch.weight)) {
-      bestLifts.snatch = { weight: lift.best_snatch, date: lift.date };
+      bestLifts.snatch = { weight: lift.best_snatch, date: lift.date, event: lift.meet };
     }
     if (lift['best_c&j'] && (!bestLifts['clean & jerk'] || lift['best_c&j'] > bestLifts['clean & jerk'].weight)) {
-      bestLifts['clean & jerk'] = { weight: lift['best_c&j'], date: lift.date };
+      bestLifts['clean & jerk'] = { weight: lift['best_c&j'], date: lift.date, event: lift.meet };
     }
     if (lift.total && (!bestLifts.total || lift.total > bestLifts.total.weight)) {
-      bestLifts.total = { weight: lift.total, date: lift.date };
+      bestLifts.total = { weight: lift.total, date: lift.date, event: lift.meet };
     }
   }
-  
+
   return bestLifts;
 }
 
@@ -348,24 +369,32 @@ async function analyzeRecords() {
         // Fetch top athletes for this weight class + age group combination
         // Use the weight class start date to avoid querying before the class was created
         const athletes = await fetchTopAthletes(weightClass, ageGroup, weightClass.start);
-        
+
         for (const athlete of athletes) {
           if (!athlete.action || athlete.action.length === 0) continue;
-          
-          // Extract athlete ID from the action route (API returns 'route', not 'url')
-          const route = athlete.action[0].route;
-          const lifterId = route && route.split('/member/')[1];
+          if (INELIGIBLE_ATHLETES.has(athlete.name)) continue;
+
+          // Skip implausible totals (data errors), matching webapp's shouldIncludePastLifter
+          if (athlete.total > 550) continue;
+
+          // Extract athlete ID — match webapp's getLifterId (RoutesAndSettings.ts)
+          const actionUrl = athlete.action[0].url ?? athlete.action[0].route ?? '';
+          const lifterId = actionUrl.split('https://usaweightlifting.sport80.com/public/rankings/member/')[1]
+                        || actionUrl.split('/member/')[1];
           if (!lifterId) continue;
-          
-          // Fetch this athlete's historical lifts
-          const lifts = await fetchAthleteLifts(lifterId);
+
+          // Fetch this athlete's historical lifts, filtered to the weight class's active date range
+          const lifts = await fetchAthleteLifts(lifterId, weightClass.start, DATE_RANGE_END);
           if (lifts.length === 0) continue;
+
+          const bestLifts = extractBestLifts(lifts, weightClass, ageGroup, athlete);
           
-          const bestLifts = extractBestLifts(lifts);
-          
+          const currentYear = new Date().getFullYear();
+
           // Check each lift type against records
           for (const [liftType, liftData] of Object.entries(bestLifts)) {
             if (!liftData) continue;
+            if (new Date(liftData.date).getFullYear() !== currentYear) continue;
             
             // Build record key to look up current record
             // Match format: GENDER_AGEGROUP_WEIGHTCLASS_LIFTTYPE
@@ -376,7 +405,7 @@ async function analyzeRecords() {
               : weightClass.maxBodyweight;
             const recordKey = `${genderKey}_${ageGroup.id}_${wcKey}_${liftType}`;
             const currentRecord = currentRecords[recordKey];
-            
+
             // Check if this lift would break an existing record
             if (currentRecord && liftData.weight > currentRecord.weight) {
               recordBreakers.push({
@@ -386,6 +415,7 @@ async function analyzeRecords() {
                 weightClass: weightClass.name,
                 ageGroup: ageGroup.name,
                 date: liftData.date || '',
+                event: liftData.event || '',
                 wouldBreak: currentRecord ? currentRecord.weight : null,
                 currentHolder: currentRecord ? currentRecord.lifter : null,
                 ageGroupIndex: ageGroups.indexOf(ageGroup),
@@ -441,16 +471,17 @@ function generateCsv(recordBreakers) {
   });
 
   const rows = [
-    ['Age Group', 'Weight Class', 'Lift', 'Athlete', 'Weight (kg)', 'Current Record (kg)', 'Current Holder', 'Date'],
+    ['Age Group', 'Weight Class', 'Lift', 'Athlete', 'Weight (kg)', 'Date', 'Event', 'Current Record (kg)', 'Current Holder'],
     ...sorted.map(lift => [
       lift.ageGroup,
       lift.weightClass,
       liftLabel[lift.liftType] || lift.liftType,
       lift.athlete,
       lift.weight,
+      lift.date,
+      lift.event,
       lift.wouldBreak ?? '',
       lift.currentHolder || '',
-      lift.date,
     ]),
   ];
 

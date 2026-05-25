@@ -1,75 +1,18 @@
+/* Main application styles */
 :root {
   --main-background-color: #282c34;
   --main-text-color: #ffffff;
   --main-border-color: silver;
   --main-accent-color: gold;
   --soft-border-color: #666666;
+  --link-color: #7ab7e0;
+  --link-color-hover: #5a9bd5;
+  --link-color-active: #3a7bb5;
 }
 
 body {
   text-align: center;
   background-color: var(--main-background-color);
-}
-
-.menu-container {
-  display: flex;
-  width: 100%;
-  justify-content: right;
-  position: absolute;
-  top: 15px;
-}
-
-.menu-icon {
-  background-image: url('data:image/svg+xml,<svg width="50px" height="50px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="%23ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M4 18L20 18" stroke="%23ffffff" stroke-width="2" stroke-linecap="round"></path><path d="M4 12L20 12" stroke="%23ffffff" stroke-width="2" stroke-linecap="round"></path><path d="M4 6L20 6" stroke="%23ffffff" stroke-width="2" stroke-linecap="round"></path></g></svg>');
-  height: 50px;
-  width: 50px;
-  display: block;
-  position: absolute;
-  right: 50px;
-  cursor: pointer;
-}
-.menu-icon:hover {
-  cursor: pointer;
-  background-image: url('data:image/svg+xml,<svg width="50px" height="50px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="%23cccccc"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M4 18L20 18" stroke="%23cccccc" stroke-width="2" stroke-linecap="round"></path><path d="M4 12L20 12" stroke="%23cccccc" stroke-width="2" stroke-linecap="round"></path><path d="M4 6L20 6" stroke="%23cccccc" stroke-width="2" stroke-linecap="round"></path></g></svg>');
-}
-.menu-icon:active {
-  cursor: pointer;
-  background-image: url('data:image/svg+xml,<svg width="50px" height="50px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="%23aaaaaa"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M4 18L20 18" stroke="%23aaaaaa" stroke-width="2" stroke-linecap="round"></path><path d="M4 12L20 12" stroke="%23aaaaaa" stroke-width="2" stroke-linecap="round"></path><path d="M4 6L20 6" stroke="%23aaaaaa" stroke-width="2" stroke-linecap="round"></path></g></svg>');
-}
-
-.hidden {
-  display: none;
-}
-
-.menu-flyout {
-  font-size: 12pt;
-  text-align: left;
-  padding: 0 15px;
-  position: absolute;
-  right: -10px;
-  top: 32px;
-  cursor: pointer;
-}
-.menu-flyout ul {
-  list-style: none;
-  padding: 0;
-  text-wrap: nowrap;
-  cursor: pointer;
-}
-.menu-flyout li a {
-  background-color: #ccc;
-  color: #333;
-  text-decoration: none;
-  font-weight: bold;
-  border: 2px solid #bbb;
-  margin-bottom: 1px;
-  padding: 8px;
-  display: block;
-  cursor: pointer;
-}
-.menu-flyout li a:hover {
-  background-color: #dfdfdf;
-  cursor: pointer;
 }
 
 .App {
@@ -89,6 +32,88 @@ body {
   padding-top: 10px;
 }
 
+/* Common styles */
+.hidden {
+  display: none;
+}
+
+.common-text-link {
+  color: var(--link-color);
+  text-decoration: underline;
+}
+
+.common-text-link:hover {
+  color: var(--link-color-hover);
+}
+
+.common-text-link:active {
+  color: var(--link-color-active);
+}
+
+/* Menu styles */
+.menu-container {
+  display: flex;
+  width: 100%;
+  justify-content: right;
+  position: absolute;
+  top: 15px;
+}
+
+.menu-icon {
+  background-image: url('data:image/svg+xml,<svg width="50px" height="50px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="%23ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M4 18L20 18" stroke="%23ffffff" stroke-width="2" stroke-linecap="round"></path><path d="M4 12L20 12" stroke="%23ffffff" stroke-width="2" stroke-linecap="round"></path><path d="M4 6L20 6" stroke="%23ffffff" stroke-width="2" stroke-linecap="round"></path></g></svg>');
+  height: 50px;
+  width: 50px;
+  display: block;
+  position: absolute;
+  right: 50px;
+  cursor: pointer;
+}
+
+.menu-icon:hover {
+  cursor: pointer;
+  background-image: url('data:image/svg+xml,<svg width="50px" height="50px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="%23cccccc"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M4 18L20 18" stroke="%23cccccc" stroke-width="2" stroke-linecap="round"></path><path d="M4 12L20 12" stroke="%23cccccc" stroke-width="2" stroke-linecap="round"></path><path d="M4 6L20 6" stroke="%23cccccc" stroke-width="2" stroke-linecap="round"></path></g></svg>');
+}
+
+.menu-icon:active {
+  cursor: pointer;
+  background-image: url('data:image/svg+xml,<svg width="50px" height="50px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="%23aaaaaa"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M4 18L20 18" stroke="%23aaaaaa" stroke-width="2" stroke-linecap="round"></path><path d="M4 12L20 12" stroke="%23aaaaaa" stroke-width="2" stroke-linecap="round"></path><path d="M4 6L20 6" stroke="%23aaaaaa" stroke-width="2" stroke-linecap="round"></path></g></svg>');
+}
+
+.menu-flyout {
+  font-size: 12pt;
+  text-align: left;
+  padding: 0 15px;
+  position: absolute;
+  right: -10px;
+  top: 32px;
+  cursor: pointer;
+}
+
+.menu-flyout ul {
+  list-style: none;
+  padding: 0;
+  text-wrap: nowrap;
+  cursor: pointer;
+}
+
+.menu-flyout li a {
+  background-color: #ccc;
+  color: #333;
+  text-decoration: none;
+  font-weight: bold;
+  border: 2px solid #bbb;
+  margin-bottom: 1px;
+  padding: 8px;
+  display: block;
+  cursor: pointer;
+}
+
+.menu-flyout li a:hover {
+  background-color: #dfdfdf;
+  cursor: pointer;
+}
+
+/* Header styles */
 .header-logo {
   padding-right: 25px;
 }
@@ -98,6 +123,15 @@ body {
   margin: 0px 8px;
 }
 
+/* Record viewer styles */
+.record-viewer-parent {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: left;
+  margin-bottom: 32px;
+}
+
+/* Record viewer toolbar styles */
 .record-viewer-options-bar {
   display: block;
   width: 100%;
@@ -111,15 +145,16 @@ body {
 
 .record-viewer-options-bar select {
   -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  appearance: none;
 }
 
-.record-viewer-parent {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: left;
-  margin-bottom: 32px;
+.reset-button {
+  margin-left: 24px;
 }
 
+/* Record group styles */
 .record-group-title {
   font-weight: bold;
 }
@@ -227,9 +262,7 @@ body {
 }
 
 .combined-history-group .record-group-info {
-  /* padding: 0 100px; */
   width: 75%;
-  /* text-align: center; */
 }
 
 .combined-history-group .record-viewer-ranking {
@@ -328,10 +361,6 @@ body {
   padding: 0 50px 50px 50px;
 }
 
-.reset-button {
-  margin-left: 24px;
-}
-
 .all-records-columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -417,6 +446,7 @@ body {
   color: var(--main-border-color);
 }
 
+/* Info page styles */
 .info-page-parent {
   margin: 50px;
 }
@@ -425,4 +455,5 @@ body {
   border: 1px solid var(--main-border-color);
   border-radius: 4px;
   padding: 0px 24px 12px;
+  margin-bottom: 24px;
 }

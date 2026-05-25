@@ -110,7 +110,10 @@ function CombinedRecordGroup({ weightClass, ageGroup, emptyContent }: CombinedRe
           for (let i = 0; i < response.data.length; i++) {
             const lifter = response.data[i];
             lifter.classData = subClass;
-            if (shouldIncludePastLifter(lifter, weightClass) && !ineligibleAthletes.includes(lifter.name)) {
+            if (
+              shouldIncludePastLifter(lifter, weightClass) &&
+              !ineligibleAthletes.includes(lifter.name)
+            ) {
               fetchIndividualLifts(lifter);
             }
           }

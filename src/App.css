@@ -387,7 +387,7 @@ body {
 
 .all-records-lift {
   display: flex;
-  text-align:left;
+  text-align: left;
   align-items: baseline;
   gap: 8px;
   font-size: 11px;

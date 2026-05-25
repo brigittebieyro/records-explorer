@@ -200,15 +200,17 @@ function RecordGroup({
       )}
       {status === 'complete' &&
         !!leadingLifters.length &&
-        leadingLifters.slice(0, count).map((lifter, index) => (
-          <RecordHolder
-            key={`record-holder-${index}-${lifter.name}`}
-            lifterData={lifter}
-            index={index}
-            individualLiftsData={combinedLiftsData}
-            sortType={sortType}
-          />
-        ))}
+        leadingLifters
+          .slice(0, count)
+          .map((lifter, index) => (
+            <RecordHolder
+              key={`record-holder-${index}-${lifter.name}`}
+              lifterData={lifter}
+              index={index}
+              individualLiftsData={combinedLiftsData}
+              sortType={sortType}
+            />
+          ))}
       {!leadingLifters.length && emptyContent}
     </div>
   );

@@ -8,7 +8,7 @@ The app displays records organized by weight class and age group (Open, Youth, J
 
 ## Running Locally
 
-The app has two processes that must run at the same time: the **React dev server** and the **Node.js proxy server**. The proxy is required because the USAW Sport80 API does not allow direct browser requests — the server forwards them and also injects API credentials at runtime.
+The app has two processes that must run at the same time: the **React dev server** and the **Node.js proxy server**. 
 
 ### Prerequisites
 
@@ -38,11 +38,11 @@ Then open [http://localhost:3000](http://localhost:3000). The React dev server a
 This app requires a platform that can run Node.js — **static hosting will not work**. There are two reasons:
 
 1. **CORS proxy** — the Express server in `server/index.js` proxies requests to the Sport80 API on behalf of the browser. Without it, all API calls will be blocked by CORS.
-2. **Runtime secrets** — API credentials are injected into the page by the server at request time. They are never baked into the static build, so a static host has no way to supply them.
+2. **Runtime secrets** — API credentials are injected into the page by the server at request time. They are not stored plainly in static code.
 
-Platforms that work: [Fly.io](https://fly.io), [Railway](https://railway.app), [Render](https://render.com), or any VPS that can run a Docker container. The repo includes a `Dockerfile` and `fly.toml` for Fly.io deployments.
+So far, we're having a good experience with [Fly.io](https://fly.io). The repo includes a `Dockerfile` and `fly.toml` for Fly.io deployments.
 
-Platforms that do **not** work: Netlify, GitHub Pages, Vercel (static/edge), S3 + CloudFront, or any other CDN-only host.
+Platforms that do **not** work: GitHub Pages, or any other CDN-only host.
 
 ## Generating a List of Newly Broken Records
 
@@ -140,7 +140,7 @@ export const endDate               = '2026-08-01'; // When the current weight cl
 
 ### 6. Add ineligible athletes
 
-If your WSO has any rules which preclude specific athletes from holding records, you can list them here. California North Central requires that all recordholders live within the WSO area, athletes who reside in other states or countries can not hold these records.
+If your WSO has any rules which preclude specific athletes from holding records, you can list them here. California North Central requires that all recordholders live within the WSO area, athletes who reside in other states or countries can not hold these records. 
 
 ```ts
 export const ineligibleAthletes: string[] = ['Full Name', 'Another Name'];

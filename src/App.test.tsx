@@ -813,6 +813,228 @@ describe('App - MainPage Component', () => {
       expect(groupIds).toContain('35');
       expect(groupIds.indexOf('OPEN')).toBeLessThan(groupIds.indexOf('35'));
     });
+
+    test('includes U11 youth lifter (Elenor Cler) in results', () => {
+      const standards = [
+        [
+          '',
+          '',
+          'U11',
+          'F',
+          'U11',
+          '',
+          '',
+          '30',
+          'Total',
+          '80',
+          'Elenor Cler',
+          'Youth Meet',
+          '2025-06-15',
+        ],
+      ];
+      const result = buildAllCurrentRecords(standards);
+      const u11entry = result.find(
+        (r) => r.groups.length === 1 && r.groups[0].ageGroup.id === 'U11'
+      );
+      expect(u11entry).toBeDefined();
+      expect(u11entry!.weightClass.maxBodyweight).toBe('30');
+      expect(u11entry!.weightClass.gender).toBe('female');
+      expect(u11entry!.groups[0].records['Total'].lifter).toBe('Elenor Cler');
+    });
+
+    test('includes U13 youth lifter (Liam Doherty) in results', () => {
+      const standards = [
+        [
+          '',
+          '',
+          'U13',
+          'M',
+          'U13',
+          '',
+          '',
+          '40',
+          'Total',
+          '110',
+          'Liam Doherty',
+          'Youth Meet',
+          '2025-07-10',
+        ],
+      ];
+      const result = buildAllCurrentRecords(standards);
+      const u13entry = result.find(
+        (r) => r.groups.length === 1 && r.groups[0].ageGroup.id === 'U13'
+      );
+      expect(u13entry).toBeDefined();
+      expect(u13entry!.weightClass.maxBodyweight).toBe('40');
+      expect(u13entry!.weightClass.gender).toBe('male');
+      expect(u13entry!.groups[0].records['Total'].lifter).toBe('Liam Doherty');
+    });
+
+    test('includes U15 and U17 youth lifters in results', () => {
+      // Use weight class indicators that exist in U15/U17 sets (U15 female: W44, U17 male: M56)
+      const standards = [
+        [
+          '',
+          '',
+          'U15',
+          'F',
+          'U15',
+          '',
+          '',
+          '44',
+          'Snatch',
+          '75',
+          'Alice',
+          'Youth Meet',
+          '2025-08-01',
+        ],
+        [
+          '',
+          '',
+          'U17',
+          'M',
+          'U17',
+          '',
+          '',
+          '56',
+          'Total',
+          '185',
+          'Bob',
+          'Youth Meet',
+          '2025-08-01',
+        ],
+      ];
+      const result = buildAllCurrentRecords(standards);
+
+      const u15entry = result.find(
+        (r) =>
+          r.groups.length === 1 &&
+          r.groups[0].ageGroup.id === 'U15' &&
+          r.weightClass.gender === 'female'
+      );
+      expect(u15entry).toBeDefined();
+      expect(u15entry!.groups[0].records['Snatch'].lifter).toBe('Alice');
+
+      const u17entry = result.find(
+        (r) =>
+          r.groups.length === 1 &&
+          r.groups[0].ageGroup.id === 'U17' &&
+          r.weightClass.gender === 'male'
+      );
+      expect(u17entry).toBeDefined();
+      expect(u17entry!.groups[0].records['Total'].lifter).toBe('Bob');
+    });
+
+    test('excludes STANDARD entries from youth weight classes', () => {
+      const standards = [
+        ['', '', 'U11', 'F', 'U11', '', '', '30', 'Total', '70', 'STANDARD', '', ''],
+      ];
+      const result = buildAllCurrentRecords(standards);
+      const u11entry = result.find(
+        (r) => r.groups.length === 1 && r.groups[0].ageGroup.id === 'U11'
+      );
+      expect(u11entry).toBeUndefined();
+    });
+
+    test('youth records are scoped to their age group — no cross-contamination with Open', () => {
+      const standards = [
+        [
+          '',
+          '',
+          'OPEN',
+          'F',
+          'OPEN',
+          '',
+          '',
+          '48',
+          'Total',
+          '225',
+          'Jane Open',
+          'Meet',
+          '2024-01-01',
+        ],
+        [
+          '',
+          '',
+          'U13',
+          'F',
+          'U13',
+          '',
+          '',
+          '36',
+          'Total',
+          '95',
+          'Jane Youth',
+          'Youth Meet',
+          '2025-06-15',
+        ],
+      ];
+      const result = buildAllCurrentRecords(standards);
+
+      // The Open W48 entry should not include any U13 age group rows
+      const openW48 = result.find(
+        (r) => r.weightClass.id === 'W48' && r.groups.some((g) => g.ageGroup.id === 'OPEN')
+      );
+      expect(openW48).toBeDefined();
+      expect(openW48!.groups.every((g) => g.ageGroup.id !== 'U13')).toBe(true);
+
+      // The U13 entry should have exactly one group and it must not be OPEN
+      const u13entry = result.find(
+        (r) => r.groups.length === 1 && r.groups[0].ageGroup.id === 'U13'
+      );
+      expect(u13entry).toBeDefined();
+      expect(u13entry!.groups[0].records['Total'].lifter).toBe('Jane Youth');
+    });
+
+    test('each youth age group gets its own entry even when sharing a weight class indicator', () => {
+      // U11 and U13 both have a Girls 30kg class (indicator '30')
+      const standards = [
+        [
+          '',
+          '',
+          'U11',
+          'F',
+          'U11',
+          '',
+          '',
+          '30',
+          'Total',
+          '65',
+          'U11 Girl',
+          'Youth Meet',
+          '2025-06-15',
+        ],
+        [
+          '',
+          '',
+          'U13',
+          'F',
+          'U13',
+          '',
+          '',
+          '30',
+          'Total',
+          '80',
+          'U13 Girl',
+          'Youth Meet',
+          '2025-06-15',
+        ],
+      ];
+      const result = buildAllCurrentRecords(standards);
+
+      const u11entry = result.find(
+        (r) => r.groups.length === 1 && r.groups[0].ageGroup.id === 'U11'
+      );
+      const u13entry = result.find(
+        (r) => r.groups.length === 1 && r.groups[0].ageGroup.id === 'U13'
+      );
+
+      expect(u11entry).toBeDefined();
+      expect(u11entry!.groups[0].records['Total'].lifter).toBe('U11 Girl');
+
+      expect(u13entry).toBeDefined();
+      expect(u13entry!.groups[0].records['Total'].lifter).toBe('U13 Girl');
+    });
   });
 
   describe('Uncovered Branch Coverage', () => {

@@ -25,7 +25,7 @@ function AllCurrentRecordsView({ data }: AllCurrentRecordsViewProps) {
           <h2 className="all-records-gender-header">Women</h2>
           {womensData.map(({ weightClass, groups }) => (
             <RecordListForWeightClass
-              key={weightClass.id}
+              key={`${weightClass.id}-${groups.map((g) => g.ageGroup.id).join('-')}`}
               weightClass={weightClass}
               groups={groups}
             />
@@ -35,7 +35,7 @@ function AllCurrentRecordsView({ data }: AllCurrentRecordsViewProps) {
           <h2 className="all-records-gender-header">Men</h2>
           {mensData.map(({ weightClass, groups }) => (
             <RecordListForWeightClass
-              key={weightClass.id}
+              key={`${weightClass.id}-${groups.map((g) => g.ageGroup.id).join('-')}`}
               weightClass={weightClass}
               groups={groups}
             />

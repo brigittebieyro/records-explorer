@@ -5,6 +5,12 @@ import { CircleLoader } from 'react-spinners';
 import AllCurrentRecordsView from './RecordViewer/AllCurrentRecordsView';
 import { ageGroups } from './Data/ageGroups';
 import { defaultWeightClasses } from './Data/defaultWeightClasses';
+import {
+  u11WeightClasses,
+  u13WeightClasses,
+  u15WeightClasses,
+  u17WeightClasses,
+} from './Data/youthWeightClasses';
 import Header from './Header/Header';
 import Info from './Info/Info';
 import RecordGroup from './RecordViewer/RecordGroup';
@@ -69,6 +75,8 @@ export function computeStandardsForWeightClass(
 
 export function buildAllCurrentRecords(standards: string[][]): AllCurrentRecordsEntry[] {
   const result: AllCurrentRecordsEntry[] = [];
+
+  // Default weight classes: group all non-youth age groups under each weight class
   for (const weightClass of defaultWeightClasses) {
     const recordSet = computeStandardsForWeightClass(weightClass, standards);
     const groups: AllCurrentRecordsGroup[] = [];
@@ -88,6 +96,32 @@ export function buildAllCurrentRecords(standards: string[][]): AllCurrentRecords
       result.push({ weightClass, groups });
     }
   }
+
+  // Youth age groups: each uses its own weight class set and records are scoped to
+  // that specific age group to avoid cross-contamination (U11/U13/U15/U17 share
+  // the same weight class IDs and indicators).
+  const youthWeightClassSets: Record<string, WeightClass[]> = {
+    U11: u11WeightClasses,
+    U13: u13WeightClasses,
+    U15: u15WeightClasses,
+    U17: u17WeightClasses,
+  };
+  for (const youthAgeGroup of ageGroups.filter((ag) => ag.customWeightClasses)) {
+    for (const weightClass of youthWeightClassSets[youthAgeGroup.id] ?? []) {
+      const recordSet = computeStandardsForWeightClass(weightClass, standards);
+      const ageGroupData = recordSet[youthAgeGroup.id];
+      if (!ageGroupData) continue;
+      const realRecords: Record<string, StandardRecord> = {};
+      Object.entries(ageGroupData.records).forEach(([liftType, record]) => {
+        if (record.lifter !== 'STANDARD') {
+          realRecords[liftType] = record;
+        }
+      });
+      if (Object.keys(realRecords).length === 0) continue;
+      result.push({ weightClass, groups: [{ ageGroup: youthAgeGroup, records: realRecords }] });
+    }
+  }
+
   return result;
 }
 

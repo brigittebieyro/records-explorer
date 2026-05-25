@@ -141,6 +141,7 @@ body {
   margin-bottom: 25px;
   font-style: italic;
   padding-right: 100px;
+  box-sizing: border-box;
 }
 
 .record-viewer-options-bar select {
@@ -203,6 +204,8 @@ body {
   margin: 6px;
   padding: 0px 24px 12px;
   width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .combined-history-group .record-viewer-record-holder {

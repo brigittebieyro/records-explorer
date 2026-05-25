@@ -11,6 +11,7 @@ import {
   getWeightClassSet,
   getYear,
   handleError,
+  isWithinWSOBoundary,
   shouldIncludePastLifter,
   sortLifts,
 } from './Utils';
@@ -614,6 +615,64 @@ describe('getWeightClassSet', () => {
       expect(wc).toHaveProperty('id');
       expect(wc).toHaveProperty('name');
       expect(wc).toHaveProperty('gender');
+    });
+  });
+});
+
+describe('isWithinWSOBoundary', () => {
+  describe('points inside the boundary', () => {
+    test('Sacramento', () => {
+      expect(isWithinWSOBoundary(38.58, -121.49)).toBe(true);
+    });
+
+    test('San Francisco', () => {
+      expect(isWithinWSOBoundary(37.77, -122.42)).toBe(true);
+    });
+
+    test('Bakersfield (southern Kern County)', () => {
+      expect(isWithinWSOBoundary(35.37, -119.02)).toBe(true);
+    });
+
+    test('southernmost point of Kern County', () => {
+      expect(isWithinWSOBoundary(34.79, -119.0)).toBe(true);
+    });
+
+    test('exactly on the northern boundary', () => {
+      expect(isWithinWSOBoundary(42.01, -120.0)).toBe(true);
+    });
+
+    test('exactly on the western boundary', () => {
+      expect(isWithinWSOBoundary(38.5, -124.41)).toBe(true);
+    });
+
+    test('exactly on the eastern boundary', () => {
+      expect(isWithinWSOBoundary(38.5, -114.13)).toBe(true);
+    });
+  });
+
+  describe('points outside the boundary', () => {
+    test('Los Angeles (south of boundary)', () => {
+      expect(isWithinWSOBoundary(34.05, -118.24)).toBe(false);
+    });
+
+    test('San Diego (south of boundary)', () => {
+      expect(isWithinWSOBoundary(32.72, -117.16)).toBe(false);
+    });
+
+    test('just south of the southern boundary', () => {
+      expect(isWithinWSOBoundary(34.78, -119.0)).toBe(false);
+    });
+
+    test('just north of the northern boundary (Oregon interior)', () => {
+      expect(isWithinWSOBoundary(42.02, -120.0)).toBe(false);
+    });
+
+    test('Pacific Ocean (west of boundary)', () => {
+      expect(isWithinWSOBoundary(37.77, -125.0)).toBe(false);
+    });
+
+    test('Arizona (east of boundary)', () => {
+      expect(isWithinWSOBoundary(36.17, -113.5)).toBe(false);
     });
   });
 });

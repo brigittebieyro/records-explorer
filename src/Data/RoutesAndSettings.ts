@@ -66,6 +66,19 @@ export const maintainerEmail: string = 'brigitte.bieyro@gmail.com';
 export const maintainerName: string = 'Brigitte Bieyro';
 
 // ----------------------------------------------------------------------------------------------------------------
+// WSO Geographic Boundary (California North Central)
+// South boundary is the southern edge of Kern County (includes Bakersfield).
+// Source: OpenStreetMap Nominatim, California South WSO ("Bakersfield to San Ysidro").
+// ----------------------------------------------------------------------------------------------------------------
+//
+export const wsoBoundary = {
+  north: 42.01,    // California–Oregon border
+  south: 34.79,    // Southern edge of Kern County
+  west: -124.41,   // California Pacific coastline
+  east: -114.13,   // California–Nevada/Arizona border
+};
+
+// ----------------------------------------------------------------------------------------------------------------
 // Exceptions who may not hold records, because they do not live within the WSO.
 // ----------------------------------------------------------------------------------------------------------------
 //

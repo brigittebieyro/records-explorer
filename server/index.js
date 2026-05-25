@@ -36,8 +36,10 @@ const envConfig = {
 };
 
 if (fs.existsSync(buildDir)) {
-  // Serve static files from build directory
-  app.use(express.static(buildDir));
+  // Serve static files from build directory, but not index.html directly
+  // (index: false ensures all HTML requests fall through to the catch-all below,
+  // where window.__ENV__ is injected at request time)
+  app.use(express.static(buildDir, { index: false }));
 
   // Inject runtime secrets into index.html for SPA routing
   app.get('*', (req, res) => {

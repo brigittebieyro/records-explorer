@@ -6,6 +6,7 @@ import {
   getLifterId,
   getRankingsRoute,
   headers,
+  ineligibleAthletes,
   wsoId,
 } from './RoutesAndSettings';
 import { handleError, shouldIncludePastLifter, sortLifts } from './Utils';
@@ -89,7 +90,7 @@ function RecordGroup({
           maximum_lifter_age: ageGroup.maximum_lifter_age,
         },
       });
-      const response = await fetch(getRankingsRoute(count), {
+      const response = await fetch(getRankingsRoute(count + 2), {
         headers,
         body,
         method: 'POST',
@@ -102,7 +103,7 @@ function RecordGroup({
         const result: CombinedLiftData[] = [];
         for (let i = 0; i < response.data.length; i++) {
           const lifter = response.data[i];
-          if (shouldIncludePastLifter(lifter)) {
+          if (shouldIncludePastLifter(lifter) && !ineligibleAthletes.includes(lifter.name)) {
             result.push(lifter);
           }
         }
@@ -199,7 +200,7 @@ function RecordGroup({
       )}
       {status === 'complete' &&
         !!leadingLifters.length &&
-        leadingLifters.map((lifter, index) => (
+        leadingLifters.slice(0, count).map((lifter, index) => (
           <RecordHolder
             key={`record-holder-${index}-${lifter.name}`}
             lifterData={lifter}

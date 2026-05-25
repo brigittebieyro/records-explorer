@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { CircleLoader } from 'react-spinners';
-import RecordHolder from './RecordHolder';
+import RecordHolder from './components/RecordHolder';
 import {
   getLifterDataRoute,
   getLifterId,
@@ -8,9 +8,15 @@ import {
   headers,
   ineligibleAthletes,
   wsoId,
-} from './RoutesAndSettings';
-import { handleError, shouldIncludePastLifter, sortLifts } from './Utils';
-import { AgeGroup, CombinedLiftData, MeetRecord, WeightClass, WeightClassAnalog } from './types';
+} from '../Data/RoutesAndSettings';
+import { handleError, shouldIncludePastLifter, sortLifts } from '../Utils/Utils';
+import {
+  AgeGroup,
+  CombinedLiftData,
+  MeetRecord,
+  WeightClass,
+  WeightClassAnalog,
+} from '../Utils/types';
 
 interface CombinedRecordGroupProps {
   weightClass: WeightClass;

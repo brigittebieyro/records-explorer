@@ -1,4 +1,4 @@
-import { ageGroups } from './Data/ageGroups';
+import { ageGroups } from './ageGroups';
 
 const REQUIRED_FIELDS = [
   'id',

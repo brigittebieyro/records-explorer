@@ -1,11 +1,11 @@
-import { defaultWeightClasses } from './Data/defaultWeightClasses';
+import { defaultWeightClasses } from './defaultWeightClasses';
 import {
   u11WeightClasses,
   u13WeightClasses,
   u15WeightClasses,
   u17WeightClasses,
-} from './Data/youthWeightClasses';
-import { WeightClass } from './types';
+} from './youthWeightClasses';
+import { WeightClass } from '../Utils/types';
 
 const REQUIRED_FIELDS = [
   'id',

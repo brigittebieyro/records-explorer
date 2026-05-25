@@ -1,4 +1,4 @@
-import { AgeGroupRecordSet, StandardRecord } from './types';
+import { AgeGroupRecordSet, StandardRecord } from '../Utils/types';
 
 interface StandardsProps {
   relevantRecords?: AgeGroupRecordSet | null;

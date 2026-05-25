@@ -1,6 +1,6 @@
 import { CircleLoader } from 'react-spinners';
-import { CombinedLiftData, SortKey } from './types';
-import { getYear } from './Utils';
+import { CombinedLiftData, SortKey } from '../../Utils/types';
+import { getYear } from '../../Utils/Utils';
 
 interface RecordHolderProps {
   lifterData: CombinedLiftData;

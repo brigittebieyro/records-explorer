@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import CompactRecordView from './CompactRecordView';
-import { StandardRecord } from './types';
+import { StandardRecord } from '../../Utils/types';
 
 describe('CompactRecordView', () => {
   test('renders nothing when record is undefined', () => {

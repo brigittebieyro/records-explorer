@@ -1,5 +1,5 @@
 jest.mock('./App', () => () => null);
-jest.mock('./reportWebVitals', () => jest.fn());
+jest.mock('./Analytics/reportWebVitals', () => jest.fn());
 jest.mock('react-dom/client', () => ({
   createRoot: jest.fn(() => ({ render: jest.fn() })),
 }));

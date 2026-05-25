@@ -1,5 +1,5 @@
-import RecordListForWeightClass from './RecordListForWeightClass';
-import { AllCurrentRecordsEntry } from './types';
+import RecordListForWeightClass from './components/RecordListForWeightClass';
+import { AllCurrentRecordsEntry } from '../Utils/types';
 
 interface AllCurrentRecordsViewProps {
   data: AllCurrentRecordsEntry[];

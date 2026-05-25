@@ -1,11 +1,11 @@
-import { ageGroups } from './Data/ageGroups';
-import { defaultWeightClasses } from './Data/defaultWeightClasses';
+import { ageGroups } from '../Data/ageGroups';
+import { defaultWeightClasses } from '../Data/defaultWeightClasses';
 import {
   u11WeightClasses,
   u13WeightClasses,
   u15WeightClasses,
   u17WeightClasses,
-} from './Data/youthWeightClasses';
+} from '../Data/youthWeightClasses';
 import {
   getAgeGroup,
   getWeightClassSet,

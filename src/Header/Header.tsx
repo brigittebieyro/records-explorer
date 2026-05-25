@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { localScheduleUrl, wsoName } from './RoutesAndSettings';
+import { localHomeUrl, localScheduleUrl, wsoName } from '../Data/RoutesAndSettings';
 
 function Header() {
   const [menuVisible, setMenuVisible] = useState(false);
@@ -32,10 +32,13 @@ function Header() {
                   <a href="/">WSO Records Explorer</a>
                 </li>
                 <li>
-                  <a href="/info">How Records Work</a>
+                  <a href={localScheduleUrl}>Local Meet Schedule</a>
                 </li>
                 <li>
-                  <a href={localScheduleUrl}>Local Meet Schedule</a>
+                  <a href={localHomeUrl}>Official WSO Site</a>
+                </li>
+                <li>
+                  <a href="/info">About</a>
                 </li>
               </ul>
             </div>

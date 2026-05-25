@@ -1,4 +1,4 @@
-import { StandardRecord } from './types';
+import { StandardRecord } from '../../Utils/types';
 
 interface CompactRecordViewProps {
   record?: StandardRecord;

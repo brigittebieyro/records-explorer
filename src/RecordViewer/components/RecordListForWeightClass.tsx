@@ -1,5 +1,5 @@
 import CompactRecordView from './CompactRecordView';
-import { AllCurrentRecordsGroup, WeightClass } from './types';
+import { AllCurrentRecordsGroup, WeightClass } from '../../Utils/types';
 
 interface RecordListForWeightClassProps {
   weightClass: WeightClass;

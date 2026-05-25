@@ -1,4 +1,4 @@
-import { WeightClass } from '../types';
+import { WeightClass } from '../Utils/types';
 
 export const u11WeightClasses: WeightClass[] = [
   {

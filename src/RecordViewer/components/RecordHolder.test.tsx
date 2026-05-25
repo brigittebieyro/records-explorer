@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import RecordHolder from './RecordHolder';
-import { CombinedLiftData } from './types';
+import { CombinedLiftData } from '../../Utils/types';
 
 jest.mock('react-spinners', () => ({
   CircleLoader: () => <div data-testid="loading-spinner" />,

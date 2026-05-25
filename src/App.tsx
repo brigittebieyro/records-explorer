@@ -2,12 +2,12 @@ import './App.css';
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { CircleLoader } from 'react-spinners';
-import AllCurrentRecordsView from './AllCurrentRecordsView';
+import AllCurrentRecordsView from './RecordViewer/AllCurrentRecordsView';
 import { ageGroups } from './Data/ageGroups';
 import { defaultWeightClasses } from './Data/defaultWeightClasses';
-import Header from './Header';
-import Info from './Info';
-import RecordGroup from './RecordGroup';
+import Header from './Header/Header';
+import Info from './Info/Info';
+import RecordGroup from './RecordViewer/RecordGroup';
 import {
   allTimeStartDate,
   currentRecordsSheetId,
@@ -16,9 +16,9 @@ import {
   getSheetRoute,
   wsoName,
   youthAllTimeStartDate,
-} from './RoutesAndSettings';
-import Standards from './Standards';
-import { getAgeGroup, getWeightClassSet } from './Utils';
+} from './Data/RoutesAndSettings';
+import Standards from './RecordViewer/Standards';
+import { getAgeGroup, getWeightClassSet } from './Utils/Utils';
 import {
   AgeGroup,
   AgeGroupRecordSet,
@@ -27,7 +27,7 @@ import {
   StandardRecord,
   StandardsResult,
   WeightClass,
-} from './types';
+} from './Utils/types';
 
 export function computeStandardsForWeightClass(
   weightClass: WeightClass,

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CircleLoader } from 'react-spinners';
-import RecordHolder from './RecordHolder';
+import RecordHolder from './components/RecordHolder';
 import {
   getLifterDataRoute,
   getLifterId,
@@ -8,9 +8,9 @@ import {
   headers,
   ineligibleAthletes,
   wsoId,
-} from './RoutesAndSettings';
-import { handleError, shouldIncludePastLifter, sortLifts } from './Utils';
-import { AgeGroup, CombinedLiftData, MeetRecord, SortKey, WeightClass } from './types';
+} from '../Data/RoutesAndSettings';
+import { handleError, shouldIncludePastLifter, sortLifts } from '../Utils/Utils';
+import { AgeGroup, CombinedLiftData, MeetRecord, SortKey, WeightClass } from '../Utils/types';
 
 interface SortTypeDescription {
   id: SortKey;
@@ -192,7 +192,7 @@ function RecordGroup({
                 key={`sort-selector-${index}-${sort.id}`}
                 selected={sortType === sort.id}
               >
-                {sort.name}{' '}
+                {sort.name}
               </option>
             ))}
           </select>

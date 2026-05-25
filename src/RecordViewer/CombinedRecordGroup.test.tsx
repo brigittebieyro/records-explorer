@@ -1,12 +1,12 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import CombinedRecordGroup from './CombinedRecordGroup';
-import * as RoutesAndSettings from './RoutesAndSettings';
-import * as Utils from './Utils';
-import { AgeGroup, LifterAction, WeightClass } from './types';
+import * as RoutesAndSettings from '../Data/RoutesAndSettings';
+import * as Utils from '../Utils/Utils';
+import { AgeGroup, LifterAction, WeightClass } from '../Utils/types';
 
-jest.mock('./RoutesAndSettings');
-jest.mock('./Utils');
-jest.mock('./RecordHolder', () => {
+jest.mock('../Data/RoutesAndSettings');
+jest.mock('../Utils/Utils');
+jest.mock('./components/RecordHolder', () => {
   return function RecordHolder() {
     return <div data-testid="record-holder">Record Holder</div>;
   };

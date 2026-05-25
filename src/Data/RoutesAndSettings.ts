@@ -57,6 +57,13 @@ export const currentRecordsSheetName = 'Raw_Data';
 //
 type WebUrl = `https://${string}` | `http://${string}`;
 export const localScheduleUrl: WebUrl = 'https://canorthcentralwso.org/meet-schedule';
+export const localHomeUrl: WebUrl = 'https://canorthcentralwso.org';
+export const americanRecordsUrl: WebUrl = 'https://www.usaweightlifting.org/american-records';
+export const wsoInfoUSAWUrl: WebUrl =
+  'https://www.usaweightlifting.org/club-wso/wso-information/california-north-central';
+export const githubUrl: WebUrl = 'https://github.com/brigittebieyro/records-explorer';
+export const maintainerEmail: string = 'brigitte.bieyro@gmail.com';
+export const maintainerName: string = 'Brigitte Bieyro';
 
 // ----------------------------------------------------------------------------------------------------------------
 // Exceptions who may not hold records, because they do not live within the WSO.

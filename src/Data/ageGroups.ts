@@ -1,4 +1,4 @@
-import { AgeGroup } from '../types';
+import { AgeGroup } from '../Utils/types';
 
 export const ageGroups: AgeGroup[] = [
   {

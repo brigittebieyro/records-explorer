@@ -14,7 +14,10 @@ const mergeByBodyweight = (entries: AllCurrentRecordsEntry[]): AllCurrentRecords
     const key = entry.weightClass.maxBodyweight;
     const existing = map.get(key);
     if (existing) {
-      map.set(key, { weightClass: existing.weightClass, groups: [...existing.groups, ...entry.groups] });
+      map.set(key, {
+        weightClass: existing.weightClass,
+        groups: [...existing.groups, ...entry.groups],
+      });
     } else {
       map.set(key, { ...entry, groups: [...entry.groups] });
     }

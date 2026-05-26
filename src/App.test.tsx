@@ -108,6 +108,7 @@ describe('App - MainPage Component', () => {
     jest
       .mocked(RoutesAndSettings.getSheetRoute)
       .mockReturnValue('https://sheets.googleapis.com/v4/test');
+    window.history.pushState({}, '', '/');
   });
 
   afterEach(() => {

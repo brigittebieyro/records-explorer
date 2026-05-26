@@ -1,4 +1,5 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import LocalMeets from './LocalMeets';
 import * as Utils from '../Utils/Utils';
 
@@ -50,7 +51,11 @@ describe('LocalMeets', () => {
     test('shows spinner while fetch is in progress', () => {
       (global.fetch as jest.Mock).mockImplementation(() => new Promise(() => {}));
 
-      render(<LocalMeets />);
+      render(
+        <MemoryRouter>
+          <LocalMeets />
+        </MemoryRouter>
+      );
 
       expect(screen.getByTestId('circle-loader')).toBeInTheDocument();
     });
@@ -65,7 +70,11 @@ describe('LocalMeets', () => {
       });
       jest.mocked(Utils.isWithinWSOBoundary).mockReturnValue(true);
 
-      render(<LocalMeets />);
+      render(
+        <MemoryRouter>
+          <LocalMeets />
+        </MemoryRouter>
+      );
 
       await waitFor(() => {
         expect(screen.getAllByText('Sacramento Open')[0]).toBeInTheDocument();
@@ -80,7 +89,11 @@ describe('LocalMeets', () => {
       });
       jest.mocked(Utils.isWithinWSOBoundary).mockReturnValue(true);
 
-      render(<LocalMeets />);
+      render(
+        <MemoryRouter>
+          <LocalMeets />
+        </MemoryRouter>
+      );
 
       await waitFor(() => {
         expect(screen.getAllByText('Meet A')[0]).toBeInTheDocument();
@@ -97,7 +110,11 @@ describe('LocalMeets', () => {
       });
       jest.mocked(Utils.isWithinWSOBoundary).mockReturnValue(false);
 
-      render(<LocalMeets />);
+      render(
+        <MemoryRouter>
+          <LocalMeets />
+        </MemoryRouter>
+      );
 
       await waitFor(() => {
         expect(
@@ -112,7 +129,11 @@ describe('LocalMeets', () => {
         json: async () => ({ data: [] }),
       });
 
-      render(<LocalMeets />);
+      render(
+        <MemoryRouter>
+          <LocalMeets />
+        </MemoryRouter>
+      );
 
       await waitFor(() => {
         expect(
@@ -132,7 +153,11 @@ describe('LocalMeets', () => {
       });
       jest.mocked(Utils.isWithinWSOBoundary).mockReturnValue(true);
 
-      render(<LocalMeets />);
+      render(
+        <MemoryRouter>
+          <LocalMeets />
+        </MemoryRouter>
+      );
 
       await waitFor(() => {
         expect(screen.getAllByText('Local Meet')[0]).toBeInTheDocument();
@@ -145,7 +170,11 @@ describe('LocalMeets', () => {
     test('shows error message when response is not ok', async () => {
       (global.fetch as jest.Mock).mockResolvedValue({ ok: false, status: 500 });
 
-      render(<LocalMeets />);
+      render(
+        <MemoryRouter>
+          <LocalMeets />
+        </MemoryRouter>
+      );
 
       await waitFor(() => {
         expect(
@@ -157,7 +186,11 @@ describe('LocalMeets', () => {
     test('shows error message when fetch throws', async () => {
       (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
 
-      render(<LocalMeets />);
+      render(
+        <MemoryRouter>
+          <LocalMeets />
+        </MemoryRouter>
+      );
 
       await waitFor(() => {
         expect(
@@ -170,7 +203,11 @@ describe('LocalMeets', () => {
       const error = new Error('Network error');
       (global.fetch as jest.Mock).mockRejectedValue(error);
 
-      render(<LocalMeets />);
+      render(
+        <MemoryRouter>
+          <LocalMeets />
+        </MemoryRouter>
+      );
 
       await waitFor(() => {
         expect(Utils.handleError).toHaveBeenCalledWith(error);
@@ -185,7 +222,11 @@ describe('LocalMeets', () => {
         json: async () => ({ data: [] }),
       });
 
-      render(<LocalMeets />);
+      render(
+        <MemoryRouter>
+          <LocalMeets />
+        </MemoryRouter>
+      );
 
       await waitFor(() => {
         expect(global.fetch).toHaveBeenCalledWith(
@@ -201,7 +242,11 @@ describe('LocalMeets', () => {
         json: async () => ({ data: [] }),
       });
 
-      render(<LocalMeets />);
+      render(
+        <MemoryRouter>
+          <LocalMeets />
+        </MemoryRouter>
+      );
 
       await waitFor(() => expect(global.fetch).toHaveBeenCalled());
       const [, options] = (global.fetch as jest.Mock).mock.calls[0];
@@ -214,7 +259,11 @@ describe('LocalMeets', () => {
         json: async () => ({ data: [] }),
       });
 
-      render(<LocalMeets />);
+      render(
+        <MemoryRouter>
+          <LocalMeets />
+        </MemoryRouter>
+      );
 
       await waitFor(() => expect(global.fetch).toHaveBeenCalled());
       const [, options] = (global.fetch as jest.Mock).mock.calls[0];
@@ -227,7 +276,11 @@ describe('LocalMeets', () => {
         json: async () => ({ data: [] }),
       });
 
-      render(<LocalMeets />);
+      render(
+        <MemoryRouter>
+          <LocalMeets />
+        </MemoryRouter>
+      );
 
       await waitFor(() => expect(global.fetch).toHaveBeenCalled());
       const [, options] = (global.fetch as jest.Mock).mock.calls[0];
@@ -241,7 +294,11 @@ describe('LocalMeets', () => {
         json: async () => ({ data: [] }),
       });
 
-      render(<LocalMeets />);
+      render(
+        <MemoryRouter>
+          <LocalMeets />
+        </MemoryRouter>
+      );
 
       await waitFor(() => expect(global.fetch).toHaveBeenCalled());
       const [, options] = (global.fetch as jest.Mock).mock.calls[0];
@@ -253,7 +310,11 @@ describe('LocalMeets', () => {
     test('renders the section heading', () => {
       (global.fetch as jest.Mock).mockImplementation(() => new Promise(() => {}));
 
-      render(<LocalMeets />);
+      render(
+        <MemoryRouter>
+          <LocalMeets />
+        </MemoryRouter>
+      );
 
       expect(screen.getByText('Local Meet Results')).toBeInTheDocument();
     });

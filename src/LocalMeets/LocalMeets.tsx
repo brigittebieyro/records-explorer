@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { CircleLoader } from 'react-spinners';
 import {
   getMeetsRoute,
@@ -13,12 +14,15 @@ import { LocalMeet, MeetResult } from '../Utils/types';
 import LocalMeetsOptionsBar from './LocalMeetsOptionsBar';
 
 function LocalMeets() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [status, setStatus] = useState<string | undefined>();
   const [meets, setMeets] = useState<LocalMeet[]>([]);
   const [selectedMeetId, setSelectedMeetId] = useState<string>('');
   const [currentMeet, setCurrentMeet] = useState<LocalMeet | undefined>();
   const [meetResults, setMeetResults] = useState<MeetResult[]>([]);
   const [resultsStatus, setResultsStatus] = useState<string | undefined>();
+  const [moreInfoLink, setMoreInfoLink] = useState<string | undefined>();
+  const autoLoadMeetId = useRef(searchParams.get('meetId'));
 
   const fetchLocalMeetList = async (): Promise<void> => {
     setStatus('inprogress');
@@ -71,6 +75,7 @@ function LocalMeets() {
     if (!meet) return;
     setCurrentMeet(meet);
     setResultsStatus('inprogress');
+    setSearchParams({ meetId: meet.id });
     try {
       // Parse the meet date from subtitle for use as the search date range.
 
@@ -108,6 +113,7 @@ function LocalMeets() {
         nameSearchData.data ?? [];
       const matched = nameSearchResults.find((r) => r.meet === meet.name) ?? nameSearchResults[0];
       const actionUrl = matched?.action?.[0]?.url;
+      setMoreInfoLink(actionUrl);
       const resultsId = actionUrl?.split('/results/')[1];
       if (!resultsId) {
         setResultsStatus('error');
@@ -136,12 +142,23 @@ function LocalMeets() {
     setMeetResults([]);
     setSelectedMeetId('');
     setResultsStatus(undefined);
+    setSearchParams({});
   };
 
   useEffect(() => {
     fetchLocalMeetList();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Auto-trigger from URL meetId param once the meet list is loaded
+  useEffect(() => {
+    const meetId = autoLoadMeetId.current;
+    if (meetId && status === 'complete' && meets.length > 0 && !currentMeet) {
+      autoLoadMeetId.current = null;
+      handleGo(meetId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, meets]);
 
   return (
     <div className="App">
@@ -202,6 +219,16 @@ function LocalMeets() {
               {currentMeet.subtitle && (
                 <span className="local-meet-date">{currentMeet.subtitle}</span>
               )}
+              <span className="local-meet-full-results-link">
+                <a
+                  className="common-text-link"
+                  target="_blank"
+                  rel="noreferrer"
+                  href={moreInfoLink}
+                >
+                  Full Results from USAW &gt;&gt;
+                </a>
+              </span>
             </div>
 
             {resultsStatus === 'inprogress' && (

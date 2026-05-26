@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { CircleLoader } from 'react-spinners';
 import AllCurrentRecordsView from './components/AllCurrentRecordsView';
 import OptionsBar from './components/OptionsBar';
@@ -128,10 +129,14 @@ function RecordViewer() {
   const [currentAgeGroup, setCurrentAgeGroup] = useState<AgeGroup | undefined>();
   const [localStandards, setLocalStandards] = useState<string[][]>([]);
   const [standardsStatus, setStandardsStatus] = useState<string | undefined>();
-  const [selectedWeightClass, setSelectedWeightClass] = useState('');
-  const [selectedAgeGroup, setSelectedAgeGroup] = useState('OPEN');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedWeightClass, setSelectedWeightClass] = useState(
+    searchParams.get('weightClass') ?? ''
+  );
+  const [selectedAgeGroup, setSelectedAgeGroup] = useState(searchParams.get('ageGroup') ?? 'OPEN');
   const [displayedStandards, setDisplayedStandards] = useState<StandardsResult>({});
   const [allRecordsData, setAllRecordsData] = useState<AllCurrentRecordsEntry[]>([]);
+  const didAutoRun = useRef(false);
 
   const fetchCurrentStandards = async (): Promise<void> => {
     if (standardsStatus) {
@@ -186,32 +191,42 @@ function RecordViewer() {
     }
   }, [localStandards]);
 
-  const updateDisplayedStandards = async (weightClass: WeightClass): Promise<void> => {
-    if (!!weightClass && localStandards?.length) {
-      setDisplayedStandards(computeStandardsForWeightClass(weightClass, localStandards));
+  // Recompute displayed standards whenever the selected weight class or standards data changes.
+  // This covers both normal Go-button flow and auto-triggering from URL params on mount.
+  useEffect(() => {
+    if (currentWeightClass && localStandards?.length) {
+      setDisplayedStandards(computeStandardsForWeightClass(currentWeightClass, localStandards));
     }
-  };
+  }, [localStandards, currentWeightClass]);
 
-  async function updateContents(): Promise<void> {
-    if (!selectedWeightClass) {
-      return;
-    }
-    const currentAge = getAgeGroup(selectedAgeGroup || 'OPEN');
-    const weightClasses = getWeightClassSet(currentAge);
-    const currentWtClass = weightClasses.find((wtClass) => wtClass.id === selectedWeightClass);
-
-    if (!currentWtClass) {
-      return;
-    }
-
+  function applySelection(ageGroup: string, weightClass: string): void {
+    const ageGroupObj = getAgeGroup(ageGroup);
+    const weightClasses = getWeightClassSet(ageGroupObj);
+    const wtClass = weightClasses.find((wc) => wc.id === weightClass);
+    if (!wtClass) return;
     setStatus('inprogress');
     resetAllData();
-
-    updateDisplayedStandards(currentWtClass);
-    setCurrentWeightClass(currentWtClass);
-    setCurrentAgeGroup(currentAge);
+    setCurrentWeightClass(wtClass);
+    setCurrentAgeGroup(ageGroupObj);
     setStatus('complete');
   }
+
+  async function updateContents(): Promise<void> {
+    if (!selectedWeightClass) return;
+    const ageGroup = selectedAgeGroup || 'OPEN';
+    applySelection(ageGroup, selectedWeightClass);
+    setSearchParams({ ageGroup, weightClass: selectedWeightClass });
+  }
+
+  // Auto-trigger from URL params on first mount
+  useEffect(() => {
+    if (didAutoRun.current) return;
+    didAutoRun.current = true;
+    const wc = searchParams.get('weightClass');
+    const ag = searchParams.get('ageGroup') ?? 'OPEN';
+    if (wc) applySelection(ag, wc);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="App">
@@ -226,6 +241,7 @@ function RecordViewer() {
           setSelectedWeightClass('');
           resetAllData();
           setStatus(undefined);
+          setSearchParams({});
         }}
         showReset={status === 'complete'}
       />

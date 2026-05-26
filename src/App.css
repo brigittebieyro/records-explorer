@@ -472,6 +472,10 @@ body {
   cursor: pointer;
 }
 
+.local-meet-full-results-link {
+  float: right;
+}
+
 .local-meet-item:hover {
   border-color: gold;
 }

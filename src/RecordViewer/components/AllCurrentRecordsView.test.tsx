@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import AllCurrentRecordsView from './AllCurrentRecordsView';
-import { AgeGroup, AllCurrentRecordsEntry, WeightClass } from '../Utils/types';
+import { AgeGroup, AllCurrentRecordsEntry, WeightClass } from '../../Utils/types';
 
 const womenW48 = { id: 'W48', name: "Women's 48kg", gender: 'female' } as unknown as WeightClass;
 const menM60 = { id: 'M60', name: "Men's 60kg", gender: 'male' } as unknown as WeightClass;

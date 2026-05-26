@@ -1,5 +1,6 @@
 import { ageGroups } from '../Data/ageGroups';
 import { defaultWeightClasses } from '../Data/defaultWeightClasses';
+import { wsoBoundary } from '../Data/RoutesAndSettings';
 import {
   u11WeightClasses,
   u13WeightClasses,
@@ -102,4 +103,13 @@ export const shouldIncludePastLifter = (
 
 export const getYear = (date: string): number => {
   return new Date(date).getUTCFullYear();
+};
+
+export const isWithinWSOBoundary = (latitude: number, longitude: number): boolean => {
+  return (
+    latitude >= wsoBoundary.south &&
+    latitude <= wsoBoundary.north &&
+    longitude >= wsoBoundary.west &&
+    longitude <= wsoBoundary.east
+  );
 };

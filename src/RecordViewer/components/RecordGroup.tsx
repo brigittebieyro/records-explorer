@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CircleLoader } from 'react-spinners';
-import RecordHolder from './components/RecordHolder';
+import RecordHolder from './RecordHolder';
 import {
   getLifterDataRoute,
   getLifterId,
@@ -8,9 +8,9 @@ import {
   headers,
   ineligibleAthletes,
   wsoId,
-} from '../Data/RoutesAndSettings';
-import { handleError, shouldIncludePastLifter, sortLifts } from '../Utils/Utils';
-import { AgeGroup, CombinedLiftData, MeetRecord, SortKey, WeightClass } from '../Utils/types';
+} from '../../Data/RoutesAndSettings';
+import { handleError, shouldIncludePastLifter, sortLifts } from '../../Utils/Utils';
+import { AgeGroup, CombinedLiftData, MeetRecord, SortKey, WeightClass } from '../../Utils/types';
 
 interface SortTypeDescription {
   id: SortKey;

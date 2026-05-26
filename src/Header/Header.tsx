@@ -32,6 +32,9 @@ function Header() {
                   <a href="/">WSO Records Explorer</a>
                 </li>
                 <li>
+                  <a href="/local-meet-results">Local Meet Results</a>
+                </li>
+                <li>
                   <a href={localScheduleUrl}>Local Meet Schedule</a>
                 </li>
                 <li>

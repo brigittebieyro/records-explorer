@@ -1,23 +1,27 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import App, { buildAllCurrentRecords, computeStandardsForWeightClass } from './App';
+import App from './App';
+import {
+  buildAllCurrentRecords,
+  computeStandardsForWeightClass,
+} from './RecordViewer/RecordViewer';
 import * as RoutesAndSettings from './Data/RoutesAndSettings';
 import * as Utils from './Utils/Utils';
 import { AgeGroup, WeightClass } from './Utils/types';
 
-jest.mock('./RecordViewer/RecordGroup', () => {
+jest.mock('./RecordViewer/components/RecordGroup', () => {
   return function RecordGroup() {
     return <div data-testid="record-group">Current Records</div>;
   };
 });
 
-jest.mock('./RecordViewer/CombinedRecordGroup', () => {
+jest.mock('./RecordViewer/components/CombinedRecordGroup', () => {
   return function CombinedRecordGroup() {
     return <div data-testid="combined-record-group">Historical Records</div>;
   };
 });
 
-jest.mock('./RecordViewer/Standards', () => {
+jest.mock('./RecordViewer/components/Standards', () => {
   return function Standards() {
     return <div data-testid="standards">Standards</div>;
   };
@@ -29,7 +33,7 @@ jest.mock('./Header/Header', () => {
   };
 });
 
-jest.mock('./RecordViewer/AllCurrentRecordsView', () => {
+jest.mock('./RecordViewer/components/AllCurrentRecordsView', () => {
   return function AllCurrentRecordsView({ data }: { data: unknown[] }) {
     return <div data-testid="all-current-records-view">All Records ({data.length})</div>;
   };

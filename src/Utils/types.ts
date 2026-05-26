@@ -70,6 +70,43 @@ export interface AgeGroupRecordSet {
 
 export type StandardsResult = Record<string, AgeGroupRecordSet>;
 
+export interface LocalMeetGeolocation {
+  lat: number;
+  lng: number;
+}
+
+export interface LocalMeet {
+  id: string;
+  is_event: boolean;
+  name: string;
+  subtitle: string;
+  subtitle_icon: string;
+  address: string;
+  geolocation: LocalMeetGeolocation | null;
+  telephone: string;
+  email: string;
+  info: string;
+  actions: unknown;
+  img_url: string;
+}
+
+export interface MeetResult {
+  age_category: string;
+  'best_c&j': number;
+  best_snatch: number;
+  'body_weight_(kg)': number;
+  'c&j_lift_1': number;
+  'c&j_lift_2': number;
+  'c&j_lift_3': number;
+  date: string;
+  lifter: string;
+  meet: string;
+  snatch_lift_1: number;
+  snatch_lift_2: number;
+  snatch_lift_3: number;
+  total: number;
+}
+
 export interface AllCurrentRecordsGroup {
   ageGroup: AgeGroup;
   records: Record<string, StandardRecord>;

@@ -1,12 +1,12 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import RecordGroup from './RecordGroup';
-import * as RoutesAndSettings from '../Data/RoutesAndSettings';
-import * as Utils from '../Utils/Utils';
-import { AgeGroup, LifterAction, WeightClass } from '../Utils/types';
+import * as RoutesAndSettings from '../../Data/RoutesAndSettings';
+import * as Utils from '../../Utils/Utils';
+import { AgeGroup, LifterAction, WeightClass } from '../../Utils/types';
 
-jest.mock('../Data/RoutesAndSettings');
-jest.mock('../Utils/Utils');
+jest.mock('../../Data/RoutesAndSettings');
+jest.mock('../../Utils/Utils');
 jest.mock('react-spinners', () => {
   return {
     CircleLoader: () => <div data-testid="circle-loader">Loading</div>,

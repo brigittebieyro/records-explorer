@@ -25,6 +25,35 @@ app.use('/api/lifter-data', (req, res) => {
   proxyServer.emit('request', req, res);
 });
 
+app.use('/api/local-meets', (req, res) => {
+  // Rewrite the incoming URL so cors-anywhere sees the target URL as the first path segment
+  // Incoming: /api/local-meets/... -> cors-anywhere expects /https://host/api/...
+  const targetBase = 'https://usaweightlifting.sport80.com/api/public/widget';
+  const suffix = req.originalUrl.replace(/^\/api\/local-meets/, '');
+  req.url = `/${targetBase}${suffix}`;
+  proxyServer.emit('request', req, res);
+});
+
+app.use('/api/meet-search', (req, res) => {
+  // Rewrite the incoming URL so cors-anywhere sees the target URL as the first path segment
+  // Incoming: /api/meet-search/... -> cors-anywhere expects /https://host/api/...
+  const targetBase = 'https://admin-usaw-rankings.sport80.com/api/events/table/data';
+  const suffix = req.originalUrl.replace(/^\/api\/meet-search/, '');
+  req.url = `/${targetBase}${suffix}`;
+  console.log(`Proxying meet search request to: ${targetBase}${suffix}`);
+  proxyServer.emit('request', req, res);
+});
+
+app.use('/api/meet-results', (req, res) => {
+  // Rewrite the incoming URL so cors-anywhere sees the target URL as the first path segment
+  // Incoming: /api/meet-results/... -> cors-anywhere expects /https://host/api/...
+  const targetBase = 'https://admin-usaw-rankings.sport80.com/api/events';
+  const suffix = req.originalUrl.replace(/^\/api\/meet-results/, '');
+  req.url = `/${targetBase}${suffix}`;
+  console.log(`Proxying meet results request to: ${targetBase}${suffix}`);
+  proxyServer.emit('request', req, res);
+});
+
 // Serve React build if available (for containerized deployments)
 const path = require('path');
 const fs = require('fs');

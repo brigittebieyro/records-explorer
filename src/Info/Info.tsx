@@ -53,6 +53,29 @@ function Info() {
         </div>
 
         <div className="info-page-box">
+          <h2>About Last Year's Lifts</h2>
+          <p>
+            In some cases, we'll see lifts from the previous year that are higher than the current
+            standard or record. This is because standards are reevaluated each year and may be
+            lowered, but are not awarded retroactively. Athletes who see that a standard has been
+            lowered to something they know they can reach in competition are invited to come out and
+            break them in the current year.
+          </p>
+          <p>
+            <strong>Nationally:</strong>
+            <br />
+            Each calendar year, USAW drops unmet standards by 1kg.
+          </p>
+          <p>
+            <strong>Locally:</strong>
+            <br />
+            Local standards are voted on by the WSO committee each year. In 2025, the committee
+            votes on and accepted 90% of the national record standard. For 2026, we voted on and
+            accepted 85% of the national record or standard for unclaimed record standards.
+          </p>
+        </div>
+
+        <div className="info-page-box">
           <h2>About This Site</h2>
           <p>
             This records viewer is meant to highlight all of our recordholders, past and present. As

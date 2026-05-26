@@ -6,10 +6,19 @@ interface RecordListForWeightClassProps {
   groups: AllCurrentRecordsGroup[];
 }
 
+const getDisplayName = (weightClass: WeightClass): string => {
+  const prefix = weightClass.gender === 'female' ? "Women's" : "Men's";
+  if (weightClass.maxBodyweight === '1000') {
+    const threshold = Math.floor(parseFloat(weightClass.minBodyweight));
+    return `${prefix} ${threshold}+kg`;
+  }
+  return `${prefix} ${weightClass.maxBodyweight}kg`;
+};
+
 function RecordListForWeightClass({ weightClass, groups }: RecordListForWeightClassProps) {
   return (
     <section className="all-records-weight-class-section">
-      <h2 className="all-records-weight-class-header">{weightClass.name}</h2>
+      <h2 className="all-records-weight-class-header">{getDisplayName(weightClass)}</h2>
       {groups.map(({ ageGroup, records }) => (
         <div key={ageGroup.id} className="all-records-age-group-row">
           <p className="all-records-age-group-name">

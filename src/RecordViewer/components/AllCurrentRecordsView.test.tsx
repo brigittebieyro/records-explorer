@@ -2,8 +2,8 @@ import { render, screen } from '@testing-library/react';
 import AllCurrentRecordsView from './AllCurrentRecordsView';
 import { AgeGroup, AllCurrentRecordsEntry, WeightClass } from '../../Utils/types';
 
-const womenW48 = { id: 'W48', name: "Women's 48kg", gender: 'female' } as unknown as WeightClass;
-const menM60 = { id: 'M60', name: "Men's 60kg", gender: 'male' } as unknown as WeightClass;
+const womenW48 = { id: 'W48', name: "Women's 48kg", gender: 'female', minBodyweight: '0', maxBodyweight: '48' } as unknown as WeightClass;
+const menM60 = { id: 'M60', name: "Men's 60kg", gender: 'male', minBodyweight: '0', maxBodyweight: '60' } as unknown as WeightClass;
 const openAgeGroup = { id: 'OPEN', name: 'Open' } as unknown as AgeGroup;
 const masters35AgeGroup = { id: '35', name: '35 - 39 years old' } as unknown as AgeGroup;
 
@@ -93,6 +93,8 @@ describe('AllCurrentRecordsView', () => {
             id: 'W48',
             name: "Women's 48kg",
             gender: 'female',
+            minBodyweight: '0',
+            maxBodyweight: '48',
           } as unknown as WeightClass,
           groups: [{ ageGroup: openAgeGroup, records: partialRecords }],
         },
@@ -101,6 +103,8 @@ describe('AllCurrentRecordsView', () => {
             id: 'W53',
             name: "Women's 53kg",
             gender: 'female',
+            minBodyweight: '48.01',
+            maxBodyweight: '53',
           } as unknown as WeightClass,
           groups: [{ ageGroup: openAgeGroup, records: partialRecords }],
         },
@@ -169,6 +173,8 @@ describe('AllCurrentRecordsView', () => {
             id: 'W48',
             name: "Women's 48kg",
             gender: 'female',
+            minBodyweight: '0',
+            maxBodyweight: '48',
           } as unknown as WeightClass,
           groups: [{ ageGroup: openAgeGroup, records: partialRecords }],
         },

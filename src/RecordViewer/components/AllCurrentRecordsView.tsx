@@ -5,9 +5,30 @@ interface AllCurrentRecordsViewProps {
   data: AllCurrentRecordsEntry[];
 }
 
+const byBodyweight = (a: AllCurrentRecordsEntry, b: AllCurrentRecordsEntry) =>
+  parseFloat(a.weightClass.maxBodyweight) - parseFloat(b.weightClass.maxBodyweight);
+
+const mergeByBodyweight = (entries: AllCurrentRecordsEntry[]): AllCurrentRecordsEntry[] => {
+  const map = new Map<string, AllCurrentRecordsEntry>();
+  for (const entry of entries) {
+    const key = entry.weightClass.maxBodyweight;
+    const existing = map.get(key);
+    if (existing) {
+      map.set(key, { weightClass: existing.weightClass, groups: [...existing.groups, ...entry.groups] });
+    } else {
+      map.set(key, { ...entry, groups: [...entry.groups] });
+    }
+  }
+  return Array.from(map.values());
+};
+
 function AllCurrentRecordsView({ data }: AllCurrentRecordsViewProps) {
-  const womensData = data.filter((item) => item.weightClass.gender === 'female');
-  const mensData = data.filter((item) => item.weightClass.gender === 'male');
+  const womensData = mergeByBodyweight(
+    data.filter((item) => item.weightClass.gender === 'female').sort(byBodyweight)
+  );
+  const mensData = mergeByBodyweight(
+    data.filter((item) => item.weightClass.gender === 'male').sort(byBodyweight)
+  );
 
   if (!data.length) {
     return (
@@ -25,7 +46,7 @@ function AllCurrentRecordsView({ data }: AllCurrentRecordsViewProps) {
           <h2 className="all-records-gender-header">Women</h2>
           {womensData.map(({ weightClass, groups }) => (
             <RecordListForWeightClass
-              key={`${weightClass.id}-${groups.map((g) => g.ageGroup.id).join('-')}`}
+              key={`female-${weightClass.maxBodyweight}`}
               weightClass={weightClass}
               groups={groups}
             />
@@ -35,7 +56,7 @@ function AllCurrentRecordsView({ data }: AllCurrentRecordsViewProps) {
           <h2 className="all-records-gender-header">Men</h2>
           {mensData.map(({ weightClass, groups }) => (
             <RecordListForWeightClass
-              key={`${weightClass.id}-${groups.map((g) => g.ageGroup.id).join('-')}`}
+              key={`male-${weightClass.maxBodyweight}`}
               weightClass={weightClass}
               groups={groups}
             />

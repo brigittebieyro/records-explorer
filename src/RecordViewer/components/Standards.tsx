@@ -1,4 +1,4 @@
-import { AgeGroupRecordSet, StandardRecord } from '../Utils/types';
+import { AgeGroupRecordSet, StandardRecord } from '../../Utils/types';
 
 interface StandardsProps {
   relevantRecords?: AgeGroupRecordSet | null;
@@ -28,7 +28,7 @@ function Standards({ relevantRecords, weightClassName, ageGroupName }: Standards
 
   return (
     <div className="record-viewer-standards-parent">
-      <p className="record-group-title">
+      <p className="page-title">
         Officially Recognized Records & Standards for {weightClassName} {ageGroupName}:
       </p>
 

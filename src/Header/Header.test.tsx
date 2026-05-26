@@ -31,6 +31,12 @@ describe('Header', () => {
       expect(link).toHaveAttribute('href', '/info');
     });
 
+    test('renders the local meet results link with correct href', () => {
+      render(<Header />);
+      const link = screen.getByText('Local Meet Results').closest('a');
+      expect(link).toHaveAttribute('href', '/local-meet-results');
+    });
+
     test('renders the meet schedule link with correct href', () => {
       render(<Header />);
       const link = screen.getByText('Local Meet Schedule').closest('a');

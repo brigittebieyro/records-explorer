@@ -44,9 +44,18 @@ function Standards({ relevantRecords, weightClassName, ageGroupName }: Standards
         <b>
           <i>more</i>
         </b>
-        &nbsp; in a sanctioned competition.
+        &nbsp; in a sanctioned competition,{' '}
+        <b>
+          <i>in the current year</i>
+        </b>
+        .
       </p>
 
+      <p className="record-viewer-fine-print">
+        <b>Note:</b> Record standards may be adjusted anually. The 2026 standard is 85% of the
+        national record or standard at the beginning of this year. The 2025 standards were 90%, and
+        for some weight classes, that is a fairly large difference.
+      </p>
       {!!relevantRecords && (
         <div>
           <div className="record-viewer-standard-set">

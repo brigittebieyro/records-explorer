@@ -129,7 +129,7 @@ export const ineligibleAthletes: string[] = ['Aurora van Ulft', 'Bekdoolot Rasul
 // Scripts page password
 // ----------------------------------------------------------------------------------------------------------------
 //
-export const scriptsPassword = 'pineapple';
+export const scriptsPassword = '28c92c4ba6b21d0aa5777a3ac422164c5c7a24e4d133513e47490c7c48b2b1df';
 
 // ----------------------------------------------------------------------------------------------------------------
 // Plausibility caps — results with any value above these are considered data errors and are not displayed.

@@ -113,3 +113,11 @@ export const isWithinWSOBoundary = (latitude: number, longitude: number): boolea
     longitude <= wsoBoundary.east
   );
 };
+
+export async function hashPassword(input: string, salt: string): Promise<string> {
+  const encoded = new TextEncoder().encode(`${input}---${salt}`);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', encoded);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}

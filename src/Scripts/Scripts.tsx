@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { scripts } from '../Data/scripts';
-import { scriptsPassword } from '../Data/RoutesAndSettings';
+import { scriptsPassword, wsoName } from '../Data/RoutesAndSettings';
+import { hashPassword } from '../Utils/Utils';
 
 function Scripts() {
   const [selectedName, setSelectedName] = useState('');
@@ -13,8 +14,9 @@ function Scripts() {
 
   const selectedScript = scripts.find((s) => s.name === selectedName);
 
-  const handlePasswordSubmit = () => {
-    if (passwordInput === scriptsPassword) {
+  const handlePasswordSubmit = async () => {
+    const hashed = await hashPassword(passwordInput, wsoName);
+    if (hashed === scriptsPassword) {
       setIsUnlocked(true);
       setPasswordError(false);
     } else {

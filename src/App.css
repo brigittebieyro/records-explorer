@@ -492,7 +492,7 @@ body {
   font-size: 12px;
 }
 
-*/ .local-meet-item:hover {
+.local-meet-item:hover {
   border-color: gold;
 }
 

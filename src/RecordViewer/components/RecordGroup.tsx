@@ -7,6 +7,9 @@ import {
   getRankingsRoute,
   headers,
   ineligibleAthletes,
+  maxCleanAndJerk,
+  maxSnatch,
+  maxTotal,
   wsoId,
 } from '../../Data/RoutesAndSettings';
 import { handleError, shouldIncludePastLifter, sortLifts } from '../../Utils/Utils';
@@ -153,7 +156,10 @@ function RecordGroup({
               meetBw >= minBw &&
               meetBw <= maxBw &&
               meetYear >= minYearForLifter &&
-              meetYear <= maxYearForLifter
+              meetYear <= maxYearForLifter &&
+              (meet.best_snatch == null || meet.best_snatch <= maxSnatch) &&
+              (meet['best_c&j'] == null || meet['best_c&j'] <= maxCleanAndJerk) &&
+              meet.total <= maxTotal
             ) {
               matchingLifts.push({ ...lifter, ...meet });
             }

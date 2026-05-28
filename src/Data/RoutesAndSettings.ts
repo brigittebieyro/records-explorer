@@ -124,3 +124,17 @@ export const wsoBoundary = {
 // ----------------------------------------------------------------------------------------------------------------
 //
 export const ineligibleAthletes: string[] = ['Aurora van Ulft', 'Bekdoolot Rasulbekov'];
+
+// ----------------------------------------------------------------------------------------------------------------
+// Scripts page password
+// ----------------------------------------------------------------------------------------------------------------
+//
+export const scriptsPassword = 'pineapple';
+
+// ----------------------------------------------------------------------------------------------------------------
+// Plausibility caps — results with any value above these are considered data errors and are not displayed.
+// ----------------------------------------------------------------------------------------------------------------
+//
+export const maxSnatch = 200;
+export const maxCleanAndJerk = 280;
+export const maxTotal = 470;

@@ -34,6 +34,9 @@ function Header() {
                 <li>
                   <a href="/local-meet-results">Local Meet Results</a>
                 </li>
+                {/* <li>
+                  <a href="/scripts">Scripts</a>
+                </li> */}
                 <li>
                   <a href={localScheduleUrl}>Local Meet Schedule</a>
                 </li>

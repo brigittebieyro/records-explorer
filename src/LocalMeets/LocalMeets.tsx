@@ -12,6 +12,7 @@ import {
 import { handleError, isWithinWSOBoundary } from '../Utils/Utils';
 import { LocalMeet, MeetResult } from '../Utils/types';
 import LocalMeetsOptionsBar from './LocalMeetsOptionsBar';
+import LocalMeetResultsByWeightClass from './LocalMeetResultsByWeightClass';
 
 function LocalMeets() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -229,6 +230,14 @@ function LocalMeets() {
                   Full Results from USAW &gt;&gt;
                 </a>
               </span>
+              <p className="common-fine-print">
+                Not all event results include athlete age groups. To deep dive on a specific age
+                group, use the{' '}
+                <a href="/" className="common-text-link">
+                  records explorer page
+                </a>
+                .
+              </p>
             </div>
 
             {resultsStatus === 'inprogress' && (
@@ -246,16 +255,7 @@ function LocalMeets() {
             )}
 
             {resultsStatus === 'complete' && meetResults.length > 0 && (
-              <ul className="local-meets-results-list">
-                {meetResults.map((result, i) => (
-                  <li key={i} className="local-meet-result-item">
-                    <strong>{result.lifter}</strong> &bull; {result.age_category} &bull;{' '}
-                    <strong>{result.best_snatch}kg Snatch</strong> &bull;{' '}
-                    <strong>{result['best_c&j']}kg Clean & Jerk</strong> &bull;{' '}
-                    <strong>{result.total}kg Total</strong>
-                  </li>
-                ))}
-              </ul>
+              <LocalMeetResultsByWeightClass meetResults={meetResults} />
             )}
           </>
         )}

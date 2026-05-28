@@ -47,6 +47,11 @@ body {
   text-decoration: underline;
 }
 
+.common-fine-print {
+  font-size: 10pt;
+  font-style: italic;
+}
+
 .common-text-link:hover {
   color: var(--link-color-hover);
 }
@@ -462,10 +467,10 @@ body {
 
 /* Local Meet Results styles */
 .local-meets-parent {
-  margin: 50px;
+  margin: 0 50px 50px 50px;
   text-align: left;
   width: 100%;
-  max-width: 800px;
+  max-width: 1100px;
 }
 
 .local-meets-list {
@@ -483,16 +488,21 @@ body {
 }
 
 .local-meet-full-results-link {
-  float: right;
+  margin-left: 28px;
+  font-size: 12px;
 }
 
-.local-meet-item:hover {
+*/ .local-meet-item:hover {
   border-color: gold;
 }
 
 .local-meets-empty {
   font-style: italic;
   color: var(--main-border-color);
+}
+
+.local-meet-result-details {
+  margin: 0 0 0 28px;
 }
 
 .local-meet-date {
@@ -505,8 +515,8 @@ body {
 .local-meet-selected-header {
   padding: 12px 0 16px 0;
   font-size: 16px;
-  border-bottom: 1px solid var(--main-border-color);
   margin-bottom: 16px;
+  text-align: center;
 }
 
 .local-meets-results-list {

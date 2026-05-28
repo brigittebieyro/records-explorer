@@ -8,9 +8,9 @@ export interface Script {
 
 export const scripts: Script[] = [
   {
-    name: 'Analyze Records',
+    name: 'Fetch Record Updates',
     source: runAnalyzeRecords,
     description:
-      'Queries the USAW API and Google Sheets to identify lifts that would break existing WSO records, then downloads the results as a CSV. Note: this analysis covers all age groups and weight classes and will take several minutes to complete.',
+      'Queries the USAW API and Google Sheets to identify lifts that would break existing WSO records in the current calendar year, then downloads the results as a CSV. Note: this analysis covers all age groups and weight classes and will take several minutes to complete.',
   },
 ];

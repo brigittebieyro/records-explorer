@@ -1,9 +1,13 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import Scripts from './Scripts';
 
 function getPasswordInput() {
   return document.querySelector('input[type="password"]') as HTMLInputElement;
 }
+
+jest.mock('../Utils/Utils', () => ({
+  hashPassword: async (input: string) => input,
+}));
 
 jest.mock('../Data/scripts', () => ({
   scripts: [
@@ -65,76 +69,84 @@ describe('Scripts', () => {
   });
 
   describe('Password entry', () => {
-    test('shows an error message for an incorrect password', () => {
+    test('shows an error message for an incorrect password', async () => {
       render(<Scripts />);
       fireEvent.change(getPasswordInput(), {
         target: { value: 'wrongpassword' },
       });
       fireEvent.click(screen.getByRole('button', { name: 'Go' }));
-      expect(screen.getByText(/Incorrect password/)).toBeInTheDocument();
+      await waitFor(() => expect(screen.getByText(/Incorrect password/)).toBeInTheDocument());
     });
 
-    test('clears the error message when the input changes after a failed attempt', () => {
+    test('clears the error message when the input changes after a failed attempt', async () => {
       render(<Scripts />);
       const input = getPasswordInput();
       fireEvent.change(input, { target: { value: 'wrong' } });
       fireEvent.click(screen.getByRole('button', { name: 'Go' }));
+      await waitFor(() => expect(screen.getByText(/Incorrect password/)).toBeInTheDocument());
       fireEvent.change(input, { target: { value: 'w' } });
       expect(screen.queryByText(/Incorrect password/)).not.toBeInTheDocument();
     });
 
-    test('accepts the correct password via the Go button', () => {
+    test('accepts the correct password via the Go button', async () => {
       render(<Scripts />);
       fireEvent.change(getPasswordInput(), {
         target: { value: 'pineapple' },
       });
       fireEvent.click(screen.getByRole('button', { name: 'Go' }));
-      expect(screen.queryByRole('button', { name: 'Go' })).not.toBeInTheDocument();
+      await waitFor(() =>
+        expect(screen.queryByRole('button', { name: 'Go' })).not.toBeInTheDocument()
+      );
     });
 
-    test('accepts the correct password via the Enter key', () => {
+    test('accepts the correct password via the Enter key', async () => {
       render(<Scripts />);
       const input = getPasswordInput();
       fireEvent.change(input, { target: { value: 'pineapple' } });
       fireEvent.keyDown(input, { key: 'Enter' });
-      expect(screen.queryByRole('button', { name: 'Go' })).not.toBeInTheDocument();
+      await waitFor(() =>
+        expect(screen.queryByRole('button', { name: 'Go' })).not.toBeInTheDocument()
+      );
     });
   });
 
   describe('Unlocked state', () => {
-    function unlock() {
+    async function unlock() {
       render(<Scripts />);
       fireEvent.change(getPasswordInput(), {
         target: { value: 'pineapple' },
       });
       fireEvent.click(screen.getByRole('button', { name: 'Go' }));
+      await waitFor(() =>
+        expect(screen.queryByRole('button', { name: 'Go' })).not.toBeInTheDocument()
+      );
     }
 
-    test('dropdown is enabled after correct password', () => {
-      unlock();
+    test('dropdown is enabled after correct password', async () => {
+      await unlock();
       expect(screen.getByRole('combobox', { name: 'Script' })).not.toBeDisabled();
     });
 
-    test('script options are populated after unlock', () => {
-      unlock();
+    test('script options are populated after unlock', async () => {
+      await unlock();
       expect(screen.getByText('Test Script')).toBeInTheDocument();
     });
 
-    test('Run button remains disabled before a script is selected', () => {
-      unlock();
+    test('Run button remains disabled before a script is selected', async () => {
+      await unlock();
       expect(screen.getByRole('button', { name: 'Run' })).toBeDisabled();
     });
 
-    test('Run button enables after selecting a script', () => {
-      unlock();
+    test('Run button enables after selecting a script', async () => {
+      await unlock();
       fireEvent.change(screen.getByRole('combobox', { name: 'Script' }), {
         target: { value: 'Test Script' },
       });
       expect(screen.getByRole('button', { name: 'Run' })).not.toBeDisabled();
     });
 
-    test('shows the script description after selecting a script', () => {
-      unlock();
+    test('shows the script description after selecting a script', async () => {
+      await unlock();
       fireEvent.change(screen.getByRole('combobox', { name: 'Script' }), {
         target: { value: 'Test Script' },
       });

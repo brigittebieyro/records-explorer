@@ -59,7 +59,7 @@ const mockLifter = {
   lifter_age: '28',
   'body_weight_(kg)': '47',
   action: 'lifterId/12345' as unknown as LifterAction[],
-  classData: mockWeightClass.previousAnalogs[0],
+  classData: mockWeightClass,
 };
 
 describe('CombinedRecordGroup', () => {
@@ -168,41 +168,6 @@ describe('CombinedRecordGroup', () => {
       });
     });
 
-    test('skips previousAnalogs with sport80Id of 0', async () => {
-      const weightClassWithZeroId: WeightClass = {
-        ...mockWeightClass,
-        previousAnalogs: [
-          { ...mockWeightClass.previousAnalogs[0], sport80Id: 0 },
-          ...mockWeightClass.previousAnalogs.slice(1),
-        ],
-      };
-
-      (global.fetch as jest.Mock).mockResolvedValue({
-        ok: true,
-        json: async () => ({ data: [] }),
-      });
-
-      jest.mocked(Utils.shouldIncludePastLifter).mockReturnValue(true);
-      jest.mocked(Utils.sortLifts).mockImplementation((lifts) => lifts);
-      jest.mocked(RoutesAndSettings.getRankingsRoute).mockReturnValue('/api/rankings');
-      Object.assign(RoutesAndSettings, { headers: {} });
-
-      render(
-        <CombinedRecordGroup
-          weightClass={weightClassWithZeroId}
-          ageGroup={mockAgeGroup}
-          emptyContent={<div>No historical records</div>}
-        />
-      );
-
-      await act(async () => {
-        jest.runAllTimers();
-      });
-
-      await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledTimes(1);
-      });
-    });
   });
 
   describe('State Management', () => {

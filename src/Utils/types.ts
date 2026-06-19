@@ -24,7 +24,9 @@ export interface WeightClass {
   maxBodyweight: string;
   gender: 'male' | 'female';
   start: string;
-  previousAnalogs: WeightClassAnalog[];
+  end?: string;
+  previousAnalogs?: WeightClassAnalog[]; //TODO, remove when historic is fully implemented
+  ageGroups?: string[]; // Simplifying historic
 }
 
 export interface LifterAction {

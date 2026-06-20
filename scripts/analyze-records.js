@@ -412,8 +412,14 @@ async function analyzeRecords() {
                 liftType,
                 athlete: athlete.name || 'Unknown',
                 weight: liftData.weight,
-                weightClass: weightClass.name,
-                ageGroup: ageGroup.name,
+                ageGroupId: /^\d+$/.test(ageGroup.id)
+                  ? (weightClass.gender === 'female' ? 'W' : 'M') + ageGroup.id
+                  : ageGroup.id,
+                gender: weightClass.gender === 'female' ? 'F' : 'M',
+                ageMin: ageGroup.minimum_lifter_age,
+                ageMax: ageGroup.maximum_lifter_age,
+                bodyWeightMin: Math.round(parseFloat(weightClass.minBodyweight)),
+                bodyWeightMax: weightClass.maxBodyweight,
                 date: liftData.date || '',
                 event: liftData.event || '',
                 wouldBreak: currentRecord ? currentRecord.weight : null,
@@ -464,24 +470,31 @@ function generateCsv(recordBreakers) {
   const liftOrder = { 'snatch': 0, 'clean & jerk': 1, 'total': 2 };
   const liftLabel = { 'snatch': 'Snatch', 'clean & jerk': 'Clean & Jerk', 'total': 'Total' };
 
+  const ageKey = r => r.ageGroupId === 'OPEN' ? -1 : parseInt(r.ageMax);
+
   const sorted = [...recordBreakers].sort((a, b) => {
-    if (a.ageGroupIndex !== b.ageGroupIndex) return a.ageGroupIndex - b.ageGroupIndex;
-    if (a.weightClassIndex !== b.weightClassIndex) return a.weightClassIndex - b.weightClassIndex;
+    const ageDiff = ageKey(a) - ageKey(b);
+    if (ageDiff !== 0) return ageDiff;
+    if (a.gender !== b.gender) return a.gender < b.gender ? -1 : 1; // F before M
+    const bwDiff = parseFloat(a.bodyWeightMax) - parseFloat(b.bodyWeightMax);
+    if (bwDiff !== 0) return bwDiff;
     return (liftOrder[a.liftType] ?? 99) - (liftOrder[b.liftType] ?? 99);
   });
 
   const rows = [
-    ['Age Group', 'Weight Class', 'Lift', 'Athlete', 'Weight (kg)', 'Date', 'Event', 'Current Record (kg)', 'Current Holder'],
+    ['ageGroup', 'gender', 'ageMin', 'ageMax', 'bodyWeightMin', 'bodyWeightMax', 'lift', 'record', 'name', 'date', 'place'],
     ...sorted.map(lift => [
-      lift.ageGroup,
-      lift.weightClass,
+      lift.ageGroupId,
+      lift.gender,
+      lift.ageMin,
+      lift.ageMax,
+      lift.bodyWeightMin,
+      parseFloat(lift.bodyWeightMax) >= 999 ? '>' + lift.bodyWeightMin : lift.bodyWeightMax,
       liftLabel[lift.liftType] || lift.liftType,
-      lift.athlete,
       lift.weight,
+      lift.athlete,
       lift.date,
       lift.event,
-      lift.wouldBreak ?? '',
-      lift.currentHolder || '',
     ]),
   ];
 

@@ -1,0 +1,1081 @@
+ageGroup,gender,ageMin,ageMax,bodyWeightMin,bodyWeightMax,lift,record,name,date,place
+OPEN,F,0,1000,0,45,Snatch,64,Nicole Blackwell,2019-05-12,2019 USA Weightlifting National Championships
+OPEN,F,0,1000,0,45,Clean & Jerk,81,Nicole Blackwell,2019-05-12,2019 USA Weightlifting National Championships
+OPEN,F,0,1000,0,45,Total,145,Nicole Blackwell,2019-05-12,2019 USA Weightlifting National Championships
+OPEN,F,0,1000,0,49,Snatch,80,Maddison Pannell,2021-07-02,"The Nike 2021 USA Weightlifting National Championships, powered by Rogue"
+OPEN,F,0,1000,0,49,Clean & Jerk,109,Maddison Pannell,2021-03-05,The Nike 2021 North American Open Series 1 powered by Rogue
+OPEN,F,0,1000,0,49,Total,185,Maddison Pannell,2021-03-05,The Nike 2021 North American Open Series 1 powered by Rogue
+OPEN,F,0,1000,49,55,Snatch,90,Charis Chan,2020-05-31,AO Series Online Qualifier - May
+OPEN,F,0,1000,49,55,Clean & Jerk,109,Charis Chan,2022-07-01,"The Nike 2022 USA Weightlifting National Championships, powered by Rogue"
+OPEN,F,0,1000,49,55,Total,196,Charis Chan,2020-05-31,AO Series Online Qualifier - May
+OPEN,F,0,1000,55,59,Snatch,87,Kelly Wild,2021-11-04,2021 Pan American Championships
+OPEN,F,0,1000,55,59,Clean & Jerk,119,Kelly Wild,2021-03-05,The Nike 2021 North American Open Series 1 powered by Rogue
+OPEN,F,0,1000,55,59,Total,206,Kelly Wild,2021-03-05,The Nike 2021 North American Open Series 1 powered by Rogue
+OPEN,F,0,1000,59,64,Snatch,100,Jamie Hegg,2021-09-18,The Nike 2021 North American Open Series 2 powered by Rogue
+OPEN,F,0,1000,59,64,Clean & Jerk,300,Jamie Hegg,2021-09-18,The Nike 2021 North American Open Series 2 powered by Rogue
+OPEN,F,0,1000,59,64,Total,400,Jamie Hegg,2021-09-18,The Nike 2021 North American Open Series 2 powered by Rogue
+OPEN,F,0,1000,64,71,Snatch,90,Cecily Basques,2018-09-16,Nike 2018 American Open Series 3
+OPEN,F,0,1000,64,71,Clean & Jerk,122,Cecily Basques,2018-09-16,Nike 2018 American Open Series 3
+OPEN,F,0,1000,64,71,Total,212,Cecily Basques,2018-09-16,Nike 2018 American Open Series 3
+OPEN,F,0,1000,71,76,Snatch,98,Laura Alexander,2019-12-08,2019 American Open Finals
+OPEN,F,0,1000,71,76,Clean & Jerk,124,Laura Alexander,2019-12-08,2019 American Open Finals
+OPEN,F,0,1000,71,76,Total,222,Laura Alexander,2019-12-08,2019 American Open Finals
+OPEN,F,0,1000,76,81,Snatch,111,Shacasia Johnson,2023-07-02,"The 2023 Nike USA Weightlifting National Championships, powered by Rogue"
+OPEN,F,0,1000,76,81,Clean & Jerk,135,Laura Alexander,2021-05-22,Hassle Free Womens Grand Prix
+OPEN,F,0,1000,76,81,Total,246,Shacasia Johnson,2023-07-02,"The 2023 Nike USA Weightlifting National Championships, powered by Rogue"
+OPEN,F,0,1000,81,87,Snatch,106,Laura Alexander,2022-07-03,"The Nike 2022 USA Weightlifting National Championships, powered by Rogue"
+OPEN,F,0,1000,81,87,Clean & Jerk,134,Laura Alexander,2022-07-03,"The Nike 2022 USA Weightlifting National Championships, powered by Rogue"
+OPEN,F,0,1000,81,87,Total,240,Laura Alexander,2022-07-03,"The Nike 2022 USA Weightlifting National Championships, powered by Rogue"
+OPEN,F,0,1000,87,>87,Snatch,106,Kuinini Manumua,2022-06-30,"The Nike 2022 National Under 25 Championships, powered by Rogue"
+OPEN,F,0,1000,87,>87,Clean & Jerk,133,Kuinini Manumua,2022-03-06,2022 Nike North American Open Series 1 Powered by Rogue
+OPEN,F,0,1000,87,>87,Total,236,Kuinini Manumua,2022-03-06,2022 Nike North American Open Series 1 Powered by Rogue
+OPEN,M,0,1000,0,55,Snatch,160,D'Angelo Osorio,2018-12-23,2018 5th International Qatar Cup
+OPEN,M,0,1000,0,55,Clean & Jerk,200,D'Angelo Osorio,2018-12-23,2018 5th International Qatar Cup
+OPEN,M,0,1000,0,55,Total,360,D'Angelo Osorio,2018-12-23,2018 5th International Qatar Cup
+OPEN,M,0,1000,55,61,Snatch,104,Seth Tom,2022-06-28,"The Nike 2022 National Junior Championships, powered by Rogue"
+OPEN,M,0,1000,55,61,Clean & Jerk,132,Seth Tom,2022-06-28,"The Nike 2022 National Junior Championships, powered by Rogue"
+OPEN,M,0,1000,55,61,Total,236,Seth Tom,2022-06-28,"The Nike 2022 National Junior Championships, powered by Rogue"
+OPEN,M,0,1000,61,67,Snatch,121,Stephen Ngo,2019-05-12,2019 USA Weightlifting National Championships
+OPEN,M,0,1000,61,67,Clean & Jerk,147,Sean Guterres,2023-09-14,"The 2023 Nike North American Open Series 2, powered by Rogue"
+OPEN,M,0,1000,61,67,Total,267,Stephen Ngo,2019-05-12,2019 USA Weightlifting National Championships
+OPEN,M,0,1000,67,73,Snatch,125,Stephen Ngo,2018-05-06,Standard Strength Presents: Money in the Bank 1
+OPEN,M,0,1000,67,73,Clean & Jerk,150,Stephen Ngo,2018-05-06,Standard Strength Presents: Money in the Bank 1
+OPEN,M,0,1000,67,73,Total,275,Stephen Ngo,2018-05-06,Standard Strength Presents: Money in the Bank 1
+OPEN,M,0,1000,73,81,Snatch,152,Christian Rodriguez Ocasio,2019-07-30,2019 Pan American Games
+OPEN,M,0,1000,73,81,Clean & Jerk,193,Kenton Chung,2022-08-14,Money in the Bank 22'
+OPEN,M,0,1000,73,81,Total,336,Christian Rodriguez Ocasio,2019-04-27,2019 Pan American Championships
+OPEN,M,0,1000,81,89,Snatch,167,Nathan Damron,2022-12-11,2022 IWF World Championships
+OPEN,M,0,1000,81,89,Clean & Jerk,203,Nathan Damron,2022-12-11,2022 IWF World Championships
+OPEN,M,0,1000,81,89,Total,370,Nathan Damron,2022-12-11,2022 IWF World Championships
+OPEN,M,0,1000,89,96,Snatch,167,Nathan Damron,2021-04-22,Rescheduled 2020 Pan American Championships
+OPEN,M,0,1000,89,96,Clean & Jerk,208,Nathan Damron,2021-11-06,2021 Pan American Championships
+OPEN,M,0,1000,89,96,Total,374,Nathan Damron,2021-04-22,Rescheduled 2020 Pan American Championships
+OPEN,M,0,1000,96,102,Snatch,177,Wesley Kitts,2023-06-16,2023 Grand Prix 1
+OPEN,M,0,1000,96,102,Clean & Jerk,211,Wesley Kitts,2023-06-16,2023 Grand Prix 1
+OPEN,M,0,1000,96,102,Total,388,Wesley Kitts,2023-06-16,2023 Grand Prix 1
+OPEN,M,0,1000,102,109,Snatch,177,Wesley Kitts,2021-08-03,2020 Olympic Games
+OPEN,M,0,1000,102,109,Clean & Jerk,223,Wesley Kitts,2019-04-27,2019 Pan American Championships
+OPEN,M,0,1000,102,109,Total,399,Wesley Kitts,2019-04-27,2019 Pan American Championships
+OPEN,M,0,1000,109,>109,Snatch,170,Wesley Kitts,2018-10-06,caffeine and kilos
+OPEN,M,0,1000,109,>109,Clean & Jerk,210,Wesley Kitts,2018-10-06,caffeine and kilos
+OPEN,M,0,1000,109,>109,Total,380,Wesley Kitts,2018-10-06,caffeine and kilos
+U11,F,0,11,0,30,Snatch,23,Brooklynn Vella,2023-08-06,Tommy Kono XVII Championships
+U11,F,0,11,0,30,Clean & Jerk,29,Brooklynn Vella,2023-03-11,Bulldog Weightlifting 2023
+U11,F,0,11,0,30,Total,50,Brooklynn Vella,2023-08-06,Tommy Kono XVII Championships
+U11,F,0,11,30,33,Snatch,25,Thevini Withana,2022-10-30,Don Wilson Memorial Golden West Open
+U11,F,0,11,30,33,Clean & Jerk,34,Brooklynn Vella,2024-06-12,"The 2024 Nike National Youth Championships, powered by Rogue"
+U11,F,0,11,30,33,Total,59,Brooklynn Vella,2024-06-12,"The 2024 Nike National Youth Championships, powered by Rogue"
+U11,F,0,11,33,36,Snatch,26,Layla Johnson,2024-12-05,"The 2024 Nike North American Open Finals, powered by Rogue"
+U11,F,0,11,33,36,Clean & Jerk,38,Layla Johnson,2024-10-05,Steve Gough Memorial - Max's Gym
+U11,F,0,11,33,36,Total,64,Layla Johnson,2024-10-05,Steve Gough Memorial - Max's Gym
+U11,F,0,11,36,40,Snatch,32,Charlotte Sullivan,2024-12-05,"The 2024 Nike North American Open Finals, powered by Rogue"
+U11,F,0,11,36,40,Clean & Jerk,43,Charlotte Sullivan,2024-12-05,"The 2024 Nike North American Open Finals, powered by Rogue"
+U11,F,0,11,36,40,Total,75,Charlotte Sullivan,2024-12-05,"The 2024 Nike North American Open Finals, powered by Rogue"
+U11,F,0,11,0,45,Snatch,44,Kaya Malia Henn,2024-06-12,"The 2024 Nike National Youth Championships, powered by Rogue"
+U11,F,0,11,0,45,Clean & Jerk,64,Kaya Malia Henn,2024-06-12,"The 2024 Nike National Youth Championships, powered by Rogue"
+U11,F,0,11,0,45,Total,108,Kaya Malia Henn,2024-06-12,"The 2024 Nike National Youth Championships, powered by Rogue"
+U11,F,0,11,0,49,Snatch,32,Abigail Wunderlich,2020-11-30,Club Showdown/November online qualifier
+U11,F,0,11,0,49,Clean & Jerk,37,kiana abordo,2019-10-13,Hassle Free Fall Breakers
+U11,F,0,11,0,49,Total,69,Abigail Wunderlich,2020-11-30,Club Showdown/November online qualifier
+U11,F,0,11,49,55,Snatch,34,Abigail Wunderlich,2021-06-26,"The Nike 2021 National Youth Championships, powered by Rogue"
+U11,F,0,11,49,55,Clean & Jerk,42,Abigail Wunderlich,2021-06-26,"The Nike 2021 National Youth Championships, powered by Rogue"
+U11,F,0,11,49,55,Total,76,Abigail Wunderlich,2021-06-26,"The Nike 2021 National Youth Championships, powered by Rogue"
+U11,F,0,11,55,59,Snatch,40,Abigail Wunderlich,2021-12-11,Hassle Free Winter Breaker
+U11,F,0,11,55,59,Clean & Jerk,49,Abigail Wunderlich,2021-12-11,Hassle Free Winter Breaker
+U11,F,0,11,55,59,Total,89,Abigail Wunderlich,2021-12-11,Hassle Free Winter Breaker
+U11,F,0,11,59,64,Snatch,66,Zoe Rangel,2024-04-27,Weightlifting AI West Coast Classic
+U11,F,0,11,59,64,Clean & Jerk,80,Zoe Rangel,2024-04-27,Weightlifting AI West Coast Classic
+U11,F,0,11,59,64,Total,146,Zoe Rangel,2024-04-27,Weightlifting AI West Coast Classic
+U11,F,0,11,64,>64,Snatch,41,Mikaella Bowens,2023-12-17,Hassle Free Winter Breaker (NUQ)
+U11,F,0,11,64,>64,Clean & Jerk,48,Mikaella Bowens,2023-12-17,Hassle Free Winter Breaker (NUQ)
+U11,F,0,11,64,>64,Total,89,Mikaella Bowens,2023-12-17,Hassle Free Winter Breaker (NUQ)
+U11,M,0,11,0,32,Snatch,28,Desmond Myles,2019-09-07,North Coast Open
+U11,M,0,11,0,32,Clean & Jerk,41,Desmond Myles,2019-09-07,North Coast Open
+U11,M,0,11,0,32,Total,69,Desmond Myles,2019-09-07,North Coast Open
+U11,M,0,11,32,36,Snatch,28,Luke Doherty,2025-05-18,Capital Gainz
+U11,M,0,11,32,36,Clean & Jerk,38,Matthew Janowiak,2018-06-17,2018 USA Weightlifting National Youth Championships
+U11,M,0,11,32,36,Total,65,Matthew Janowiak,2018-06-17,2018 USA Weightlifting National Youth Championships
+U11,M,0,11,36,39,Snatch,36,Mason Alderman,2018-06-17,2018 USA Weightlifting National Youth Championships
+U11,M,0,11,36,39,Clean & Jerk,49,Desmond Myles,2020-12-03,2020 Online National Youth Championships
+U11,M,0,11,36,39,Total,82,Desmond Myles,2020-12-03,2020 Online National Youth Championships
+U11,M,0,11,39,44,Snatch,40,bret tom,2020-12-03,2020 Online National Youth Championships
+U11,M,0,11,39,44,Clean & Jerk,51,bret tom,2020-12-03,2020 Online National Youth Championships
+U11,M,0,11,39,44,Total,91,bret tom,2020-12-03,2020 Online National Youth Championships
+U11,M,0,11,0,49,Snatch,34,Preston Sparks,2020-12-03,2020 Online National Youth Championships
+U11,M,0,11,0,49,Clean & Jerk,45,Nick Wegner,2020-10-25,Fall Record Breaker
+U11,M,0,11,0,49,Total,78,Preston Sparks,2020-12-03,2020 Online National Youth Championships
+U11,M,0,11,0,55,Snatch,40,bret tom,2020-12-03,2020 Online National Youth Championships
+U11,M,0,11,0,55,Clean & Jerk,51,bret tom,2020-12-03,2020 Online National Youth Championships
+U11,M,0,11,0,55,Total,91,bret tom,2020-12-03,2020 Online National Youth Championships
+U11,M,0,11,55,61,Snatch,35,latu manumua,2018-12-16,Hassle Free Winter Breaker
+U11,M,0,11,55,61,Clean & Jerk,40,latu manumua,2018-12-16,Hassle Free Winter Breaker
+U11,M,0,11,55,61,Total,75,latu manumua,2018-12-16,Hassle Free Winter Breaker
+U11,M,0,11,61,67,Snatch,19,Dominic Carducci,2019-01-19,2019 CTS Youth Open
+U11,M,0,11,61,67,Clean & Jerk,26,Micah Marquez,2019-06-23,PWA Champs
+U11,M,0,11,61,67,Total,44,Micah Marquez,2019-06-23,PWA Champs
+U11,M,0,11,67,73,Snatch,29,Micah Marquez,2020-01-12,Bar Wars VI
+U11,M,0,11,67,73,Clean & Jerk,36,Micah Marquez,2020-01-12,Bar Wars VI
+U11,M,0,11,67,73,Total,65,Micah Marquez,2020-01-12,Bar Wars VI
+U11,M,0,11,73,>73,Snatch,43,Micah Marquez,2021-06-26,"The Nike 2021 National Youth Championships, powered by Rogue"
+U11,M,0,11,73,>73,Clean & Jerk,56,Siale Pooi-Unga,2021-10-24,Fall Record Breaker
+U11,M,0,11,73,>73,Total,96,Micah Marquez,2021-06-26,"The Nike 2021 National Youth Championships, powered by Rogue"
+U13,F,0,13,0,30,Snatch,35,Stevie Majoros,2022-03-27,2022 HF EVO Springbreaker
+U13,F,0,13,0,30,Clean & Jerk,41,Stevie Majoros,2022-03-27,2022 HF EVO Springbreaker
+U13,F,0,13,0,30,Total,76,Stevie Majoros,2022-03-27,2022 HF EVO Springbreaker
+U13,F,0,13,30,33,Snatch,25,Thevini Withana,2022-10-30,Don Wilson Memorial Golden West Open
+U13,F,0,13,30,33,Clean & Jerk,34,Brooklynn Vella,2024-06-12,"The 2024 Nike National Youth Championships, powered by Rogue"
+U13,F,0,13,30,33,Total,59,Brooklynn Vella,2024-06-12,"The 2024 Nike National Youth Championships, powered by Rogue"
+U13,F,0,13,33,36,Snatch,28,Thevini Withana,2023-03-02,"The 2023 Nike North American Open Series 1, powered by Rogue"
+U13,F,0,13,33,36,Clean & Jerk,42,Layla Johnson,2025-02-27,2025 Virus Weightlifting Series 1 Powered by Rogue Fitness
+U13,F,0,13,33,36,Total,70,Layla Johnson,2025-02-27,2025 Virus Weightlifting Series 1 Powered by Rogue Fitness
+U13,F,0,13,36,40,Snatch,35,Thevini Withana,2024-02-29,The Nike 2024 North American Open Series 1 Powered by Rogue Fitness
+U13,F,0,13,36,40,Clean & Jerk,45,Layla Johnson,2025-04-12,Hassle Free Barbell Spring Open
+U13,F,0,13,36,40,Total,77,Layla Johnson,2025-04-12,Hassle Free Barbell Spring Open
+U13,F,0,13,0,45,Snatch,47,Jade Morales,2020-10-31,South County Open
+U13,F,0,13,0,45,Clean & Jerk,58,Jade Morales,2020-10-31,South County Open
+U13,F,0,13,0,45,Total,105,Jade Morales,2020-10-31,South County Open
+U13,F,0,13,0,49,Snatch,48,Jade Morales,2020-12-12,Hassle Free Evolution Performance Winter Breaker
+U13,F,0,13,0,49,Clean & Jerk,61,Kimberly Wiese,2019-06-30,2019 USA Weightlifting National Youth Championships
+U13,F,0,13,0,49,Total,108,Kimberly Wiese,2019-06-30,2019 USA Weightlifting National Youth Championships
+U13,F,0,13,49,55,Snatch,50,Kimberly Wiese,2019-10-19,Night of the Lifting Dead
+U13,F,0,13,49,55,Clean & Jerk,65,Kimberly Wiese,2019-10-06,2019 USA Weightlifting San Diego Open U15 and U13
+U13,F,0,13,49,55,Total,115,Kimberly Wiese,2019-10-06,2019 USA Weightlifting San Diego Open U15 and U13
+U13,F,0,13,55,59,Snatch,43,sienna lo,2019-06-23,PWA Champs
+U13,F,0,13,55,59,Clean & Jerk,59,sienna lo,2019-09-22,Caffeine and Kilos Invitational
+U13,F,0,13,55,59,Total,100,Gianna Van Hofwegen,2022-10-30,Don Wilson Memorial Golden West Open
+U13,F,0,13,59,64,Snatch,66,Zoe Rangel,2024-04-27,Weightlifting AI West Coast Classic
+U13,F,0,13,59,64,Clean & Jerk,80,Gianna Van Hofwegen,2023-12-08,"The 2023 Nike North American Open Finals, powered by Rogue"
+U13,F,0,13,59,64,Total,146,Zoe Rangel,2024-04-27,Weightlifting AI West Coast Classic
+U13,F,0,13,64,>64,Snatch,61,Gianna Van Hofwegen,2023-09-15,"The 2023 Nike North American Open Series 2, powered by Rogue"
+U13,F,0,13,64,>64,Clean & Jerk,77,Gianna Van Hofwegen,2023-09-15,"The 2023 Nike North American Open Series 2, powered by Rogue"
+U13,F,0,13,64,>64,Total,138,Gianna Van Hofwegen,2023-09-15,"The 2023 Nike North American Open Series 2, powered by Rogue"
+U13,M,0,13,0,32,Snatch,28,Desmond Myles,2019-09-07,North Coast Open
+U13,M,0,13,0,32,Clean & Jerk,41,Desmond Myles,2019-09-07,North Coast Open
+U13,M,0,13,0,32,Total,69,Desmond Myles,2019-09-07,North Coast Open
+U13,M,0,13,32,36,Snatch,28,Luke Doherty,2025-05-18,Capital Gainz
+U13,M,0,13,32,36,Clean & Jerk,38,Matthew Janowiak,2018-06-17,2018 USA Weightlifting National Youth Championships
+U13,M,0,13,32,36,Total,65,Matthew Janowiak,2018-06-17,2018 USA Weightlifting National Youth Championships
+U13,M,0,13,36,39,Snatch,36,Mason Alderman,2018-06-17,2018 USA Weightlifting National Youth Championships
+U13,M,0,13,36,39,Clean & Jerk,49,Desmond Myles,2020-12-03,2020 Online National Youth Championships
+U13,M,0,13,36,39,Total,82,ethan trinh,2018-05-06,Standard Strength Presents: Money in the Bank 1
+U13,M,0,13,39,44,Snatch,42,Desmond Myles,2022-05-07,Testify Barbell MAYhem
+U13,M,0,13,39,44,Clean & Jerk,57,Desmond Myles,2022-05-07,Testify Barbell MAYhem
+U13,M,0,13,39,44,Total,99,Desmond Myles,2022-05-07,Testify Barbell MAYhem
+U13,M,0,13,0,49,Snatch,54,Jacob Garcia,2019-06-30,2019 USA Weightlifting National Youth Championships
+U13,M,0,13,0,49,Clean & Jerk,75,Jacob Garcia,2019-06-30,2019 USA Weightlifting National Youth Championships
+U13,M,0,13,0,49,Total,129,Jacob Garcia,2019-06-30,2019 USA Weightlifting National Youth Championships
+U13,M,0,13,0,55,Snatch,66,bret tom,2022-12-01,"The Nike 2022 North American Open Finals, powered by Rogue"
+U13,M,0,13,0,55,Clean & Jerk,81,bret tom,2022-12-01,"The Nike 2022 North American Open Finals, powered by Rogue"
+U13,M,0,13,0,55,Total,147,bret tom,2022-12-01,"The Nike 2022 North American Open Finals, powered by Rogue"
+U13,M,0,13,55,61,Snatch,54,Seth Evans,2020-12-03,2020 Online National Youth Championships
+U13,M,0,13,55,61,Clean & Jerk,73,Robert Whitlock,2022-06-25,"The Nike 2022 National Youth Championships, powered by Rogue"
+U13,M,0,13,55,61,Total,127,Robert Whitlock,2022-06-25,"The Nike 2022 National Youth Championships, powered by Rogue"
+U13,M,0,13,61,67,Snatch,75,Seth Evans,2021-10-17,Don Wilson Memorial Golden West Open
+U13,M,0,13,61,67,Clean & Jerk,91,Seth Evans,2021-10-17,Don Wilson Memorial Golden West Open
+U13,M,0,13,61,67,Total,166,Seth Evans,2021-10-17,Don Wilson Memorial Golden West Open
+U13,M,0,13,67,73,Snatch,52,Frank Machado,2018-12-02,2018 Max's Gym Open
+U13,M,0,13,67,73,Clean & Jerk,64,Frank Machado,2018-12-02,2018 Max's Gym Open
+U13,M,0,13,67,73,Total,116,Frank Machado,2018-12-02,2018 Max's Gym Open
+U13,M,0,13,73,>73,Snatch,67,Massimo Shinzato-Barrueto,2022-12-18,Hassle Free BBC Winter Breaker
+U13,M,0,13,73,>73,Clean & Jerk,85,Brody Laird,2025-04-26,Folsom Open 2- 2025
+U13,M,0,13,73,>73,Total,150,Brody Laird,2025-04-26,Folsom Open 2- 2025
+U15,F,14,15,33,36,Snatch,,,,
+U15,F,14,15,33,36,Clean & Jerk,,,,
+U15,F,14,15,33,36,Total,,,,
+U15,F,14,15,36,40,Snatch,39,Jasmin Trinh,2023-11-05,2023 Golden West Don Wilson Memorial
+U15,F,14,15,36,40,Clean & Jerk,45,Jasmin Trinh,2023-11-05,2023 Golden West Don Wilson Memorial
+U15,F,14,15,36,40,Total,84,Jasmin Trinh,2023-11-05,2023 Golden West Don Wilson Memorial
+U15,F,14,15,0,45,Snatch,44,Kaya Malia Henn,2024-06-12,"The 2024 Nike National Youth Championships, powered by Rogue"
+U15,F,14,15,0,45,Clean & Jerk,64,Kaya Malia Henn,2024-06-12,"The 2024 Nike National Youth Championships, powered by Rogue"
+U15,F,14,15,0,45,Total,108,Kaya Malia Henn,2024-06-12,"The 2024 Nike National Youth Championships, powered by Rogue"
+U15,F,14,15,0,49,Snatch,68,Jade Morales,2022-12-01,"The Nike 2022 North American Open Finals, powered by Rogue"
+U15,F,14,15,0,49,Clean & Jerk,82,Jade Morales,2022-11-23,2022 U15/U17 Youth Pan American Championships
+U15,F,14,15,0,49,Total,148,Jade Morales,2022-12-01,"The Nike 2022 North American Open Finals, powered by Rogue"
+U15,F,14,15,49,55,Snatch,66,Jade Morales,2022-10-01,Caffeine and Kilos
+U15,F,14,15,49,55,Clean & Jerk,83,Jade Morales,2022-10-01,Caffeine and Kilos
+U15,F,14,15,49,55,Total,149,Jade Morales,2022-10-01,Caffeine and Kilos
+U15,F,14,15,55,59,Snatch,74,haley trinh,2019-10-06,2019 USA Weightlifting San Diego Open U15 and U13
+U15,F,14,15,55,59,Clean & Jerk,96,Madilyn Espinoza,2018-09-16,Nike 2018 American Open Series 3
+U15,F,14,15,55,59,Total,168,Madilyn Espinoza,2018-09-16,Nike 2018 American Open Series 3
+U15,F,14,15,59,64,Snatch,74,haley trinh,2019-09-22,Caffeine and Kilos Invitational
+U15,F,14,15,59,64,Clean & Jerk,98,haley trinh,2019-11-23,Folsom Open 3
+U15,F,14,15,59,64,Total,171,haley trinh,2019-11-23,Folsom Open 3
+U15,F,14,15,64,71,Snatch,75,Gianna Van Hofwegen,2025-02-27,2025 Virus Weightlifting Series 1 Powered by Rogue Fitness
+U15,F,14,15,64,71,Clean & Jerk,94,Gianna Van Hofwegen,2024-12-05,"The 2024 Nike North American Open Finals, powered by Rogue"
+U15,F,14,15,64,71,Total,167,Gianna Van Hofwegen,2024-12-05,"The 2024 Nike North American Open Finals, powered by Rogue"
+U15,F,14,15,71,76,Snatch,74,Amanda Robles,2019-10-06,2019 USA Weightlifting San Diego Open U15 and U13
+U15,F,14,15,71,76,Clean & Jerk,92,Amanda Robles,2019-10-06,2019 USA Weightlifting San Diego Open U15 and U13
+U15,F,14,15,71,76,Total,166,Amanda Robles,2019-10-06,2019 USA Weightlifting San Diego Open U15 and U13
+U15,F,14,15,76,>76,Snatch,91,Julia Yun,2019-06-23,PWA Champs
+U15,F,14,15,76,>76,Clean & Jerk,115,Julia Yun,2019-06-30,2019 USA Weightlifting National Youth Championships
+U15,F,14,15,76,>76,Total,203,Julia Yun,2019-06-30,2019 USA Weightlifting National Youth Championships
+U15,M,14,15,36,39,Snatch,40,David Zechowy,2019-09-07,North Coast Open
+U15,M,14,15,36,39,Clean & Jerk,50,David Zechowy,2019-06-30,2019 USA Weightlifting National Youth Championships
+U15,M,14,15,36,39,Total,88,David Zechowy,2019-09-07,North Coast Open
+U15,M,14,15,39,44,Snatch,44,ethan trinh,2019-06-30,2019 USA Weightlifting National Youth Championships
+U15,M,14,15,39,44,Clean & Jerk,61,ethan trinh,2019-06-30,2019 USA Weightlifting National Youth Championships
+U15,M,14,15,39,44,Total,105,ethan trinh,2019-06-30,2019 USA Weightlifting National Youth Championships
+U15,M,14,15,0,49,Snatch,49,ethan trinh,2019-10-13,Hassle Free Fall Breakers
+U15,M,14,15,0,49,Clean & Jerk,64,ethan trinh,2019-10-13,Hassle Free Fall Breakers
+U15,M,14,15,0,49,Total,113,ethan trinh,2019-10-13,Hassle Free Fall Breakers
+U15,M,14,15,0,55,Snatch,73,bret tom,2023-08-12,Money in the Bank 2023
+U15,M,14,15,0,55,Clean & Jerk,90,bret tom,2023-08-12,Money in the Bank 2023
+U15,M,14,15,0,55,Total,163,bret tom,2023-08-12,Money in the Bank 2023
+U15,M,14,15,55,61,Snatch,82,Preston Sparks,2024-11-03,2024 Golden West Don Wilson Memorial
+U15,M,14,15,55,61,Clean & Jerk,97,bret tom,2024-06-12,"The 2024 Nike National Youth Championships, powered by Rogue"
+U15,M,14,15,55,61,Total,174,bret tom,2024-06-12,"The 2024 Nike National Youth Championships, powered by Rogue"
+U15,M,14,15,61,67,Snatch,83,Leo Crane,2019-12-15,Hassle Free Winter Breaker
+U15,M,14,15,61,67,Clean & Jerk,104,Leo Crane,2019-12-15,Hassle Free Winter Breaker
+U15,M,14,15,61,67,Total,187,Leo Crane,2019-12-15,Hassle Free Winter Breaker
+U15,M,14,15,67,73,Snatch,92,Robert Whitlock,2024-02-29,The Nike 2024 North American Open Series 1 Powered by Rogue Fitness
+U15,M,14,15,67,73,Clean & Jerk,123,Robert Whitlock,2024-02-29,The Nike 2024 North American Open Series 1 Powered by Rogue Fitness
+U15,M,14,15,67,73,Total,215,Robert Whitlock,2024-02-29,The Nike 2024 North American Open Series 1 Powered by Rogue Fitness
+U15,M,14,15,73,81,Snatch,113,Robert Whitlock,2024-12-05,"The 2024 Nike North American Open Finals, powered by Rogue"
+U15,M,14,15,73,81,Clean & Jerk,140,Robert Whitlock,2024-12-05,"The 2024 Nike North American Open Finals, powered by Rogue"
+U15,M,14,15,73,81,Total,253,Robert Whitlock,2024-12-05,"The 2024 Nike North American Open Finals, powered by Rogue"
+U15,M,14,15,81,89,Snatch,96,demetrius brown,2020-12-04,2020 Online National Youth Championships
+U15,M,14,15,81,89,Snatch,73,Richard Semenza,2020-12-04,2020 Online National Youth Championships
+U15,M,14,15,81,89,Clean & Jerk,111,Gavin  Murphy,2023-06-25,"The 2023 Nike National Youth Championships, powered by Rogue"
+U15,M,14,15,81,89,Clean & Jerk,95,Elliot Leet,2023-04-22,South Bay Open
+U15,M,14,15,81,89,Total,202,Gavin  Murphy,2023-06-25,"The 2023 Nike National Youth Championships, powered by Rogue"
+U15,M,14,15,81,89,Total,166,Elliot Leet,2023-06-25,"The 2023 Nike National Youth Championships, powered by Rogue"
+U17,F,16,17,36,40,Snatch,41,Jasmin Trinh,2024-06-12,"The 2024 Nike National Youth Championships, powered by Rogue"
+U17,F,16,17,36,40,Clean & Jerk,52,Jasmin Trinh,2024-12-05,"The 2024 Nike North American Open Finals, powered by Rogue"
+U17,F,16,17,36,40,Total,92,Jasmin Trinh,2024-12-05,"The 2024 Nike North American Open Finals, powered by Rogue"
+U17,F,16,17,0,45,Snatch,41,Jasmin Trinh,2024-06-12,"The 2024 Nike National Youth Championships, powered by Rogue"
+U17,F,16,17,0,45,Clean & Jerk,52,Jasmin Trinh,2024-12-05,"The 2024 Nike North American Open Finals, powered by Rogue"
+U17,F,16,17,0,45,Total,92,Jasmin Trinh,2024-12-05,"The 2024 Nike North American Open Finals, powered by Rogue"
+U17,F,16,17,0,49,Snatch,68,Jade Morales,2023-06-26,"The 2023 Nike National Youth Championships, powered by Rogue"
+U17,F,16,17,0,49,Clean & Jerk,85,Jade Morales,2023-03-26,2023 IWF Youth World Championships
+U17,F,16,17,0,49,Total,152,Jade Morales,2023-06-26,"The 2023 Nike National Youth Championships, powered by Rogue"
+U17,F,16,17,49,55,Snatch,76,Jade Morales,2024-05-23,2024 IWF Youth World Championships
+U17,F,16,17,49,55,Clean & Jerk,100,Jade Morales,2024-06-12,"The 2024 Nike National Youth Championships, powered by Rogue"
+U17,F,16,17,49,55,Total,175,Jade Morales,2024-06-12,"The 2024 Nike National Youth Championships, powered by Rogue"
+U17,F,16,17,55,59,Snatch,72,Jade Morales,2024-04-20,Hassle Free Barbell Spring Breaker
+U17,F,16,17,55,59,Clean & Jerk,97,Jade Morales,2024-04-20,Hassle Free Barbell Spring Breaker
+U17,F,16,17,55,59,Total,169,Jade Morales,2024-04-20,Hassle Free Barbell Spring Breaker
+U17,F,16,17,59,64,Snatch,81,haley trinh,2021-10-09,2021 IWF Youth World Championships
+U17,F,16,17,59,64,Clean & Jerk,105,haley trinh,2021-12-04,"The Nike 2021 North American Open Finals, powered by Rogue"
+U17,F,16,17,59,64,Total,185,haley trinh,2021-12-04,"The Nike 2021 North American Open Finals, powered by Rogue"
+U17,F,16,17,64,71,Snatch,79,Kimberly Wiese,2023-12-09,"The 2023 Nike North American Open Finals, powered by Rogue"
+U17,F,16,17,64,71,Clean & Jerk,100,Kimberly Wiese,2023-12-09,"The 2023 Nike North American Open Finals, powered by Rogue"
+U17,F,16,17,64,71,Total,179,Kimberly Wiese,2023-12-09,"The 2023 Nike North American Open Finals, powered by Rogue"
+U17,F,16,17,71,76,Snatch,94,Athena Schrijver,2018-06-17,2018 USA Weightlifting National Youth Championships
+U17,F,16,17,71,76,Clean & Jerk,116,Athena Schrijver,2018-06-17,2018 USA Weightlifting National Youth Championships
+U17,F,16,17,71,76,Total,210,Athena Schrijver,2018-06-17,2018 USA Weightlifting National Youth Championships
+U17,F,16,17,76,81,Snatch,92,Athena Schrijver,2018-10-20,Occam  Back Alley Rumble IV
+U17,F,16,17,76,81,Clean & Jerk,118,Athena Schrijver,2018-10-20,Occam  Back Alley Rumble IV
+U17,F,16,17,76,81,Total,210,Athena Schrijver,2018-10-20,Occam  Back Alley Rumble IV
+U17,F,16,17,81,>81,Snatch,98,Amanda Robles,2021-12-05,"The Nike 2021 North American Open Finals, powered by Rogue"
+U17,F,16,17,81,>81,Clean & Jerk,116,Amanda Robles,2021-12-05,"The Nike 2021 North American Open Finals, powered by Rogue"
+U17,F,16,17,81,>81,Total,214,Amanda Robles,2021-12-05,"The Nike 2021 North American Open Finals, powered by Rogue"
+U17,M,16,17,0,49,Snatch,58,David Zechowy,2021-06-28,"The Nike 2021 National Youth Championships, powered by Rogue"
+U17,M,16,17,0,49,Clean & Jerk,75,David Zechowy,2021-06-28,"The Nike 2021 National Youth Championships, powered by Rogue"
+U17,M,16,17,0,49,Total,133,David Zechowy,2021-06-28,"The Nike 2021 National Youth Championships, powered by Rogue"
+U17,M,16,17,0,55,Snatch,95,Seth Tom,2019-06-08,2019 IWF Junior World Championships
+U17,M,16,17,0,55,Clean & Jerk,118,Seth Tom,2019-02-17,2019 National Junior Championships
+U17,M,16,17,0,55,Total,213,Seth Tom,2019-02-17,2019 National Junior Championships
+U17,M,16,17,55,61,Snatch,93,Seth Tom,2019-06-23,PWA Champs
+U17,M,16,17,55,61,Clean & Jerk,114,Seth Tom,2019-11-03,56th Golden West Opejn
+U17,M,16,17,55,61,Total,206,Seth Tom,2019-06-23,PWA Champs
+U17,M,16,17,61,67,Snatch,100,Evan Fukuhara,2020-12-05,2020 Online National Youth Championships
+U17,M,16,17,61,67,Clean & Jerk,116,Evan Fukuhara,2020-12-05,2020 Online National Youth Championships
+U17,M,16,17,61,67,Total,216,Evan Fukuhara,2020-12-05,2020 Online National Youth Championships
+U17,M,16,17,67,73,Snatch,88,Evan Fukuhara,2020-02-22,NorCal Weightlifting Meet
+U17,M,16,17,67,73,Clean & Jerk,108,Daniel Chavez,2022-04-30,Folsom Open 2 2022
+U17,M,16,17,67,73,Total,194,Daniel Chavez,2022-04-30,Folsom Open 2 2022
+U17,M,16,17,73,81,Snatch,120,Rucker Johnson,2025-04-12,Hassle Free Barbell Spring Open
+U17,M,16,17,73,81,Clean & Jerk,155,Conner Sparks,2018-12-16,Hassle Free Winter Breaker
+U17,M,16,17,73,81,Total,264,Conner Sparks,2018-12-16,Hassle Free Winter Breaker
+U17,M,16,17,81,89,Snatch,102,Emmanuel Dixon,2018-11-11,Midtown Opens III
+U17,M,16,17,81,89,Clean & Jerk,127,Ryland Shriver,2018-04-28,Midtown Open 2
+U17,M,16,17,81,89,Total,224,Emmanuel Dixon,2018-11-11,Midtown Opens III
+U17,M,16,17,89,96,Snatch,123,Ryland Shriver,2019-12-08,2019 Buenos Aires International Open
+U17,M,16,17,89,96,Clean & Jerk,155,Ryland Shriver,2019-09-22,Caffeine and Kilos Invitational
+U17,M,16,17,89,96,Total,276,Ryland Shriver,2019-12-08,2019 Buenos Aires International Open
+U17,M,16,17,96,102,Snatch,122,Ryland Shriver,2019-04-27,Occam Back Alley Rumble V
+U17,M,16,17,96,102,Clean & Jerk,152,Ryland Shriver,2018-11-11,Midtown Opens III
+U17,M,16,17,96,102,Total,265,Ryland Shriver,2019-04-27,Occam Back Alley Rumble V
+U17,M,16,17,102,>102,Snatch,127,Jared Flaming,2018-09-16,Nike 2018 American Open Series 3
+U17,M,16,17,102,>102,Clean & Jerk,174,Jacob Melander,2020-12-06,2020 Online National Youth Championships
+U17,M,16,17,102,>102,Total,298,Jacob Melander,2020-12-06,2020 Online National Youth Championships
+JR,F,15,20,0,45,Snatch,42,Aisling Mcmanamon,2020-02-07,"2020 National Junior Championships, powered by Rogue Fitness"
+JR,F,15,20,0,45,Clean & Jerk,55,Cadence Ricci,2019-12-08,2019 Buenos Aires International Open
+JR,F,15,20,0,45,Total,94,Skylar Fernandes,2024-10-05,Steve Gough Memorial - Max's Gym
+JR,F,15,20,0,49,Snatch,77,Megan Seegert,2018-02-18,2018 Nike National Junior Championships
+JR,F,15,20,0,49,Clean & Jerk,92,Megan Seegert,2018-02-18,2018 Nike National Junior Championships
+JR,F,15,20,0,49,Total,169,Megan Seegert,2018-02-18,2018 Nike National Junior Championships
+JR,F,15,20,49,55,Snatch,76,Jade Morales,2025-03-11,2025 Pan American Junior Championships
+JR,F,15,20,49,55,Clean & Jerk,102,Jade Morales,2025-03-11,2025 Pan American Junior Championships
+JR,F,15,20,49,55,Total,178,Jade Morales,2025-03-11,2025 Pan American Junior Championships
+JR,F,15,20,55,59,Snatch,74,haley trinh,2019-10-06,2019 USA Weightlifting San Diego Open U15 and U13
+JR,F,15,20,55,59,Clean & Jerk,97,Jade Morales,2024-04-20,Hassle Free Barbell Spring Breaker
+JR,F,15,20,55,59,Total,169,Jade Morales,2024-04-20,Hassle Free Barbell Spring Breaker
+JR,F,15,20,59,64,Snatch,85,haley trinh,2023-09-15,"The 2023 Nike North American Open Series 2, powered by Rogue"
+JR,F,15,20,59,64,Clean & Jerk,111,haley trinh,2022-03-05,2022 Nike North American Open Series 1 Powered by Rogue
+JR,F,15,20,59,64,Total,196,haley trinh,2022-03-05,2022 Nike North American Open Series 1 Powered by Rogue
+JR,F,15,20,64,71,Snatch,89,haley trinh,2024-06-22,2024 Pan American Junior Championships
+JR,F,15,20,64,71,Clean & Jerk,116,haley trinh,2024-06-22,2024 Pan American Junior Championships
+JR,F,15,20,64,71,Total,205,haley trinh,2024-06-22,2024 Pan American Junior Championships
+JR,F,15,20,71,76,Snatch,94,Athena Schrijver,2018-06-17,2018 USA Weightlifting National Youth Championships
+JR,F,15,20,71,76,Clean & Jerk,116,Athena Schrijver,2018-06-17,2018 USA Weightlifting National Youth Championships
+JR,F,15,20,71,76,Total,210,Athena Schrijver,2018-06-17,2018 USA Weightlifting National Youth Championships
+JR,F,15,20,76,81,Snatch,92,Athena Schrijver,2018-10-20,Occam  Back Alley Rumble IV
+JR,F,15,20,76,81,Clean & Jerk,118,Athena Schrijver,2018-10-20,Occam  Back Alley Rumble IV
+JR,F,15,20,76,81,Total,210,Athena Schrijver,2018-10-20,Occam  Back Alley Rumble IV
+JR,F,15,20,81,87,Snatch,103,Amanda Robles,2022-03-06,2022 Nike North American Open Series 1 Powered by Rogue
+JR,F,15,20,81,87,Clean & Jerk,123,Amanda Robles,2024-06-24,2024 Pan American Junior Championships
+JR,F,15,20,81,87,Total,224,Amanda Robles,2024-03-03,The Nike 2024 National University Championships Powered by Rogue Fitness
+JR,F,15,20,87,>87,Snatch,104,Kuinini Manumua,2018-10-06,caffeine and kilos
+JR,F,15,20,87,>87,Clean & Jerk,132,Kuinini Manumua,2018-09-16,Nike 2018 American Open Series 3
+JR,F,15,20,87,>87,Total,235,Kuinini Manumua,2018-09-16,Nike 2018 American Open Series 3
+JR,M,15,20,0,55,Snatch,95,Seth Tom,2019-06-08,2019 IWF Junior World Championships
+JR,M,15,20,0,55,Clean & Jerk,118,Seth Tom,2019-02-17,2019 National Junior Championships
+JR,M,15,20,0,55,Total,213,Seth Tom,2019-02-17,2019 National Junior Championships
+JR,M,15,20,55,61,Snatch,104,Seth Tom,2022-06-28,"The Nike 2022 National Junior Championships, powered by Rogue"
+JR,M,15,20,55,61,Clean & Jerk,132,Seth Tom,2022-06-28,"The Nike 2022 National Junior Championships, powered by Rogue"
+JR,M,15,20,55,61,Total,236,Seth Tom,2022-06-28,"The Nike 2022 National Junior Championships, powered by Rogue"
+JR,M,15,20,61,67,Snatch,111,Evan Fukuhara,2023-12-07,"The 2023 Nike North American Open Finals, powered by Rogue"
+JR,M,15,20,61,67,Clean & Jerk,145,Evan Fukuhara,2023-12-07,"The 2023 Nike North American Open Finals, powered by Rogue"
+JR,M,15,20,61,67,Total,256,Evan Fukuhara,2023-12-07,"The 2023 Nike North American Open Finals, powered by Rogue"
+JR,M,15,20,67,73,Snatch,120,Evan Fukuhara,2023-11-04,Iowa Elite Championship (NUQ)
+JR,M,15,20,67,73,Clean & Jerk,150,Evan Fukuhara,2023-11-04,Iowa Elite Championship (NUQ)
+JR,M,15,20,67,73,Total,270,Evan Fukuhara,2023-11-04,Iowa Elite Championship (NUQ)
+JR,M,15,20,73,81,Snatch,123,Conner Sparks,2019-11-23,Folsom Open 3
+JR,M,15,20,73,81,Clean & Jerk,163,Conner Sparks,2019-11-23,Folsom Open 3
+JR,M,15,20,73,81,Total,286,Conner Sparks,2019-11-23,Folsom Open 3
+JR,M,15,20,81,89,Snatch,140,Conner Sparks,2021-07-13,Rescheduled 2020 Junior Pan American Championships
+JR,M,15,20,81,89,Clean & Jerk,179,Conner Sparks,2021-10-22,2021 Junior Pan American Championships
+JR,M,15,20,81,89,Total,317,Conner Sparks,2020-12-06,2020 Online American Open Finals
+JR,M,15,20,89,96,Snatch,148,Jaden Washington,2018-02-18,2018 Nike National Junior Championships
+JR,M,15,20,89,96,Clean & Jerk,190,Jaden Washington,2019-02-17,2019 National Junior Championships
+JR,M,15,20,89,96,Total,338,Jaden Washington,2018-02-18,2018 Nike National Junior Championships
+JR,M,15,20,96,102,Snatch,145,Ryland Shriver,2021-07-01,"The Nike 2021 National Junior Championships, powered by Rogue"
+JR,M,15,20,96,102,Clean & Jerk,185,Ryland Shriver,2021-07-14,Rescheduled 2020 Junior Pan American Championships
+JR,M,15,20,96,102,Total,327,Ryland Shriver,2021-07-01,"The Nike 2021 National Junior Championships, powered by Rogue"
+JR,M,15,20,102,109,Snatch,155,Ryland Shriver,2022-10-23,2022 Junior Pan American Championships
+JR,M,15,20,102,109,Clean & Jerk,195,Ryland Shriver,2022-06-30,"The Nike 2022 National Junior Championships, powered by Rogue"
+JR,M,15,20,102,109,Total,348,Ryland Shriver,2022-10-23,2022 Junior Pan American Championships
+JR,M,15,20,109,>109,Snatch,148,Ryland Shriver,2021-11-29,2021 Junior Pan American Games
+JR,M,15,20,109,>109,Clean & Jerk,187,Ryland Shriver,2021-11-29,2021 Junior Pan American Games
+JR,M,15,20,109,>109,Total,335,Ryland Shriver,2021-11-29,2021 Junior Pan American Games
+W35,F,35,39,0,45,Snatch,35,panatda wongtep,2021-07-31,Hassle Free Summer Breaker
+W35,F,35,39,0,45,Clean & Jerk,57,panatda wongtep,2021-11-07,2021 Howard Cohen American Masters
+W35,F,35,39,0,45,Total,85,panatda wongtep,2021-07-31,Hassle Free Summer Breaker
+W35,F,35,39,0,49,Snatch,58,Sarah DeParis,2021-08-14,August online qualifier
+W35,F,35,39,0,49,Clean & Jerk,77,Sarah DeParis,2020-10-24,Fall Record Breaker
+W35,F,35,39,0,49,Total,131,Sarah DeParis,2021-12-03,"The Nike 2021 North American Open Finals, powered by Rogue"
+W35,F,35,39,49,55,Snatch,85,Charis Chan,2022-07-01,"The Nike 2022 USA Weightlifting National Championships, powered by Rogue"
+W35,F,35,39,49,55,Clean & Jerk,109,Charis Chan,2022-07-01,"The Nike 2022 USA Weightlifting National Championships, powered by Rogue"
+W35,F,35,39,49,55,Total,194,Charis Chan,2022-07-01,"The Nike 2022 USA Weightlifting National Championships, powered by Rogue"
+W35,F,35,39,55,59,Snatch,84,Charis Chan,2023-06-04,2023 California North Central WSO Championships
+W35,F,35,39,55,59,Clean & Jerk,103,Charis Chan,2023-06-04,2023 California North Central WSO Championships
+W35,F,35,39,55,59,Total,187,Charis Chan,2023-06-04,2023 California North Central WSO Championships
+W35,F,35,39,59,64,Snatch,83,Charis Chan,2024-11-03,2024 Golden West Don Wilson Memorial
+W35,F,35,39,59,64,Clean & Jerk,104,Charis Chan,2024-11-03,2024 Golden West Don Wilson Memorial
+W35,F,35,39,59,64,Total,187,Charis Chan,2024-11-03,2024 Golden West Don Wilson Memorial
+W35,F,35,39,64,71,Snatch,76,Megan Farrell,2018-03-04,Nike 2018 American Open Series 1
+W35,F,35,39,64,71,Clean & Jerk,93,Megan Farrell,2018-03-04,Nike 2018 American Open Series 1
+W35,F,35,39,64,71,Total,169,Megan Farrell,2018-03-04,Nike 2018 American Open Series 1
+W35,F,35,39,71,76,Snatch,80,Kristin Newman,2018-09-16,Nike 2018 American Open Series 3
+W35,F,35,39,71,76,Clean & Jerk,104,Kristin Newman,2018-08-04,Redwood Empire Championships
+W35,F,35,39,71,76,Total,183,Kristin Newman,2018-08-04,Redwood Empire Championships
+W35,F,35,39,76,81,Snatch,80,Kara Doherty,2020-07-31,Stars and Stripes Lift Off
+W35,F,35,39,76,81,Clean & Jerk,93,Kara Doherty,2021-05-22,Hassle Free Womens Grand Prix
+W35,F,35,39,76,81,Total,173,Kara Doherty,2020-07-31,Stars and Stripes Lift Off
+W35,F,35,39,81,87,Snatch,93,Laura Alexander,2024-06-12,"The 2024 Nike USA Weightlifting National Championships, powered by Rogue"
+W35,F,35,39,81,87,Clean & Jerk,125,Laura Alexander,2024-06-12,"The 2024 Nike USA Weightlifting National Championships, powered by Rogue"
+W35,F,35,39,81,87,Total,218,Laura Alexander,2024-06-12,"The 2024 Nike USA Weightlifting National Championships, powered by Rogue"
+W35,F,35,39,87,>87,Snatch,85,Mariana Duhne Aguayo,2024-10-25,October Online Qualifier (NUQ)
+W35,F,35,39,87,>87,Clean & Jerk,112,Mariana Duhne Aguayo,2024-03-03,The Nike 2024 North American Open Series 1 Powered by Rogue Fitness
+W35,F,35,39,87,>87,Total,192,Mariana Duhne Aguayo,2024-03-03,The Nike 2024 North American Open Series 1 Powered by Rogue Fitness
+M35,M,35,39,0,55,Snatch,96,Benjamin Elias,2022-10-30,Don Wilson Memorial Golden West Open
+M35,M,35,39,0,55,Clean & Jerk,122,Benjamin Elias,2022-10-30,Don Wilson Memorial Golden West Open
+M35,M,35,39,0,55,Total,218,Benjamin Elias,2022-10-30,Don Wilson Memorial Golden West Open
+M35,M,35,39,55,61,Snatch,82,Daniel Louie,2022-08-07,Tommy Kono XVI
+M35,M,35,39,55,61,Clean & Jerk,105,Daniel Louie,2022-08-07,Tommy Kono XVI
+M35,M,35,39,55,61,Total,187,Daniel Louie,2022-08-07,Tommy Kono XVI
+M35,M,35,39,61,67,Snatch,93,Adam Tabalno,2018-01-13,Altius Athletics Winter Classic
+M35,M,35,39,61,67,Clean & Jerk,115,Adam Tabalno,2018-12-15,2018 Hawaii Open Weightlifting Championships
+M35,M,35,39,61,67,Total,204,Adam Tabalno,2018-01-13,Altius Athletics Winter Classic
+M35,M,35,39,67,73,Snatch,114,Jonathan McHale,2024-03-23,The Nike 2024 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+M35,M,35,39,67,73,Clean & Jerk,146,Jonathan McHale,2024-12-05,"The 2024 Nike North American Open Finals, powered by Rogue"
+M35,M,35,39,67,73,Total,257,Jonathan McHale,2024-03-23,The Nike 2024 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+M35,M,35,39,73,81,Snatch,118,Alvin Tajima,2025-02-27,2025 Virus Weightlifting Series 1 Powered by Rogue Fitness
+M35,M,35,39,73,81,Clean & Jerk,193,Kenton Chung,2022-08-14,Money in the Bank 22'
+M35,M,35,39,73,81,Total,298,Kenton Chung,2022-08-14,Money in the Bank 22'
+M35,M,35,39,81,89,Snatch,121,Christopher Robertson,2019-06-02,Standard Strength Presents: Money in the Bank 2
+M35,M,35,39,81,89,Clean & Jerk,153,Danny Lehr,2019-10-06,2019 Masters World Cup - U.S. Citizen
+M35,M,35,39,81,89,Total,266,Christopher Robertson,2019-06-02,Standard Strength Presents: Money in the Bank 2
+M35,M,35,39,89,96,Snatch,120,Mauricio Leal,2021-06-30,Lift Proud Virtual Cup
+M35,M,35,39,89,96,Clean & Jerk,150,Kevin Roberts,2019-06-23,PWA Champs
+M35,M,35,39,89,96,Total,265,Kevin Roberts,2019-06-23,PWA Champs
+M35,M,35,39,96,102,Snatch,157,Tarek Yehia,2022-12-04,"The Nike 2022 North American Open Finals, powered by Rogue"
+M35,M,35,39,96,102,Clean & Jerk,195,Tarek Yehia,2022-12-04,"The Nike 2022 North American Open Finals, powered by Rogue"
+M35,M,35,39,96,102,Total,352,Tarek Yehia,2022-12-04,"The Nike 2022 North American Open Finals, powered by Rogue"
+M35,M,35,39,102,109,Snatch,146,Caleb Johnson,2021-07-04,"The Nike 2021 USA Weightlifting National Championships, powered by Rogue"
+M35,M,35,39,102,109,Clean & Jerk,175,Caleb Johnson,2021-03-07,The Nike 2021 North American Open Series 1 powered by Rogue
+M35,M,35,39,102,109,Total,320,Joshua Uikilifi,2025-04-12,Hassle Free Barbell Spring Open
+M35,M,35,39,109,>109,Snatch,128,Rajan Bains,2025-04-12,2025 SoCal Spring Classic
+M35,M,35,39,109,>109,Clean & Jerk,178,Rajan Bains,2025-04-12,2025 SoCal Spring Classic
+M35,M,35,39,109,>109,Total,306,Rajan Bains,2025-04-12,2025 SoCal Spring Classic
+W40,F,40,44,0,45,Snatch,58,Rhiannon Ricketts,2018-10-20,Occam  Back Alley Rumble IV
+W40,F,40,44,0,45,Clean & Jerk,68,Rhiannon Ricketts,2019-03-31,2019 Masters National Championships
+W40,F,40,44,0,45,Total,124,Rhiannon Ricketts,2019-03-31,2019 Masters National Championships
+W40,F,40,44,0,49,Snatch,61,Carrie Olson,2018-08-24,2018 World Masters Weightlifting Championships
+W40,F,40,44,0,49,Clean & Jerk,81,Carrie Olson,2019-03-31,2019 Masters National Championships
+W40,F,40,44,0,49,Total,141,Carrie Olson,2019-03-31,2019 Masters National Championships
+W40,F,40,44,49,55,Snatch,68,wendy spies,2018-06-18,2018 Pan American Masters Championships
+W40,F,40,44,49,55,Clean & Jerk,80,wendy spies,2018-08-24,2018 World Masters Weightlifting Championships
+W40,F,40,44,49,55,Total,147,wendy spies,2018-08-24,2018 World Masters Weightlifting Championships
+W40,F,40,44,55,59,Snatch,81,Jocelyn Forest,2020-05-17,Virtual Super Championship
+W40,F,40,44,55,59,Clean & Jerk,99,Jocelyn Forest,2020-12-05,2020 Online National Championships
+W40,F,40,44,55,59,Total,177,Jocelyn Forest,2020-12-05,2020 Online National Championships
+W40,F,40,44,59,64,Snatch,77,Carlee Acevedo-Fuller,2020-04-29,AO Series Online Qualifier - April
+W40,F,40,44,59,64,Clean & Jerk,93,Carlee Acevedo-Fuller,2020-04-29,AO Series Online Qualifier - April
+W40,F,40,44,59,64,Total,170,Carlee Acevedo-Fuller,2020-04-29,AO Series Online Qualifier - April
+W40,F,40,44,64,71,Snatch,71,Rebecca Merino,2024-03-23,The Nike 2024 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+W40,F,40,44,64,71,Clean & Jerk,91,Rebecca Merino,2023-10-07,Caffeine and Kilos
+W40,F,40,44,64,71,Total,159,Rebecca Merino,2023-10-07,Caffeine and Kilos
+W40,F,40,44,71,76,Snatch,64,Brigitte Bieyro,2024-08-29,"The 2024 Nike North American Open Series 2, powered by Rogue"
+W40,F,40,44,71,76,Clean & Jerk,89,Lorlyn Cabrera,2018-09-16,Nike 2018 American Open Series 3
+W40,F,40,44,71,76,Total,152,Lorlyn Cabrera,2018-09-16,Nike 2018 American Open Series 3
+W40,F,40,44,76,81,Snatch,77,Kara Doherty,2023-09-17,"The 2023 Nike North American Open Series 2, powered by Rogue"
+W40,F,40,44,76,81,Clean & Jerk,96,Ruth Pardue,2018-05-19,2018 CTS Wine Country Classic
+W40,F,40,44,76,81,Total,165,Kara Doherty,2023-09-17,"The 2023 Nike North American Open Series 2, powered by Rogue"
+W40,F,40,44,81,87,Snatch,76,Kara Doherty,2024-03-23,The Nike 2024 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+W40,F,40,44,81,87,Clean & Jerk,95,Lorlyn Cabrera,2018-05-06,Standard Strength Presents: Money in the Bank 1
+W40,F,40,44,81,87,Total,169,Lorlyn Cabrera,2018-05-06,Standard Strength Presents: Money in the Bank 1
+W40,F,40,44,87,>87,Snatch,75,Erin Becker,2025-01-12,Bar Wars 2025
+W40,F,40,44,87,>87,Clean & Jerk,98,Lindsay Hall,2019-10-19,Occapendence Day
+W40,F,40,44,87,>87,Total,166,Erin Becker,2025-01-12,Bar Wars 2025
+M40,M,40,44,0,55,Snatch,80,Ajay Goel,2021-12-03,"The Nike 2021 North American Open Finals, powered by Rogue"
+M40,M,40,44,0,55,Clean & Jerk,102,Ajay Goel,2021-04-01,AO Series Online Qualifier - April
+M40,M,40,44,0,55,Total,182,Ajay Goel,2021-04-01,AO Series Online Qualifier - April
+M40,M,40,44,55,61,Snatch,85,Daniel Louie,2024-03-22,The Nike 2024 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+M40,M,40,44,55,61,Clean & Jerk,105,Daniel Louie,2024-03-22,The Nike 2024 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+M40,M,40,44,55,61,Total,190,Daniel Louie,2024-03-22,The Nike 2024 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+M40,M,40,44,61,67,Snatch,99,Adam Tabalno,2020-10-09,2020 Masters National Championships
+M40,M,40,44,61,67,Clean & Jerk,120,Adam Tabalno,2019-02-17,2019 Oahu Open Weightlifting Championships
+M40,M,40,44,61,67,Total,216,Adam Tabalno,2020-10-09,2020 Masters National Championships
+M40,M,40,44,67,73,Snatch,110,Andre Pulizzi,2019-04-20,Silicon Valley: SPRING OPEN
+M40,M,40,44,67,73,Clean & Jerk,140,Andre Pulizzi,2019-04-20,Silicon Valley: SPRING OPEN
+M40,M,40,44,67,73,Total,250,Andre Pulizzi,2019-04-20,Silicon Valley: SPRING OPEN
+M40,M,40,44,73,81,Snatch,106,Jason Thai,2021-11-06,2021 Howard Cohen American Masters
+M40,M,40,44,73,81,Clean & Jerk,128,Victor Igtiben,2024-03-23,The Nike 2024 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+M40,M,40,44,73,81,Total,231,Victor Igtiben,2024-03-23,The Nike 2024 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+M40,M,40,44,81,89,Snatch,110,Christopher Robertson,2020-02-22,NorCal Weightlifting Meet
+M40,M,40,44,81,89,Clean & Jerk,142,Larry Hutchinson,2019-06-23,PWA Champs
+M40,M,40,44,81,89,Total,249,Larry Hutchinson,2019-06-23,PWA Champs
+M40,M,40,44,89,96,Snatch,112,Larry Hutchinson,2019-03-24,Spring Breaker
+M40,M,40,44,89,96,Clean & Jerk,145,Larry Hutchinson,2018-09-02,Pacific Weightlifting Association Championships
+M40,M,40,44,89,96,Total,254,Larry Hutchinson,2019-03-24,Spring Breaker
+M40,M,40,44,96,102,Snatch,125,Chris Weingartner,2021-12-11,Hassle Free Winter Breaker
+M40,M,40,44,96,102,Clean & Jerk,152,Chris Weingartner,2021-12-11,Hassle Free Winter Breaker
+M40,M,40,44,96,102,Total,277,Chris Weingartner,2021-12-11,Hassle Free Winter Breaker
+M40,M,40,44,102,109,Snatch,137,Jason Kristal,2019-06-02,Pan American Masters Championships
+M40,M,40,44,102,109,Clean & Jerk,160,Jason Kristal,2019-05-05,Folsom Open
+M40,M,40,44,102,109,Total,291,Jason Kristal,2019-05-05,Folsom Open
+M40,M,40,44,109,>109,Snatch,137,Jason Kristal,2019-04-27,Occam Back Alley Rumble V
+M40,M,40,44,109,>109,Clean & Jerk,154,Brian Nicklas,2019-11-16,Visalia Fall Lift-Off
+M40,M,40,44,109,>109,Total,288,Jason Kristal,2019-04-27,Occam Back Alley Rumble V
+W45,F,45,49,0,45,Snatch,,,,
+W45,F,45,49,0,45,Clean & Jerk,,,,
+W45,F,45,49,0,45,Total,,,,
+W45,F,45,49,0,49,Snatch,47,Minet Sepulveda,2021-11-06,2021 Howard Cohen American Masters
+W45,F,45,49,0,49,Clean & Jerk,60,Minet Sepulveda,2021-11-06,2021 Howard Cohen American Masters
+W45,F,45,49,0,49,Total,107,Minet Sepulveda,2021-11-06,2021 Howard Cohen American Masters
+W45,F,45,49,49,55,Snatch,66,wendy spies,2024-09-25,2024 UMWF World Championships
+W45,F,45,49,49,55,Clean & Jerk,79,wendy spies,2024-08-04,Money in the Bank 2024
+W45,F,45,49,49,55,Total,144,wendy spies,2024-08-04,Money in the Bank 2024
+W45,F,45,49,55,59,Snatch,61,Nadia Isidoro,2024-04-20,Hassle Free Barbell Spring Breaker
+W45,F,45,49,55,59,Clean & Jerk,77,Nadia Isidoro,2024-03-22,The Nike 2024 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+W45,F,45,49,55,59,Total,136,Nadia Isidoro,2024-04-20,Hassle Free Barbell Spring Breaker
+W45,F,45,49,59,64,Snatch,58,Catherine Moore,2023-09-15,"The 2023 Nike North American Open Series 2, powered by Rogue"
+W45,F,45,49,59,64,Clean & Jerk,71,Catherine Moore,2024-03-22,The Nike 2024 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+W45,F,45,49,59,64,Total,128,Catherine Moore,2023-09-15,"The 2023 Nike North American Open Series 2, powered by Rogue"
+W45,F,45,49,64,71,Snatch,70,meshelle mifsud,2018-11-04,Howard Cohen American Masters
+W45,F,45,49,64,71,Clean & Jerk,85,Katherine Redcher Bowling,2019-11-23,Folsom Open 3
+W45,F,45,49,64,71,Total,151,meshelle mifsud,2018-11-04,Howard Cohen American Masters
+W45,F,45,49,71,76,Snatch,80,meshelle mifsud,2018-05-05,2018 PWA Masters Championships
+W45,F,45,49,71,76,Clean & Jerk,90,meshelle mifsud,2018-05-05,2018 PWA Masters Championships
+W45,F,45,49,71,76,Total,170,meshelle mifsud,2018-05-05,2018 PWA Masters Championships
+W45,F,45,49,76,81,Snatch,65,Lorlyn Cabrera,2023-09-17,"The 2023 Nike North American Open Series 2, powered by Rogue"
+W45,F,45,49,76,81,Clean & Jerk,80,Lorlyn Cabrera,2023-09-17,"The 2023 Nike North American Open Series 2, powered by Rogue"
+W45,F,45,49,76,81,Total,145,Lorlyn Cabrera,2023-09-17,"The 2023 Nike North American Open Series 2, powered by Rogue"
+W45,F,45,49,81,87,Snatch,60,Jennifer Valosek,2022-04-30,Evo Open
+W45,F,45,49,81,87,Clean & Jerk,80,Jennifer Valosek,2022-04-30,Evo Open
+W45,F,45,49,81,87,Total,140,Jennifer Valosek,2022-04-30,Evo Open
+W45,F,45,49,87,>87,Snatch,75,Maika Godwin,2020-02-01,Folsom Open 1
+W45,F,45,49,87,>87,Clean & Jerk,90,Maika Godwin,2020-09-20,Nike 2020 Online American Open Series 3 powered by Rogue
+W45,F,45,49,87,>87,Total,165,Maika Godwin,2020-02-01,Folsom Open 1
+M45,M,45,49,0,55,Snatch,,,,
+M45,M,45,49,0,55,Clean & Jerk,,,,
+M45,M,45,49,0,55,Total,,,,
+M45,M,45,49,55,61,Snatch,,,,
+M45,M,45,49,55,61,Clean & Jerk,,,,
+M45,M,45,49,55,61,Total,,,,
+M45,M,45,49,61,67,Snatch,,,,
+M45,M,45,49,61,67,Clean & Jerk,,,,
+M45,M,45,49,61,67,Total,,,,
+M45,M,45,49,67,73,Snatch,92,Sid Florendo,2024-12-05,"The 2024 Nike North American Open Finals, powered by Rogue"
+M45,M,45,49,67,73,Clean & Jerk,113,Sid Florendo,2024-12-05,"The 2024 Nike North American Open Finals, powered by Rogue"
+M45,M,45,49,67,73,Total,205,Sid Florendo,2024-12-05,"The 2024 Nike North American Open Finals, powered by Rogue"
+M45,M,45,49,73,81,Snatch,90,Gerald See,2018-12-01,Alyssa's meet
+M45,M,45,49,73,81,Clean & Jerk,112,CHIN SONU,2022-08-14,Money in the Bank 22'
+M45,M,45,49,73,81,Total,199,Christopher McManus,2019-12-15,Hassle Free Winter Breaker
+M45,M,45,49,81,89,Snatch,115,Christopher Robertson,2025-04-03,The 2025 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+M45,M,45,49,81,89,Clean & Jerk,134,Christopher Robertson,2025-02-08,Max's Gym - Oakland Open 2025
+M45,M,45,49,81,89,Total,246,Christopher Robertson,2025-02-08,Max's Gym - Oakland Open 2025
+M45,M,45,49,89,96,Snatch,91,Kevin Lee,2025-05-18,Capital Gainz
+M45,M,45,49,89,96,Clean & Jerk,119,Kevin Lee,2025-05-18,Capital Gainz
+M45,M,45,49,89,96,Total,210,Kevin Lee,2025-05-18,Capital Gainz
+M45,M,45,49,96,102,Snatch,80,ADAM LORIMER,2023-10-14,Diablo Fall Classic
+M45,M,45,49,96,102,Clean & Jerk,115,ADAM LORIMER,2023-10-14,Diablo Fall Classic
+M45,M,45,49,96,102,Total,195,ADAM LORIMER,2023-10-14,Diablo Fall Classic
+M45,M,45,49,102,109,Snatch,108,Tomas Kaselionis,2021-11-06,2021 Howard Cohen American Masters
+M45,M,45,49,102,109,Clean & Jerk,124,Kaleo Cornwell,2024-08-03,Money in the Bank 2024
+M45,M,45,49,102,109,Total,229,Tomas Kaselionis,2021-11-06,2021 Howard Cohen American Masters
+M45,M,45,49,109,>109,Snatch,125,Jason Kristal,2024-03-22,The Nike 2024 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+M45,M,45,49,109,>109,Clean & Jerk,150,Martin Sisneroz,2024-10-06,Pacific Northwest WSO Championship
+M45,M,45,49,109,>109,Total,272,Martin Sisneroz,2024-10-06,Pacific Northwest WSO Championship
+W50,F,50,54,0,45,Snatch,53,Jodie Kubota,2022-03-27,2022 HF EVO Springbreaker
+W50,F,50,54,0,45,Clean & Jerk,58,Jodie Kubota,2022-03-27,2022 HF EVO Springbreaker
+W50,F,50,54,0,45,Total,111,Jodie Kubota,2022-03-27,2022 HF EVO Springbreaker
+W50,F,50,54,0,49,Snatch,44,Lisa Renschen,2018-05-05,2018 PWA Masters Championships
+W50,F,50,54,0,49,Clean & Jerk,58,Lisa Renschen,2018-11-04,Howard Cohen American Masters
+W50,F,50,54,0,49,Total,102,Lisa Renschen,2018-05-05,2018 PWA Masters Championships
+W50,F,50,54,49,55,Snatch,61,Rosanna Sansone,2024-03-21,The Nike 2024 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+W50,F,50,54,49,55,Clean & Jerk,71,Rosanna Sansone,2024-03-21,The Nike 2024 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+W50,F,50,54,49,55,Total,132,Rosanna Sansone,2024-03-21,The Nike 2024 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+W50,F,50,54,55,59,Snatch,50,Ina Hart,2021-11-05,2021 Howard Cohen American Masters
+W50,F,50,54,55,59,Clean & Jerk,68,Isabelle Morency Ruiz,2021-12-11,SoCal Winter Classic 2021
+W50,F,50,54,55,59,Total,115,Isabelle Morency Ruiz,2021-12-11,SoCal Winter Classic 2021
+W50,F,50,54,59,64,Snatch,65,Katherine Redcher Bowling,2020-04-29,AO Series Online Qualifier - April
+W50,F,50,54,59,64,Clean & Jerk,82,Katherine Redcher Bowling,2020-04-29,AO Series Online Qualifier - April
+W50,F,50,54,59,64,Total,147,Katherine Redcher Bowling,2020-04-29,AO Series Online Qualifier - April
+W50,F,50,54,64,71,Snatch,67,Katherine Redcher Bowling,2020-02-22,NorCal Weightlifting Meet
+W50,F,50,54,64,71,Clean & Jerk,86,Katherine Redcher Bowling,2020-02-01,Folsom Open 1
+W50,F,50,54,64,71,Total,152,Katherine Redcher Bowling,2020-02-01,Folsom Open 1
+W50,F,50,54,71,76,Snatch,62,Katherine Redcher Bowling,2023-10-07,Caffeine and Kilos
+W50,F,50,54,71,76,Clean & Jerk,75,Katherine Redcher Bowling,2023-03-11,Bulldog Weightlifting 2023
+W50,F,50,54,71,76,Total,135,Katherine Redcher Bowling,2023-03-11,Bulldog Weightlifting 2023
+W50,F,50,54,76,81,Snatch,62,Jennifer Valosek,2025-04-03,The 2025 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+W50,F,50,54,76,81,Clean & Jerk,77,Jennifer Valosek,2025-04-03,The 2025 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+W50,F,50,54,76,81,Total,139,Jennifer Valosek,2025-04-03,The 2025 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+W50,F,50,54,81,87,Snatch,48,Betty De Leon,2024-11-23,Rite of Passage 2024
+W50,F,50,54,81,87,Clean & Jerk,73,Betty De Leon,2024-11-23,Rite of Passage 2024
+W50,F,50,54,81,87,Total,121,Betty De Leon,2024-11-23,Rite of Passage 2024
+W50,F,50,54,87,>87,Snatch,65,Candace Dees-Barrios,2020-10-18,2020 Pan American Masters
+W50,F,50,54,87,>87,Clean & Jerk,84,Candace Dees-Barrios,2020-10-18,2020 Pan American Masters
+W50,F,50,54,87,>87,Total,149,Candace Dees-Barrios,2020-10-18,2020 Pan American Masters
+M50,M,50,54,0,55,Snatch,,,,
+M50,M,50,54,0,55,Clean & Jerk,,,,
+M50,M,50,54,0,55,Total,,,,
+M50,M,50,54,55,61,Snatch,,,,
+M50,M,50,54,55,61,Clean & Jerk,,,,
+M50,M,50,54,55,61,Total,,,,
+M50,M,50,54,61,67,Snatch,58,John Destacamento,2019-08-10,Tommy Kono Memorial
+M50,M,50,54,61,67,Clean & Jerk,75,John Destacamento,2019-08-10,Tommy Kono Memorial
+M50,M,50,54,61,67,Total,133,John Destacamento,2019-08-10,Tommy Kono Memorial
+M50,M,50,54,67,73,Snatch,75,CHIN SONU,2023-03-16,2023 National Masters Championships
+M50,M,50,54,67,73,Clean & Jerk,110,CHIN SONU,2023-03-16,2023 National Masters Championships
+M50,M,50,54,67,73,Total,185,CHIN SONU,2023-03-16,2023 National Masters Championships
+M50,M,50,54,73,81,Snatch,91,Gerald See,2021-07-31,Hassle Free Summer Breaker
+M50,M,50,54,73,81,Clean & Jerk,110,David Conragan,2021-05-23,2021 Heavy Athletics Open
+M50,M,50,54,73,81,Total,200,Gerald See,2021-07-31,Hassle Free Summer Breaker
+M50,M,50,54,81,89,Snatch,91,John Bourgeois,2024-03-22,The Nike 2024 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+M50,M,50,54,81,89,Clean & Jerk,111,John Bourgeois,2024-01-13,Bar Wars 2024
+M50,M,50,54,81,89,Total,200,John Bourgeois,2024-01-13,Bar Wars 2024
+M50,M,50,54,89,96,Snatch,76,Alan Reese,2021-08-08,Tommy Kono Memorial XV
+M50,M,50,54,89,96,Clean & Jerk,98,Alan Reese,2021-08-08,Tommy Kono Memorial XV
+M50,M,50,54,89,96,Total,174,Alan Reese,2021-08-08,Tommy Kono Memorial XV
+M50,M,50,54,96,102,Snatch,106,Roy Lesui,2025-04-03,The 2025 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+M50,M,50,54,96,102,Clean & Jerk,121,Roy Lesui,2025-04-03,The 2025 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+M50,M,50,54,96,102,Total,227,Roy Lesui,2025-04-03,The 2025 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+M50,M,50,54,102,109,Snatch,68,Travis Johnson,2025-03-22,Power House Open 2025
+M50,M,50,54,102,109,Clean & Jerk,100,Travis Johnson,2025-03-22,Power House Open 2025
+M50,M,50,54,102,109,Total,168,Travis Johnson,2025-03-22,Power House Open 2025
+M50,M,50,54,109,>109,Snatch,66,Jeffrey Carpenter,2019-04-20,Silicon Valley: SPRING OPEN
+M50,M,50,54,109,>109,Clean & Jerk,98,Jeffrey Carpenter,2019-04-20,Silicon Valley: SPRING OPEN
+M50,M,50,54,109,>109,Total,164,Jeffrey Carpenter,2019-04-20,Silicon Valley: SPRING OPEN
+W55,F,55,59,0,45,Snatch,,,,
+W55,F,55,59,0,45,Clean & Jerk,,,,
+W55,F,55,59,0,45,Total,,,,
+W55,F,55,59,0,49,Snatch,,,,
+W55,F,55,59,0,49,Clean & Jerk,,,,
+W55,F,55,59,0,49,Total,,,,
+W55,F,55,59,49,55,Snatch,32,Anita Ng,2019-11-17,Howard Cohen American Masters
+W55,F,55,59,49,55,Clean & Jerk,50,Anita Ng,2019-11-17,Howard Cohen American Masters
+W55,F,55,59,49,55,Total,82,Anita Ng,2019-11-17,Howard Cohen American Masters
+W55,F,55,59,55,59,Snatch,47,Susan Gerhard,2024-12-05,"The 2024 Nike North American Open Finals, powered by Rogue"
+W55,F,55,59,55,59,Clean & Jerk,57,Anita Ng,2018-09-16,Nike 2018 American Open Series 3
+W55,F,55,59,55,59,Total,102,Susan Gerhard,2023-09-14,"The 2023 Nike North American Open Series 2, powered by Rogue"
+W55,F,55,59,59,64,Snatch,43,Jodi Jordan,2022-10-08,Legion Open and Nevada State/Mountain South WSO Championships
+W55,F,55,59,59,64,Clean & Jerk,58,Jodi Jordan,2022-10-08,Legion Open and Nevada State/Mountain South WSO Championships
+W55,F,55,59,59,64,Total,101,Jodi Jordan,2022-10-08,Legion Open and Nevada State/Mountain South WSO Championships
+W55,F,55,59,64,71,Snatch,47,Tarra Lyons,2020-10-09,2020 Masters National Championships
+W55,F,55,59,64,71,Clean & Jerk,59,Jodi Jordan,2023-03-18,Hassle Free BBC Spring Breaker Jr Champs
+W55,F,55,59,64,71,Total,103,Jodi Jordan,2023-09-15,"The 2023 Nike North American Open Series 2, powered by Rogue"
+W55,F,55,59,71,76,Snatch,54,Katherine Redcher Bowling,2025-04-26,Folsom Open 2- 2025
+W55,F,55,59,71,76,Clean & Jerk,71,Katherine Redcher Bowling,2025-04-26,Folsom Open 2- 2025
+W55,F,55,59,71,76,Total,125,Katherine Redcher Bowling,2025-04-26,Folsom Open 2- 2025
+W55,F,55,59,76,81,Snatch,47,Joanna Mangiante,2025-04-12,Hassle Free Barbell Spring Open
+W55,F,55,59,76,81,Clean & Jerk,61,Joanna Mangiante,2025-04-12,Hassle Free Barbell Spring Open
+W55,F,55,59,76,81,Total,108,Joanna Mangiante,2025-04-12,Hassle Free Barbell Spring Open
+W55,F,55,59,81,87,Snatch,37,Tracy Rapplin,2024-03-21,The Nike 2024 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+W55,F,55,59,81,87,Clean & Jerk,55,Tracy Rapplin,2024-03-21,The Nike 2024 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+W55,F,55,59,81,87,Total,92,Tracy Rapplin,2024-03-21,The Nike 2024 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+W55,F,55,59,87,>87,Snatch,42,Tracy Rapplin,2022-05-21,PWA Championships 2022
+W55,F,55,59,87,>87,Clean & Jerk,62,Tracy Rapplin,2022-04-21,2022 National Masters Weightlifting Championships
+W55,F,55,59,87,>87,Total,104,Tracy Rapplin,2022-04-21,2022 National Masters Weightlifting Championships
+M55,M,55,59,0,55,Snatch,,,,
+M55,M,55,59,0,55,Clean & Jerk,,,,
+M55,M,55,59,0,55,Total,,,,
+M55,M,55,59,55,61,Snatch,,,,
+M55,M,55,59,55,61,Clean & Jerk,,,,
+M55,M,55,59,55,61,Total,,,,
+M55,M,55,59,61,67,Snatch,53,John Destacamento,2024-07-20,The Tommy Kono XVIII:   2024 WSO Championships
+M55,M,55,59,61,67,Clean & Jerk,60,John Destacamento,2024-07-20,The Tommy Kono XVIII:   2024 WSO Championships
+M55,M,55,59,61,67,Total,113,John Destacamento,2024-07-20,The Tommy Kono XVIII:   2024 WSO Championships
+M55,M,55,59,67,73,Snatch,80,Norman Prokup,2024-10-05,Steve Gough Memorial - Max's Gym
+M55,M,55,59,67,73,Clean & Jerk,105,Norman Prokup,2024-10-05,Steve Gough Memorial - Max's Gym
+M55,M,55,59,67,73,Total,185,Norman Prokup,2024-10-05,Steve Gough Memorial - Max's Gym
+M55,M,55,59,73,81,Snatch,,,,
+M55,M,55,59,73,81,Clean & Jerk,,,,
+M55,M,55,59,73,81,Total,,,,
+M55,M,55,59,81,89,Snatch,81,Gary Alinea,2025-04-12,Hassle Free Barbell Spring Open
+M55,M,55,59,81,89,Clean & Jerk,107,Gary Alinea,2023-07-16,2023 Max's Gym Open
+M55,M,55,59,81,89,Total,188,Gary Alinea,2023-07-16,2023 Max's Gym Open
+M55,M,55,59,89,96,Snatch,77,Alan Reese,2024-07-20,The Tommy Kono XVIII:   2024 WSO Championships
+M55,M,55,59,89,96,Clean & Jerk,85,Alan Reese,2024-07-20,The Tommy Kono XVIII:   2024 WSO Championships
+M55,M,55,59,89,96,Total,162,Alan Reese,2024-07-20,The Tommy Kono XVIII:   2024 WSO Championships
+M55,M,55,59,96,102,Snatch,,,,
+M55,M,55,59,96,102,Clean & Jerk,,,,
+M55,M,55,59,96,102,Total,,,,
+M55,M,55,59,102,109,Snatch,81,Daniel Larson,2023-03-16,2023 National Masters Championships
+M55,M,55,59,102,109,Clean & Jerk,93,Daniel Larson,2023-01-15,Bar Wars 2023
+M55,M,55,59,102,109,Total,171,Daniel Larson,2023-01-15,Bar Wars 2023
+M55,M,55,59,109,>109,Snatch,98,Robert Madsen,2019-06-23,PWA Champs
+M55,M,55,59,109,>109,Clean & Jerk,122,Robert Madsen,2019-06-23,PWA Champs
+M55,M,55,59,109,>109,Total,220,Robert Madsen,2019-06-23,PWA Champs
+W60,F,60,64,0,45,Snatch,,,,
+W60,F,60,64,0,45,Clean & Jerk,,,,
+W60,F,60,64,0,45,Total,,,,
+W60,F,60,64,0,49,Snatch,31,Lori Bihler,2019-08-24,2019 IWF World Masters
+W60,F,60,64,0,49,Clean & Jerk,42,Lori Bihler,2019-03-31,2019 Masters National Championships
+W60,F,60,64,0,49,Total,71,Lori Bihler,2019-03-31,2019 Masters National Championships
+W60,F,60,64,49,55,Snatch,40,Sandra Guterres,2024-07-20,The Tommy Kono XVIII:   2024 WSO Championships
+W60,F,60,64,49,55,Clean & Jerk,54,Sandra Guterres,2024-07-20,The Tommy Kono XVIII:   2024 WSO Championships
+W60,F,60,64,49,55,Total,94,Sandra Guterres,2024-07-20,The Tommy Kono XVIII:   2024 WSO Championships
+W60,F,60,64,55,59,Snatch,41,Sandra Guterres,2024-12-15,Hassle Free Winter Breakers
+W60,F,60,64,55,59,Clean & Jerk,55,Yvonne Howard,2023-10-14,Diablo Fall Classic
+W60,F,60,64,55,59,Total,96,Sandra Guterres,2024-12-15,Hassle Free Winter Breakers
+W60,F,60,64,59,64,Snatch,34,Tracy Paxton,2025-01-11,Bar Wars 2025
+W60,F,60,64,59,64,Clean & Jerk,47,Tracy Paxton,2025-01-11,Bar Wars 2025
+W60,F,60,64,59,64,Total,81,Tracy Paxton,2025-01-11,Bar Wars 2025
+W60,F,60,64,64,71,Snatch,47,Jodi Jordan,2024-07-20,The Tommy Kono XVIII:   2024 WSO Championships
+W60,F,60,64,64,71,Clean & Jerk,55,Jodi Jordan,2024-07-20,The Tommy Kono XVIII:   2024 WSO Championships
+W60,F,60,64,64,71,Total,102,Jodi Jordan,2024-07-20,The Tommy Kono XVIII:   2024 WSO Championships
+W60,F,60,64,71,76,Snatch,26,Rene Cournoyer,2021-12-11,Steve Gough Memorial PWA Championships
+W60,F,60,64,71,76,Clean & Jerk,37,Rene Cournoyer,2021-12-11,Steve Gough Memorial PWA Championships
+W60,F,60,64,71,76,Total,63,Rene Cournoyer,2021-12-11,Steve Gough Memorial PWA Championships
+W60,F,60,64,76,81,Snatch,24,Rene Cournoyer,2019-11-03,56th Golden West Opejn
+W60,F,60,64,76,81,Clean & Jerk,35,Rene Cournoyer,2019-11-03,56th Golden West Opejn
+W60,F,60,64,76,81,Total,59,Rene Cournoyer,2019-11-03,56th Golden West Opejn
+W60,F,60,64,81,87,Snatch,,,,
+W60,F,60,64,81,87,Clean & Jerk,,,,
+W60,F,60,64,81,87,Total,,,,
+W60,F,60,64,87,>87,Snatch,16,Carmen Dias,2024-03-15,Bakersfield 2024 - National Qualifier
+W60,F,60,64,87,>87,Clean & Jerk,20,Carmen Dias,2024-03-15,Bakersfield 2024 - National Qualifier
+W60,F,60,64,87,>87,Total,36,Carmen Dias,2024-03-15,Bakersfield 2024 - National Qualifier
+M60,M,60,64,0,55,Snatch,,,,
+M60,M,60,64,0,55,Clean & Jerk,,,,
+M60,M,60,64,0,55,Total,,,,
+M60,M,60,64,55,61,Snatch,,,,
+M60,M,60,64,55,61,Clean & Jerk,,,,
+M60,M,60,64,55,61,Total,,,,
+M60,M,60,64,61,67,Snatch,,,,
+M60,M,60,64,61,67,Clean & Jerk,,,,
+M60,M,60,64,61,67,Total,,,,
+M60,M,60,64,67,73,Snatch,,,,
+M60,M,60,64,67,73,Clean & Jerk,,,,
+M60,M,60,64,67,73,Total,,,,
+M60,M,60,64,73,81,Snatch,70,Dallas Broussard,2018-02-10,Midtown Open 1
+M60,M,60,64,73,81,Clean & Jerk,90,Dallas Broussard,2018-02-10,Midtown Open 1
+M60,M,60,64,73,81,Total,160,Dallas Broussard,2018-02-10,Midtown Open 1
+M60,M,60,64,81,89,Snatch,95,Aleksandr  Degtyarev,2025-05-18,Capital Gainz
+M60,M,60,64,81,89,Clean & Jerk,115,Aleksandr  Degtyarev,2025-05-18,Capital Gainz
+M60,M,60,64,81,89,Total,210,Aleksandr  Degtyarev,2025-05-18,Capital Gainz
+M60,M,60,64,89,96,Snatch,,,,
+M60,M,60,64,89,96,Clean & Jerk,,,,
+M60,M,60,64,89,96,Total,,,,
+M60,M,60,64,96,102,Snatch,,,,
+M60,M,60,64,96,102,Clean & Jerk,,,,
+M60,M,60,64,96,102,Total,,,,
+M60,M,60,64,102,109,Snatch,40,Kenneth Swenson,2022-08-07,Tommy Kono XVI
+M60,M,60,64,102,109,Clean & Jerk,44,Kenneth Swenson,2022-08-07,Tommy Kono XVI
+M60,M,60,64,102,109,Total,84,Kenneth Swenson,2022-08-07,Tommy Kono XVI
+M60,M,60,64,109,>109,Snatch,93,Robert Madsen,2022-04-21,2022 National Masters Weightlifting Championships
+M60,M,60,64,109,>109,Clean & Jerk,112,Robert Madsen,2022-04-21,2022 National Masters Weightlifting Championships
+M60,M,60,64,109,>109,Total,205,Robert Madsen,2022-04-21,2022 National Masters Weightlifting Championships
+W65,F,65,69,0,45,Snatch,,,,
+W65,F,65,69,0,45,Clean & Jerk,,,,
+W65,F,65,69,0,45,Total,,,,
+W65,F,65,69,0,49,Snatch,20,joann truby,2020-06-30,Lift Proud Virtual Cup
+W65,F,65,69,0,49,Clean & Jerk,31,joann truby,2020-10-17,2020 Pan American Masters
+W65,F,65,69,0,49,Total,50,joann truby,2020-06-30,Lift Proud Virtual Cup
+W65,F,65,69,49,55,Snatch,,,,
+W65,F,65,69,49,55,Clean & Jerk,,,,
+W65,F,65,69,49,55,Total,,,,
+W65,F,65,69,55,59,Snatch,,,,
+W65,F,65,69,55,59,Clean & Jerk,,,,
+W65,F,65,69,55,59,Total,,,,
+W65,F,65,69,59,64,Snatch,28,Betsy Groh,2021-11-05,2021 Howard Cohen American Masters
+W65,F,65,69,59,64,Clean & Jerk,38,Betsy Groh,2021-11-05,2021 Howard Cohen American Masters
+W65,F,65,69,59,64,Total,66,Betsy Groh,2021-11-05,2021 Howard Cohen American Masters
+W65,F,65,69,64,71,Snatch,19,Toni Webster-McIntosh,2022-05-21,PWA Championships 2022
+W65,F,65,69,64,71,Clean & Jerk,26,Toni Webster-McIntosh,2022-05-21,PWA Championships 2022
+W65,F,65,69,64,71,Total,45,Toni Webster-McIntosh,2022-05-21,PWA Championships 2022
+W65,F,65,69,71,76,Snatch,34,Rose Marie Moore,2018-08-24,2018 World Masters Weightlifting Championships
+W65,F,65,69,71,76,Clean & Jerk,44,Rose Marie Moore,2019-03-31,2019 Masters National Championships
+W65,F,65,69,71,76,Total,77,Rose Marie Moore,2019-03-31,2019 Masters National Championships
+W65,F,65,69,76,81,Snatch,35,Rose Marie Moore,2018-11-11,Midtown Opens III
+W65,F,65,69,76,81,Clean & Jerk,45,Rose Marie Moore,2018-11-11,Midtown Opens III
+W65,F,65,69,76,81,Total,80,Rose Marie Moore,2018-11-11,Midtown Opens III
+W65,F,65,69,81,87,Snatch,,,,
+W65,F,65,69,81,87,Clean & Jerk,,,,
+W65,F,65,69,81,87,Total,,,,
+W65,F,65,69,87,>87,Snatch,,,,
+W65,F,65,69,87,>87,Clean & Jerk,,,,
+W65,F,65,69,87,>87,Total,,,,
+M65,M,65,69,0,55,Snatch,,,,
+M65,M,65,69,0,55,Clean & Jerk,,,,
+M65,M,65,69,0,55,Total,,,,
+M65,M,65,69,55,61,Snatch,,,,
+M65,M,65,69,55,61,Clean & Jerk,,,,
+M65,M,65,69,55,61,Total,,,,
+M65,M,65,69,61,67,Snatch,,,,
+M65,M,65,69,61,67,Clean & Jerk,,,,
+M65,M,65,69,61,67,Total,,,,
+M65,M,65,69,67,73,Snatch,59,Clarke Holland,2019-06-23,PWA Champs
+M65,M,65,69,67,73,Clean & Jerk,77,Clarke Holland,2018-08-24,2018 World Masters Weightlifting Championships
+M65,M,65,69,67,73,Total,135,Clarke Holland,2019-06-23,PWA Champs
+M65,M,65,69,73,81,Snatch,62,Kevin McPhee,2024-12-15,Hassle Free Winter Breakers
+M65,M,65,69,73,81,Clean & Jerk,79,Clarke Holland,2018-05-05,2018 PWA Masters Championships
+M65,M,65,69,73,81,Total,137,Clarke Holland,2018-05-05,2018 PWA Masters Championships
+M65,M,65,69,81,89,Snatch,59,Bill Shea,2018-08-04,Redwood Empire Championships
+M65,M,65,69,81,89,Clean & Jerk,82,Bill Shea,2018-08-04,Redwood Empire Championships
+M65,M,65,69,81,89,Total,141,Bill Shea,2018-08-04,Redwood Empire Championships
+M65,M,65,69,89,96,Snatch,60,JW Gurtis,2024-07-20,The Tommy Kono XVIII:   2024 WSO Championships
+M65,M,65,69,89,96,Clean & Jerk,80,JW Gurtis,2024-07-20,The Tommy Kono XVIII:   2024 WSO Championships
+M65,M,65,69,89,96,Total,140,JW Gurtis,2024-07-20,The Tommy Kono XVIII:   2024 WSO Championships
+M65,M,65,69,96,102,Snatch,,,,
+M65,M,65,69,96,102,Clean & Jerk,,,,
+M65,M,65,69,96,102,Total,,,,
+M65,M,65,69,102,109,Snatch,,,,
+M65,M,65,69,102,109,Clean & Jerk,,,,
+M65,M,65,69,102,109,Total,,,,
+M65,M,65,69,109,>109,Snatch,83,Robert Madsen,2025-02-08,Norcal Collegiate Qualifier @Menlo College
+M65,M,65,69,109,>109,Clean & Jerk,106,Robert Madsen,2025-02-08,Norcal Collegiate Qualifier @Menlo College
+M65,M,65,69,109,>109,Total,189,Robert Madsen,2025-02-08,Norcal Collegiate Qualifier @Menlo College
+W70,F,70,74,0,45,Snatch,,,,
+W70,F,70,74,0,45,Clean & Jerk,,,,
+W70,F,70,74,0,45,Total,,,,
+W70,F,70,74,0,49,Snatch,,,,
+W70,F,70,74,0,49,Clean & Jerk,,,,
+W70,F,70,74,0,49,Total,,,,
+W70,F,70,74,49,55,Snatch,,,,
+W70,F,70,74,49,55,Clean & Jerk,,,,
+W70,F,70,74,49,55,Total,,,,
+W70,F,70,74,55,59,Snatch,,,,
+W70,F,70,74,55,59,Clean & Jerk,,,,
+W70,F,70,74,55,59,Total,,,,
+W70,F,70,74,59,64,Snatch,,,,
+W70,F,70,74,59,64,Clean & Jerk,,,,
+W70,F,70,74,59,64,Total,,,,
+W70,F,70,74,64,71,Snatch,,,,
+W70,F,70,74,64,71,Clean & Jerk,,,,
+W70,F,70,74,64,71,Total,,,,
+W70,F,70,74,71,76,Snatch,30,Rose Marie Moore,2023-03-15,2023 National Masters Championships
+W70,F,70,74,71,76,Clean & Jerk,38,Rose Marie Moore,2024-03-21,The Nike 2024 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+W70,F,70,74,71,76,Total,66,Rose Marie Moore,2024-03-21,The Nike 2024 USA Weightlifting Masters National Championships Powered by Rogue Fitness
+W70,F,70,74,76,81,Snatch,31,Rose Marie Moore,2022-08-10,2022 Howard Cohen American Masters
+W70,F,70,74,76,81,Clean & Jerk,37,Rose Marie Moore,2022-08-10,2022 Howard Cohen American Masters
+W70,F,70,74,76,81,Total,68,Rose Marie Moore,2022-08-10,2022 Howard Cohen American Masters
+W70,F,70,74,81,87,Snatch,29,Rose Marie Moore,2022-12-01,IWF World Masters Championships
+W70,F,70,74,81,87,Clean & Jerk,36,Rose Marie Moore,2021-11-05,2021 Howard Cohen American Masters
+W70,F,70,74,81,87,Total,65,Rose Marie Moore,2021-11-05,2021 Howard Cohen American Masters
+W70,F,70,74,87,>87,Snatch,,,,
+W70,F,70,74,87,>87,Clean & Jerk,,,,
+W70,F,70,74,87,>87,Total,,,,
+M70,M,70,74,0,55,Snatch,,,,
+M70,M,70,74,0,55,Clean & Jerk,,,,
+M70,M,70,74,0,55,Total,,,,
+M70,M,70,74,55,61,Snatch,,,,
+M70,M,70,74,55,61,Clean & Jerk,,,,
+M70,M,70,74,55,61,Total,,,,
+M70,M,70,74,61,67,Snatch,,,,
+M70,M,70,74,61,67,Clean & Jerk,,,,
+M70,M,70,74,61,67,Total,,,,
+M70,M,70,74,67,73,Snatch,58,Clarke Holland,2021-05-24,2021 World Masters Championships
+M70,M,70,74,67,73,Clean & Jerk,73,Clarke Holland,2021-05-24,2021 World Masters Championships
+M70,M,70,74,67,73,Total,131,Clarke Holland,2021-05-24,2021 World Masters Championships
+M70,M,70,74,73,81,Snatch,54,Gordon Chiang,2023-09-15,"The 2023 Nike North American Open Series 2, powered by Rogue"
+M70,M,70,74,73,81,Clean & Jerk,79,Christopher Kulp,2022-03-06,2019 Masters World Cup - U.S. Citizen
+M70,M,70,74,73,81,Total,130,Christopher Kulp,2022-03-06,2019 Masters World Cup - U.S. Citizen
+M70,M,70,74,81,89,Snatch,47,Robert Cavano,2018-05-05,2018 PWA Masters Championships
+M70,M,70,74,81,89,Clean & Jerk,70,Robert Cavano,2018-08-04,Redwood Empire Championships
+M70,M,70,74,81,89,Total,116,Robert Cavano,2018-05-05,2018 PWA Masters Championships
+M70,M,70,74,89,96,Snatch,,,,
+M70,M,70,74,89,96,Clean & Jerk,,,,
+M70,M,70,74,89,96,Total,,,,
+M70,M,70,74,96,102,Snatch,,,,
+M70,M,70,74,96,102,Clean & Jerk,,,,
+M70,M,70,74,96,102,Total,,,,
+M70,M,70,74,102,109,Snatch,,,,
+M70,M,70,74,102,109,Clean & Jerk,,,,
+M70,M,70,74,102,109,Total,,,,
+M70,M,70,74,109,>109,Snatch,,,,
+M70,M,70,74,109,>109,Clean & Jerk,,,,
+M70,M,70,74,109,>109,Total,,,,
+W75,F,75,79,0,45,Snatch,,,,
+W75,F,75,79,0,45,Clean & Jerk,,,,
+W75,F,75,79,0,45,Total,,,,
+W75,F,75,79,0,49,Snatch,,,,
+W75,F,75,79,0,49,Clean & Jerk,,,,
+W75,F,75,79,0,49,Total,,,,
+W75,F,75,79,49,55,Snatch,,,,
+W75,F,75,79,49,55,Clean & Jerk,,,,
+W75,F,75,79,49,55,Total,,,,
+W75,F,75,79,55,59,Snatch,,,,
+W75,F,75,79,55,59,Clean & Jerk,,,,
+W75,F,75,79,55,59,Total,,,,
+W75,F,75,79,59,64,Snatch,,,,
+W75,F,75,79,59,64,Clean & Jerk,,,,
+W75,F,75,79,59,64,Total,,,,
+W75,F,75,79,64,71,Snatch,,,,
+W75,F,75,79,64,71,Clean & Jerk,,,,
+W75,F,75,79,64,71,Total,,,,
+W75,F,75,79,71,76,Snatch,,,,
+W75,F,75,79,71,76,Clean & Jerk,,,,
+W75,F,75,79,71,76,Total,,,,
+W75,F,75,79,76,81,Snatch,,,,
+W75,F,75,79,76,81,Clean & Jerk,,,,
+W75,F,75,79,76,81,Total,,,,
+W75,F,75,79,81,87,Snatch,,,,
+W75,F,75,79,81,87,Clean & Jerk,,,,
+W75,F,75,79,81,87,Total,,,,
+W75,F,75,79,87,>87,Snatch,,,,
+W75,F,75,79,87,>87,Clean & Jerk,,,,
+W75,F,75,79,87,>87,Total,,,,
+M75,M,75,79,0,55,Snatch,,,,
+M75,M,75,79,0,55,Clean & Jerk,,,,
+M75,M,75,79,0,55,Total,,,,
+M75,M,75,79,55,61,Snatch,,,,
+M75,M,75,79,55,61,Clean & Jerk,,,,
+M75,M,75,79,55,61,Total,,,,
+M75,M,75,79,61,67,Snatch,,,,
+M75,M,75,79,61,67,Clean & Jerk,,,,
+M75,M,75,79,61,67,Total,,,,
+M75,M,75,79,67,73,Snatch,,,,
+M75,M,75,79,67,73,Clean & Jerk,,,,
+M75,M,75,79,67,73,Total,,,,
+M75,M,75,79,73,81,Snatch,,,,
+M75,M,75,79,73,81,Clean & Jerk,,,,
+M75,M,75,79,73,81,Total,,,,
+M75,M,75,79,81,89,Snatch,45,Robert Cavano,2023-12-03,2023 Oakland Open
+M75,M,75,79,81,89,Clean & Jerk,62,Robert Cavano,2023-12-03,2023 Oakland Open
+M75,M,75,79,81,89,Total,107,Robert Cavano,2023-12-03,2023 Oakland Open
+M75,M,75,79,89,96,Snatch,,,,
+M75,M,75,79,89,96,Clean & Jerk,,,,
+M75,M,75,79,89,96,Total,,,,
+M75,M,75,79,96,102,Snatch,,,,
+M75,M,75,79,96,102,Clean & Jerk,,,,
+M75,M,75,79,96,102,Total,,,,
+M75,M,75,79,102,109,Snatch,,,,
+M75,M,75,79,102,109,Clean & Jerk,,,,
+M75,M,75,79,102,109,Total,,,,
+M75,M,75,79,109,>109,Snatch,,,,
+M75,M,75,79,109,>109,Clean & Jerk,,,,
+M75,M,75,79,109,>109,Total,,,,
+W80,F,80,84,0,45,Snatch,,,,
+W80,F,80,84,0,45,Clean & Jerk,,,,
+W80,F,80,84,0,45,Total,,,,
+W80,F,80,84,0,49,Snatch,,,,
+W80,F,80,84,0,49,Clean & Jerk,,,,
+W80,F,80,84,0,49,Total,,,,
+W80,F,80,84,49,55,Snatch,,,,
+W80,F,80,84,49,55,Clean & Jerk,,,,
+W80,F,80,84,49,55,Total,,,,
+W80,F,80,84,55,59,Snatch,,,,
+W80,F,80,84,55,59,Clean & Jerk,,,,
+W80,F,80,84,55,59,Total,,,,
+W80,F,80,84,59,64,Snatch,,,,
+W80,F,80,84,59,64,Clean & Jerk,,,,
+W80,F,80,84,59,64,Total,,,,
+W80,F,80,84,64,71,Snatch,,,,
+W80,F,80,84,64,71,Clean & Jerk,,,,
+W80,F,80,84,64,71,Total,,,,
+W80,F,80,84,71,76,Snatch,,,,
+W80,F,80,84,71,76,Clean & Jerk,,,,
+W80,F,80,84,71,76,Total,,,,
+W80,F,80,84,76,81,Snatch,,,,
+W80,F,80,84,76,81,Clean & Jerk,,,,
+W80,F,80,84,76,81,Total,,,,
+W80,F,80,84,81,87,Snatch,,,,
+W80,F,80,84,81,87,Clean & Jerk,,,,
+W80,F,80,84,81,87,Total,,,,
+W80,F,80,84,87,>87,Snatch,,,,
+W80,F,80,84,87,>87,Clean & Jerk,,,,
+W80,F,80,84,87,>87,Total,,,,
+M80,M,80,84,0,55,Snatch,,,,
+M80,M,80,84,0,55,Clean & Jerk,,,,
+M80,M,80,84,0,55,Total,,,,
+M80,M,80,84,55,61,Snatch,,,,
+M80,M,80,84,55,61,Clean & Jerk,,,,
+M80,M,80,84,55,61,Total,,,,
+M80,M,80,84,61,67,Snatch,,,,
+M80,M,80,84,61,67,Clean & Jerk,,,,
+M80,M,80,84,61,67,Total,,,,
+M80,M,80,84,67,73,Snatch,,,,
+M80,M,80,84,67,73,Clean & Jerk,,,,
+M80,M,80,84,67,73,Total,,,,
+M80,M,80,84,73,81,Snatch,,,,
+M80,M,80,84,73,81,Clean & Jerk,,,,
+M80,M,80,84,73,81,Total,,,,
+M80,M,80,84,81,89,Snatch,,,,
+M80,M,80,84,81,89,Clean & Jerk,,,,
+M80,M,80,84,81,89,Total,,,,
+M80,M,80,84,89,96,Snatch,,,,
+M80,M,80,84,89,96,Clean & Jerk,,,,
+M80,M,80,84,89,96,Total,,,,
+M80,M,80,84,96,102,Snatch,,,,
+M80,M,80,84,96,102,Clean & Jerk,,,,
+M80,M,80,84,96,102,Total,,,,
+M80,M,80,84,102,109,Snatch,,,,
+M80,M,80,84,102,109,Clean & Jerk,,,,
+M80,M,80,84,102,109,Total,,,,
+M80,M,80,84,109,>109,Snatch,,,,
+M80,M,80,84,109,>109,Clean & Jerk,,,,
+M80,M,80,84,109,>109,Total,,,,
+W85,F,85,89,0,45,Snatch,,,,
+W85,F,85,89,0,45,Clean & Jerk,,,,
+W85,F,85,89,0,45,Total,,,,
+W85,F,85,89,0,49,Snatch,,,,
+W85,F,85,89,0,49,Clean & Jerk,,,,
+W85,F,85,89,0,49,Total,,,,
+W85,F,85,89,49,55,Snatch,,,,
+W85,F,85,89,49,55,Clean & Jerk,,,,
+W85,F,85,89,49,55,Total,,,,
+W85,F,85,89,55,59,Snatch,,,,
+W85,F,85,89,55,59,Clean & Jerk,,,,
+W85,F,85,89,55,59,Total,,,,
+W85,F,85,89,59,64,Snatch,,,,
+W85,F,85,89,59,64,Clean & Jerk,,,,
+W85,F,85,89,59,64,Total,,,,
+W85,F,85,89,64,71,Snatch,,,,
+W85,F,85,89,64,71,Clean & Jerk,,,,
+W85,F,85,89,64,71,Total,,,,
+W85,F,85,89,71,76,Snatch,,,,
+W85,F,85,89,71,76,Clean & Jerk,,,,
+W85,F,85,89,71,76,Total,,,,
+W85,F,85,89,76,81,Snatch,,,,
+W85,F,85,89,76,81,Clean & Jerk,,,,
+W85,F,85,89,76,81,Total,,,,
+W85,F,85,89,81,87,Snatch,,,,
+W85,F,85,89,81,87,Clean & Jerk,,,,
+W85,F,85,89,81,87,Total,,,,
+W85,F,85,89,87,>87,Snatch,,,,
+W85,F,85,89,87,>87,Clean & Jerk,,,,
+W85,F,85,89,87,>87,Total,,,,
+M85,M,85,89,0,55,Snatch,,,,
+M85,M,85,89,0,55,Clean & Jerk,,,,
+M85,M,85,89,0,55,Total,,,,
+M85,M,85,89,55,61,Snatch,,,,
+M85,M,85,89,55,61,Clean & Jerk,,,,
+M85,M,85,89,55,61,Total,,,,
+M85,M,85,89,61,67,Snatch,,,,
+M85,M,85,89,61,67,Clean & Jerk,,,,
+M85,M,85,89,61,67,Total,,,,
+M85,M,85,89,67,73,Snatch,,,,
+M85,M,85,89,67,73,Clean & Jerk,,,,
+M85,M,85,89,67,73,Total,,,,
+M85,M,85,89,73,81,Snatch,,,,
+M85,M,85,89,73,81,Clean & Jerk,,,,
+M85,M,85,89,73,81,Total,,,,
+M85,M,85,89,81,89,Snatch,,,,
+M85,M,85,89,81,89,Clean & Jerk,,,,
+M85,M,85,89,81,89,Total,,,,
+M85,M,85,89,89,96,Snatch,,,,
+M85,M,85,89,89,96,Clean & Jerk,,,,
+M85,M,85,89,89,96,Total,,,,
+M85,M,85,89,96,102,Snatch,,,,
+M85,M,85,89,96,102,Clean & Jerk,,,,
+M85,M,85,89,96,102,Total,,,,
+M85,M,85,89,102,109,Snatch,,,,
+M85,M,85,89,102,109,Clean & Jerk,,,,
+M85,M,85,89,102,109,Total,,,,
+M85,M,85,89,109,>109,Snatch,,,,
+M85,M,85,89,109,>109,Clean & Jerk,,,,
+M85,M,85,89,109,>109,Total,,,,
+W90,F,90,1000,0,45,Snatch,,,,
+W90,F,90,1000,0,45,Clean & Jerk,,,,
+W90,F,90,1000,0,45,Total,,,,
+W90,F,90,1000,0,49,Snatch,,,,
+W90,F,90,1000,0,49,Clean & Jerk,,,,
+W90,F,90,1000,0,49,Total,,,,
+W90,F,90,1000,49,55,Snatch,,,,
+W90,F,90,1000,49,55,Clean & Jerk,,,,
+W90,F,90,1000,49,55,Total,,,,
+W90,F,90,1000,55,59,Snatch,,,,
+W90,F,90,1000,55,59,Clean & Jerk,,,,
+W90,F,90,1000,55,59,Total,,,,
+W90,F,90,1000,59,64,Snatch,,,,
+W90,F,90,1000,59,64,Clean & Jerk,,,,
+W90,F,90,1000,59,64,Total,,,,
+W90,F,90,1000,64,71,Snatch,,,,
+W90,F,90,1000,64,71,Clean & Jerk,,,,
+W90,F,90,1000,64,71,Total,,,,
+W90,F,90,1000,71,76,Snatch,,,,
+W90,F,90,1000,71,76,Clean & Jerk,,,,
+W90,F,90,1000,71,76,Total,,,,
+W90,F,90,1000,76,81,Snatch,,,,
+W90,F,90,1000,76,81,Clean & Jerk,,,,
+W90,F,90,1000,76,81,Total,,,,
+W90,F,90,1000,81,87,Snatch,,,,
+W90,F,90,1000,81,87,Clean & Jerk,,,,
+W90,F,90,1000,81,87,Total,,,,
+W90,F,90,1000,87,>87,Snatch,,,,
+W90,F,90,1000,87,>87,Clean & Jerk,,,,
+W90,F,90,1000,87,>87,Total,,,,
+M90,M,90,1000,0,55,Snatch,,,,
+M90,M,90,1000,0,55,Clean & Jerk,,,,
+M90,M,90,1000,0,55,Total,,,,
+M90,M,90,1000,55,61,Snatch,,,,
+M90,M,90,1000,55,61,Clean & Jerk,,,,
+M90,M,90,1000,55,61,Total,,,,
+M90,M,90,1000,61,67,Snatch,,,,
+M90,M,90,1000,61,67,Clean & Jerk,,,,
+M90,M,90,1000,61,67,Total,,,,
+M90,M,90,1000,67,73,Snatch,,,,
+M90,M,90,1000,67,73,Clean & Jerk,,,,
+M90,M,90,1000,67,73,Total,,,,
+M90,M,90,1000,73,81,Snatch,,,,
+M90,M,90,1000,73,81,Clean & Jerk,,,,
+M90,M,90,1000,73,81,Total,,,,
+M90,M,90,1000,81,89,Snatch,,,,
+M90,M,90,1000,81,89,Clean & Jerk,,,,
+M90,M,90,1000,81,89,Total,,,,
+M90,M,90,1000,89,96,Snatch,,,,
+M90,M,90,1000,89,96,Clean & Jerk,,,,
+M90,M,90,1000,89,96,Total,,,,
+M90,M,90,1000,96,102,Snatch,,,,
+M90,M,90,1000,96,102,Clean & Jerk,,,,
+M90,M,90,1000,96,102,Total,,,,
+M90,M,90,1000,102,109,Snatch,,,,
+M90,M,90,1000,102,109,Clean & Jerk,,,,
+M90,M,90,1000,102,109,Total,,,,
+M90,M,90,1000,109,>109,Snatch,,,,
+M90,M,90,1000,109,>109,Clean & Jerk,,,,
+M90,M,90,1000,109,>109,Total,,,,

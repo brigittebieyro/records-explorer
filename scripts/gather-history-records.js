@@ -53,7 +53,7 @@ function parseAgeGroupsFromObj(objStr, spreadMap) {
   return result;
 }
 
-function loadHistoricWeightClasses() {
+function loadHistoricWeightClasses(variableName) {
   const filePath = path.join(__dirname, '../src/Data/historicWeightClasses.ts');
   const content = fs.readFileSync(filePath, 'utf-8');
 
@@ -64,45 +64,57 @@ function loadHistoricWeightClasses() {
   };
 
   const result = [];
-  const startIdx = content.indexOf('export const weightClasses2018');
-  if (startIdx === -1) return result;
-  const arrayStart = content.indexOf('[', startIdx);
+  const startIdx = content.indexOf(`export const ${variableName}`);
+  if (startIdx === -1) {
+    console.error(`❌ "${variableName}" not found in historicWeightClasses.ts`);
+    process.exit(1);
+  }
+  const eqIdx = content.indexOf('=', startIdx);
+  const arrayStart = content.indexOf('[', eqIdx);
   if (arrayStart === -1) return result;
 
+  // depth tracks { } nesting inside each object.
+  // outerBracket tracks the [ ] of the target array itself so we stop at its closing ].
   let depth = 0;
+  let outerBracket = 1; // we already consumed the opening [
   let objStart = -1;
   for (let i = arrayStart + 1; i < content.length; i++) {
     const ch = content[i];
-    if (ch === '{') {
-      if (depth === 0) objStart = i;
-      depth++;
-    } else if (ch === '}') {
-      depth--;
-      if (depth === 0 && objStart !== -1) {
-        const objStr = content.slice(objStart, i + 1);
-        const idMatch = objStr.match(/id:\s*'([^']+)'/);
-        const sportIdMatch = objStr.match(/sport80Id:\s*(\d+)/);
-        const nameMatch = objStr.match(/name:\s*"([^"]+)"/) || objStr.match(/name:\s*'([^']+)'/);
-        const maxMatch = objStr.match(/maxBodyweight:\s*'([^']+)'/);
-        const minMatch = objStr.match(/minBodyweight:\s*'([^']+)'/);
-        const genderMatch = objStr.match(/gender:\s*'([^']+)'/);
-        const startMatch = objStr.match(/start:\s*'([^']+)'/);
-        const endMatch = objStr.match(/end:\s*'([^']+)'/);
+    if (depth === 0) {
+      if (ch === '[') { outerBracket++; }
+      else if (ch === ']') { outerBracket--; if (outerBracket === 0) break; }
+      else if (ch === '{') { depth++; objStart = i; }
+    } else {
+      if (ch === '{') {
+        depth++;
+      } else if (ch === '}') {
+        depth--;
+        if (depth === 0 && objStart !== -1) {
+          const objStr = content.slice(objStart, i + 1);
+          const idMatch = objStr.match(/id:\s*'([^']+)'/);
+          const sportIdMatch = objStr.match(/sport80Id:\s*(\d+)/);
+          const nameMatch = objStr.match(/name:\s*"([^"]+)"/) || objStr.match(/name:\s*'([^']+)'/);
+          const maxMatch = objStr.match(/maxBodyweight:\s*'([^']+)'/);
+          const minMatch = objStr.match(/minBodyweight:\s*'([^']+)'/);
+          const genderMatch = objStr.match(/gender:\s*'([^']+)'/);
+          const startMatch = objStr.match(/start:\s*'([^']+)'/);
+          const endMatch = objStr.match(/end:\s*'([^']+)'/);
 
-        if (idMatch && sportIdMatch) {
-          result.push({
-            id: idMatch[1],
-            name: nameMatch ? nameMatch[1] : undefined,
-            sport80Id: parseInt(sportIdMatch[1]),
-            minBodyweight: minMatch ? minMatch[1] : undefined,
-            maxBodyweight: maxMatch ? maxMatch[1] : undefined,
-            gender: genderMatch ? genderMatch[1] : undefined,
-            start: startMatch ? startMatch[1] : undefined,
-            end: endMatch ? endMatch[1] : undefined,
-            ageGroups: parseAgeGroupsFromObj(objStr, spreadMap),
-          });
+          if (idMatch && sportIdMatch) {
+            result.push({
+              id: idMatch[1],
+              name: nameMatch ? nameMatch[1] : undefined,
+              sport80Id: parseInt(sportIdMatch[1]),
+              minBodyweight: minMatch ? minMatch[1] : undefined,
+              maxBodyweight: maxMatch ? maxMatch[1] : undefined,
+              gender: genderMatch ? genderMatch[1] : undefined,
+              start: startMatch ? startMatch[1] : undefined,
+              end: endMatch ? endMatch[1] : undefined,
+              ageGroups: parseAgeGroupsFromObj(objStr, spreadMap),
+            });
+          }
+          objStart = -1;
         }
-        objStart = -1;
       }
     }
   }
@@ -259,8 +271,8 @@ function delay(ms) {
 // Main gather
 // ---------------------------------------------------------------------------
 
-async function gatherHistoryRecords() {
-  const weightClasses = loadHistoricWeightClasses();
+async function gatherHistoryRecords(variableName) {
+  const weightClasses = loadHistoricWeightClasses(variableName);
   const ageGroups = loadAgeGroups();
   const ageGroupMap = Object.fromEntries(ageGroups.map(ag => [ag.id, ag]));
 
@@ -428,11 +440,18 @@ function generateCsv(results) {
 // ---------------------------------------------------------------------------
 
 async function main() {
+  const yearArg = process.argv.slice(2).find(a => /^-\d{4}$/.test(a));
+  if (!yearArg) {
+    console.error('Year parameter is missing. Usage: node gather-history-records.js -YYYY');
+    process.exit(1);
+  }
+  const variableName = `weightClasses${yearArg.slice(1)}`;
+
   try {
     console.log('🏋️  Records Explorer - Historic Records Gathering\n');
     console.log('='.repeat(50) + '\n');
 
-    const results = await gatherHistoryRecords();
+    const results = await gatherHistoryRecords(variableName);
     const csv = generateCsv(results);
 
     const outputPath = path.join(process.cwd(), 'historic-records.csv');

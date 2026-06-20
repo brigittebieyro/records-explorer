@@ -167,7 +167,6 @@ describe('CombinedRecordGroup', () => {
         expect(global.fetch).toHaveBeenCalledTimes(4);
       });
     });
-
   });
 
   describe('State Management', () => {

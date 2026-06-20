@@ -151,6 +151,7 @@ function RecordGroup({
             const meetBw = parseFloat(String(meet['body_weight_(kg)'] ?? 0));
             const meetYear = new Date(meet.date).getFullYear();
             if (
+              meetBw > 0 &&
               meet.date >= startDate &&
               meet.date <= endDate &&
               meetBw >= minBw &&

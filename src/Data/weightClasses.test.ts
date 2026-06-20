@@ -58,22 +58,6 @@ function sharedWeightClassTests(weightClasses: WeightClass[]) {
     }
   });
 
-  test('every class has a previousAnalogs array', () => {
-    for (const wc of weightClasses) {
-      expect(Array.isArray(wc.previousAnalogs)).toBe(true);
-    }
-  });
-
-  test('every previous analog has the required fields', () => {
-    for (const wc of weightClasses) {
-      for (const analog of wc.previousAnalogs) {
-        for (const field of ANALOG_FIELDS) {
-          expect(analog).toHaveProperty(field);
-        }
-      }
-    }
-  });
-
   test('start date is a parseable year after 2000', () => {
     for (const wc of weightClasses) {
       expect(new Date(wc.start).getFullYear()).toBeGreaterThan(2000);

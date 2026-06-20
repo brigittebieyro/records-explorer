@@ -45,17 +45,6 @@ function CombinedRecordGroup({ weightClass, ageGroup, emptyContent }: CombinedRe
   useEffect(() => {
     if (weightClass && ageGroup) {
       resetAllData();
-
-      for (let i = 0; i < weightClass.previousAnalogs.length; i++) {
-        if (weightClass.previousAnalogs[i].sport80Id !== 0) {
-          setTimeout(
-            () => {
-              fetchRecordGroupRef.current?.(weightClass.previousAnalogs[i], ageGroup);
-            },
-            100 * (i + 1)
-          );
-        }
-      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [weightClass, ageGroup]);

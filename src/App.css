@@ -42,6 +42,10 @@ body {
   display: none;
 }
 
+.common-italic {
+  font-style: italic;
+}
+
 .common-text-link {
   color: var(--link-color);
   text-decoration: underline;
@@ -463,6 +467,33 @@ body {
   padding: 40px;
   font-style: italic;
   color: var(--main-border-color);
+}
+
+.prior-record {
+  border: 1px solid var(--main-accent-color);
+  padding: 0 8px;
+  margin: 8px 0;
+  font-size: 12px;
+}
+
+.prior-record-title {
+  font-weight: bold;
+  margin-right: 4px;
+}
+
+.prior-record-contents {
+  margin-top: 0px;
+}
+
+.prior-record-type {
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.prior-record-emphasis {
+  font-weight: bold;
+  font-style: italic;
+  color: var(--main-accent-color);
 }
 
 /* Local Meet Results styles */

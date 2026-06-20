@@ -63,6 +63,20 @@ export interface StandardRecord {
   event: string | null;
   date: string | null;
 }
+export interface PriorRecord {
+  ageGroup: string;
+  gender: string;
+  ageMin: number;
+  ageMax: number;
+  bodyWeightMin: number;
+  bodyWeightMax: number;
+  lift: string;
+  weight: string;
+  lifter: string;
+  event: string | null;
+  date: string | null;
+  yearSpan: string;
+}
 
 export interface AgeGroupRecordSet {
   ageGroup: string;

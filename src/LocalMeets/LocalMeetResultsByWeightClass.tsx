@@ -69,23 +69,29 @@ function buildGroups(results: MeetResult[], gender: 'male' | 'female'): WeightCl
         results: [],
       });
     }
-    map.get(parsed.label)!.results.push(result);
+    map.get(parsed.label)?.results.push(result);
   }
 
   for (const group of map.values()) {
     const best = new Map<string, MeetResult>();
-    for (const r of group.results) {
-      const existing = best.get(r.lifter);
-      if (!existing || r.total > existing.total) best.set(r.lifter, r);
+    for (const result of group.results) {
+      const existing = best.get(result.lifter);
+      if (!existing || result.total > existing.total) best.set(result.lifter, result);
     }
-    group.results = Array.from(best.values()).sort((a, b) => b.total - a.total);
+    group.results = Array.from(best.values()).sort(
+      (resultA, resultB) => resultB.total - resultA.total
+    );
   }
 
-  return Array.from(map.values()).sort((a, b) => a.numericValue - b.numericValue);
+  return Array.from(map.values()).sort(
+    (resultA, resultB) => resultA.numericValue - resultB.numericValue
+  );
 }
 
 function getUnclassified(results: MeetResult[]): MeetResult[] {
-  return results.filter((r) => !getGender(r.age_category) || !parseWeightClass(r.age_category));
+  return results.filter(
+    (result) => !getGender(result.age_category) || !parseWeightClass(result.age_category)
+  );
 }
 
 function WeightClassSection({ group }: { group: WeightClassGroup }) {

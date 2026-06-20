@@ -789,8 +789,8 @@ describe('App - MainPage Component', () => {
       ];
       const result = buildAllCurrentRecords(standards);
       expect(result[0].weightClass.gender).toBe('female');
-      const maleEntries = result.filter((r) => r.weightClass.gender === 'male');
-      const femaleEntries = result.filter((r) => r.weightClass.gender === 'female');
+      const maleEntries = result.filter((record) => record.weightClass.gender === 'male');
+      const femaleEntries = result.filter((record) => record.weightClass.gender === 'female');
       const lastFemaleIdx = result.indexOf(femaleEntries[femaleEntries.length - 1]);
       const firstMaleIdx = result.indexOf(maleEntries[0]);
       expect(lastFemaleIdx).toBeLessThan(firstMaleIdx);
@@ -816,9 +816,10 @@ describe('App - MainPage Component', () => {
         ],
       ];
       const result = buildAllCurrentRecords(standards);
-      const w48 = result.find((r) => r.weightClass.id === 'W48');
+      const w48 = result.find((record) => record.weightClass.id === 'W48');
       expect(w48).toBeDefined();
-      const groupIds = w48!.groups.map((g) => g.ageGroup.id);
+      if (!w48) return;
+      const groupIds = w48.groups.map((group) => group.ageGroup.id);
       expect(groupIds).toContain('OPEN');
       expect(groupIds).toContain('35');
       expect(groupIds.indexOf('OPEN')).toBeLessThan(groupIds.indexOf('35'));
@@ -844,12 +845,12 @@ describe('App - MainPage Component', () => {
       ];
       const result = buildAllCurrentRecords(standards);
       const u11entry = result.find(
-        (r) => r.groups.length === 1 && r.groups[0].ageGroup.id === 'U11'
+        (record) => record.groups.length === 1 && record.groups[0].ageGroup.id === 'U11'
       );
       expect(u11entry).toBeDefined();
-      expect(u11entry!.weightClass.maxBodyweight).toBe('30');
-      expect(u11entry!.weightClass.gender).toBe('female');
-      expect(u11entry!.groups[0].records['Total'].lifter).toBe('Elenor Cler');
+      expect(u11entry?.weightClass.maxBodyweight).toBe('30');
+      expect(u11entry?.weightClass.gender).toBe('female');
+      expect(u11entry?.groups[0].records['Total'].lifter).toBe('Elenor Cler');
     });
 
     test('includes U13 youth lifter (Liam Doherty) in results', () => {
@@ -872,12 +873,12 @@ describe('App - MainPage Component', () => {
       ];
       const result = buildAllCurrentRecords(standards);
       const u13entry = result.find(
-        (r) => r.groups.length === 1 && r.groups[0].ageGroup.id === 'U13'
+        (record) => record.groups.length === 1 && record.groups[0].ageGroup.id === 'U13'
       );
       expect(u13entry).toBeDefined();
-      expect(u13entry!.weightClass.maxBodyweight).toBe('40');
-      expect(u13entry!.weightClass.gender).toBe('male');
-      expect(u13entry!.groups[0].records['Total'].lifter).toBe('Liam Doherty');
+      expect(u13entry?.weightClass.maxBodyweight).toBe('40');
+      expect(u13entry?.weightClass.gender).toBe('male');
+      expect(u13entry?.groups[0].records['Total'].lifter).toBe('Liam Doherty');
     });
 
     test('includes U15 and U17 youth lifters in results', () => {
@@ -917,22 +918,22 @@ describe('App - MainPage Component', () => {
       const result = buildAllCurrentRecords(standards);
 
       const u15entry = result.find(
-        (r) =>
-          r.groups.length === 1 &&
-          r.groups[0].ageGroup.id === 'U15' &&
-          r.weightClass.gender === 'female'
+        (record) =>
+          record.groups.length === 1 &&
+          record.groups[0].ageGroup.id === 'U15' &&
+          record.weightClass.gender === 'female'
       );
       expect(u15entry).toBeDefined();
-      expect(u15entry!.groups[0].records['Snatch'].lifter).toBe('Alice');
+      expect(u15entry?.groups[0].records['Snatch'].lifter).toBe('Alice');
 
       const u17entry = result.find(
-        (r) =>
-          r.groups.length === 1 &&
-          r.groups[0].ageGroup.id === 'U17' &&
-          r.weightClass.gender === 'male'
+        (record) =>
+          record.groups.length === 1 &&
+          record.groups[0].ageGroup.id === 'U17' &&
+          record.weightClass.gender === 'male'
       );
       expect(u17entry).toBeDefined();
-      expect(u17entry!.groups[0].records['Total'].lifter).toBe('Bob');
+      expect(u17entry?.groups[0].records['Total'].lifter).toBe('Bob');
     });
 
     test('excludes STANDARD entries from youth weight classes', () => {
@@ -941,7 +942,7 @@ describe('App - MainPage Component', () => {
       ];
       const result = buildAllCurrentRecords(standards);
       const u11entry = result.find(
-        (r) => r.groups.length === 1 && r.groups[0].ageGroup.id === 'U11'
+        (record) => record.groups.length === 1 && record.groups[0].ageGroup.id === 'U11'
       );
       expect(u11entry).toBeUndefined();
     });
@@ -983,17 +984,19 @@ describe('App - MainPage Component', () => {
 
       // The Open W48 entry should not include any U13 age group rows
       const openW48 = result.find(
-        (r) => r.weightClass.id === 'W48' && r.groups.some((g) => g.ageGroup.id === 'OPEN')
+        (record) =>
+          record.weightClass.id === 'W48' &&
+          record.groups.some((group) => group.ageGroup.id === 'OPEN')
       );
       expect(openW48).toBeDefined();
-      expect(openW48!.groups.every((g) => g.ageGroup.id !== 'U13')).toBe(true);
+      expect(openW48?.groups.every((group) => group.ageGroup.id !== 'U13')).toBe(true);
 
       // The U13 entry should have exactly one group and it must not be OPEN
       const u13entry = result.find(
-        (r) => r.groups.length === 1 && r.groups[0].ageGroup.id === 'U13'
+        (record) => record.groups.length === 1 && record.groups[0].ageGroup.id === 'U13'
       );
       expect(u13entry).toBeDefined();
-      expect(u13entry!.groups[0].records['Total'].lifter).toBe('Jane Youth');
+      expect(u13entry?.groups[0].records['Total'].lifter).toBe('Jane Youth');
     });
 
     test('each youth age group gets its own entry even when sharing a weight class indicator', () => {
@@ -1033,17 +1036,17 @@ describe('App - MainPage Component', () => {
       const result = buildAllCurrentRecords(standards);
 
       const u11entry = result.find(
-        (r) => r.groups.length === 1 && r.groups[0].ageGroup.id === 'U11'
+        (record) => record.groups.length === 1 && record.groups[0].ageGroup.id === 'U11'
       );
       const u13entry = result.find(
-        (r) => r.groups.length === 1 && r.groups[0].ageGroup.id === 'U13'
+        (record) => record.groups.length === 1 && record.groups[0].ageGroup.id === 'U13'
       );
 
       expect(u11entry).toBeDefined();
-      expect(u11entry!.groups[0].records['Total'].lifter).toBe('U11 Girl');
+      expect(u11entry?.groups[0].records['Total'].lifter).toBe('U11 Girl');
 
       expect(u13entry).toBeDefined();
-      expect(u13entry!.groups[0].records['Total'].lifter).toBe('U13 Girl');
+      expect(u13entry?.groups[0].records['Total'].lifter).toBe('U13 Girl');
     });
   });
 
@@ -1176,8 +1179,8 @@ describe('App - MainPage Component', () => {
         '2022-03-15', // [13] date
         'Nationals', // [14] event
       ];
-      Object.entries(overrides).forEach(([i, v]) => {
-        if (v !== undefined) base[parseInt(i)] = v;
+      Object.entries(overrides).forEach(([key, value]) => {
+        if (value !== undefined) base[parseInt(key)] = value;
       });
       return base;
     };

@@ -52,9 +52,9 @@ function LocalMeets() {
             meet.geolocation && isWithinWSOBoundary(meet.geolocation.lat, meet.geolocation.lng)
         )
         .sort(
-          (a, b) =>
-            new Date(b.subtitle.split(' - ')[0]).getTime() -
-            new Date(a.subtitle.split(' - ')[0]).getTime()
+          (meetA, meetB) =>
+            new Date(meetB.subtitle.split(' - ')[0]).getTime() -
+            new Date(meetA.subtitle.split(' - ')[0]).getTime()
         );
       setMeets(localMeets);
       setStatus('complete');
@@ -72,7 +72,7 @@ function LocalMeets() {
   };
 
   const handleGo = async (meetId: string = selectedMeetId): Promise<void> => {
-    const meet = meets.find((m) => m.id === meetId);
+    const meet = meets.find((meetItem) => meetItem.id === meetId);
     if (!meet) return;
     setCurrentMeet(meet);
     setResultsStatus('inprogress');
@@ -81,14 +81,14 @@ function LocalMeets() {
       // Parse the meet date from subtitle for use as the search date range.
 
       const today = new Date().toISOString().split('T')[0];
-      const toIso = (s: string): string | null => {
-        const d = new Date(s.trim());
-        return isNaN(d.getTime()) ? null : d.toISOString().split('T')[0];
+      const toIso = (dateStr: string): string | null => {
+        const date = new Date(dateStr.trim());
+        return isNaN(date.getTime()) ? null : date.toISOString().split('T')[0];
       };
       const shiftDay = (iso: string, delta: number): string => {
-        const d = new Date(iso);
-        d.setDate(d.getDate() + delta);
-        return d.toISOString().split('T')[0];
+        const date = new Date(iso);
+        date.setDate(date.getDate() + delta);
+        return date.toISOString().split('T')[0];
       };
       const subtitleParts = (meet.subtitle ?? '').split(' - ');
       const searchStart = toIso(shiftDay(subtitleParts[0], -1));
@@ -112,7 +112,8 @@ function LocalMeets() {
       const nameSearchData = await nameSearchResponse.json();
       const nameSearchResults: Array<{ meet: string; action: Array<{ url: string }> }> =
         nameSearchData.data ?? [];
-      const matched = nameSearchResults.find((r) => r.meet === meet.name) ?? nameSearchResults[0];
+      const matched =
+        nameSearchResults.find((result) => result.meet === meet.name) ?? nameSearchResults[0];
       const actionUrl = matched?.action?.[0]?.url;
       setMoreInfoLink(actionUrl);
       const resultsId = actionUrl?.split('/results/')[1];
@@ -199,7 +200,7 @@ function LocalMeets() {
                 onClick={() => handleGo(meet.id)}
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && handleGo(meet.id)}
+                onKeyDown={(eventObj) => eventObj.key === 'Enter' && handleGo(meet.id)}
               >
                 <strong>
                   <span>{meet.name}</span>

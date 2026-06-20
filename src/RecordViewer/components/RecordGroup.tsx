@@ -188,8 +188,8 @@ function RecordGroup({
             aria-label="Sort"
             name="sort-selection"
             id="sort-select"
-            onChange={(e) => {
-              updateSortType(e.target.value as SortKey);
+            onChange={(eventObj) => {
+              updateSortType(eventObj.target.value as SortKey);
             }}
             disabled={status !== 'complete'}
           >

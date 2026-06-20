@@ -182,8 +182,8 @@ describe('sortLifts', () => {
       const johnDoe = result.find((lift) => lift.name === 'John Doe');
       const janeSmith = result.find((lift) => lift.name === 'Jane Smith');
       expect(result.length).toBe(2);
-      expect(johnDoe!.total).toBe(305);
-      expect(janeSmith!.total).toBe(320);
+      expect(johnDoe?.total).toBe(305);
+      expect(janeSmith?.total).toBe(320);
     });
 
     test('sorts by total descending', () => {
@@ -482,7 +482,7 @@ describe('getAgeGroup', () => {
   test('returns correct age group by id', () => {
     const result = getAgeGroup('OPEN');
     expect(result).toBeDefined();
-    expect(result!.id).toBe('OPEN');
+    expect(result?.id).toBe('OPEN');
   });
 
   test('returns undefined for non-existent age group', () => {
@@ -494,7 +494,7 @@ describe('getAgeGroup', () => {
     const standardGroups = ['OPEN', 'MASTERS_35_39', 'MASTERS_40_44', 'MASTERS_45_49'];
     standardGroups.forEach((groupId) => {
       const result = getAgeGroup(groupId);
-      if (ageGroups.find((g) => g.id === groupId)) {
+      if (ageGroups.find((group) => group.id === groupId)) {
         expect(result).toBeDefined();
       }
     });
@@ -504,7 +504,7 @@ describe('getAgeGroup', () => {
     const youthGroups = ['U11', 'U13', 'U15'];
     youthGroups.forEach((groupId) => {
       const result = getAgeGroup(groupId);
-      if (ageGroups.find((g) => g.id === groupId)) {
+      if (ageGroups.find((group) => group.id === groupId)) {
         expect(result).toBeDefined();
       }
     });

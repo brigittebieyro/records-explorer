@@ -33,7 +33,8 @@
     ],
     "rules": {
       "no-unused-vars": "error",
-      "@typescript-eslint/ban-ts-comment": "error"
+      "@typescript-eslint/ban-ts-comment": "error",
+      "@typescript-eslint/no-non-null-assertion": "error"
     }
   },
   "browserslist": {

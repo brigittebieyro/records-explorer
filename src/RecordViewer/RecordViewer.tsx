@@ -339,25 +339,25 @@ function RecordViewer() {
         </div>
       )}
 
-      {status === 'complete' && (
+      {status === 'complete' && currentWeightClass && currentAgeGroup && (
         <div className="record-viewer-results-parent">
           <div className="current-leaders-group">
             <div className="record-group-info">
               <p className="page-title">Current Top Athletes</p>
               <p className="record-group-description">
                 These are the {wsoName} WSO's top ranked lifters in the current{' '}
-                <strong>{currentWeightClass!.name}</strong> weight class, active{' '}
+                <strong>{currentWeightClass.name}</strong> weight class, active{' '}
                 <strong>
-                  from {new Date(currentWeightClass!.start).getUTCFullYear()}, originally fetched by
+                  from {new Date(currentWeightClass.start).getUTCFullYear()}, originally fetched by
                   total.
                 </strong>
               </p>
             </div>
             <RecordGroup
-              weightClass={currentWeightClass!}
-              ageGroup={currentAgeGroup!}
+              weightClass={currentWeightClass}
+              ageGroup={currentAgeGroup}
               count={5}
-              startDate={currentWeightClass!.start}
+              startDate={currentWeightClass.start}
               endDate={endDate}
               emptyContent={
                 <div>Looks like nobody's competed in this division yet! Could be you?</div>
@@ -368,10 +368,10 @@ function RecordViewer() {
           <div className="combined-history-group">
             <Standards
               relevantRecords={
-                displayedStandards[currentAgeGroup!.id] as AgeGroupRecordSet | undefined
+                displayedStandards[currentAgeGroup.id] as AgeGroupRecordSet | undefined
               }
-              weightClassName={currentWeightClass!.name}
-              ageGroupName={currentAgeGroup!.name}
+              weightClassName={currentWeightClass.name}
+              ageGroupName={currentAgeGroup.name}
             />
 
             <AssociatedPriorRecords records={displayedHistoricalRecords} />
@@ -381,15 +381,15 @@ function RecordViewer() {
               <p className="record-group-description">
                 What if the current weight class were active earlier? Who would hold our all time
                 records? Here are the top lifters by total in overlapping weight classes, prior to{' '}
-                {new Date(currentWeightClass!.start).getUTCFullYear()}.
+                {new Date(currentWeightClass.start).getUTCFullYear()}.
               </p>
             </div>
             <RecordGroup
-              weightClass={currentWeightClass!}
-              ageGroup={currentAgeGroup!}
+              weightClass={currentWeightClass}
+              ageGroup={currentAgeGroup}
               count={12}
               startDate={
-                currentAgeGroup!.id === 'U11' || currentAgeGroup!.id === 'U13'
+                currentAgeGroup.id === 'U11' || currentAgeGroup.id === 'U13'
                   ? youthAllTimeStartDate
                   : allTimeStartDate
               }

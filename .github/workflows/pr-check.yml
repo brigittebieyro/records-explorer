@@ -29,7 +29,7 @@ jobs:
         run: npm run build
           
       - name: Run unit tests
-        run: npm run test:ci
+        run: npm run test
       # include any workflow/action specific dependencies
       
       - uses: ./                  #picks the current action PR code.

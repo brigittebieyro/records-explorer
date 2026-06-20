@@ -28,8 +28,8 @@ function OptionsBar({
         className="header-button"
         name="age-group"
         id="age-group-select"
-        onChange={(e) => {
-          onAgeGroupChange(e.target.value);
+        onChange={(eventObj) => {
+          onAgeGroupChange(eventObj.target.value);
         }}
       >
         {ageGroups.map((group, index) => (
@@ -50,8 +50,8 @@ function OptionsBar({
         name="weight-class"
         id="weight-class-select"
         value={selectedWeightClass}
-        onChange={(e) => {
-          onWeightClassChange(e.target.value);
+        onChange={(eventObj) => {
+          onWeightClassChange(eventObj.target.value);
         }}
       >
         {!selectedWeightClass && <option value="">Select a Weight Class</option>}

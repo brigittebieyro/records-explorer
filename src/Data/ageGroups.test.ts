@@ -27,20 +27,20 @@ describe('ageGroups data', () => {
   });
 
   test('all age group IDs are unique', () => {
-    const ids = ageGroups.map((g) => g.id);
+    const ids = ageGroups.map((group) => group.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
 
   test('includes the OPEN age group', () => {
-    expect(ageGroups.find((g) => g.id === 'OPEN')).toBeDefined();
+    expect(ageGroups.find((group) => group.id === 'OPEN')).toBeDefined();
   });
 
   test('includes the Junior (JR) age group', () => {
-    expect(ageGroups.find((g) => g.id === 'JR')).toBeDefined();
+    expect(ageGroups.find((group) => group.id === 'JR')).toBeDefined();
   });
 
   test('includes all four youth age groups', () => {
-    const ids = ageGroups.map((g) => g.id);
+    const ids = ageGroups.map((group) => group.id);
     for (const youthId of YOUTH_IDS) {
       expect(ids).toContain(youthId);
     }
@@ -48,7 +48,7 @@ describe('ageGroups data', () => {
 
   test('includes Masters age groups from 35 through 90', () => {
     const expectedIds = ['35', '40', '45', '50', '55', '60', '65', '70', '75', '80', '85', '90'];
-    const ids = ageGroups.map((g) => g.id);
+    const ids = ageGroups.map((group) => group.id);
     for (const id of expectedIds) {
       expect(ids).toContain(id);
     }
@@ -56,13 +56,13 @@ describe('ageGroups data', () => {
 
   test('youth age groups have customWeightClasses: true', () => {
     for (const id of YOUTH_IDS) {
-      const group = ageGroups.find((g) => g.id === id);
-      expect(group!.customWeightClasses).toBe(true);
+      const group = ageGroups.find((grp) => grp.id === id);
+      expect(group?.customWeightClasses).toBe(true);
     }
   });
 
   test('non-youth age groups have customWeightClasses: false', () => {
-    const nonYouth = ageGroups.filter((g) => !YOUTH_IDS.includes(g.id));
+    const nonYouth = ageGroups.filter((group) => !YOUTH_IDS.includes(group.id));
     for (const group of nonYouth) {
       expect(group.customWeightClasses).toBe(false);
     }

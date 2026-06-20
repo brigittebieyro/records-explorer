@@ -26,7 +26,7 @@ function LocalMeetsOptionsBar({
         name="meet"
         id="meet-select"
         value={selectedMeetId}
-        onChange={(e) => onMeetChange(e.target.value)}
+        onChange={(eventObj) => onMeetChange(eventObj.target.value)}
       >
         <option value="">Select a meet</option>
         {meets.map((meet) => (

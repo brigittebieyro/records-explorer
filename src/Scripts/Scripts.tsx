@@ -12,7 +12,7 @@ function Scripts() {
   const [passwordInput, setPasswordInput] = useState('');
   const [passwordError, setPasswordError] = useState(false);
 
-  const selectedScript = scripts.find((s) => s.name === selectedName);
+  const selectedScript = scripts.find((scriptObj) => scriptObj.name === selectedName);
 
   const handlePasswordSubmit = async () => {
     const hashed = await hashPassword(passwordInput, wsoName);
@@ -58,14 +58,14 @@ function Scripts() {
             aria-label="Script"
             className="header-button"
             value={selectedName}
-            onChange={(e) => setSelectedName(e.target.value)}
+            onChange={(eventObj) => setSelectedName(eventObj.target.value)}
             disabled={!isUnlocked || isRunning}
           >
             <option value="">Select a script</option>
             {isUnlocked &&
-              scripts.map((s) => (
-                <option key={s.name} value={s.name}>
-                  {s.name}
+              scripts.map((scriptObj) => (
+                <option key={scriptObj.name} value={scriptObj.name}>
+                  {scriptObj.name}
                 </option>
               ))}
           </select>
@@ -102,11 +102,11 @@ function Scripts() {
                 type="password"
                 className="header-button"
                 value={passwordInput}
-                onChange={(e) => {
-                  setPasswordInput(e.target.value);
+                onChange={(eventObj) => {
+                  setPasswordInput(eventObj.target.value);
                   setPasswordError(false);
                 }}
-                onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()}
+                onKeyDown={(eventObj) => eventObj.key === 'Enter' && handlePasswordSubmit()}
               />
               <button className="header-button" onClick={handlePasswordSubmit}>
                 Go

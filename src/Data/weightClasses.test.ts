@@ -48,7 +48,9 @@ describe('defaultWeightClasses', () => {
   test("women's weight classes have continuous boundaries with no gaps", () => {
     const femaleClasses = defaultWeightClasses
       .filter((wc) => wc.gender === 'female')
-      .sort((a, b) => Number(a.minBodyweight) - Number(b.minBodyweight));
+      .sort(
+        (wtClassA, wtClassB) => Number(wtClassA.minBodyweight) - Number(wtClassB.minBodyweight)
+      );
 
     expect(Number(femaleClasses[0].minBodyweight)).toBe(0);
     expect(femaleClasses[femaleClasses.length - 1].maxBodyweight).toBe('1000');

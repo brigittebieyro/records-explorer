@@ -43,12 +43,12 @@ export const sortLifts = (lifts: CombinedLiftData[], key?: SortKey): CombinedLif
 
   // For date sorting, keep all lifts
   if (useKey === 'lift_date') {
-    const result = lifts.sort(function (a, b) {
-      const keyA = new Date(a.lift_date);
-      const keyB = new Date(b.lift_date);
+    const result = lifts.sort(function (liftA, liftB) {
+      const keyA = new Date(liftA.lift_date);
+      const keyB = new Date(liftB.lift_date);
       if (keyA > keyB) return -1;
       if (keyA < keyB) return 1;
-      return (parseInt(String(b.total)) || 0) - (parseInt(String(a.total)) || 0);
+      return (parseInt(String(liftB.total)) || 0) - (parseInt(String(liftA.total)) || 0);
     });
     const trimmedResult: CombinedLiftData[] = [];
     for (let i = 0; i < result.length; i++) {
@@ -69,25 +69,27 @@ export const sortLifts = (lifts: CombinedLiftData[], key?: SortKey): CombinedLif
     if (!athleteMap.has(athleteName)) {
       athleteMap.set(athleteName, lift);
     } else {
-      const existingLift = athleteMap.get(athleteName)!;
-      const existingRaw = liftMap(existingLift)[useKey];
-      const existingValue =
-        existingRaw !== undefined && existingRaw !== null ? parseInt(String(existingRaw)) : 0;
-      if (liftValue > existingValue) {
-        athleteMap.set(athleteName, lift);
+      const existingLift = athleteMap.get(athleteName);
+      if (existingLift) {
+        const existingRaw = liftMap(existingLift)[useKey];
+        const existingValue =
+          existingRaw !== undefined && existingRaw !== null ? parseInt(String(existingRaw)) : 0;
+        if (liftValue > existingValue) {
+          athleteMap.set(athleteName, lift);
+        }
       }
     }
   }
 
   const result = Array.from(athleteMap.values());
-  result.sort(function (a, b) {
-    const rawA = liftMap(a)[useKey];
-    const rawB = liftMap(b)[useKey];
-    const keyA = rawA !== undefined && rawA !== null ? parseInt(String(rawA)) : 0;
-    const keyB = rawB !== undefined && rawB !== null ? parseInt(String(rawB)) : 0;
-    if (keyA > keyB) return -1;
-    if (keyA < keyB) return 1;
-    return new Date(a.lift_date).getTime() - new Date(b.lift_date).getTime();
+  result.sort(function (liftA, liftB) {
+    const rawLiftA = liftMap(liftA)[useKey];
+    const rawLiftB = liftMap(liftB)[useKey];
+    const keyLiftA = rawLiftA !== undefined && rawLiftA !== null ? parseInt(String(rawLiftA)) : 0;
+    const keyLiftB = rawLiftB !== undefined && rawLiftB !== null ? parseInt(String(rawLiftB)) : 0;
+    if (keyLiftA > keyLiftB) return -1;
+    if (keyLiftA < keyLiftB) return 1;
+    return new Date(liftA.lift_date).getTime() - new Date(liftB.lift_date).getTime();
   });
 
   return result;
@@ -118,6 +120,6 @@ export async function hashPassword(input: string, salt: string): Promise<string>
   const encoded = new TextEncoder().encode(`${input}---${salt}`);
   const hashBuffer = await crypto.subtle.digest('SHA-256', encoded);
   return Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, '0'))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
     .join('');
 }

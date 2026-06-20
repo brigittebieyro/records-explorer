@@ -219,10 +219,12 @@ function generateCsv(recordBreakers: RecordBreaker[]): string {
     total: 'Total',
   };
 
-  const sorted = [...recordBreakers].sort((a, b) => {
-    if (a.ageGroupIndex !== b.ageGroupIndex) return a.ageGroupIndex - b.ageGroupIndex;
-    if (a.weightClassIndex !== b.weightClassIndex) return a.weightClassIndex - b.weightClassIndex;
-    return (liftOrder[a.liftType] ?? 99) - (liftOrder[b.liftType] ?? 99);
+  const sorted = [...recordBreakers].sort((breakerA, breakerB) => {
+    if (breakerA.ageGroupIndex !== breakerB.ageGroupIndex)
+      return breakerA.ageGroupIndex - breakerB.ageGroupIndex;
+    if (breakerA.weightClassIndex !== breakerB.weightClassIndex)
+      return breakerA.weightClassIndex - breakerB.weightClassIndex;
+    return (liftOrder[breakerA.liftType] ?? 99) - (liftOrder[breakerB.liftType] ?? 99);
   });
 
   const rows = [

@@ -40,7 +40,7 @@ function RecordHolder({ lifterData, index, individualLiftsData, sortType }: Reco
       {isFromPriorGroup && (
         <div className="record-viewer-record-header">
           <p>
-            {lifter.classData!.name} • {classYears}
+            {lifter.classData?.name} • {classYears}
           </p>
         </div>
       )}

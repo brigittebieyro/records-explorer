@@ -25,7 +25,6 @@ export interface WeightClass {
   gender: 'male' | 'female';
   start: string;
   end?: string;
-  previousAnalogs?: WeightClassAnalog[]; //TODO, remove when historic is fully implemented
   ageGroups?: string[]; // Simplifying historic
 }
 
@@ -62,6 +61,20 @@ export interface StandardRecord {
   lifter: string;
   event: string | null;
   date: string | null;
+}
+export interface PriorRecord {
+  ageGroup: string;
+  gender: string;
+  ageMin: number;
+  ageMax: number;
+  bodyWeightMin: number;
+  bodyWeightMax: number;
+  lift: string;
+  weight: string;
+  lifter: string;
+  event: string | null;
+  date: string | null;
+  yearSpan: string;
 }
 
 export interface AgeGroupRecordSet {

@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import App from './App';
 import {
   buildAllCurrentRecords,
+  computeHistoricalRecordsForWeightClass,
   computeStandardsForWeightClass,
 } from './RecordViewer/RecordViewer';
 import * as RoutesAndSettings from './Data/RoutesAndSettings';
@@ -12,12 +13,6 @@ import { AgeGroup, WeightClass } from './Utils/types';
 jest.mock('./RecordViewer/components/RecordGroup', () => {
   return function RecordGroup() {
     return <div data-testid="record-group">Current Records</div>;
-  };
-});
-
-jest.mock('./RecordViewer/components/CombinedRecordGroup', () => {
-  return function CombinedRecordGroup() {
-    return <div data-testid="combined-record-group">Historical Records</div>;
   };
 });
 
@@ -89,7 +84,6 @@ const mockWeightClass = {
   maxBodyweight: '48',
   gender: 'female',
   start: '2025-06-01',
-  previousAnalogs: [],
 } as unknown as WeightClass;
 
 const mockAgeGroup = {
@@ -120,7 +114,7 @@ describe('App - MainPage Component', () => {
   };
 
   describe('Rendering and Initialization', () => {
-    test('renders main page with selection controls', () => {
+    test('renders main page with selection controls', async () => {
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
@@ -131,9 +125,10 @@ describe('App - MainPage Component', () => {
       expect(screen.getByText('Select a weight class & group:')).toBeInTheDocument();
       expect(screen.getByRole('combobox', { name: /age group/i })).toBeInTheDocument();
       expect(screen.getByRole('combobox', { name: /weight class/i })).toBeInTheDocument();
+      await waitFor(() => expect(global.fetch).toHaveBeenCalled());
     });
 
-    test('renders header component', () => {
+    test('renders header component', async () => {
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
@@ -142,6 +137,7 @@ describe('App - MainPage Component', () => {
       renderApp();
 
       expect(screen.getByTestId('header')).toBeInTheDocument();
+      await waitFor(() => expect(global.fetch).toHaveBeenCalled());
     });
 
     test('fetches standards on component mount', async () => {
@@ -162,7 +158,7 @@ describe('App - MainPage Component', () => {
   });
 
   describe('Age Group Selection', () => {
-    test('populates age group options from ageGroups data', () => {
+    test('populates age group options from ageGroups data', async () => {
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
@@ -174,9 +170,10 @@ describe('App - MainPage Component', () => {
       const options = ageGroupSelect.querySelectorAll('option');
 
       expect(options.length).toBeGreaterThan(0);
+      await waitFor(() => expect(global.fetch).toHaveBeenCalled());
     });
 
-    test('defaults to OPEN age group', () => {
+    test('defaults to OPEN age group', async () => {
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
@@ -186,6 +183,7 @@ describe('App - MainPage Component', () => {
 
       const ageGroupSelect = screen.getByRole('combobox', { name: /age group/i });
       expect((ageGroupSelect as HTMLSelectElement).value).toBe('OPEN');
+      await waitFor(() => expect(global.fetch).toHaveBeenCalled());
     });
 
     test('updates weight class options when age group changes', async () => {
@@ -243,7 +241,7 @@ describe('App - MainPage Component', () => {
   });
 
   describe('Weight Class Selection', () => {
-    test('displays weight class options based on selected age group', () => {
+    test('displays weight class options based on selected age group', async () => {
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
@@ -259,9 +257,10 @@ describe('App - MainPage Component', () => {
       const options = weightClassSelect.querySelectorAll('option');
 
       expect(options.length).toBeGreaterThan(2);
+      await waitFor(() => expect(global.fetch).toHaveBeenCalled());
     });
 
-    test('shows placeholder text when no weight class selected', () => {
+    test('shows placeholder text when no weight class selected', async () => {
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
@@ -272,11 +271,12 @@ describe('App - MainPage Component', () => {
       const weightClassSelect = screen.getByRole('combobox', { name: /weight class/i });
       expect((weightClassSelect as HTMLSelectElement).value).toBe('');
       expect(screen.getByText('Select a Weight Class')).toBeInTheDocument();
+      await waitFor(() => expect(global.fetch).toHaveBeenCalled());
     });
   });
 
   describe('Form Submission (Go Button)', () => {
-    test('disables Go button when no weight class selected', () => {
+    test('disables Go button when no weight class selected', async () => {
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
@@ -286,6 +286,7 @@ describe('App - MainPage Component', () => {
 
       const goButton = screen.getByRole('button', { name: 'Go' });
       expect(goButton).toBeDisabled();
+      await waitFor(() => expect(global.fetch).toHaveBeenCalled());
     });
 
     test('enables Go button when both age group and weight class selected', async () => {
@@ -507,11 +508,12 @@ describe('App - MainPage Component', () => {
       const goButton = screen.getByRole('button', { name: 'Go' });
 
       expect(goButton).toBeDisabled();
+      await waitFor(() => expect(global.fetch).toHaveBeenCalled());
     });
   });
 
   describe('Display State Transitions', () => {
-    test('shows initial options screen', () => {
+    test('shows initial options screen', async () => {
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
@@ -521,6 +523,7 @@ describe('App - MainPage Component', () => {
 
       expect(screen.getByText('Select a weight class & group:')).toBeInTheDocument();
       expect(screen.queryByTestId('circle-loader')).not.toBeInTheDocument();
+      await waitFor(() => expect(global.fetch).toHaveBeenCalled());
     });
 
     test('transitions to complete state when Go is clicked', async () => {
@@ -563,7 +566,7 @@ describe('App - MainPage Component', () => {
   });
 
   describe('Reset Button and Empty State', () => {
-    test('Reset button is not visible in the initial empty state', () => {
+    test('Reset button is not visible in the initial empty state', async () => {
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
@@ -572,9 +575,10 @@ describe('App - MainPage Component', () => {
       renderApp();
 
       expect(screen.queryByRole('button', { name: 'Reset' })).not.toBeInTheDocument();
+      await waitFor(() => expect(global.fetch).toHaveBeenCalled());
     });
 
-    test('shows AllCurrentRecordsView as the initial empty state', () => {
+    test('shows AllCurrentRecordsView as the initial empty state', async () => {
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ values: mockStandardsData }),
@@ -583,6 +587,7 @@ describe('App - MainPage Component', () => {
       renderApp();
 
       expect(screen.getByTestId('all-current-records-view')).toBeInTheDocument();
+      await waitFor(() => expect(global.fetch).toHaveBeenCalled());
     });
 
     test('Reset button appears after clicking Go', async () => {
@@ -1133,6 +1138,135 @@ describe('App - MainPage Component', () => {
       await waitFor(() => {
         expect(screen.getByTestId('standards')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('computeHistoricalRecordsForWeightClass (pure helper)', () => {
+    const femaleW48 = {
+      id: 'W48',
+      name: "Women's 48kg",
+      maxBodyweight: '48',
+      minBodyweight: '0',
+      gender: 'female',
+      start: '2025-06-01',
+    } as unknown as WeightClass;
+
+    const openAgeGroup = {
+      id: 'OPEN',
+      name: 'Open',
+      minimum_lifter_age: '15',
+      maximum_lifter_age: '999',
+    } as unknown as AgeGroup;
+
+    const makeRow = (overrides: Partial<Record<number, string>> = {}): string[] => {
+      const base: string[] = [
+        '2018-01-01', // [0] period start
+        '2025-06-01', // [1] period end
+        '', // [2]
+        '', // [3]
+        'open', // [4] age group
+        'F', // [5] gender
+        '15', // [6] min age
+        '999', // [7] max age
+        '36', // [8] body weight min
+        '48', // [9] body weight max
+        'Total', // [10] lift
+        '210', // [11] weight
+        'Jane Smith', // [12] lifter
+        '2022-03-15', // [13] date
+        'Nationals', // [14] event
+      ];
+      Object.entries(overrides).forEach(([i, v]) => {
+        if (v !== undefined) base[parseInt(i)] = v;
+      });
+      return base;
+    };
+
+    test('returns empty array when historicalData is empty', () => {
+      const result = computeHistoricalRecordsForWeightClass(femaleW48, openAgeGroup, []);
+      expect(result).toEqual([]);
+    });
+
+    test('skips rows with fewer than 14 elements', () => {
+      const shortRow = ['2018-01-01', '2025-06-01', '', '', 'open', 'F'];
+      const result = computeHistoricalRecordsForWeightClass(femaleW48, openAgeGroup, [shortRow]);
+      expect(result).toHaveLength(0);
+    });
+
+    test('skips rows where date (row[13]) is missing', () => {
+      const result = computeHistoricalRecordsForWeightClass(femaleW48, openAgeGroup, [
+        makeRow({ 13: '' }),
+      ]);
+      expect(result).toHaveLength(0);
+    });
+
+    test('skips rows where event (row[14]) is missing', () => {
+      const result = computeHistoricalRecordsForWeightClass(femaleW48, openAgeGroup, [
+        makeRow({ 14: '' }),
+      ]);
+      expect(result).toHaveLength(0);
+    });
+
+    test('filters out records that do not match the age group', () => {
+      const result = computeHistoricalRecordsForWeightClass(femaleW48, openAgeGroup, [
+        makeRow({ 4: 'masters' }),
+      ]);
+      expect(result).toHaveLength(0);
+    });
+
+    test('matches age group case-insensitively (row[4] is uppercased)', () => {
+      const result = computeHistoricalRecordsForWeightClass(femaleW48, openAgeGroup, [
+        makeRow({ 4: 'open' }),
+      ]);
+      expect(result).toHaveLength(1);
+    });
+
+    test('filters out records where gender does not match the weight class', () => {
+      const result = computeHistoricalRecordsForWeightClass(femaleW48, openAgeGroup, [
+        makeRow({ 5: 'M' }),
+      ]);
+      expect(result).toHaveLength(0);
+    });
+
+    test('includes a record whose weight class range overlaps with the current class', () => {
+      // historical class 36–48kg overlaps with current 0–48kg
+      const result = computeHistoricalRecordsForWeightClass(femaleW48, openAgeGroup, [makeRow()]);
+      expect(result).toHaveLength(1);
+    });
+
+    test('excludes a record whose weight class range is entirely above the current class', () => {
+      // historical class 49–59kg does not overlap with 0–48kg
+      const result = computeHistoricalRecordsForWeightClass(femaleW48, openAgeGroup, [
+        makeRow({ 8: '49', 9: '59' }),
+      ]);
+      expect(result).toHaveLength(0);
+    });
+
+    test('populates all PriorRecord fields correctly', () => {
+      const result = computeHistoricalRecordsForWeightClass(femaleW48, openAgeGroup, [makeRow()]);
+      expect(result[0]).toMatchObject({
+        ageGroup: 'OPEN',
+        gender: 'female',
+        ageMin: 15,
+        ageMax: 999,
+        bodyWeightMin: 36,
+        bodyWeightMax: 48,
+        lift: 'Total',
+        weight: '210',
+        lifter: 'Jane Smith',
+        date: '2022-03-15',
+        event: 'Nationals',
+        yearSpan: `${new Date('2018-01-01').getFullYear()} - ${new Date('2025-06-01').getFullYear()}`,
+      });
+    });
+
+    test('includes multiple matching records', () => {
+      const rows = [
+        makeRow({ 10: 'Total', 12: 'Jane Smith' }),
+        makeRow({ 10: 'Snatch', 12: 'Joan Lee' }),
+      ];
+      const result = computeHistoricalRecordsForWeightClass(femaleW48, openAgeGroup, rows);
+      expect(result).toHaveLength(2);
     });
   });
 });

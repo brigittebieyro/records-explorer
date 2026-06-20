@@ -9,29 +9,6 @@ export const defaultWeightClasses: WeightClass[] = [
     maxBodyweight: '48',
     gender: 'female',
     start: '2025-06-01',
-    previousAnalogs: [
-      {
-        name: "Women's 48kg", // Pre-2018?
-        sport80Id: 362,
-        gender: 'female',
-        start: '1980-01-01',
-        end: '2018-01-01',
-      },
-      {
-        name: "Women's 45kg",
-        sport80Id: 91,
-        gender: 'female',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-      {
-        name: "Women's 49kg",
-        sport80Id: 92,
-        gender: 'female',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-    ],
   },
   {
     id: 'W53',
@@ -41,29 +18,6 @@ export const defaultWeightClasses: WeightClass[] = [
     maxBodyweight: '53',
     gender: 'female',
     start: '2025-06-01',
-    previousAnalogs: [
-      {
-        name: "Women's 53kg", // Pre-2018?
-        sport80Id: 363,
-        gender: 'female',
-        start: '1980-01-01',
-        end: '2018-01-01',
-      },
-      {
-        name: "Women's 55kg",
-        sport80Id: 93,
-        gender: 'female',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-      {
-        name: "Women's 49kg",
-        sport80Id: 92,
-        gender: 'female',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-    ],
   },
   {
     id: 'W58',
@@ -73,22 +27,6 @@ export const defaultWeightClasses: WeightClass[] = [
     maxBodyweight: '58',
     gender: 'female',
     start: '2025-06-01',
-    previousAnalogs: [
-      {
-        name: "Women's 58", // Pre-2018?
-        sport80Id: 364,
-        gender: 'female',
-        start: '1980-01-01',
-        end: '2018-01-01',
-      },
-      {
-        name: "Women's 59kg",
-        sport80Id: 94,
-        gender: 'female',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-    ],
   },
   {
     id: 'W63',
@@ -98,22 +36,6 @@ export const defaultWeightClasses: WeightClass[] = [
     maxBodyweight: '63',
     gender: 'female',
     start: '2025-06-01',
-    previousAnalogs: [
-      {
-        name: "Women's 63kg", // Pre-2018?
-        sport80Id: 365,
-        gender: 'female',
-        start: '1980-01-01',
-        end: '2018-01-01',
-      },
-      {
-        name: "Women's 64kg",
-        sport80Id: 95,
-        gender: 'female',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-    ],
   },
   {
     id: 'W69',
@@ -123,29 +45,6 @@ export const defaultWeightClasses: WeightClass[] = [
     maxBodyweight: '69',
     gender: 'female',
     start: '2025-06-01',
-    previousAnalogs: [
-      {
-        name: "Women's 69kg", // Pre-2018?
-        sport80Id: 366,
-        gender: 'female',
-        start: '1980-01-01',
-        end: '2018-01-01',
-      },
-      {
-        name: "Women's 64kg",
-        sport80Id: 95,
-        gender: 'female',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-      {
-        name: "Women's 71kg",
-        sport80Id: 96,
-        gender: 'female',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-    ],
   },
   {
     id: 'W77',
@@ -155,29 +54,6 @@ export const defaultWeightClasses: WeightClass[] = [
     maxBodyweight: '77',
     gender: 'female',
     start: '2025-06-01',
-    previousAnalogs: [
-      {
-        name: "Women's 76kg",
-        sport80Id: 97,
-        gender: 'female',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-      {
-        name: "Women's 81kg",
-        sport80Id: 98,
-        gender: 'female',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-      {
-        name: "Women's 75kg",
-        sport80Id: 367,
-        gender: 'female',
-        start: '1980-01-01',
-        end: '2018-01-01',
-      },
-    ],
   },
   {
     id: 'W86',
@@ -187,29 +63,6 @@ export const defaultWeightClasses: WeightClass[] = [
     maxBodyweight: '86',
     gender: 'female',
     start: '2025-06-01',
-    previousAnalogs: [
-      {
-        name: "Women's 81kg",
-        sport80Id: 98,
-        gender: 'female',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-      {
-        name: "Women's 87kg",
-        sport80Id: 99,
-        gender: 'female',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-      {
-        name: "Women's 75kg",
-        sport80Id: 367,
-        gender: 'female',
-        start: '1980-01-01',
-        end: '2018-01-01',
-      },
-    ],
   },
   {
     id: 'W86plus',
@@ -219,29 +72,6 @@ export const defaultWeightClasses: WeightClass[] = [
     maxBodyweight: '1000',
     gender: 'female',
     start: '2025-06-01',
-    previousAnalogs: [
-      {
-        name: "Women's 75+", // Youth only?
-        sport80Id: 368,
-        gender: 'female',
-        start: '1980-01-01',
-        end: '2018-01-01',
-      },
-      {
-        name: "Women's 90+kg",
-        sport80Id: 370,
-        gender: 'female',
-        start: '1980-01-01',
-        end: '2018-01-01',
-      },
-      {
-        name: "Women's 87+kg",
-        sport80Id: 100,
-        gender: 'female',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-    ],
   },
   {
     id: 'M60',
@@ -251,36 +81,6 @@ export const defaultWeightClasses: WeightClass[] = [
     maxBodyweight: '60',
     gender: 'male',
     start: '2025-06-01',
-    previousAnalogs: [
-      {
-        name: "Men's 55kg",
-        sport80Id: 81,
-        gender: 'male',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-      {
-        name: "Men's 56kg", //Pre-2018
-        sport80Id: 354,
-        gender: 'male',
-        start: '1980-01-01',
-        end: '2018-01-01',
-      },
-      {
-        name: "Men's 61kg",
-        sport80Id: 82,
-        gender: 'male',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-      {
-        name: "Men's 62kg", // Pre 2018
-        sport80Id: 355,
-        gender: 'male',
-        start: '1980-01-01',
-        end: '2018-01-01',
-      },
-    ],
   },
   {
     id: 'M65',
@@ -290,36 +90,6 @@ export const defaultWeightClasses: WeightClass[] = [
     maxBodyweight: '65',
     gender: 'male',
     start: '2025-06-01',
-    previousAnalogs: [
-      {
-        name: "Men's 61kg",
-        sport80Id: 82,
-        gender: 'male',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-      {
-        name: "Men's 62kg", // Pre 2018
-        sport80Id: 355,
-        gender: 'male',
-        start: '1980-01-01',
-        end: '2018-01-01',
-      },
-      {
-        name: "Men's 67kg",
-        sport80Id: 83,
-        gender: 'male',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-      {
-        name: "Men's 69kg",
-        sport80Id: 356,
-        gender: 'male',
-        start: '1980-01-01',
-        end: '2018-01-01',
-      },
-    ],
   },
   {
     id: 'M71',
@@ -329,36 +99,6 @@ export const defaultWeightClasses: WeightClass[] = [
     maxBodyweight: '71',
     gender: 'male',
     start: '2025-06-01',
-    previousAnalogs: [
-      {
-        name: "Men's 67kg",
-        sport80Id: 83,
-        gender: 'male',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-      {
-        name: "Men's 69kg",
-        sport80Id: 356,
-        gender: 'male',
-        start: '1980-01-01',
-        end: '2018-01-01',
-      },
-      {
-        name: "Men's 73kg",
-        sport80Id: 84,
-        gender: 'male',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-      {
-        name: "Men's 77kg",
-        sport80Id: 357,
-        gender: 'male',
-        start: '1980-01-01',
-        end: '2018-01-01',
-      },
-    ],
   },
   {
     id: 'M79',
@@ -368,29 +108,6 @@ export const defaultWeightClasses: WeightClass[] = [
     maxBodyweight: '79',
     gender: 'male',
     start: '2025-06-01',
-    previousAnalogs: [
-      {
-        name: "Men's 73kg",
-        sport80Id: 84,
-        gender: 'male',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-      {
-        name: "Men's 77kg",
-        sport80Id: 357,
-        gender: 'male',
-        start: '1980-01-01',
-        end: '2018-01-01',
-      },
-      {
-        name: "Men's 81kg",
-        sport80Id: 85,
-        gender: 'male',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-    ],
   },
   {
     id: 'M88',
@@ -400,22 +117,6 @@ export const defaultWeightClasses: WeightClass[] = [
     maxBodyweight: '88',
     gender: 'male',
     start: '2025-06-01',
-    previousAnalogs: [
-      {
-        name: "Men's 85kg",
-        sport80Id: 358,
-        gender: 'male',
-        start: '1980-01-01',
-        end: '2018-01-01',
-      },
-      {
-        name: "Men's 89kg",
-        sport80Id: 86,
-        gender: 'male',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-    ],
   },
   {
     id: 'M94',
@@ -425,29 +126,6 @@ export const defaultWeightClasses: WeightClass[] = [
     maxBodyweight: '94',
     gender: 'male',
     start: '2025-06-01',
-    previousAnalogs: [
-      {
-        name: "Men's 94kg", //Pre-2018
-        sport80Id: 359,
-        gender: 'male',
-        start: '1980-01-01',
-        end: '2018-01-01',
-      },
-      {
-        name: "Men's 96kg",
-        sport80Id: 87,
-        gender: 'male',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-      {
-        name: "Men's 102kg",
-        sport80Id: 88,
-        gender: 'male',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-    ],
   },
   {
     id: 'M110',
@@ -457,29 +135,6 @@ export const defaultWeightClasses: WeightClass[] = [
     maxBodyweight: '110',
     gender: 'male',
     start: '2025-06-01',
-    previousAnalogs: [
-      {
-        name: "Men's 102kg",
-        sport80Id: 88,
-        gender: 'male',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-      {
-        name: "Men's 105kg",
-        sport80Id: 360,
-        gender: 'male',
-        start: '1980-01-01',
-        end: '2018-01-01',
-      },
-      {
-        name: "Men's 109kg",
-        sport80Id: 89,
-        gender: 'male',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-    ],
   },
   {
     id: 'M110plus',
@@ -489,21 +144,5 @@ export const defaultWeightClasses: WeightClass[] = [
     maxBodyweight: '1000',
     gender: 'male',
     start: '2025-06-01',
-    previousAnalogs: [
-      {
-        name: "Men's 109+kg",
-        sport80Id: 90,
-        gender: 'male',
-        start: '2018-01-01',
-        end: '2025-05-30',
-      },
-      {
-        name: "Men's 105+kg",
-        sport80Id: 361,
-        gender: 'male',
-        start: '1980-01-01',
-        end: '2018-01-01',
-      },
-    ],
   },
 ];

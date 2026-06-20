@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { CircleLoader } from 'react-spinners';
 import AllCurrentRecordsView from './components/AllCurrentRecordsView';
+import AssociatedPriorRecords from './components/AssociatedPriorRecords';
 import OptionsBar from './components/OptionsBar';
 import RecordGroup from './components/RecordGroup';
 import Standards from './components/Standards';
@@ -13,6 +14,7 @@ import {
   currentRecordsSheetName,
   endDate,
   getSheetRoute,
+  priorRecordsSheetNames,
   wsoName,
   youthAllTimeStartDate,
 } from '../Data/RoutesAndSettings';
@@ -28,6 +30,7 @@ import {
   AgeGroupRecordSet,
   AllCurrentRecordsEntry,
   AllCurrentRecordsGroup,
+  PriorRecord,
   StandardRecord,
   StandardsResult,
   WeightClass,
@@ -69,6 +72,51 @@ export function computeStandardsForWeightClass(
     }
   });
   return recordSet;
+}
+
+export function computeHistoricalRecordsForWeightClass(
+  weightClass: WeightClass,
+  ageGroup: AgeGroup,
+  historicalData: string[][]
+): PriorRecord[] {
+  const records: PriorRecord[] = [];
+  historicalData.forEach((row) => {
+    if (row.length < 14) return;
+    const gender = row[5] === 'F' ? 'female' : 'male';
+    if (!row[13] || !row[14]) return;
+    const yearSpan = `${new Date(row[0]).getFullYear()} - ${new Date(row[1]).getFullYear()}`;
+    const record: PriorRecord = {
+      ageGroup: row[4].toUpperCase(),
+      gender: gender,
+      ageMin: parseInt(row[6]),
+      ageMax: parseInt(row[7]),
+      bodyWeightMin: parseInt(row[8]),
+      bodyWeightMax: parseInt(row[9]),
+      lift: row[10],
+      weight: row[11],
+      lifter: row[12],
+      date: row[13],
+      event: row[14],
+      yearSpan: yearSpan,
+    };
+    if (
+      ageGroup.id === record.ageGroup &&
+      weightClass.gender === record.gender &&
+      record.bodyWeightMin &&
+      record.bodyWeightMax
+    ) {
+      const classMin = parseInt(weightClass.minBodyweight);
+      const classMax = parseInt(weightClass.maxBodyweight);
+      if (
+        (classMin <= record.bodyWeightMin && classMin >= record.bodyWeightMin) ||
+        (classMin <= record.bodyWeightMax && classMax >= record.bodyWeightMax) ||
+        (classMin >= record.bodyWeightMin && classMax <= record.bodyWeightMax)
+      ) {
+        records.push(record);
+      }
+    }
+  });
+  return records;
 }
 
 export function buildAllCurrentRecords(standards: string[][]): AllCurrentRecordsEntry[] {
@@ -136,6 +184,9 @@ function RecordViewer() {
   const [selectedAgeGroup, setSelectedAgeGroup] = useState(searchParams.get('ageGroup') ?? 'OPEN');
   const [displayedStandards, setDisplayedStandards] = useState<StandardsResult>({});
   const [allRecordsData, setAllRecordsData] = useState<AllCurrentRecordsEntry[]>([]);
+  const [historicalRecordsData, setHistoricalRecordsData] = useState<string[][]>([]);
+  const [historicalRecordsStatus, setHistoricalRecordsStatus] = useState<string | undefined>();
+  const [displayedHistoricalRecords, setDisplayedHistoricalRecords] = useState<PriorRecord[]>([]);
   const didAutoRun = useRef(false);
 
   const fetchCurrentStandards = async (): Promise<void> => {
@@ -163,10 +214,32 @@ function RecordViewer() {
   };
   fetchCurrentStandards();
 
+  const fetchHistoricalRecords = async (): Promise<void> => {
+    if (historicalRecordsStatus) return;
+    setHistoricalRecordsStatus('inprogress');
+    const allRows: string[][] = [];
+    for (const sheetName of priorRecordsSheetNames) {
+      try {
+        const route = getSheetRoute(currentRecordsSheetId, sheetName);
+        const response = await fetch(route, { method: 'GET' });
+        if (!response.ok) continue;
+        await response.json().then((data: { values: string[][] }) => {
+          if (data.values) allRows.push(...data.values);
+        });
+      } catch {
+        // continue on error
+      }
+    }
+    setHistoricalRecordsData(allRows);
+    setHistoricalRecordsStatus('complete');
+  };
+  fetchHistoricalRecords();
+
   const resetAllData = (): void => {
     setCurrentWeightClass(undefined);
     setCurrentAgeGroup(undefined);
     setDisplayedStandards({});
+    setDisplayedHistoricalRecords([]);
   };
 
   useEffect(() => {
@@ -198,6 +271,18 @@ function RecordViewer() {
       setDisplayedStandards(computeStandardsForWeightClass(currentWeightClass, localStandards));
     }
   }, [localStandards, currentWeightClass]);
+
+  useEffect(() => {
+    if (currentWeightClass && currentAgeGroup && historicalRecordsData.length) {
+      setDisplayedHistoricalRecords(
+        computeHistoricalRecordsForWeightClass(
+          currentWeightClass,
+          currentAgeGroup,
+          historicalRecordsData
+        )
+      );
+    }
+  }, [historicalRecordsData, currentWeightClass, currentAgeGroup]);
 
   function applySelection(ageGroup: string, weightClass: string): void {
     const ageGroupObj = getAgeGroup(ageGroup);
@@ -288,6 +373,8 @@ function RecordViewer() {
               weightClassName={currentWeightClass!.name}
               ageGroupName={currentAgeGroup!.name}
             />
+
+            <AssociatedPriorRecords records={displayedHistoricalRecords} />
 
             <div className="record-group-info">
               <p className="page-title">All time bests from this bodyweight</p>

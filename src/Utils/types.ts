@@ -25,7 +25,6 @@ export interface WeightClass {
   gender: 'male' | 'female';
   start: string;
   end?: string;
-  previousAnalogs?: WeightClassAnalog[]; //TODO, remove when historic is fully implemented
   ageGroups?: string[]; // Simplifying historic
 }
 

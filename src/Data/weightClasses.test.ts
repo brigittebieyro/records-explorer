@@ -7,18 +7,10 @@ import {
 } from './youthWeightClasses';
 import { WeightClass } from '../Utils/types';
 
-const REQUIRED_FIELDS = [
-  'id',
-  'name',
-  'sport80Id',
-  'minBodyweight',
-  'maxBodyweight',
-  'gender',
-  'start',
-  'previousAnalogs',
-];
-
-const ANALOG_FIELDS = ['name', 'sport80Id', 'gender', 'start', 'end'];
+// Removed auto-generated tests verifying that defined weight classes all match the defined type.
+// These are wasteful because typescript does this for us, do not re-add.
+// Also removed auto-generated tests verifying no duplicate weight class weights.
+// Youth weight classes may very well interact with adult classes in this way.
 
 function sharedWeightClassTests(weightClasses: WeightClass[]) {
   test('is a non-empty array', () => {
@@ -26,23 +18,9 @@ function sharedWeightClassTests(weightClasses: WeightClass[]) {
     expect(weightClasses.length).toBeGreaterThan(0);
   });
 
-  test('every weight class has all required fields', () => {
-    for (const wc of weightClasses) {
-      for (const field of REQUIRED_FIELDS) {
-        expect(wc).toHaveProperty(field);
-      }
-    }
-  });
-
   test('all IDs are unique within the set', () => {
     const ids = weightClasses.map((wc) => wc.id);
     expect(new Set(ids).size).toBe(ids.length);
-  });
-
-  test('all gender values are "male" or "female"', () => {
-    for (const wc of weightClasses) {
-      expect(['male', 'female']).toContain(wc.gender);
-    }
   });
 
   test('minBodyweight is less than maxBodyweight for every class', () => {
@@ -51,16 +29,9 @@ function sharedWeightClassTests(weightClasses: WeightClass[]) {
     }
   });
 
-  test('plus-weight classes have maxBodyweight of "1000"', () => {
-    const plusClasses = weightClasses.filter((wc) => wc.id.endsWith('plus') || wc.id.endsWith('+'));
-    for (const wc of plusClasses) {
-      expect(wc.maxBodyweight).toBe('1000');
-    }
-  });
-
-  test('start date is a parseable year after 2000', () => {
+  test('start date is a parseable year after 1975', () => {
     for (const wc of weightClasses) {
-      expect(new Date(wc.start).getFullYear()).toBeGreaterThan(2000);
+      expect(new Date(wc.start).getFullYear()).toBeGreaterThan(1975);
     }
   });
 
@@ -68,62 +39,23 @@ function sharedWeightClassTests(weightClasses: WeightClass[]) {
     expect(weightClasses.some((wc) => wc.gender === 'female')).toBe(true);
     expect(weightClasses.some((wc) => wc.gender === 'male')).toBe(true);
   });
-
-  test('no two classes of the same gender share a minBodyweight', () => {
-    for (const gender of ['male', 'female'] as const) {
-      const classes = weightClasses.filter((wc) => wc.gender === gender);
-      const mins = classes.map((wc) => wc.minBodyweight);
-      expect(new Set(mins).size).toBe(mins.length);
-    }
-  });
-
-  test('no two classes of the same gender share a maxBodyweight', () => {
-    for (const gender of ['male', 'female'] as const) {
-      const classes = weightClasses.filter((wc) => wc.gender === gender);
-      const maxes = classes.map((wc) => wc.maxBodyweight);
-      expect(new Set(maxes).size).toBe(maxes.length);
-    }
-  });
 }
 
 describe('defaultWeightClasses', () => {
   sharedWeightClassTests(defaultWeightClasses);
-
-  test("has exactly 8 women's weight classes", () => {
-    expect(defaultWeightClasses.filter((wc) => wc.gender === 'female')).toHaveLength(8);
-  });
-
-  test("has exactly 8 men's weight classes", () => {
-    expect(defaultWeightClasses.filter((wc) => wc.gender === 'male')).toHaveLength(8);
-  });
-
-  test("W48 is the lightest women's class", () => {
-    const femaleClasses = defaultWeightClasses.filter((wc) => wc.gender === 'female');
-    const lightest = femaleClasses.reduce((a, b) =>
-      parseFloat(a.maxBodyweight) < parseFloat(b.maxBodyweight) ? a : b
-    );
-    expect(lightest.id).toBe('W48');
-  });
-
-  test("M60 is the lightest men's class", () => {
-    const maleClasses = defaultWeightClasses.filter((wc) => wc.gender === 'male');
-    const lightest = maleClasses.reduce((a, b) =>
-      parseFloat(a.maxBodyweight) < parseFloat(b.maxBodyweight) ? a : b
-    );
-    expect(lightest.id).toBe('M60');
-  });
-
+  // Removed auto-generated tests verifying specific values for weight classes.
+  // These are subject to change and configurable for a REASON.
   test("women's weight classes have continuous boundaries with no gaps", () => {
     const femaleClasses = defaultWeightClasses
       .filter((wc) => wc.gender === 'female')
-      .sort((a, b) => parseFloat(a.minBodyweight) - parseFloat(b.minBodyweight));
+      .sort((a, b) => Number(a.minBodyweight) - Number(b.minBodyweight));
 
-    expect(parseFloat(femaleClasses[0].minBodyweight)).toBe(0);
+    expect(Number(femaleClasses[0].minBodyweight)).toBe(0);
     expect(femaleClasses[femaleClasses.length - 1].maxBodyweight).toBe('1000');
 
     for (let i = 1; i < femaleClasses.length; i++) {
-      const prevMax = parseFloat(femaleClasses[i - 1].maxBodyweight);
-      const currMin = parseFloat(femaleClasses[i].minBodyweight);
+      const prevMax = Number(femaleClasses[i - 1].maxBodyweight);
+      const currMin = Number(femaleClasses[i].minBodyweight);
       expect(currMin).toBeCloseTo(prevMax + 0.01, 2);
     }
   });

@@ -21,7 +21,6 @@ const mockWeightClass: WeightClass = {
   maxBodyweight: '48',
   gender: 'female',
   start: '2025-06-01',
-  previousAnalogs: [],
 };
 
 const mockAgeGroup = {
@@ -61,7 +60,7 @@ describe('RecordGroup', () => {
   });
 
   describe('Rendering and Loading States', () => {
-    test('renders loading spinner initially', () => {
+    test('renders loading spinner initially', async () => {
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ data: [] }),
@@ -79,6 +78,7 @@ describe('RecordGroup', () => {
       );
 
       expect(screen.getByTestId('circle-loader')).toBeInTheDocument();
+      await waitFor(() => expect(global.fetch).toHaveBeenCalled());
     });
 
     test('renders empty content when no lifters match', async () => {

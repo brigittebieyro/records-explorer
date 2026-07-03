@@ -176,8 +176,9 @@ const USAW_API = 'https://admin-usaw-rankings.sport80.com/api';
 const WSO_ID = 21; // California North Central
 
 const INELIGIBLE_ATHLETES = new Set([
-  'Aurora van Ulft',
-  'Bekdoolot Rasulbekov',
+  // 'Aurora van Ulft',
+  // 'Bekdoolot Rasulbekov',
+  'Imaginary B. Athlete',
 ]);
 
 const headers = {

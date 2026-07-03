@@ -124,7 +124,10 @@ export const wsoBoundary = {
 // Exceptions who may not hold records, because they do not live within the WSO.
 // ----------------------------------------------------------------------------------------------------------------
 //
-export const ineligibleAthletes: string[] = ['Aurora van Ulft', 'Bekdoolot Rasulbekov'];
+export const ineligibleAthletes: string[] = [
+  'Imaginary B. Athlete',
+  // 'Aurora van Ulft', 'Bekdoolot Rasulbekov'
+];
 
 // ----------------------------------------------------------------------------------------------------------------
 // Scripts page password

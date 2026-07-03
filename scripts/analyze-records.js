@@ -164,8 +164,9 @@ const DATE_RANGE_END = '2026-08-01';
 
 // Athletes who appear in WSO rankings but are not eligible for CANCA records
 const INELIGIBLE_ATHLETES = new Set([
-  'Aurora van Ulft',
-  'Bekdoolot Rasulbekov',
+  // 'Aurora van Ulft',
+  // 'Bekdoolot Rasulbekov',
+  'Imaginary B. Athlete',
 ]);
 
 const headers = {
@@ -380,7 +381,7 @@ async function analyzeRecords() {
           // Extract athlete ID — match webapp's getLifterId (RoutesAndSettings.ts)
           const actionUrl = athlete.action[0].url ?? athlete.action[0].route ?? '';
           const lifterId = actionUrl.split('https://usaweightlifting.sport80.com/public/rankings/member/')[1]
-                        || actionUrl.split('/member/')[1];
+            || actionUrl.split('/member/')[1];
           if (!lifterId) continue;
 
           // Fetch this athlete's historical lifts, filtered to the weight class's active date range
@@ -507,8 +508,8 @@ function generateCsv(recordBreakers) {
 async function main() {
   try {
     console.log('🏋️  Records Explorer - Record Breaking Analysis\n');
-    console.log('=' .repeat(50) + '\n');
-    
+    console.log('='.repeat(50) + '\n');
+
     const recordBreakers = await analyzeRecords();
     const csv = generateCsv(recordBreakers);
 

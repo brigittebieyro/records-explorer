@@ -21,11 +21,28 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test:coverage": "CI=true react-scripts test --watchAll=false --coverage",
+    "coverage": "npm run test:coverage",
     "eject": "react-scripts eject",
     "server": "node-env-run server --exec nodemon | pino-colada",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,json}\"",
     "analyze-records": "node scripts/analyze-records.js",
     "gather-history-records": "node scripts/gather-history-records.js"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.{ts,tsx}",
+      "!src/**/*.d.ts",
+      "!src/setupTests.ts",
+      "!src/index.tsx",
+      "!src/**/__tests__/**"
+    ],
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html",
+      "json-summary"
+    ]
   },
   "eslintConfig": {
     "extends": [

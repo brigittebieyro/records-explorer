@@ -94,7 +94,7 @@ export const getSheetRoute = (sheetId: string, sheetName: string): string => {
 // for current records:
 export const currentRecordsSheetId = '1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ';
 export const currentRecordsSheetName = 'Raw_Data';
-export const priorRecordsSheetNames = ['Pre-June2025'];
+export const priorRecordsSheetNames = ['Pre-Aug2026', 'Pre-June2025', 'Pre-2018'];
 export const publicSpreadsheetLink =
   'https://docs.google.com/spreadsheets/d/1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ';
 

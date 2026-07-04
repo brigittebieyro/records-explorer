@@ -22,8 +22,19 @@ function Goals() {
           for each group looks like, with {wsoName} WSO members already in that tier highlighted.
         </p>
         <p className="goals-descriptive-text">
+          Of course not every in the national top group will attempt to sign up for Nationals. We're
+          showing just a few extras, but if you're within 20kg of the bottom totals in your group,{' '}
+          <strong>give it a shot and sign up</strong>. The final ranking will not be out of everyone
+          who <strong>signs up</strong>, not solely the national ranking.{' '}
+        </p>
+        <p className="goals-descriptive-text">
           To explore national rankings in more detail, see{' '}
-          <a href={usawRankingsPublicSiteLink} target="_blank" className="common-text-link">
+          <a
+            href={usawRankingsPublicSiteLink}
+            target="_blank"
+            className="common-text-link"
+            rel="noreferrer"
+          >
             USAW's public rankings site
           </a>
           . You do not need to be logged in to USAW for this.
@@ -37,7 +48,7 @@ function Goals() {
               <h2 className="goals-weight-class-header">{wc.name}</h2>
               <GoalsWeightClass
                 weightClass={wc}
-                count={getCount(index)}
+                safeCount={getCount(index)}
                 startDate={startDate}
                 endDate={endDate}
               />
@@ -51,7 +62,7 @@ function Goals() {
               <h2 className="goals-weight-class-header">{wc.name}</h2>
               <GoalsWeightClass
                 weightClass={wc}
-                count={getCount(index)}
+                safeCount={getCount(index)}
                 startDate={startDate}
                 endDate={endDate}
               />

@@ -1,6 +1,6 @@
 import { ageGroups } from '../Data/ageGroups';
 import { defaultWeightClasses } from '../Data/defaultWeightClasses';
-import { wsoBoundary } from '../Data/RoutesAndSettings';
+import { maxCleanAndJerk, maxSnatch, maxTotal, wsoBoundary } from '../Data/RoutesAndSettings';
 import {
   u11WeightClasses,
   u13WeightClasses,
@@ -101,6 +101,18 @@ export const shouldIncludePastLifter = (
 ): boolean => {
   const totalIsPlausible = lifter.total <= 550;
   return totalIsPlausible;
+};
+
+export const isWithinPlausibilityCaps = (lifter: {
+  total: number;
+  best_snatch?: number;
+  'best_c&j'?: number;
+}): boolean => {
+  return (
+    (lifter.best_snatch == null || lifter.best_snatch <= maxSnatch) &&
+    (lifter['best_c&j'] == null || lifter['best_c&j'] <= maxCleanAndJerk) &&
+    lifter.total <= maxTotal
+  );
 };
 
 export const getYear = (date: string): number => {

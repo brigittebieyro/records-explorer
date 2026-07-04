@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 import { CircleLoader } from 'react-spinners';
 import { getRankingsRoute, headers } from '../../Data/RoutesAndSettings';
-import { handleError } from '../../Utils/Utils';
+import { handleError, isWithinPlausibilityCaps } from '../../Utils/Utils';
 import { CombinedLiftData, WeightClass } from '../../Utils/types';
 
 interface GoalsWeightClassProps {
   weightClass: WeightClass;
-  count: number;
+  safeCount: number;
   startDate: string;
   endDate: string;
 }
 
-function GoalsWeightClass({ weightClass, count, startDate, endDate }: GoalsWeightClassProps) {
+function GoalsWeightClass({ weightClass, safeCount, startDate, endDate }: GoalsWeightClassProps) {
   const [status, setStatus] = useState<string | undefined>();
   const [lifters, setLifters] = useState<CombinedLiftData[]>([]);
 
@@ -32,7 +32,7 @@ function GoalsWeightClass({ weightClass, count, startDate, endDate }: GoalsWeigh
           weight_class: wtClass.sport80Id,
         },
       });
-      const response = await fetch(getRankingsRoute(count), {
+      const response = await fetch(getRankingsRoute(safeCount + 5), {
         headers,
         body,
         method: 'POST',
@@ -44,7 +44,9 @@ function GoalsWeightClass({ weightClass, count, startDate, endDate }: GoalsWeigh
       const json: { data: CombinedLiftData[] } = await response.json();
       const result: CombinedLiftData[] = [];
       for (const lifter of json.data) {
-        result.push(lifter);
+        if (isWithinPlausibilityCaps(lifter)) {
+          result.push(lifter);
+        }
       }
       setLifters(result);
       setStatus('complete');
@@ -57,14 +59,16 @@ function GoalsWeightClass({ weightClass, count, startDate, endDate }: GoalsWeigh
     <div className="goals-list-segment">
       {status !== 'complete' && <CircleLoader loading={true} color="gold" />}
       {status === 'complete' &&
-        lifters.slice(0, count).map((lifter, index) => (
+        lifters.slice(0, safeCount + 3).map((lifter, index) => (
           <div key={`goals-${index}-${lifter.name}`}>
             <p
-              className={`goals-list-item ${lifter.wso === 'California North Central' ? 'goals-list-highlight' : ''}`}
+              className={`goals-list-item ${lifter.wso === 'California North Central' ? 'goals-list-highlight' : ''} ${index >= safeCount ? 'goals-item-tentative' : ''}`}
             >
+              <span className="goals-rank-circle">{index + 1}</span>
               {lifter.total}kg &bull; {lifter.name}
               {lifter.wso === 'California North Central' && <span> &bull; {lifter.club}</span>}
               {lifter.wso !== 'California North Central' && <span> &bull; {lifter.wso}</span>}
+              {index >= safeCount && <span> &bull; Probable</span>}
             </p>
           </div>
         ))}

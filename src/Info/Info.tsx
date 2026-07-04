@@ -17,7 +17,12 @@ function Info() {
             Each level of weightlifting has records, and while those at the local level for Northern
             and Central Californiaare the ones this site is focused on, you may also be interested
             in working towards a national or international records.{' '}
-            <a href={americanRecordsUrl} target="_blank" className="common-text-link">
+            <a
+              href={americanRecordsUrl}
+              target="_blank"
+              className="common-text-link"
+              rel="noreferrer"
+            >
               American national National records and standards
             </a>{' '}
             are maintained by USAW, while international records are maintained by multiple governing
@@ -33,7 +38,7 @@ function Info() {
             <strong>Local Records:</strong>
             <br />
             At the local level,{' '}
-            <a href={wsoInfoUSAWUrl} target="_blank" className="common-text-link">
+            <a href={wsoInfoUSAWUrl} target="_blank" className="common-text-link" rel="noreferrer">
               your WSO committee
             </a>{' '}
             is responsible for maintaing the records. We're keeping an eye out, but we're not all
@@ -86,7 +91,12 @@ function Info() {
           <p>
             This site gathers data directly from USAW's public rankings and results database, which
             means it's vulnerable to errors in meet results. Recognized records are stored in a{' '}
-            <a href={publicSpreadsheetLink} target="_blank" className="common-text-link">
+            <a
+              href={publicSpreadsheetLink}
+              target="_blank"
+              className="common-text-link"
+              rel="noreferrer"
+            >
               public spreadsheet
             </a>
             , which was used before this site existed. Whereever possible, we've linked directly to
@@ -101,12 +111,12 @@ function Info() {
           </p>
           <p>
             You can find this project on{' '}
-            <a href={githubUrl} target="_blank" className="common-text-link">
+            <a href={githubUrl} target="_blank" className="common-text-link" rel="noreferrer">
               GitHub
             </a>
             .<br />
             Reach out to{' '}
-            <a href={`mailto:${maintainerEmail}`} className="common-text-link">
+            <a href={`mailto:${maintainerEmail}`} className="common-text-link" rel="noreferrer">
               {maintainerName}
             </a>{' '}
             if you notice any bugs, have a feature suggestion, or would like help reusing this site

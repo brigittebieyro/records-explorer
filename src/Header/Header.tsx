@@ -21,7 +21,7 @@ function Header() {
       <div className="App">
         <header className="App-header">
           <img className="header-logo" src="/WSOLogo.png" width="150" height="150" alt="WSO logo" />
-          {wsoName} WSO Records Explorer
+          {wsoName} WSO Records & Results
         </header>
 
         <div className="menu-container">
@@ -29,14 +29,14 @@ function Header() {
             <div className={getMenuStyles()}>
               <ul>
                 <li>
-                  <a href="/">WSO Records Explorer</a>
+                  <a href="/">WSO Records & Results</a>
                 </li>
                 <li>
                   <a href="/local-meet-results">Local Meet Results</a>
                 </li>
-                {/* <li>
-                  <a href="/scripts">Scripts</a>
-                </li> */}
+                <li>
+                  <a href="/goals">Senior Nationals Qualification Rankings</a>
+                </li>
                 <li>
                   <a href={localScheduleUrl}>Local Meet Schedule</a>
                 </li>

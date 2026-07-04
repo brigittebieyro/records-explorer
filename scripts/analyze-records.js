@@ -182,7 +182,7 @@ const headers = {
 async function fetchCurrentRecords() {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.sheetId}/values/${SHEETS_CONFIG.sheetName}?key=${SHEETS_CONFIG.googleKey}`;
   console.log('📊 Fetching current records from Google Sheets...');
-  
+
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -233,7 +233,7 @@ function parseCurrentRecords(sheetData) {
       : ageKeyRaw;
 
     const recordKey = `${gender}_${normalizedAgeGroup}_${weightClassIndicator}_${liftType.toLowerCase()}`;
-    
+
     // Keep only the highest weight for each record type
     if (!records[recordKey] || numWeight > records[recordKey].weight) {
       records[recordKey] = {
@@ -248,7 +248,7 @@ function parseCurrentRecords(sheetData) {
       validRecords++;
     }
   });
-  
+
   console.log(`✓ Loaded ${validRecords} current records\n`);
   return records;
 }
@@ -268,7 +268,7 @@ async function fetchTopAthletes(weightClass, ageGroup, dateRangeStart) {
       maximum_lifter_age: ageGroup.maximum_lifter_age,
     },
   });
-  
+
   try {
     const response = await fetch(`${USAW_API}/categories/all/rankings/table/data?platform=1&p=0&l=5&sort=action&d=asc&s=&st=`, {
       method: 'POST',
@@ -280,7 +280,7 @@ async function fetchTopAthletes(weightClass, ageGroup, dateRangeStart) {
     }
     const data = await response.json();
     const athletes = data.data || [];
-    
+
     return athletes;
   } catch (error) {
     return [];
@@ -349,11 +349,11 @@ function extractBestLifts(athleteData, weightClass, ageGroup, lifter) {
  */
 async function analyzeRecords() {
   const recordBreakers = [];
-  
+
   // Fetch current records
   const sheetData = await fetchCurrentRecords();
   const currentRecords = parseCurrentRecords(sheetData);
-  
+
   const total = ageGroups.reduce((sum, ag) => sum + getWeightClassSetForAgeGroup(ag).length, 0);
   console.log(`🔍 Analyzing ${ageGroups.length} age groups (${total} total combinations)...\n`);
 
@@ -365,7 +365,7 @@ async function analyzeRecords() {
       processed++;
       const pct = Math.round((processed / total) * 100);
       process.stdout.write(`\r  [${pct}%] ${processed}/${total} combinations analyzed...`);
-      
+
       try {
         // Fetch top athletes for this weight class + age group combination
         // Use the weight class start date to avoid querying before the class was created
@@ -389,14 +389,14 @@ async function analyzeRecords() {
           if (lifts.length === 0) continue;
 
           const bestLifts = extractBestLifts(lifts, weightClass, ageGroup, athlete);
-          
+
           const currentYear = new Date().getFullYear();
 
           // Check each lift type against records
           for (const [liftType, liftData] of Object.entries(bestLifts)) {
             if (!liftData) continue;
             if (new Date(liftData.date).getFullYear() !== currentYear) continue;
-            
+
             // Build record key to look up current record
             // Match format: GENDER_AGEGROUP_WEIGHTCLASS_LIFTTYPE
             // Sheet uses '>X' for the heaviest class; TS source stores '1000' as sentinel
@@ -431,7 +431,7 @@ async function analyzeRecords() {
             }
           }
         }
-        
+
         // Rate limit to avoid overwhelming the API
         await delay(100);
       } catch (error) {
@@ -442,7 +442,7 @@ async function analyzeRecords() {
       }
     }
   }
-  
+
   console.log(`\r✓ Analysis complete. Found ${recordBreakers.length} record breakers.   \n`);
   return recordBreakers;
 }
@@ -518,7 +518,7 @@ async function main() {
 
     console.log(`\n📄 Report generated: ${path.relative(process.cwd(), outputPath)}`);
     console.log(`✨ Done!\n`);
-    
+
   } catch (error) {
     console.error('\n❌ Error during analysis:');
     console.error(`   ${error.message}`);

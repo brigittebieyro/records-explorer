@@ -235,7 +235,7 @@ function LocalMeets() {
                 Not all event results include athlete age groups. To deep dive on a specific age
                 group, use the{' '}
                 <a href="/" className="common-text-link">
-                  records explorer page
+                  Records Explorer page
                 </a>
                 .
               </p>

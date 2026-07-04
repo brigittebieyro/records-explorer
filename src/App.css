@@ -573,3 +573,36 @@ body {
   padding: 0px 24px 12px;
   margin-bottom: 24px;
 }
+
+/* Goals list styles */
+.goals-parent {
+  color: var(--main-text-color);
+}
+
+.goals-column-header {
+  color: var(--main-text-color);
+  padding-bottom: 8px;
+  margin-top: 0;
+}
+
+.goals-descriptive-text {
+  font-size: 12px;
+  margin: 8px 15%;
+}
+
+.goals-list-item {
+  color: var(--main-text-color);
+  font-size: 12px;
+}
+
+.goals-list-highlight {
+  font-weight: bold;
+}
+
+.goals-weight-class-header {
+  color: var(--main-accent-color);
+  font-size: 14px;
+  margin: 0 0 6px 0;
+  padding: 8px 0 4px 0;
+  border-top: 1px solid var(--soft-border-color);
+}

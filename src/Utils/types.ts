@@ -41,6 +41,7 @@ export interface LifterRankingData {
   action: LifterAction[];
   bodyweight?: number;
   classData?: WeightClassAnalog;
+  wso?: string;
 }
 
 export interface MeetRecord {

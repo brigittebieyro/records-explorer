@@ -4,6 +4,7 @@ import Header from './Header/Header';
 import Info from './Info/Info';
 import LocalMeets from './LocalMeets/LocalMeets';
 import RecordViewer from './RecordViewer/RecordViewer';
+import Goals from './Goals/Goals';
 import Scripts from './Scripts/Scripts';
 
 export default function App() {
@@ -15,6 +16,7 @@ export default function App() {
         <Route path="/info" element={<Info />} />
         <Route path="/local-meet-results" element={<LocalMeets />} />
         <Route path="/scripts" element={<Scripts />} />
+        <Route path="/goals" element={<Goals />} />
         <Route path="/hall-of-fame" element={<div>Find old records here!</div>} />
       </Routes>
     </BrowserRouter>

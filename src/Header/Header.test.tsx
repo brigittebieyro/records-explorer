@@ -16,12 +16,12 @@ describe('Header', () => {
 
     test('renders the WSO name in the page header', () => {
       render(<Header />);
-      expect(screen.getByText(/TestOrg WSO Records Explorer/)).toBeInTheDocument();
+      expect(screen.getByText(/TestOrg WSO Records & Results/)).toBeInTheDocument();
     });
 
     test('renders the records explorer home link', () => {
       render(<Header />);
-      const link = screen.getByText('WSO Records Explorer').closest('a');
+      const link = screen.getByText('WSO Records & Results').closest('a');
       expect(link).toHaveAttribute('href', '/');
     });
 

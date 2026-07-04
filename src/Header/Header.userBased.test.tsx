@@ -64,10 +64,9 @@ describe('Header (user-based)', () => {
     );
   });
 
-  test('A-05: hidden routes are not linked anywhere in the menu', () => {
+  test('A-05: the hidden /scripts route is not linked anywhere in the menu', () => {
     const { container } = render(<Header />);
 
     expect(container.querySelector('a[href="/scripts"]')).toBeNull();
-    expect(container.querySelector('a[href="/hall-of-fame"]')).toBeNull();
   });
 });

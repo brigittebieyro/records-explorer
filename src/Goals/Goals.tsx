@@ -1,5 +1,5 @@
 import { defaultWeightClasses } from '../Data/defaultWeightClasses';
-import { endDate, wsoName } from '../Data/RoutesAndSettings';
+import { endDate, usawRankingsPublicSiteLink, wsoName } from '../Data/RoutesAndSettings';
 import GoalsWeightClass from './components/GoalsWeightClass';
 
 const femaleClasses = defaultWeightClasses.filter((wc) => wc.gender === 'female');
@@ -14,12 +14,21 @@ const startDate = oneYearAgo.toISOString().split('T')[0];
 function Goals() {
   return (
     <div className="goals-parent">
-      <p className="page-title">Senior Nationals Qualification Rankings</p>
-      <p className="goals-descriptive-text">
-        With the 2027 change in format for Senior Nationals, everybody wants to reach their top
-        twelve (or six for the very lightest weight classes). Here's a view of what the top totals
-        for each group looks like, with {wsoName} WSO members already in that tier highlighted.
-      </p>
+      <div className="common-text-header">
+        <p className="page-title">Senior Nationals Qualification Rankings</p>
+        <p className="goals-descriptive-text">
+          With the 2027 change in format for Senior Nationals, everybody wants to reach their top
+          twelve (or six for the very lightest weight classes). Here's a view of what the top totals
+          for each group looks like, with {wsoName} WSO members already in that tier highlighted.
+        </p>
+        <p className="goals-descriptive-text">
+          To explore national rankings in more detail, see{' '}
+          <a href={usawRankingsPublicSiteLink} target="_blank" className="common-text-link">
+            USAW's public rankings site
+          </a>
+          . You do not need to be logged in to USAW for this.
+        </p>
+      </div>
       <div className="all-records-columns">
         <div className="all-records-column">
           <h2 className="goals-column-header">Women</h2>

@@ -14,6 +14,9 @@ export const getRankingsRoute = (count?: number): string => {
   return `${_baseUrl}/categories/all/rankings/table/data?platform=1&p=0&l=${limit}&sort=action&d=asc&s=&st=`;
 };
 
+export const usawRankingsPublicSiteLink =
+  'https://usaweightlifting.sport80.com/public/rankings/all';
+
 export const getLifterId = (lifterActionRoute: Array<{ url: string }>): string => {
   return lifterActionRoute[0].url.split(
     'https://usaweightlifting.sport80.com/public/rankings/member/'
@@ -92,6 +95,8 @@ export const getSheetRoute = (sheetId: string, sheetName: string): string => {
 export const currentRecordsSheetId = '1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ';
 export const currentRecordsSheetName = 'Raw_Data';
 export const priorRecordsSheetNames = ['Pre-June2025'];
+export const publicSpreadsheetLink =
+  'https://docs.google.com/spreadsheets/d/1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ';
 
 // ----------------------------------------------------------------------------------------------------------------
 // External Links

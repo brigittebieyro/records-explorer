@@ -64,6 +64,10 @@ body {
   color: var(--link-color-active);
 }
 
+.common-text-header {
+  margin-bottom: 24px;
+}
+
 /* Menu styles */
 .menu-container {
   display: flex;
@@ -499,7 +503,7 @@ body {
 /* Local Meet Results styles */
 .local-meets-parent {
   margin: 0 50px 50px 50px;
-  text-align: left;
+  text-align: center;
   width: 100%;
   max-width: 1100px;
 }
@@ -507,7 +511,7 @@ body {
 .local-meets-list {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 0 50px;
 }
 
 .local-meet-item {
@@ -577,6 +581,10 @@ body {
 /* Goals list styles */
 .goals-parent {
   color: var(--main-text-color);
+  text-align: center;
+  padding: 0 50px 50px 50px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .goals-column-header {

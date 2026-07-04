@@ -11,6 +11,7 @@ import {
   getWeightClassSet,
   getYear,
   handleError,
+  isWithinPlausibilityCaps,
   isWithinWSOBoundary,
   shouldIncludePastLifter,
   sortLifts,
@@ -454,6 +455,37 @@ describe('shouldIncludePastLifter', () => {
 
   test('returns true for negative total (edge case)', () => {
     expect(shouldIncludePastLifter({ total: -100 })).toBe(true);
+  });
+});
+
+describe('isWithinPlausibilityCaps', () => {
+  test('returns true when all values are under the caps', () => {
+    expect(isWithinPlausibilityCaps({ total: 250, best_snatch: 110, 'best_c&j': 140 })).toBe(true);
+  });
+
+  test('returns true for values exactly at the caps', () => {
+    expect(isWithinPlausibilityCaps({ total: 470, best_snatch: 200, 'best_c&j': 280 })).toBe(true);
+  });
+
+  test('returns false when total exceeds the cap', () => {
+    expect(isWithinPlausibilityCaps({ total: 471 })).toBe(false);
+    expect(isWithinPlausibilityCaps({ total: 1000, best_snatch: 100, 'best_c&j': 120 })).toBe(
+      false
+    );
+  });
+
+  test('returns false when snatch exceeds the cap', () => {
+    expect(isWithinPlausibilityCaps({ total: 300, best_snatch: 201, 'best_c&j': 150 })).toBe(false);
+  });
+
+  test('returns false when clean and jerk exceeds the cap', () => {
+    expect(isWithinPlausibilityCaps({ total: 300, best_snatch: 130, 'best_c&j': 281 })).toBe(false);
+  });
+
+  test('returns true when per-lift values are missing and total is plausible', () => {
+    expect(isWithinPlausibilityCaps({ total: 300 })).toBe(true);
+    expect(isWithinPlausibilityCaps({ total: 300, best_snatch: 130 })).toBe(true);
+    expect(isWithinPlausibilityCaps({ total: 300, 'best_c&j': 160 })).toBe(true);
   });
 });
 

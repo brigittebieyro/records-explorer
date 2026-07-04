@@ -102,7 +102,10 @@ function Info() {
             , which was used before this site existed. Wherever possible, we've linked directly to
             public pages for further research and verification. If you notice something totally
             implausible, let us know! We may exclude it and others like it, or reach out to USAW for
-            help correcting the data.
+            help correcting the data. Missing data is also possible, for the same reason. If USAW
+            states that you hit an 800kg snatch or had 0 bodyweight, we're probably not displaying
+            that. Missing lifts can be added to the record spreadsheet directly while you reach out
+            to the meet director and USAW about correcting your results.
           </p>
           <p>
             Additional features are being added slowly and by request. Local meet results was Jim

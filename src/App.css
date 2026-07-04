@@ -597,6 +597,7 @@ body {
 
 .goals-list-highlight {
   font-weight: bold;
+  color: var(--main-accent-color);
 }
 
 .goals-weight-class-header {

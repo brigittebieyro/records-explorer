@@ -1,70 +1,69 @@
 import { render, screen } from '@testing-library/react';
 import Info from './Info';
+import {
+  americanRecordsUrl,
+  githubUrl,
+  maintainerEmail,
+  maintainerName,
+  publicSpreadsheetLink,
+  wsoInfoUSAWUrl,
+} from '../Data/RoutesAndSettings';
 
-jest.mock('../Data/RoutesAndSettings', () => ({
-  americanRecordsUrl: 'https://test-american-records.example.com',
-  wsoInfoUSAWUrl: 'https://test-wso-info.example.com',
-  githubUrl: 'https://test-github.example.com',
-  maintainerEmail: 'test@example.com',
-  maintainerName: 'Test Maintainer',
-}));
+describe('Info (user-based)', () => {
+  test('E-01: renders the three info boxes', () => {
+    render(<Info />);
 
-describe('Info', () => {
-  describe('About Records section', () => {
-    test('renders the About Records heading', () => {
-      render(<Info />);
-      expect(screen.getByRole('heading', { level: 2, name: 'About Records' })).toBeInTheDocument();
-    });
-
-    test('includes content about local records', () => {
-      const { container } = render(<Info />);
-      expect(container).toHaveTextContent('Local Records');
-    });
-
-    test('mentions the WSO committee', () => {
-      const { container } = render(<Info />);
-      expect(container).toHaveTextContent('WSO committee');
-    });
-
-    test('links to American records with correct href', () => {
-      render(<Info />);
-      const link = screen.getByText(/American national/).closest('a');
-      expect(link).toHaveAttribute('href', 'https://test-american-records.example.com');
-      expect(link).toHaveAttribute('target', '_blank');
-    });
-
-    test('links to the WSO committee page with correct href', () => {
-      render(<Info />);
-      const link = screen.getByText('your WSO committee').closest('a');
-      expect(link).toHaveAttribute('href', 'https://test-wso-info.example.com');
-      expect(link).toHaveAttribute('target', '_blank');
-    });
+    expect(screen.getByRole('heading', { name: 'About Records' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: "About Last Year's Lifts" })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'About This Site' })).toBeInTheDocument();
   });
 
-  describe('About This Site section', () => {
-    test('renders the About This Site heading', () => {
-      render(<Info />);
-      expect(
-        screen.getByRole('heading', { level: 2, name: 'About This Site' })
-      ).toBeInTheDocument();
-    });
+  test('E-02: the American records link points at USAW', () => {
+    render(<Info />);
 
-    test('links to GitHub with correct href', () => {
-      render(<Info />);
-      const link = screen.getByText('GitHub').closest('a');
-      expect(link).toHaveAttribute('href', 'https://test-github.example.com');
-      expect(link).toHaveAttribute('target', '_blank');
-    });
+    expect(
+      screen.getByRole('link', { name: /American national National records and standards/ })
+    ).toHaveAttribute('href', americanRecordsUrl);
+  });
 
-    test('renders the maintainer name', () => {
-      render(<Info />);
-      expect(screen.getByText('Test Maintainer')).toBeInTheDocument();
-    });
+  test('E-02: the WSO committee link points at USAW WSO info', () => {
+    render(<Info />);
 
-    test('links to maintainer email with correct mailto href', () => {
-      render(<Info />);
-      const link = screen.getByText('Test Maintainer').closest('a');
-      expect(link).toHaveAttribute('href', 'mailto:test@example.com');
-    });
+    expect(screen.getByRole('link', { name: 'your WSO committee' })).toHaveAttribute(
+      'href',
+      wsoInfoUSAWUrl
+    );
+  });
+
+  test('E-02: the public spreadsheet link points at the records sheet', () => {
+    render(<Info />);
+
+    expect(screen.getByRole('link', { name: 'public spreadsheet' })).toHaveAttribute(
+      'href',
+      publicSpreadsheetLink
+    );
+  });
+
+  test('E-02: the GitHub link points at the project repo', () => {
+    render(<Info />);
+
+    expect(screen.getByRole('link', { name: 'GitHub' })).toHaveAttribute('href', githubUrl);
+  });
+
+  test('E-02: external links open in a new tab', () => {
+    render(<Info />);
+
+    for (const name of ['your WSO committee', 'public spreadsheet', 'GitHub']) {
+      expect(screen.getByRole('link', { name })).toHaveAttribute('target', '_blank');
+    }
+  });
+
+  test('E-03: the maintainer link is a mailto', () => {
+    render(<Info />);
+
+    expect(screen.getByRole('link', { name: maintainerName })).toHaveAttribute(
+      'href',
+      `mailto:${maintainerEmail}`
+    );
   });
 });

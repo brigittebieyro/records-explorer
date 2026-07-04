@@ -2,60 +2,73 @@ import { render, screen } from '@testing-library/react';
 import AssociatedPriorRecords from './AssociatedPriorRecords';
 import { PriorRecord } from '../../Utils/types';
 
-const makeRecord = (overrides: Partial<PriorRecord> = {}): PriorRecord => ({
+const makePriorRecord = (overrides: object = {}): PriorRecord => ({
   ageGroup: 'OPEN',
   gender: 'female',
-  ageMin: 15,
-  ageMax: 999,
-  bodyWeightMin: 36,
-  bodyWeightMax: 48,
+  ageMin: 0,
+  ageMax: 1000,
+  bodyWeightMin: 0,
+  bodyWeightMax: 49,
   lift: 'Total',
-  weight: '210',
-  lifter: 'Jane Smith',
-  date: '2022-03-15',
-  event: 'Nationals',
+  weight: '140',
+  lifter: 'Jane Doe',
+  event: 'Sacramento Open',
+  date: '2019-05-04',
   yearSpan: '2018 - 2025',
   ...overrides,
 });
 
-describe('AssociatedPriorRecords', () => {
-  test('renders nothing when records array is empty', () => {
+describe('AssociatedPriorRecords (user-based)', () => {
+  test('B-16: renders nothing when there are no records', () => {
     const { container } = render(<AssociatedPriorRecords records={[]} />);
     expect(container.firstChild).toBeNull();
   });
 
-  test('renders section heading when records are present', () => {
-    render(<AssociatedPriorRecords records={[makeRecord()]} />);
+  test('B-16: renders the section title when records exist', () => {
+    render(<AssociatedPriorRecords records={[makePriorRecord()]} />);
     expect(screen.getByText('Records from prior weight classes')).toBeInTheDocument();
   });
 
-  test('renders each record as a list item', () => {
-    const records = [
-      makeRecord({ lift: 'Total', date: '2022-03-15' }),
-      makeRecord({ lift: 'Snatch', weight: '95', date: '2021-06-10' }),
-    ];
-    render(<AssociatedPriorRecords records={records} />);
-    expect(screen.getByText(/Total/)).toBeInTheDocument();
-    expect(screen.getByText(/Snatch/)).toBeInTheDocument();
+  test("B-16: a women's record row shows the year span, class, lift, and result", () => {
+    const { container } = render(<AssociatedPriorRecords records={[makePriorRecord()]} />);
+
+    const title = container.querySelector('.prior-record-title');
+    expect(title?.textContent).toBe("2018 - 2025 Women's 49kg Total:");
+    const contents = container.querySelector('.prior-record-contents');
+    expect(contents?.textContent).toBe('140kg - Jane Doe, 2019-05-04, Sacramento Open');
   });
 
-  test('shows "Women\'s" for female records', () => {
-    render(<AssociatedPriorRecords records={[makeRecord({ gender: 'female' })]} />);
-    expect(screen.getByText(/Women's/)).toBeInTheDocument();
+  test("B-16: a men's record row uses the Men's prefix", () => {
+    const { container } = render(
+      <AssociatedPriorRecords
+        records={[
+          makePriorRecord({
+            gender: 'male',
+            bodyWeightMax: 109,
+            lift: 'Snatch',
+            weight: '155',
+            lifter: 'John Doe',
+            date: '2005-11-20',
+            yearSpan: '1998 - 2018',
+          }),
+        ]}
+      />
+    );
+
+    const title = container.querySelector('.prior-record-title');
+    expect(title?.textContent).toBe("1998 - 2018 Men's 109kg Snatch:");
   });
 
-  test('shows "Men\'s" for male records', () => {
-    render(<AssociatedPriorRecords records={[makeRecord({ gender: 'male' })]} />);
-    expect(screen.getByText(/Men's/)).toBeInTheDocument();
-  });
+  test('B-16: renders one row per record', () => {
+    const { container } = render(
+      <AssociatedPriorRecords
+        records={[
+          makePriorRecord({ date: '2019-05-04' }),
+          makePriorRecord({ date: '2016-02-11', lift: 'Snatch' }),
+        ]}
+      />
+    );
 
-  test('renders yearSpan, bodyWeightMax, lift, weight, lifter, date, and event', () => {
-    render(<AssociatedPriorRecords records={[makeRecord()]} />);
-    expect(screen.getByText(/2018 - 2025/)).toBeInTheDocument();
-    expect(screen.getByText(/48kg/)).toBeInTheDocument();
-    expect(screen.getByText(/Total/)).toBeInTheDocument();
-    expect(screen.getByText(/210kg - Jane Smith/)).toBeInTheDocument();
-    expect(screen.getByText(/2022-03-15/)).toBeInTheDocument();
-    expect(screen.getByText(/Nationals/)).toBeInTheDocument();
+    expect(container.querySelectorAll('.prior-record')).toHaveLength(2);
   });
 });

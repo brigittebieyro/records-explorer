@@ -17,7 +17,6 @@ export default function App() {
         <Route path="/local-meet-results" element={<LocalMeets />} />
         <Route path="/scripts" element={<Scripts />} />
         <Route path="/goals" element={<Goals />} />
-        <Route path="/hall-of-fame" element={<div>Find old records here!</div>} />
       </Routes>
     </BrowserRouter>
   );

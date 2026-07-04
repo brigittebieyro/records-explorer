@@ -15,8 +15,8 @@ function Info() {
           <h2>About Records</h2>
           <p>
             Each level of weightlifting has records, and while those at the local level for Northern
-            and Central Californiaare the ones this site is focused on, you may also be interested
-            in working towards a national or international records.{' '}
+            and Central California are the ones this site is focused on, you may also be interested
+            in working towards national or international records.{' '}
             <a
               href={americanRecordsUrl}
               target="_blank"
@@ -41,7 +41,7 @@ function Info() {
             <a href={wsoInfoUSAWUrl} target="_blank" className="common-text-link" rel="noreferrer">
               your WSO committee
             </a>{' '}
-            is responsible for maintaing the records. We're keeping an eye out, but we're not all
+            is responsible for maintaining the records. We're keeping an eye out, but we're not all
             seeing, and do not get automatic notifications. Athletes and coaches who believe they've
             set a record are encouraged to reach out to the WSO committee and let us know.{' '}
           </p>
@@ -50,7 +50,7 @@ function Info() {
             <br />
             Records above local are maintained by their national or international owners. All should
             have records viewable on their websites. To break these records, you must compete and
-            make the lift at or above that level, in an event recognoized by that federation. For
+            make the lift at or above that level, in an event recognized by that federation. For
             example, USAW national records can be broken at national events, but not local ones.
             They can also be broken at international events hosted by the IWF or UMWF, with which
             USAW is affiliated. USAW is not affiliated with the IMWA, so you can not break USAW
@@ -85,7 +85,7 @@ function Info() {
           <h2>About This Site</h2>
           <p>
             This records viewer is meant to highlight all of our recordholders, past and present. As
-            weight classes change, we hope you continue to feel that your accomplishements are seen
+            weight classes change, we hope you continue to feel that your accomplishments are seen
             and celebrated.
           </p>
           <p>
@@ -99,7 +99,7 @@ function Info() {
             >
               public spreadsheet
             </a>
-            , which was used before this site existed. Whereever possible, we've linked directly to
+            , which was used before this site existed. Wherever possible, we've linked directly to
             public pages for further research and verification. If you notice something totally
             implausible, let us know! We may exclude it and others like it, or reach out to USAW for
             help correcting the data.
@@ -107,7 +107,7 @@ function Info() {
           <p>
             Additional features are being added slowly and by request. Local meet results was Jim
             Schmitz's idea. Most recently, a tool for athletes and coaches to see who's likely to
-            make it ot the Rogue Stage at 2027 Senior Nationals. Got ideas? Please reach out!
+            make it to the Rogue Stage at 2027 Senior Nationals. Got ideas? Please reach out!
           </p>
           <p>
             You can find this project on{' '}

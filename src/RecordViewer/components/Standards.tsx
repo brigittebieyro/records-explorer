@@ -38,8 +38,8 @@ function Standards({ relevantRecords, weightClassName, ageGroupName }: Standards
       </p>
 
       <p className="record-viewer-fine-print">
-        When the recordholder is "STANDARD", this indicates that rur WSO has chosen this as the
-        record standar, and are not yet aware of anyone reaching it in competition. To hold the
+        When the recordholder is "STANDARD", this indicates that our WSO has chosen this as the
+        record standard, and are not yet aware of anyone reaching it in competition. To hold the
         record, an athlete must lift one kilo &nbsp;
         <b>
           <i>more</i>
@@ -52,7 +52,7 @@ function Standards({ relevantRecords, weightClassName, ageGroupName }: Standards
       </p>
 
       <p className="record-viewer-fine-print">
-        <b>Note:</b> Record standards may be adjusted anually. The 2026 standard is 85% of the
+        <b>Note:</b> Record standards may be adjusted annually. The 2026 standard is 85% of the
         national record or standard at the beginning of this year. The 2025 standards were 90%, and
         for some weight classes, that is a fairly large difference.
       </p>

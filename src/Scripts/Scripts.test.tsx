@@ -1,156 +1,162 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import Scripts from './Scripts';
-
-function getPasswordInput() {
-  return document.querySelector('input[type="password"]') as HTMLInputElement;
-}
+import { scriptsPassword } from '../Data/RoutesAndSettings';
+import { hashPassword } from '../Utils/Utils';
+import { scripts } from '../Data/scripts';
 
 jest.mock('../Utils/Utils', () => ({
-  hashPassword: async (input: string) => input,
+  hashPassword: jest.fn(),
 }));
 
 jest.mock('../Data/scripts', () => ({
   scripts: [
     {
-      name: 'Test Script',
-      source: jest.fn().mockResolvedValue('col1,col2\nval1,val2\n'),
-      description: 'A test script description.',
+      name: 'Fetch Record Updates',
+      description: 'Test script description.',
+      source: jest.fn(),
     },
   ],
 }));
 
-jest.mock('../Data/RoutesAndSettings', () => ({
-  scriptsPassword: 'pineapple',
-}));
+const scriptSource = scripts[0].source as jest.Mock;
 
-describe('Scripts', () => {
-  describe('Static content', () => {
-    test('renders the Scripts heading', () => {
-      render(<Scripts />);
-      expect(screen.getByRole('heading', { level: 2, name: 'Scripts' })).toBeInTheDocument();
-    });
+const getPasswordInput = (container: HTMLElement): HTMLInputElement => {
+  const input = container.querySelector('input[type="password"]');
+  expect(input).not.toBeNull();
+  return input as HTMLInputElement;
+};
 
-    test('renders the description box', () => {
-      const { container } = render(<Scripts />);
-      expect(container).toHaveTextContent('WSO Committee members');
-    });
+const unlock = async (container: HTMLElement) => {
+  (hashPassword as jest.Mock).mockResolvedValue(scriptsPassword);
+  await userEvent.type(getPasswordInput(container), 'the-right-password');
+  await userEvent.click(screen.getByRole('button', { name: 'Go' }));
+  await waitFor(() => {
+    expect(screen.getByLabelText('Script')).toBeEnabled();
+  });
+};
 
-    test('renders the script selector dropdown', () => {
-      render(<Scripts />);
-      expect(screen.getByRole('combobox', { name: 'Script' })).toBeInTheDocument();
-    });
+describe('Scripts (user-based)', () => {
+  let createObjectURL: jest.Mock;
+  let clickSpy: jest.SpyInstance;
 
-    test('renders the Run button', () => {
-      render(<Scripts />);
-      expect(screen.getByRole('button', { name: 'Run' })).toBeInTheDocument();
+  beforeEach(() => {
+    jest.clearAllMocks();
+    createObjectURL = jest.fn(() => 'blob:fake-url');
+    Object.defineProperty(window.URL, 'createObjectURL', {
+      value: createObjectURL,
+      configurable: true,
     });
+    Object.defineProperty(window.URL, 'revokeObjectURL', {
+      value: jest.fn(),
+      configurable: true,
+    });
+    clickSpy = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
   });
 
-  describe('Locked state', () => {
-    test('dropdown is disabled on initial load', () => {
-      render(<Scripts />);
-      expect(screen.getByRole('combobox', { name: 'Script' })).toBeDisabled();
-    });
-
-    test('Run button is disabled on initial load', () => {
-      render(<Scripts />);
-      expect(screen.getByRole('button', { name: 'Run' })).toBeDisabled();
-    });
-
-    test('password input is visible on initial load', () => {
-      render(<Scripts />);
-      expect(screen.getByRole('button', { name: 'Go' })).toBeInTheDocument();
-    });
-
-    test('script options are not populated while locked', () => {
-      render(<Scripts />);
-      expect(screen.queryByText('Test Script')).not.toBeInTheDocument();
-    });
+  afterEach(() => {
+    clickSpy.mockRestore();
   });
 
-  describe('Password entry', () => {
-    test('shows an error message for an incorrect password', async () => {
-      render(<Scripts />);
-      fireEvent.change(getPasswordInput(), {
-        target: { value: 'wrongpassword' },
-      });
-      fireEvent.click(screen.getByRole('button', { name: 'Go' }));
-      await waitFor(() => expect(screen.getByText(/Incorrect password/)).toBeInTheDocument());
-    });
+  test('F-01: the tools are locked behind the password gate', () => {
+    const { container } = render(<Scripts />);
 
-    test('clears the error message when the input changes after a failed attempt', async () => {
-      render(<Scripts />);
-      const input = getPasswordInput();
-      fireEvent.change(input, { target: { value: 'wrong' } });
-      fireEvent.click(screen.getByRole('button', { name: 'Go' }));
-      await waitFor(() => expect(screen.getByText(/Incorrect password/)).toBeInTheDocument());
-      fireEvent.change(input, { target: { value: 'w' } });
-      expect(screen.queryByText(/Incorrect password/)).not.toBeInTheDocument();
-    });
-
-    test('accepts the correct password via the Go button', async () => {
-      render(<Scripts />);
-      fireEvent.change(getPasswordInput(), {
-        target: { value: 'pineapple' },
-      });
-      fireEvent.click(screen.getByRole('button', { name: 'Go' }));
-      await waitFor(() =>
-        expect(screen.queryByRole('button', { name: 'Go' })).not.toBeInTheDocument()
-      );
-    });
-
-    test('accepts the correct password via the Enter key', async () => {
-      render(<Scripts />);
-      const input = getPasswordInput();
-      fireEvent.change(input, { target: { value: 'pineapple' } });
-      fireEvent.keyDown(input, { key: 'Enter' });
-      await waitFor(() =>
-        expect(screen.queryByRole('button', { name: 'Go' })).not.toBeInTheDocument()
-      );
-    });
+    expect(getPasswordInput(container)).toBeInTheDocument();
+    expect(screen.getByLabelText('Script')).toBeDisabled();
+    expect(screen.queryByRole('option', { name: 'Fetch Record Updates' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Run' })).toBeDisabled();
   });
 
-  describe('Unlocked state', () => {
-    async function unlock() {
-      render(<Scripts />);
-      fireEvent.change(getPasswordInput(), {
-        target: { value: 'pineapple' },
-      });
-      fireEvent.click(screen.getByRole('button', { name: 'Go' }));
-      await waitFor(() =>
-        expect(screen.queryByRole('button', { name: 'Go' })).not.toBeInTheDocument()
-      );
-    }
+  test('F-01: a wrong password submitted with Enter shows the error and stays locked', async () => {
+    (hashPassword as jest.Mock).mockResolvedValue('not-the-right-hash');
+    const { container } = render(<Scripts />);
 
-    test('dropdown is enabled after correct password', async () => {
-      await unlock();
-      expect(screen.getByRole('combobox', { name: 'Script' })).not.toBeDisabled();
+    const input = getPasswordInput(container);
+    await userEvent.type(input, 'wrong-password');
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    await waitFor(() => {
+      expect(screen.getByText('Incorrect password.')).toBeInTheDocument();
+    });
+    expect(screen.getByLabelText('Script')).toBeDisabled();
+    expect(screen.queryByRole('option', { name: 'Fetch Record Updates' })).toBeNull();
+  });
+
+  test('F-01: typing again clears the password error', async () => {
+    (hashPassword as jest.Mock).mockResolvedValue('not-the-right-hash');
+    const { container } = render(<Scripts />);
+
+    const input = getPasswordInput(container);
+    await userEvent.type(input, 'wrong-password');
+    await userEvent.click(screen.getByRole('button', { name: 'Go' }));
+    await waitFor(() => {
+      expect(screen.getByText('Incorrect password.')).toBeInTheDocument();
     });
 
-    test('script options are populated after unlock', async () => {
-      await unlock();
-      expect(screen.getByText('Test Script')).toBeInTheDocument();
-    });
+    await userEvent.type(input, 'x');
+    expect(screen.queryByText('Incorrect password.')).toBeNull();
+  });
 
-    test('Run button remains disabled before a script is selected', async () => {
-      await unlock();
-      expect(screen.getByRole('button', { name: 'Run' })).toBeDisabled();
-    });
+  test('F-02: the correct password unlocks the script dropdown and Run button', async () => {
+    const { container } = render(<Scripts />);
 
-    test('Run button enables after selecting a script', async () => {
-      await unlock();
-      fireEvent.change(screen.getByRole('combobox', { name: 'Script' }), {
-        target: { value: 'Test Script' },
-      });
-      expect(screen.getByRole('button', { name: 'Run' })).not.toBeDisabled();
-    });
+    await unlock(container);
 
-    test('shows the script description after selecting a script', async () => {
-      await unlock();
-      fireEvent.change(screen.getByRole('combobox', { name: 'Script' }), {
-        target: { value: 'Test Script' },
-      });
-      expect(screen.getByText('A test script description.')).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Fetch Record Updates' })).toBeInTheDocument();
+    expect(container.querySelector('input[type="password"]')).toBeNull();
+    // Run stays disabled until a script is chosen.
+    expect(screen.getByRole('button', { name: 'Run' })).toBeDisabled();
+
+    await userEvent.selectOptions(screen.getByLabelText('Script'), 'Fetch Record Updates');
+    expect(screen.getByRole('button', { name: 'Run' })).toBeEnabled();
+    expect(screen.getByText('Test script description.')).toBeInTheDocument();
+  });
+
+  test('F-03: Run shows Running…, downloads the CSV, and reports completion', async () => {
+    let resolveCsv: (csv: string) => void = () => {};
+    scriptSource.mockReturnValue(
+      new Promise<string>((resolve) => {
+        resolveCsv = resolve;
+      })
+    );
+    const { container } = render(<Scripts />);
+    await unlock(container);
+    await userEvent.selectOptions(screen.getByLabelText('Script'), 'Fetch Record Updates');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Run' }));
+
+    const runningButton = await screen.findByRole('button', { name: 'Running…' });
+    expect(runningButton).toBeDisabled();
+    expect(screen.getByLabelText('Script')).toBeDisabled();
+
+    resolveCsv('lifter,total\nJane Doe,180');
+
+    await waitFor(() => {
+      expect(screen.getByText('Download complete.')).toBeInTheDocument();
     });
+    expect(createObjectURL).toHaveBeenCalledTimes(1);
+    expect(createObjectURL.mock.calls[0][0]).toBeInstanceOf(Blob);
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+    const downloadLink = clickSpy.mock.instances[0] as unknown as HTMLAnchorElement;
+    expect(downloadLink.download).toBe('record-breaking-analysis.csv');
+    expect(downloadLink.href).toContain('blob:fake-url');
+    expect(screen.getByRole('button', { name: 'Run' })).toBeEnabled();
+  });
+
+  test('F-04: a failing script shows the error box instead of failing silently', async () => {
+    scriptSource.mockRejectedValue(new Error('proxy down'));
+    const { container } = render(<Scripts />);
+    await unlock(container);
+    await userEvent.selectOptions(screen.getByLabelText('Script'), 'Fetch Record Updates');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Run' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Error:')).toBeInTheDocument();
+    });
+    expect(screen.getByText(/proxy down/)).toBeInTheDocument();
+    expect(screen.queryByText('Download complete.')).toBeNull();
+    expect(createObjectURL).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Run' })).toBeEnabled();
   });
 });

@@ -29,12 +29,11 @@ export const getWeightClassSet = (ageGroup: AgeGroup | undefined | null): Weight
   if (ageGroup.id === 'U17') {
     return u17WeightClasses;
   }
-  console.log(`Could not find custom weight classes for ${ageGroup.id}`);
   return defaultWeightClasses;
 };
 
 export const handleError = (error: unknown): void => {
-  console.log(`An error occurred?`, error);
+  console.log('An error occurred?', error);
 };
 
 export const sortLifts = (lifts: CombinedLiftData[], key?: SortKey): CombinedLiftData[] => {

@@ -73,9 +73,7 @@ function RecordGroup({
   }, [combinedLiftsData, sortType]);
 
   const updateSortType = (newType: SortKey): void => {
-    console.log('Fetch is complete, proceeding to re-sort lifters', combinedLiftsData);
     const newSortedLifts = sortLifts(combinedLiftsData, newType);
-    console.log('Updated version:', newSortedLifts);
     setLeadingLifters(newSortedLifts);
     setSortType(newType);
   };

@@ -45,7 +45,7 @@ function AllCurrentRecordsView({ data }: AllCurrentRecordsViewProps) {
     <div className="all-records-view-parent">
       <p className="page-title">All Current Record Holders</p>
 
-      <p className="record-viewer-fine-print all-records-fine-print">
+      <p className="common-text-header record-viewer-fine-print all-records-fine-print">
         Use the dropdown above to see the current standard and best lifts, plus historical best
         across previous weight classes. The 2026 standard for records, if there is not a
         recordholder yet, is 85% of the national record standard. In 2025, the standard was 90%,

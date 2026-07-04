@@ -3,6 +3,7 @@ import {
   githubUrl,
   maintainerEmail,
   maintainerName,
+  publicSpreadsheetLink,
   wsoInfoUSAWUrl,
 } from '../Data/RoutesAndSettings';
 
@@ -81,6 +82,22 @@ function Info() {
             This records viewer is meant to highlight all of our recordholders, past and present. As
             weight classes change, we hope you continue to feel that your accomplishements are seen
             and celebrated.
+          </p>
+          <p>
+            This site gathers data directly from USAW's public rankings and results database, which
+            means it's vulnerable to errors in meet results. Recognized records are stored in a{' '}
+            <a href={publicSpreadsheetLink} target="_blank" className="common-text-link">
+              public spreadsheet
+            </a>
+            , which was used before this site existed. Whereever possible, we've linked directly to
+            public pages for further research and verification. If you notice something totally
+            implausible, let us know! We may exclude it and others like it, or reach out to USAW for
+            help correcting the data.
+          </p>
+          <p>
+            Additional features are being added slowly and by request. Local meet results was Jim
+            Schmitz's idea. Most recently, a tool for athletes and coaches to see who's likely to
+            make it ot the Rogue Stage at 2027 Senior Nationals. Got ideas? Please reach out!
           </p>
           <p>
             You can find this project on{' '}

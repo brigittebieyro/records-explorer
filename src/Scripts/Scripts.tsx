@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import OptionsBar from '../Common/OptionsBar';
 import { scripts } from '../Data/scripts';
 import { scriptsPassword, wsoName } from '../Data/RoutesAndSettings';
 import { hashPassword } from '../Utils/Utils';
@@ -52,31 +53,29 @@ function Scripts() {
   return (
     <div className="App">
       <div className="info-page-parent">
-        <div className="record-viewer-options-bar">
-          <span>Select a script: </span>
-          <select
-            aria-label="Script"
-            className="header-button"
-            value={selectedName}
-            onChange={(eventObj) => setSelectedName(eventObj.target.value)}
-            disabled={!isUnlocked || isRunning}
-          >
-            <option value="">Select a script</option>
-            {isUnlocked &&
-              scripts.map((scriptObj) => (
-                <option key={scriptObj.name} value={scriptObj.name}>
-                  {scriptObj.name}
-                </option>
-              ))}
-          </select>
-          <button
-            className="header-button"
-            onClick={handleRun}
-            disabled={!isUnlocked || !selectedName || isRunning}
-          >
-            {isRunning ? 'Running…' : 'Run'}
-          </button>
-        </div>
+        <OptionsBar
+          label="Select a script: "
+          selects={[
+            {
+              id: 'script-select',
+              name: 'Script',
+              value: selectedName,
+              onChange: setSelectedName,
+              disabled: !isUnlocked || isRunning,
+              placeholder: 'Select a script',
+              options: isUnlocked
+                ? scripts.map((scriptObj) => ({ value: scriptObj.name, label: scriptObj.name }))
+                : [],
+            },
+          ]}
+          buttons={[
+            {
+              label: isRunning ? 'Running…' : 'Run',
+              onClick: handleRun,
+              enablement: isUnlocked && !!selectedName && !isRunning ? 'enabled' : 'disabled',
+            },
+          ]}
+        />
 
         <h2>Scripts</h2>
         <div className="info-page-box">

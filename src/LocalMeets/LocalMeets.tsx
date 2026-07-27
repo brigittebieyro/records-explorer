@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { CircleLoader } from 'react-spinners';
+import OptionsBar from '../Common/OptionsBar';
 import {
   getMeetsRoute,
   getIndividualMeetResultsRoute,
@@ -11,7 +12,6 @@ import {
 } from '../Data/RoutesAndSettings';
 import { handleError, isWithinWSOBoundary } from '../Utils/Utils';
 import { LocalMeet, MeetResult } from '../Utils/types';
-import LocalMeetsOptionsBar from './LocalMeetsOptionsBar';
 import LocalMeetResultsByWeightClass from './LocalMeetResultsByWeightClass';
 
 function LocalMeets() {
@@ -165,13 +165,20 @@ function LocalMeets() {
   return (
     <div className="App">
       {status === 'complete' && meets.length > 0 && (
-        <LocalMeetsOptionsBar
-          meets={meets}
-          selectedMeetId={selectedMeetId}
-          onMeetChange={setSelectedMeetId}
-          onGo={() => handleGo()}
-          onReset={handleReset}
-          showReset={!!currentMeet}
+        <OptionsBar
+          label="Select a meet: "
+          selects={[
+            {
+              id: 'meet-select',
+              name: 'Meet',
+              value: selectedMeetId,
+              onChange: setSelectedMeetId,
+              placeholder: 'Select a meet',
+              options: meets.map((meet) => ({ value: meet.id, label: meet.name })),
+            },
+          ]}
+          buttons={[{ label: 'Go', onClick: () => handleGo(), enablement: 'onSelectionChange' }]}
+          onReset={currentMeet ? handleReset : undefined}
         />
       )}
       <p className="page-title">Local Meet Results</p>

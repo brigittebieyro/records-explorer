@@ -1,17 +1,54 @@
+import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import OptionsBar from '../Common/OptionsBar';
 import { defaultWeightClasses } from '../Data/defaultWeightClasses';
 import { endDate, usawRankingsPublicSiteLink, wsoName } from '../Data/RoutesAndSettings';
 import GoalsWeightClass from './components/GoalsWeightClass';
+import { WeightClass } from '../Utils/types';
 
 const femaleClasses = defaultWeightClasses.filter((wc) => wc.gender === 'female');
 const maleClasses = defaultWeightClasses.filter((wc) => wc.gender === 'male');
 
-const getCount = (index: number): number => (index < 2 ? 6 : 12);
+// The two lightest classes per gender qualify a top-6 group; everyone else uses top-12.
+const getCount = (weightClass: WeightClass): number => {
+  const group = weightClass.gender === 'female' ? femaleClasses : maleClasses;
+  const index = group.findIndex((wc) => wc.id === weightClass.id);
+  return index < 2 ? 6 : 12;
+};
 
 const oneYearAgo = new Date();
 oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 const startDate = oneYearAgo.toISOString().split('T')[0];
 
 function Goals() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedWeightClass, setSelectedWeightClass] = useState(
+    searchParams.get('weightClass') ?? ''
+  );
+  const [currentWeightClass, setCurrentWeightClass] = useState<WeightClass | undefined>();
+  const didAutoRun = useRef(false);
+
+  function applySelection(weightClassId: string): void {
+    const wtClass = defaultWeightClasses.find((wc) => wc.id === weightClassId);
+    if (!wtClass) return;
+    setCurrentWeightClass(wtClass);
+  }
+
+  function updateContents(): void {
+    if (!selectedWeightClass) return;
+    applySelection(selectedWeightClass);
+    setSearchParams({ weightClass: selectedWeightClass });
+  }
+
+  // Auto-trigger from URL params on first mount
+  useEffect(() => {
+    if (didAutoRun.current) return;
+    didAutoRun.current = true;
+    const wc = searchParams.get('weightClass');
+    if (wc) applySelection(wc);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="goals-parent">
       <div className="common-text-header">
@@ -40,36 +77,48 @@ function Goals() {
           . You do not need to be logged in to USAW for this.
         </p>
       </div>
-      <div className="all-records-columns">
-        <div className="all-records-column">
-          <h2 className="goals-column-header">Women</h2>
-          {femaleClasses.map((wc, index) => (
-            <section className="all-records-weight-class-section" key={wc.id}>
-              <h2 className="goals-weight-class-header">{wc.name}</h2>
-              <GoalsWeightClass
-                weightClass={wc}
-                safeCount={getCount(index)}
-                startDate={startDate}
-                endDate={endDate}
-              />
-            </section>
-          ))}
-        </div>
-        <div className="all-records-column">
-          <h2 className="goals-column-header">Men</h2>
-          {maleClasses.map((wc, index) => (
-            <section className="all-records-weight-class-section" key={wc.id}>
-              <h2 className="goals-weight-class-header">{wc.name}</h2>
-              <GoalsWeightClass
-                weightClass={wc}
-                safeCount={getCount(index)}
-                startDate={startDate}
-                endDate={endDate}
-              />
-            </section>
-          ))}
-        </div>
-      </div>
+
+      <OptionsBar
+        label="Select a weight class: "
+        selects={[
+          {
+            id: 'goals-weight-class-select',
+            name: 'Weight Class',
+            value: selectedWeightClass,
+            onChange: setSelectedWeightClass,
+            placeholder: 'Select a Weight Class',
+            options: defaultWeightClasses.map((wc) => ({ value: wc.id, label: wc.name })),
+          },
+        ]}
+        buttons={[{ label: 'Go', onClick: updateContents, enablement: 'onSelectionChange' }]}
+        onReset={
+          currentWeightClass
+            ? () => {
+                setSelectedWeightClass('');
+                setCurrentWeightClass(undefined);
+                setSearchParams({});
+              }
+            : undefined
+        }
+      />
+
+      {currentWeightClass && (
+        <section className="all-records-weight-class-section" key={currentWeightClass.id}>
+          <h2 className="goals-weight-class-header">{currentWeightClass.name}</h2>
+          <GoalsWeightClass
+            weightClass={currentWeightClass}
+            safeCount={getCount(currentWeightClass)}
+            startDate={startDate}
+            endDate={endDate}
+          />
+        </section>
+      )}
+
+      {!currentWeightClass && (
+        <p className="goals-descriptive-text">
+          Select a weight class above and hit Go to see its qualification rankings.
+        </p>
+      )}
     </div>
   );
 }

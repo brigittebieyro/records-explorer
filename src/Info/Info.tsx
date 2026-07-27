@@ -56,6 +56,28 @@ function Info() {
             USAW is affiliated. USAW is not affiliated with the IMWA, so you can not break USAW
             records at their events.
           </p>
+          <p>
+            <strong>New Weightclasses, August 2026</strong>
+            <br />
+            This is a bit awkward, because only about half of the weight classes will be moving.
+            USAW has requested that athletes currently holding records in unchanged weight classes
+            remain the recordholder. However, it doesn't seem fair to only immortalize{' '}
+            <strong>
+              <i>half</i>
+            </strong>{' '}
+            of our recordholders on August 1st.
+            <br />
+            So here's what we're doing instead:
+            <br />
+            The WSO will immortalize everybody as part of the 2025-2026 record period,{' '}
+            <strong>
+              <i>and</i>
+            </strong>{' '}
+            bring forward recordholders in new classes as the newest recordholder. So many athletes
+            have spent the last several months working towards records with the expectation that
+            what they achieve in this period will stand forever, so we are recording this period
+            specially for all athletes.
+          </p>
         </div>
 
         <div className="info-page-box">

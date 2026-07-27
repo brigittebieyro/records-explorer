@@ -92,7 +92,8 @@ export const getSheetRoute = (sheetId: string, sheetName: string): string => {
   return `${_sheetsBaseUrl}/${sheetId}/values/${sheetName}?key=${_googleKey}`;
 };
 // for current records:
-export const currentRecordsSheetId = '1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ';
+// export const currentRecordsSheetId = '1EJgLNWI4v5KZo780RIZ6zSsaDnOinuhJHQOvZoDL8BM'; // Testing sheet with past data clone. Use locally only.
+export const currentRecordsSheetId = '1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ'; // Real sheet! Link is public! DO NOT alter data for testing.
 export const currentRecordsSheetName = 'Raw_Data';
 export const priorRecordsSheetNames = ['Pre-Aug2026', 'Pre-June2025', 'Pre-2018'];
 export const publicSpreadsheetLink =

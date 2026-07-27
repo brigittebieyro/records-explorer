@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import AssociatedPriorRecords from './AssociatedPriorRecords';
 import { PriorRecord } from '../../Utils/types';
 
@@ -25,8 +25,10 @@ describe('AssociatedPriorRecords (user-based)', () => {
   });
 
   test('B-16: renders the section title when records exist', () => {
-    render(<AssociatedPriorRecords records={[makePriorRecord()]} />);
-    expect(screen.getByText('Records from prior weight classes')).toBeInTheDocument();
+    const { container } = render(<AssociatedPriorRecords records={[makePriorRecord()]} />);
+    expect(container.querySelector('.page-title')?.textContent).toBe(
+      'Official historic records from prior weight classes'
+    );
   });
 
   test("B-16: a women's record row shows the year span, class, lift, and result", () => {

@@ -8,7 +8,9 @@ function AssociatedPriorRecords({ records }: AssociatedPriorRecordsProps) {
 
   return (
     <div className="record-viewer-historical-records">
-      <p className="page-title">Records from prior weight classes</p>
+      <p className="page-title">
+        Official <i>historic</i> records from prior weight classes
+      </p>
       {records.map((record) => (
         <div className="prior-record" key={record.date}>
           <p>

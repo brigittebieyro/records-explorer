@@ -3,9 +3,9 @@ import { useSearchParams } from 'react-router-dom';
 import { CircleLoader } from 'react-spinners';
 import AllCurrentRecordsView from './components/AllCurrentRecordsView';
 import AssociatedPriorRecords from './components/AssociatedPriorRecords';
-import OptionsBar from './components/OptionsBar';
 import RecordGroup from './components/RecordGroup';
 import Standards from './components/Standards';
+import OptionsBar from '../Common/OptionsBar';
 import { ageGroups } from '../Data/ageGroups';
 import { defaultWeightClasses } from '../Data/defaultWeightClasses';
 import {
@@ -316,19 +316,43 @@ function RecordViewer() {
   return (
     <div className="App">
       <OptionsBar
-        selectedAgeGroup={selectedAgeGroup}
-        selectedWeightClass={selectedWeightClass}
-        onAgeGroupChange={setSelectedAgeGroup}
-        onWeightClassChange={setSelectedWeightClass}
-        onGo={updateContents}
-        onReset={() => {
-          setSelectedAgeGroup('OPEN');
-          setSelectedWeightClass('');
-          resetAllData();
-          setStatus(undefined);
-          setSearchParams({});
-        }}
-        showReset={status === 'complete'}
+        label="Select a weight class & group: "
+        selects={[
+          {
+            id: 'age-group-select',
+            name: 'Age Group',
+            value: selectedAgeGroup,
+            onChange: setSelectedAgeGroup,
+            options: ageGroups.map((group) => ({
+              value: group.id,
+              label: group.name,
+              disabled: group.disabled,
+            })),
+          },
+          {
+            id: 'weight-class-select',
+            name: 'Weight Class',
+            value: selectedWeightClass,
+            onChange: setSelectedWeightClass,
+            placeholder: 'Select a Weight Class',
+            options: getWeightClassSet(getAgeGroup(selectedAgeGroup)).map((wtClass) => ({
+              value: wtClass.id,
+              label: wtClass.name,
+            })),
+          },
+        ]}
+        buttons={[{ label: 'Go', onClick: updateContents, enablement: 'onSelectionChange' }]}
+        onReset={
+          status === 'complete'
+            ? () => {
+                setSelectedAgeGroup('OPEN');
+                setSelectedWeightClass('');
+                resetAllData();
+                setStatus(undefined);
+                setSearchParams({});
+              }
+            : undefined
+        }
       />
 
       {!status && <AllCurrentRecordsView data={allRecordsData} />}

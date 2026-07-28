@@ -66,6 +66,7 @@ describe('RecordHolder (user-based)', () => {
     );
 
     expect(screen.getByTestId('circle-loader')).toBeInTheDocument();
+    expect(screen.getByText('Verifying')).toBeInTheDocument();
   });
 
   test('B-10: merges lazily loaded individual lifts into the card', () => {

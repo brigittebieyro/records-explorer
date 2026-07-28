@@ -82,6 +82,7 @@ function RecordHolder({ lifterData, index, individualLiftsData, sortType }: Reco
       {!lifter.best_snatch && lifter?.best_snatch !== 0 && (
         <div className="records-viewer-content-spinner">
           <CircleLoader loading={true} color="gold" size="18px" />
+          <span className="verifying-text">Verifying</span>
         </div>
       )}
       <a

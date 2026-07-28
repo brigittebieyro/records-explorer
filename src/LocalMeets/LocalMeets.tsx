@@ -187,6 +187,7 @@ function LocalMeets() {
         {status === 'inprogress' && (
           <div className="records-viewer-loading-container">
             <CircleLoader loading={true} color="gold" />
+            <span className="fetching-text">Fetching</span>
           </div>
         )}
 
@@ -251,6 +252,7 @@ function LocalMeets() {
             {resultsStatus === 'inprogress' && (
               <div className="records-viewer-loading-container">
                 <CircleLoader loading={true} color="gold" />
+                <span className="fetching-text">Fetching</span>
               </div>
             )}
 

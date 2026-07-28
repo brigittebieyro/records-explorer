@@ -71,8 +71,13 @@ describe('AllCurrentRecordsView (user-based)', () => {
     const { container } = render(
       <AllCurrentRecordsView
         data={[
-          makeEntry({ id: 'W64', name: "Women's 64kg", maxBodyweight: '64' }),
-          makeEntry({ id: 'W48', name: "Women's 48kg", maxBodyweight: '48' }),
+          makeEntry({
+            id: 'W64',
+            name: "Women's 64kg",
+            minBodyweight: '48.01',
+            maxBodyweight: '64',
+          }),
+          makeEntry({ id: 'W48', name: "Women's 48kg", minBodyweight: '0', maxBodyweight: '48' }),
         ]}
       />
     );
@@ -106,6 +111,61 @@ describe('AllCurrentRecordsView (user-based)', () => {
     expect(container.querySelectorAll('.all-records-weight-class-header')).toHaveLength(1);
     expect(screen.getByText('Open')).toBeInTheDocument();
     expect(screen.getByText('Junior (15-20 years old)')).toBeInTheDocument();
+  });
+
+  test('B-02: distinct "+" weight classes are not merged just because they share the placeholder max bodyweight', () => {
+    const { container } = render(
+      <AllCurrentRecordsView
+        data={[
+          makeEntry(
+            { id: 'W86plus', minBodyweight: '86.01', maxBodyweight: '1000' },
+            {},
+            { Total: makeRecord({ lifter: 'Adult Plus Lifter' }) }
+          ),
+          makeEntry(
+            { id: 'W63plus', minBodyweight: '63.01', maxBodyweight: '1000' },
+            { id: 'U11', name: 'Under 11' },
+            { Total: makeRecord({ lifter: 'Youth Plus Lifter' }) }
+          ),
+        ]}
+      />
+    );
+
+    const headers = Array.from(container.querySelectorAll('.all-records-weight-class-header')).map(
+      (node) => node.textContent
+    );
+    expect(headers).toEqual(["Women's 86+kg", "Women's 63+kg"]);
+    expect(screen.getByText('Adult Plus Lifter')).toBeInTheDocument();
+    expect(screen.getByText('Youth Plus Lifter')).toBeInTheDocument();
+  });
+
+  test('B-02: merged age-group rows display youngest to oldest: Open, youth (youngest first), Junior, Masters (youngest first)', () => {
+    const { container } = render(
+      <AllCurrentRecordsView
+        data={[
+          // Pushed out of display order on purpose, and sharing a minBodyweight so
+          // they land in the same merged section.
+          makeEntry({ minBodyweight: '48.01' }, { id: '55', name: '55 - 59 years old' }),
+          makeEntry({ minBodyweight: '48.01' }, { id: 'U17', name: 'Under 17' }),
+          makeEntry({ minBodyweight: '48.01' }, { id: 'OPEN', name: 'Open' }),
+          makeEntry({ minBodyweight: '48.01' }, { id: '35', name: '35 - 39 years old' }),
+          makeEntry({ minBodyweight: '48.01' }, { id: 'JR', name: 'Junior' }),
+          makeEntry({ minBodyweight: '48.01' }, { id: 'U11', name: 'Under 11' }),
+        ]}
+      />
+    );
+
+    const names = Array.from(container.querySelectorAll('.all-records-age-group-name')).map(
+      (node) => node.textContent
+    );
+    expect(names).toEqual([
+      'Open',
+      'Under 11',
+      'Under 17',
+      'Junior',
+      '35 - 39 years old',
+      '55 - 59 years old',
+    ]);
   });
 
   test('B-02: genders are split into their own columns', () => {

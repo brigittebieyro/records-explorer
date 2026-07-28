@@ -57,7 +57,11 @@ function GoalsWeightClass({ weightClass, safeCount, startDate, endDate }: GoalsW
 
   return (
     <div className="goals-list-segment">
-      {status !== 'complete' && <CircleLoader loading={true} color="gold" />}
+      {status !== 'complete' && (
+        <div className="goals-loading">
+          <CircleLoader loading={true} color="gold" />
+        </div>
+      )}
       {status === 'complete' &&
         lifters.slice(0, safeCount + 3).map((lifter, index) => (
           <div key={`goals-${index}-${lifter.name}`}>

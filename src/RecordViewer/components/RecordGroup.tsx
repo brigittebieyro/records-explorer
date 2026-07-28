@@ -57,10 +57,13 @@ function RecordGroup({
   };
 
   useEffect(() => {
-    if (weightClass && ageGroup) {
-      resetAllData();
-      fetchRecordGroup(weightClass, ageGroup);
-    }
+    if (!weightClass || !ageGroup) return;
+    resetAllData();
+    let cancelled = false;
+    fetchRecordGroup(weightClass, ageGroup, () => cancelled);
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [weightClass, ageGroup]);
 
@@ -78,7 +81,11 @@ function RecordGroup({
     setSortType(newType);
   };
 
-  const fetchRecordGroup = async (wtClass: WeightClass, ageGroup: AgeGroup): Promise<void> => {
+  const fetchRecordGroup = async (
+    wtClass: WeightClass,
+    ageGroup: AgeGroup,
+    isCancelled: () => boolean
+  ): Promise<void> => {
     try {
       const body = JSON.stringify({
         columns: [],
@@ -101,6 +108,7 @@ function RecordGroup({
         throw new Error(`Response status: ${response.status}`);
       }
       await response.json().then(async (response: { data: CombinedLiftData[] }) => {
+        if (isCancelled()) return;
         const result: CombinedLiftData[] = [];
         for (let i = 0; i < response.data.length; i++) {
           const lifter = response.data[i];
@@ -112,7 +120,8 @@ function RecordGroup({
         setStatus('complete');
 
         for (let i = 0; i < result.length; i++) {
-          await fetchIndividualLifts(result[i]);
+          if (isCancelled()) return;
+          await fetchIndividualLifts(result[i], isCancelled);
         }
       });
     } catch (error) {
@@ -120,7 +129,10 @@ function RecordGroup({
     }
   };
 
-  const fetchIndividualLifts = async (lifter: CombinedLiftData): Promise<void> => {
+  const fetchIndividualLifts = async (
+    lifter: CombinedLiftData,
+    isCancelled: () => boolean
+  ): Promise<void> => {
     const publicLifterId = getLifterId(lifter.action);
     const route = getLifterDataRoute(publicLifterId);
 
@@ -133,6 +145,7 @@ function RecordGroup({
         return;
       }
       await response.json().then((response: { data: MeetRecord[] }) => {
+        if (isCancelled()) return;
         if (response.data.length) {
           const meets = response.data;
           const ageAtRankingTime = parseInt(lifter.lifter_age);

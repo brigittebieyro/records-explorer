@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { CircleLoader } from 'react-spinners';
 import AllCurrentRecordsView from './components/AllCurrentRecordsView';
@@ -126,7 +126,7 @@ export function buildAllCurrentRecords(standards: string[][]): AllCurrentRecords
   for (const weightClass of defaultWeightClasses) {
     const recordSet = computeStandardsForWeightClass(weightClass, standards);
     const groups: AllCurrentRecordsGroup[] = [];
-    for (const ageGroup of ageGroups) {
+    for (const ageGroup of ageGroups.filter((ag) => !ag.customWeightClasses)) {
       const ageGroupData = recordSet[ageGroup.id];
       if (!ageGroupData) continue;
       const realRecords: Record<string, StandardRecord> = {};
@@ -182,64 +182,91 @@ function RecordViewer() {
     searchParams.get('weightClass') ?? ''
   );
   const [selectedAgeGroup, setSelectedAgeGroup] = useState(searchParams.get('ageGroup') ?? 'OPEN');
-  const [displayedStandards, setDisplayedStandards] = useState<StandardsResult>({});
-  const [allRecordsData, setAllRecordsData] = useState<AllCurrentRecordsEntry[]>([]);
   const [historicalRecordsData, setHistoricalRecordsData] = useState<string[][]>([]);
   const [historicalRecordsStatus, setHistoricalRecordsStatus] = useState<string | undefined>();
-  const [displayedHistoricalRecords, setDisplayedHistoricalRecords] = useState<PriorRecord[]>([]);
   const didAutoRun = useRef(false);
 
-  const fetchCurrentStandards = async (): Promise<void> => {
-    if (standardsStatus) {
-      return;
-    }
-    setStandardsStatus('inprogress');
-    const route = getSheetRoute(currentRecordsSheetId, currentRecordsSheetName);
+  // Derived synchronously from state during render (not via useEffect) so these
+  // values can never lag a render behind localStandards/currentWeightClass —
+  // see the investigation notes for why that lag mattered.
+  const allRecordsData = useMemo<AllCurrentRecordsEntry[]>(() => {
+    return localStandards.length ? buildAllCurrentRecords(localStandards) : [];
+  }, [localStandards]);
 
-    try {
-      const response = await fetch(route, {
-        method: 'GET',
-      });
-      if (!response.ok) {
-        setStandardsStatus('error');
-        Promise.resolve();
-      }
-      await response.json().then((response: { values: string[][] }) => {
-        setLocalStandards(response.values);
-        setStandardsStatus('complete');
-      });
-    } catch (error) {
-      setStandardsStatus('error');
+  const displayedStandards = useMemo<StandardsResult>(() => {
+    if (currentWeightClass && localStandards.length) {
+      return computeStandardsForWeightClass(currentWeightClass, localStandards);
     }
-  };
-  fetchCurrentStandards();
+    return {};
+  }, [currentWeightClass, localStandards]);
 
-  const fetchHistoricalRecords = async (): Promise<void> => {
-    if (historicalRecordsStatus) return;
-    setHistoricalRecordsStatus('inprogress');
-    const allRows: string[][] = [];
-    for (const sheetName of priorRecordsSheetNames) {
+  const displayedHistoricalRecords = useMemo<PriorRecord[]>(() => {
+    if (currentWeightClass && currentAgeGroup && historicalRecordsData.length) {
+      return computeHistoricalRecordsForWeightClass(
+        currentWeightClass,
+        currentAgeGroup,
+        historicalRecordsData
+      );
+    }
+    return [];
+  }, [currentWeightClass, currentAgeGroup, historicalRecordsData]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchCurrentStandards = async (): Promise<void> => {
+      setStandardsStatus('inprogress');
+      const route = getSheetRoute(currentRecordsSheetId, currentRecordsSheetName);
       try {
-        const route = getSheetRoute(currentRecordsSheetId, sheetName);
         const response = await fetch(route, { method: 'GET' });
-        if (!response.ok) continue;
-        await response.json().then((data: { values: string[][] }) => {
-          if (data.values) allRows.push(...data.values);
-        });
+        if (!response.ok) {
+          if (!cancelled) setStandardsStatus('error');
+          return;
+        }
+        const data: { values: string[][] } = await response.json();
+        if (!cancelled) {
+          setLocalStandards(data.values);
+          setStandardsStatus('complete');
+        }
       } catch {
-        // continue on error
+        if (!cancelled) setStandardsStatus('error');
       }
-    }
-    setHistoricalRecordsData(allRows);
-    setHistoricalRecordsStatus('complete');
-  };
-  fetchHistoricalRecords();
+    };
+    fetchCurrentStandards();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchHistoricalRecords = async (): Promise<void> => {
+      setHistoricalRecordsStatus('inprogress');
+      const allRows: string[][] = [];
+      for (const sheetName of priorRecordsSheetNames) {
+        try {
+          const route = getSheetRoute(currentRecordsSheetId, sheetName);
+          const response = await fetch(route, { method: 'GET' });
+          if (!response.ok) continue;
+          const data: { values: string[][] } = await response.json();
+          if (data.values) allRows.push(...data.values);
+        } catch {
+          // continue on error
+        }
+      }
+      if (!cancelled) {
+        setHistoricalRecordsData(allRows);
+        setHistoricalRecordsStatus('complete');
+      }
+    };
+    fetchHistoricalRecords();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const resetAllData = (): void => {
     setCurrentWeightClass(undefined);
     setCurrentAgeGroup(undefined);
-    setDisplayedStandards({});
-    setDisplayedHistoricalRecords([]);
   };
 
   useEffect(() => {
@@ -257,32 +284,6 @@ function RecordViewer() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAgeGroup]);
-
-  useEffect(() => {
-    if (localStandards?.length) {
-      setAllRecordsData(buildAllCurrentRecords(localStandards));
-    }
-  }, [localStandards]);
-
-  // Recompute displayed standards whenever the selected weight class or standards data changes.
-  // This covers both normal Go-button flow and auto-triggering from URL params on mount.
-  useEffect(() => {
-    if (currentWeightClass && localStandards?.length) {
-      setDisplayedStandards(computeStandardsForWeightClass(currentWeightClass, localStandards));
-    }
-  }, [localStandards, currentWeightClass]);
-
-  useEffect(() => {
-    if (currentWeightClass && currentAgeGroup && historicalRecordsData.length) {
-      setDisplayedHistoricalRecords(
-        computeHistoricalRecordsForWeightClass(
-          currentWeightClass,
-          currentAgeGroup,
-          historicalRecordsData
-        )
-      );
-    }
-  }, [historicalRecordsData, currentWeightClass, currentAgeGroup]);
 
   function applySelection(ageGroup: string, weightClass: string): void {
     const ageGroupObj = getAgeGroup(ageGroup);
@@ -312,6 +313,19 @@ function RecordViewer() {
     if (wc) applySelection(ag, wc);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // TEMP DEBUG — remove once the masters/empty-standards bug is diagnosed.
+  if (status === 'complete' && currentWeightClass && currentAgeGroup) {
+    console.log('[DEBUG-STANDARDS-BUG] render decision', {
+      currentWeightClassId: currentWeightClass.id,
+      currentAgeGroupId: currentAgeGroup.id,
+      standardsStatus,
+      historicalRecordsStatus,
+      localStandardsLength: localStandards.length,
+      displayedStandardsKeys: Object.keys(displayedStandards),
+      relevantRecordsPresent: Object.hasOwn(displayedStandards, currentAgeGroup.id),
+    });
+  }
 
   return (
     <div className="App">
@@ -355,7 +369,7 @@ function RecordViewer() {
         }
       />
 
-      {!status && <AllCurrentRecordsView data={allRecordsData} />}
+      {!status && standardsStatus !== 'error' && <AllCurrentRecordsView data={allRecordsData} />}
 
       {status === 'inprogress' && (
         <div className="records-viewer-loading-container">
@@ -363,66 +377,80 @@ function RecordViewer() {
         </div>
       )}
 
-      {status === 'complete' && currentWeightClass && currentAgeGroup && (
-        <div className="record-viewer-results-parent">
-          <div className="current-leaders-group">
-            <div className="record-group-info">
-              <p className="page-title">Current Top Athletes</p>
-              <p className="record-group-description">
-                These are the {wsoName} WSO's top ranked lifters in the current{' '}
-                <strong>{currentWeightClass.name}</strong> weight class, active{' '}
-                <strong>
-                  from {new Date(currentWeightClass.start).getUTCFullYear()}, originally fetched by
-                  total.
-                </strong>
-              </p>
-            </div>
-            <RecordGroup
-              weightClass={currentWeightClass}
-              ageGroup={currentAgeGroup}
-              count={5}
-              startDate={currentWeightClass.start}
-              endDate={endDate}
-              emptyContent={
-                <div>Looks like nobody's competed in this division yet! Could be you?</div>
-              }
-            />
+      {status === 'complete' &&
+        currentWeightClass &&
+        currentAgeGroup &&
+        standardsStatus !== 'error' &&
+        (standardsStatus !== 'complete' || historicalRecordsStatus !== 'complete') && (
+          <div className="records-viewer-loading-container">
+            <CircleLoader loading={true} color="gold" />
           </div>
+        )}
 
-          <div className="combined-history-group">
-            <Standards
-              relevantRecords={
-                displayedStandards[currentAgeGroup.id] as AgeGroupRecordSet | undefined
-              }
-              weightClassName={currentWeightClass.name}
-              ageGroupName={currentAgeGroup.name}
-            />
-
-            <AssociatedPriorRecords records={displayedHistoricalRecords} />
-
-            <div className="record-group-info">
-              <p className="page-title">All time bests from this bodyweight</p>
-              <p className="record-group-description">
-                What if the current weight class were active earlier? Who would hold our all time
-                records? Here are the top lifters by total in overlapping weight classes, prior to{' '}
-                {new Date(currentWeightClass.start).getUTCFullYear()}.
-              </p>
+      {status === 'complete' &&
+        currentWeightClass &&
+        currentAgeGroup &&
+        standardsStatus === 'complete' &&
+        historicalRecordsStatus === 'complete' && (
+          <div className="record-viewer-results-parent">
+            <div className="current-leaders-group">
+              <div className="record-group-info">
+                <p className="page-title">Current Top Athletes</p>
+                <p className="record-group-description">
+                  These are the {wsoName} WSO's top ranked lifters in the current{' '}
+                  <strong>{currentWeightClass.name}</strong> weight class, active{' '}
+                  <strong>
+                    from {new Date(currentWeightClass.start).getUTCFullYear()}, originally fetched
+                    by total.
+                  </strong>
+                </p>
+              </div>
+              <RecordGroup
+                weightClass={currentWeightClass}
+                ageGroup={currentAgeGroup}
+                count={5}
+                startDate={currentWeightClass.start}
+                endDate={endDate}
+                emptyContent={
+                  <div>Looks like nobody's competed in this division yet! Could be you?</div>
+                }
+              />
             </div>
-            <RecordGroup
-              weightClass={currentWeightClass}
-              ageGroup={currentAgeGroup}
-              count={12}
-              startDate={
-                currentAgeGroup.id === 'U11' || currentAgeGroup.id === 'U13'
-                  ? youthAllTimeStartDate
-                  : allTimeStartDate
-              }
-              endDate={endDate}
-              emptyContent={<div>No history found for this age division and weight class.</div>}
-            />
+
+            <div className="combined-history-group">
+              <Standards
+                relevantRecords={
+                  displayedStandards[currentAgeGroup.id] as AgeGroupRecordSet | undefined
+                }
+                weightClassName={currentWeightClass.name}
+                ageGroupName={currentAgeGroup.name}
+              />
+
+              <AssociatedPriorRecords records={displayedHistoricalRecords} />
+
+              <div className="record-group-info">
+                <p className="page-title">All time bests from this bodyweight</p>
+                <p className="record-group-description">
+                  What if the current weight class were active earlier? Who would hold our all time
+                  records? Here are the top lifters by total in overlapping weight classes, prior to{' '}
+                  {new Date(currentWeightClass.start).getUTCFullYear()}.
+                </p>
+              </div>
+              <RecordGroup
+                weightClass={currentWeightClass}
+                ageGroup={currentAgeGroup}
+                count={12}
+                startDate={
+                  currentAgeGroup.id === 'U11' || currentAgeGroup.id === 'U13'
+                    ? youthAllTimeStartDate
+                    : allTimeStartDate
+                }
+                endDate={endDate}
+                emptyContent={<div>No history found for this age division and weight class.</div>}
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import RecordListForWeightClass from './RecordListForWeightClass';
+import { ageGroups } from '../../Data/ageGroups';
 import { AllCurrentRecordsEntry } from '../../Utils/types';
 
 interface AllCurrentRecordsViewProps {
@@ -8,10 +9,23 @@ interface AllCurrentRecordsViewProps {
 const byBodyweight = (a: AllCurrentRecordsEntry, b: AllCurrentRecordsEntry) =>
   parseFloat(a.weightClass.maxBodyweight) - parseFloat(b.weightClass.maxBodyweight);
 
+// ageGroups is already ordered youngest to oldest (Open, then U11-U17, then
+// Junior, then Masters 35-90); reuse that ordering so merged sections always
+// display in that sequence regardless of which pass (default vs. youth) added
+// each age group's row.
+const ageGroupOrder = new Map(ageGroups.map((ageGroup, index) => [ageGroup.id, index]));
+const byAgeGroupOrder = (
+  a: AllCurrentRecordsEntry['groups'][number],
+  b: AllCurrentRecordsEntry['groups'][number]
+) => (ageGroupOrder.get(a.ageGroup.id) ?? 0) - (ageGroupOrder.get(b.ageGroup.id) ?? 0);
+
 const mergeByBodyweight = (entries: AllCurrentRecordsEntry[]): AllCurrentRecordsEntry[] => {
   const map = new Map<string, AllCurrentRecordsEntry>();
   for (const entry of entries) {
-    const key = entry.weightClass.maxBodyweight;
+    // Keyed by minBodyweight, not maxBodyweight: every "+" class (across adult
+    // and youth age groups) shares the placeholder maxBodyweight '1000', but
+    // each has a distinct real minBodyweight threshold.
+    const key = entry.weightClass.minBodyweight;
     const existing = map.get(key);
     if (existing) {
       map.set(key, {
@@ -22,7 +36,10 @@ const mergeByBodyweight = (entries: AllCurrentRecordsEntry[]): AllCurrentRecords
       map.set(key, { ...entry, groups: [...entry.groups] });
     }
   }
-  return Array.from(map.values());
+  return Array.from(map.values()).map((entry) => ({
+    ...entry,
+    groups: [...entry.groups].sort(byAgeGroupOrder),
+  }));
 };
 
 function AllCurrentRecordsView({ data }: AllCurrentRecordsViewProps) {
@@ -58,7 +75,7 @@ function AllCurrentRecordsView({ data }: AllCurrentRecordsViewProps) {
           <h2 className="all-records-gender-header">Women</h2>
           {womensData.map(({ weightClass, groups }) => (
             <RecordListForWeightClass
-              key={`female-${weightClass.maxBodyweight}`}
+              key={`female-${weightClass.minBodyweight}`}
               weightClass={weightClass}
               groups={groups}
             />
@@ -68,7 +85,7 @@ function AllCurrentRecordsView({ data }: AllCurrentRecordsViewProps) {
           <h2 className="all-records-gender-header">Men</h2>
           {mensData.map(({ weightClass, groups }) => (
             <RecordListForWeightClass
-              key={`male-${weightClass.maxBodyweight}`}
+              key={`male-${weightClass.minBodyweight}`}
               weightClass={weightClass}
               groups={groups}
             />

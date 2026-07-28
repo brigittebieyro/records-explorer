@@ -631,3 +631,7 @@ body {
   margin: 0 0 6px 0;
   padding: 8px 0 4px 0;
 }
+
+.goals-loading {
+  margin: 22px 47.5%;
+}

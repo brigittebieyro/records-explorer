@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import RecordViewer, {
@@ -24,7 +24,17 @@ jest.mock(
   )
 );
 
-jest.mock('./components/Standards', () => () => <div data-testid="standards" />);
+jest.mock(
+  './components/Standards',
+  () => (props: { relevantRecords?: { records?: Record<string, unknown> } }) => (
+    <div
+      data-testid="standards"
+      data-has-records={
+        !!props.relevantRecords && Object.keys(props.relevantRecords.records ?? {}).length > 0
+      }
+    />
+  )
+);
 
 jest.mock('./components/AssociatedPriorRecords', () => () => <div data-testid="prior-records" />);
 
@@ -139,6 +149,26 @@ describe('RecordViewer helpers (user-based)', () => {
       const rows = [makeStandardRow({ lifter: 'STANDARD' })];
 
       expect(buildAllCurrentRecords(rows)).toHaveLength(0);
+    });
+
+    test('does not duplicate a youth age group under the default weight class it shares a max-bodyweight indicator with', () => {
+      // Default Women's 48kg and U17 Girls 48kg both use indicator '48', but represent
+      // different bodyweight brackets (0-48 vs 44.01-48).
+      const rows = [
+        makeStandardRow({ ageKey: 'Open', indicator: '48', lifter: 'Open Lifter' }),
+        makeStandardRow({ ageKey: 'U17', indicator: '48', lifter: 'U17 Lifter' }),
+      ];
+
+      const entries = buildAllCurrentRecords(rows);
+
+      const entriesWithU17 = entries.filter((entry) =>
+        entry.groups.some((group) => group.ageGroup.id === 'U17')
+      );
+      expect(entriesWithU17).toHaveLength(1);
+      expect(entriesWithU17[0].weightClass.minBodyweight).toBe('44.01');
+
+      const defaultEntry = entries.find((entry) => entry.weightClass.minBodyweight === '0');
+      expect(defaultEntry?.groups.map((group) => group.ageGroup.id)).toEqual(['OPEN']);
     });
   });
 
@@ -348,12 +378,82 @@ describe('RecordViewer component (user-based)', () => {
     expect(screen.queryAllByTestId('record-group')).toHaveLength(0);
   });
 
-  test('G-02: a failed sheet fetch leaves the loading message (known gap, no crash)', async () => {
+  test('G-02: a failed sheet fetch does not crash and does not show stale/misleading content', async () => {
     (global.fetch as jest.Mock).mockRejectedValue(new Error('sheets down'));
 
     renderRecordViewer();
 
-    await waitFor(() => expect(global.fetch).toHaveBeenCalled());
-    expect(screen.getByText('Loading current records…')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText('Loading current records…')).toBeNull();
+    });
+    expect(screen.queryByText('All Current Record Holders')).toBeNull();
+  });
+
+  test('B-19: standards render once the sheet loads, even if the selection finishes first', async () => {
+    let resolveStandards: (value: {
+      ok: boolean;
+      json: () => Promise<{ values: string[][] }>;
+    }) => void = () => {};
+    (global.fetch as jest.Mock).mockImplementation((url: string) => {
+      if (String(url).includes('Raw_Data')) {
+        return new Promise((resolve) => {
+          resolveStandards = resolve;
+        });
+      }
+      return Promise.resolve({ ok: true, json: async () => ({ values: [] }) });
+    });
+
+    renderRecordViewer();
+    await runSearch('OPEN', openWeightClass.id);
+
+    // The selection has been applied (Go was clicked), but the standards sheet
+    // hasn't loaded yet — the results panel must keep showing the loader instead
+    // of mounting Standards with no data.
+    expect(screen.getByTestId('circle-loader')).toBeInTheDocument();
+    expect(screen.queryByTestId('standards')).toBeNull();
+
+    await act(async () => {
+      resolveStandards({ ok: true, json: async () => ({ values: [makeStandardRow()] }) });
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('standards')).toBeInTheDocument();
+    });
+  });
+
+  test('B-20: standards show the correct record the first time they appear, even when other page data loads faster', async () => {
+    // Reproduces a real race: prior-record history is 3 small sheets that
+    // often resolve before the single, larger current-standards sheet. The
+    // instant standards first become visible, they must already carry the
+    // right record — never an empty/stale placeholder that requires
+    // reselecting the same weight class to fix.
+    let resolveStandards: (value: {
+      ok: boolean;
+      json: () => Promise<{ values: string[][] }>;
+    }) => void = () => {};
+    (global.fetch as jest.Mock).mockImplementation((url: string) => {
+      if (String(url).includes('Raw_Data')) {
+        return new Promise((resolve) => {
+          resolveStandards = resolve;
+        });
+      }
+      // Prior-record history resolves immediately, well before standards.
+      return Promise.resolve({ ok: true, json: async () => ({ values: [] }) });
+    });
+
+    renderRecordViewer();
+    await runSearch('OPEN', openWeightClass.id);
+
+    expect(screen.getByTestId('circle-loader')).toBeInTheDocument();
+    expect(screen.queryByTestId('standards')).toBeNull();
+
+    await act(async () => {
+      resolveStandards({ ok: true, json: async () => ({ values: [makeStandardRow()] }) });
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('standards')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('standards')).toHaveAttribute('data-has-records', 'true');
   });
 });

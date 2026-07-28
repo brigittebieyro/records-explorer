@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import RecordGroup from './RecordGroup';
 import { AgeGroup, CombinedLiftData, MeetRecord, WeightClass } from '../../Utils/types';
@@ -196,6 +196,57 @@ describe('RecordGroup (user-based)', () => {
     });
     expect(screen.getByText('EMPTY MESSAGE')).toBeInTheDocument();
     expect(screen.queryByTestId('record-holder')).toBeNull();
+  });
+
+  test('G-07: switching weight class while a fetch is in flight does not leak stale lifters into the new selection', async () => {
+    const classA = makeWeightClass({ id: 'W48', sport80Id: 111 });
+    const classB = makeWeightClass({ id: 'W53', sport80Id: 222 });
+
+    let resolveA: (value: {
+      ok: boolean;
+      json: () => Promise<{ data: CombinedLiftData[] }>;
+    }) => void = () => {};
+    (global.fetch as jest.Mock).mockImplementation((_url: string, options: { body: string }) => {
+      const body = JSON.parse(options.body);
+      if (body.filters.weight_class === 111) {
+        return new Promise((resolve) => {
+          resolveA = resolve;
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ data: [makeLifter('9', { name: 'Class B Lifter' })] }),
+      });
+    });
+
+    const { rerender } = renderRecordGroup({ weightClass: classA });
+
+    // Switch to class B before class A's rankings fetch has resolved.
+    rerender(
+      <RecordGroup
+        weightClass={classB}
+        ageGroup={makeAgeGroup()}
+        count={5}
+        startDate="2025-06-01"
+        endDate="2026-08-01"
+        emptyContent={<div>EMPTY MESSAGE</div>}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Class B Lifter')).toBeInTheDocument();
+    });
+
+    // Class A's stale response lands after the switch — it must not leak in.
+    await act(async () => {
+      resolveA({
+        ok: true,
+        json: async () => ({ data: [makeLifter('1', { name: 'Class A Lifter' })] }),
+      });
+    });
+
+    expect(screen.queryByText('Class A Lifter')).toBeNull();
+    expect(screen.getByText('Class B Lifter')).toBeInTheDocument();
   });
 
   test('G-01: a failed rankings fetch does not crash the component', async () => {

@@ -88,6 +88,7 @@ deployed Fly.io environment, where the server injects API secrets at request tim
 | B-15 | Standards section | Scroll below top athletes                                       | "Officially Recognized Records & Standards" shows Total, Snatch, and Clean & Jerk cards plus fine print explaining STANDARD placeholders                                                                                    | - [ ] |
 | B-16 | Prior records     | Scroll to the bottom section                                    | "Records from prior weight classes" shows historical records with year spans, plus an "All time bests from this bodyweight" list (up to 12 by total). Older sheet tabs (Pre-Aug2026, Pre-June2025, Pre-2018) all contribute | - [ ] |
 | B-17 | Youth date range  | Search a U11 or U13 class and check the prior-records year span | Youth history starts from 2014; other age groups from 1998                                                                                                                                                                  | - [ ] |
+| B-19 | Standards load before selection resolves | Throttle the network (devtools "Slow 3G"), then select a weight class and click Go immediately | The spinner stays up until Standards actually render — no need to reselect the class or refresh the page | - [ ] |
 
 ### Deep-linking
 
@@ -143,7 +144,7 @@ deployed Fly.io environment, where the server injects API secrets at request tim
 | ID   | Test                 | Steps                                                                                | Expected result                                                                                                                         | Pass  |
 | ---- | -------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- | ----- |
 | G-01 | Proxy down           | Stop `npm run server`, reload `/`, and run a search                                  | USAW-backed data fails gracefully — no white-screen crash. Note what the user sees for each section                                     | - [ ] |
-| G-02 | Sheets failure       | Load `/` with an invalid `REACT_APP_GOOGLE_API_KEY`                                  | **Known gap:** the all-records view stays on "Loading current records…" indefinitely with no error message. Confirm behavior and log it | - [ ] |
+| G-02 | Sheets failure       | Load `/` with an invalid `REACT_APP_GOOGLE_API_KEY`                                  | The page does not crash and does not show stale/misleading content (known gap: no visible error or retry affordance) | - [ ] |
 | G-03 | Meets failure        | Open `/local-meet-results` with the proxy down                                       | Explicit "Failed to load meets…" error message shows                                                                                    | - [ ] |
 | G-04 | Plausibility filters | Spot-check top athletes and meet results                                             | No absurd values appear (the app drops results above 200 snatch / 280 C&J / 470 total as data errors)                                   | - [ ] |
 | G-05 | Bad deep-links       | Open `/?ageGroup=BOGUS&weightClass=BOGUS` and `/local-meet-results?meetId=999999999` | No crash; app either ignores the params or shows an error/empty state                                                                   | - [ ] |
@@ -159,9 +160,3 @@ The stylesheets contain no media queries, so mobile layout is a known risk area.
 | H-02 | Mobile: menu        | Open and use the flyout menu at mobile width             | Menu icon is tappable; flyout is fully visible and links work                            | - [ ] |
 | H-03 | Mobile: other pages | View `/local-meet-results` and `/goals` at mobile width  | Columns, dropdowns, and lists remain usable                                              | - [ ] |
 | H-04 | Cross-browser smoke | Repeat A-01–A-03, B-08, C-02, D-02 in Safari and Firefox | Behavior matches Chrome                                                                  | - [ ] |
-
----
-
-## Appendix: known issues (tester awareness, not test failures)
-
-- No user-facing error message when the current-records Google Sheet fetch fails (covered by G-02).

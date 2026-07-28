@@ -100,6 +100,36 @@ describe('RecordGroup (user-based)', () => {
     renderRecordGroup();
 
     expect(screen.getByTestId('circle-loader')).toBeInTheDocument();
+    expect(screen.getByText('Fetching')).toBeInTheDocument();
+  });
+
+  test('bug fix: does not show the empty message while the rankings are still loading', () => {
+    (global.fetch as jest.Mock).mockImplementation(() => new Promise(() => {}));
+
+    renderRecordGroup();
+
+    expect(screen.getByTestId('circle-loader')).toBeInTheDocument();
+    expect(screen.queryByText('EMPTY MESSAGE')).toBeNull();
+  });
+
+  test('renders the raw rankings list immediately, before individual lift verification finishes', async () => {
+    (global.fetch as jest.Mock).mockImplementation((url: unknown) => {
+      if (String(url).includes('/athletes/')) return new Promise(() => {}); // verification never resolves
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({
+          data: [makeLifter('1'), makeLifter('2', { name: 'Amy Smith', total: 170 })],
+        }),
+      });
+    });
+
+    renderRecordGroup();
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('record-holder')).toHaveLength(2);
+    });
+    // The big spinner is gone even though per-lifter verification is still pending.
+    expect(screen.queryByTestId('circle-loader')).toBeNull();
   });
 
   test('B-08: renders ranked lifters once the fetch completes', async () => {

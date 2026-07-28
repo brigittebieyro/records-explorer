@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import GoalsWeightClass from './GoalsWeightClass';
-import { CombinedLiftData, WeightClass } from '../../Utils/types';
+import { CombinedLiftData, MeetRecord, WeightClass } from '../../Utils/types';
 
 jest.mock('react-spinners', () => ({
   CircleLoader: () => <div data-testid="circle-loader">Loading</div>,
@@ -30,6 +30,23 @@ const makeGoalLifter = (overrides: object = {}): CombinedLiftData =>
     ...overrides,
   }) as unknown as CombinedLiftData;
 
+const makeLifterWithId = (id: string, overrides: object = {}): CombinedLiftData =>
+  makeGoalLifter({
+    action: [{ url: `https://usaweightlifting.sport80.com/public/rankings/member/${id}` }],
+    ...overrides,
+  });
+
+// A meet that comfortably satisfies every validation rule for the default weight class/date range.
+const makeMeet = (overrides: object = {}): MeetRecord =>
+  ({
+    date: '2025-12-01',
+    total: 180,
+    best_snatch: 80,
+    'best_c&j': 100,
+    'body_weight_(kg)': 47,
+    ...overrides,
+  }) as MeetRecord;
+
 const renderGoalsWeightClass = (overrides: object = {}) => {
   const props = {
     weightClass: makeWeightClass(),
@@ -39,6 +56,33 @@ const renderGoalsWeightClass = (overrides: object = {}) => {
     ...overrides,
   };
   return render(<GoalsWeightClass {...props} />);
+};
+
+type IndividualMock = { ok: false } | { ok: true; data: MeetRecord[] };
+
+// Rankings resolve with `rankingsData`. Any athlete not listed in `individualById` is treated
+// as "couldn't be verified" (their individual-lookup fetch fails), matching production
+// behavior where an unverifiable athlete is assumed valid rather than removed.
+const mockFetchResponses = (
+  rankingsData: CombinedLiftData[],
+  individualById: Record<string, IndividualMock> = {}
+) => {
+  (global.fetch as jest.Mock).mockImplementation((url: unknown) => {
+    const urlStr = String(url);
+    if (urlStr.includes('/athletes/')) {
+      const id = urlStr.match(/\/athletes\/([^/]+)\//)?.[1] ?? '';
+      const entry = individualById[id];
+      if (!entry || !entry.ok) {
+        return Promise.resolve({ ok: false, status: 500 });
+      }
+      return Promise.resolve({ ok: true, json: async () => ({ data: entry.data }) });
+    }
+    return Promise.resolve({ ok: true, json: async () => ({ data: rankingsData }) });
+  });
+};
+
+const waitForVerificationToFinish = async () => {
+  await waitFor(() => expect(screen.queryByText('Verifying')).toBeNull());
 };
 
 describe('GoalsWeightClass (user-based)', () => {
@@ -57,12 +101,14 @@ describe('GoalsWeightClass (user-based)', () => {
     renderGoalsWeightClass();
 
     expect(screen.getByTestId('circle-loader')).toBeInTheDocument();
+    expect(screen.getByText('Fetching')).toBeInTheDocument();
+    expect(screen.queryByText(/kg/)).toBeNull();
   });
 
-  test('D-02: renders each entry as total • name', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: async () => ({ data: [makeGoalLifter()] }),
+  test('D-02: renders each entry as soon as the rankings arrive, without waiting on verification', async () => {
+    (global.fetch as jest.Mock).mockImplementation((url: unknown) => {
+      if (String(url).includes('/athletes/')) return new Promise(() => {}); // verification never resolves
+      return Promise.resolve({ ok: true, json: async () => ({ data: [makeGoalLifter()] }) });
     });
 
     renderGoalsWeightClass();
@@ -70,14 +116,22 @@ describe('GoalsWeightClass (user-based)', () => {
     await waitFor(() => {
       expect(screen.getByText(/180kg • Jane Doe/)).toBeInTheDocument();
     });
-    expect(screen.queryByTestId('circle-loader')).toBeNull();
+    // The list is visible while a small "Verifying" indicator is still checking each athlete.
+    expect(screen.getByText('Verifying')).toBeInTheDocument();
+  });
+
+  test('D-02: the "Verifying" indicator disappears once every athlete has been checked', async () => {
+    mockFetchResponses([makeGoalLifter()]);
+
+    renderGoalsWeightClass();
+
+    await waitFor(() => expect(screen.getByText(/Jane Doe/)).toBeInTheDocument());
+    await waitForVerificationToFinish();
+    expect(screen.getByText(/180kg • Jane Doe/)).toBeInTheDocument();
   });
 
   test('D-02: requests rankings for the weight class with safeCount + 5 entries', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: async () => ({ data: [] }),
-    });
+    mockFetchResponses([]);
 
     renderGoalsWeightClass({ safeCount: 6 });
 
@@ -95,38 +149,29 @@ describe('GoalsWeightClass (user-based)', () => {
     const lifters = Array.from({ length: 7 }, (_, i) =>
       makeGoalLifter({ name: `Lifter ${i + 1}`, total: 200 - i })
     );
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: async () => ({ data: lifters }),
-    });
+    mockFetchResponses(lifters);
 
     const { container } = renderGoalsWeightClass({ safeCount: 2 });
 
-    await waitFor(() => {
-      expect(container.querySelectorAll('.goals-list-item')).toHaveLength(5);
-    });
+    await waitFor(() => expect(screen.getByText(/Lifter 1/)).toBeInTheDocument());
+    await waitForVerificationToFinish();
+    expect(container.querySelectorAll('.goals-list-item')).toHaveLength(5);
   });
 
   test('D-04: WSO members are gold-highlighted and show their club', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        data: [
-          makeGoalLifter({
-            name: 'Member Lifter',
-            wso: 'California North Central',
-            club: 'Sacramento Barbell',
-          }),
-          makeGoalLifter({ name: 'Outside Lifter', wso: 'Pacific Northwest', total: 170 }),
-        ],
+    mockFetchResponses([
+      makeGoalLifter({
+        name: 'Member Lifter',
+        wso: 'California North Central',
+        club: 'Sacramento Barbell',
       }),
-    });
+      makeGoalLifter({ name: 'Outside Lifter', wso: 'Pacific Northwest', total: 170 }),
+    ]);
 
     const { container } = renderGoalsWeightClass();
 
-    await waitFor(() => {
-      expect(screen.getByText(/Member Lifter/)).toBeInTheDocument();
-    });
+    await waitFor(() => expect(screen.getByText(/Member Lifter/)).toBeInTheDocument());
+    await waitForVerificationToFinish();
 
     const items = Array.from(container.querySelectorAll('.goals-list-item'));
     const memberRow = items.find((item) => item.textContent?.includes('Member Lifter'));
@@ -141,18 +186,15 @@ describe('GoalsWeightClass (user-based)', () => {
     const lifters = Array.from({ length: 4 }, (_, i) =>
       makeGoalLifter({ name: `Lifter ${i + 1}`, total: 200 - i })
     );
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: async () => ({ data: lifters }),
-    });
+    mockFetchResponses(lifters);
 
     const { container } = renderGoalsWeightClass({ safeCount: 2 });
 
-    await waitFor(() => {
-      expect(container.querySelectorAll('.goals-list-item')).toHaveLength(4);
-    });
+    await waitFor(() => expect(screen.getByText(/Lifter 1/)).toBeInTheDocument());
+    await waitForVerificationToFinish();
 
     const items = Array.from(container.querySelectorAll('.goals-list-item'));
+    expect(items).toHaveLength(4);
     expect(items[0]).not.toHaveClass('goals-item-tentative');
     expect(items[1]).not.toHaveClass('goals-item-tentative');
     expect(items[2]).toHaveClass('goals-item-tentative');
@@ -162,26 +204,20 @@ describe('GoalsWeightClass (user-based)', () => {
   });
 
   test('D-05: WSO member highlighting still applies to tentative rows', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        data: [
-          makeGoalLifter({ name: 'Lifter 1', total: 200 }),
-          makeGoalLifter({ name: 'Lifter 2', total: 190 }),
-          makeGoalLifter({
-            name: 'Probable Member',
-            total: 180,
-            wso: 'California North Central',
-          }),
-        ],
+    mockFetchResponses([
+      makeGoalLifter({ name: 'Lifter 1', total: 200 }),
+      makeGoalLifter({ name: 'Lifter 2', total: 190 }),
+      makeGoalLifter({
+        name: 'Probable Member',
+        total: 180,
+        wso: 'California North Central',
       }),
-    });
+    ]);
 
     const { container } = renderGoalsWeightClass({ safeCount: 2 });
 
-    await waitFor(() => {
-      expect(screen.getByText(/Probable Member/)).toBeInTheDocument();
-    });
+    await waitFor(() => expect(screen.getByText(/Probable Member/)).toBeInTheDocument());
+    await waitForVerificationToFinish();
 
     const items = Array.from(container.querySelectorAll('.goals-list-item'));
     expect(items[2]).toHaveClass('goals-item-tentative');
@@ -192,16 +228,12 @@ describe('GoalsWeightClass (user-based)', () => {
     const lifters = Array.from({ length: 4 }, (_, i) =>
       makeGoalLifter({ name: `Lifter ${i + 1}`, total: 200 - i })
     );
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: async () => ({ data: lifters }),
-    });
+    mockFetchResponses(lifters);
 
     const { container } = renderGoalsWeightClass({ safeCount: 2 });
 
-    await waitFor(() => {
-      expect(container.querySelectorAll('.goals-rank-circle')).toHaveLength(4);
-    });
+    await waitFor(() => expect(screen.getByText(/Lifter 1/)).toBeInTheDocument());
+    await waitForVerificationToFinish();
 
     const ranks = Array.from(container.querySelectorAll('.goals-rank-circle')).map(
       (node) => node.textContent
@@ -209,28 +241,93 @@ describe('GoalsWeightClass (user-based)', () => {
     expect(ranks).toEqual(['1', '2', '3', '4']);
   });
 
-  test('G-04: implausible lifters are filtered out of the rankings', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        data: [
-          makeGoalLifter({ name: 'Plausible', total: 180 }),
-          makeGoalLifter({ name: 'Implausible Total', total: 471 }),
-          makeGoalLifter({ name: 'Implausible Snatch', total: 180, best_snatch: 201 }),
-        ],
-      }),
+  test('G-04: an athlete whose ranking total is backed by a real meet stays on the list unchanged', async () => {
+    mockFetchResponses([makeLifterWithId('1', { name: 'Supported Lifter', total: 180 })], {
+      '1': { ok: true, data: [makeMeet({ total: 180 })] },
     });
 
     renderGoalsWeightClass();
 
-    await waitFor(() => {
-      expect(screen.getByText(/Plausible/)).toBeInTheDocument();
-    });
-    expect(screen.queryByText(/Implausible Total/)).toBeNull();
-    expect(screen.queryByText(/Implausible Snatch/)).toBeNull();
+    await waitFor(() => expect(screen.getByText(/Supported Lifter/)).toBeInTheDocument());
+    await waitForVerificationToFinish();
+
+    expect(screen.getByText(/180kg • Supported Lifter/)).toBeInTheDocument();
   });
 
-  test('a failed fetch leaves the spinner without crashing', async () => {
+  test('G-04: an athlete whose ranking total is not directly backed, but a total within 20kg is, gets their total corrected', async () => {
+    mockFetchResponses([makeLifterWithId('1', { name: 'Corrected Lifter', total: 180 })], {
+      '1': { ok: true, data: [makeMeet({ total: 172 })] },
+    });
+
+    renderGoalsWeightClass();
+
+    await waitFor(() => expect(screen.getByText(/Corrected Lifter/)).toBeInTheDocument());
+    await waitForVerificationToFinish();
+
+    expect(screen.getByText(/172kg • Corrected Lifter/)).toBeInTheDocument();
+    expect(screen.queryByText(/180kg • Corrected Lifter/)).toBeNull();
+  });
+
+  test('G-04: an athlete with no supporting meet within 20kg is removed, and later athletes move up in rank', async () => {
+    mockFetchResponses(
+      [
+        makeLifterWithId('1', { name: 'Unsupported Lifter', total: 300 }),
+        makeLifterWithId('2', { name: 'Next Lifter', total: 250 }),
+      ],
+      {
+        '1': { ok: true, data: [makeMeet({ total: 150 })] }, // nowhere near 300, so unsupported
+        '2': { ok: true, data: [makeMeet({ total: 250 })] },
+      }
+    );
+
+    const { container } = renderGoalsWeightClass();
+
+    await waitFor(() => expect(screen.getByText(/Next Lifter/)).toBeInTheDocument());
+    await waitForVerificationToFinish();
+
+    expect(screen.queryByText(/Unsupported Lifter/)).toBeNull();
+    const items = Array.from(container.querySelectorAll('.goals-list-item'));
+    expect(items).toHaveLength(1);
+    expect(container.querySelector('.goals-rank-circle')?.textContent).toBe('1');
+  });
+
+  test('G-04: a total correction that changes the order re-sorts the list', async () => {
+    mockFetchResponses(
+      [
+        makeLifterWithId('1', { name: 'Lifter A', total: 190 }),
+        makeLifterWithId('2', { name: 'Lifter B', total: 180 }),
+      ],
+      {
+        '1': { ok: true, data: [makeMeet({ total: 190 })] }, // stays at 190
+        '2': { ok: true, data: [makeMeet({ total: 198 })] }, // corrected up past Lifter A
+      }
+    );
+
+    const { container } = renderGoalsWeightClass();
+
+    await waitFor(() => expect(screen.getByText(/Lifter A/)).toBeInTheDocument());
+    await waitForVerificationToFinish();
+
+    const items = Array.from(container.querySelectorAll('.goals-list-item'));
+    expect(items[0].textContent).toContain('Lifter B');
+    expect(items[0].textContent).toContain('198kg');
+    expect(items[1].textContent).toContain('Lifter A');
+  });
+
+  test('G-04: an athlete whose individual data cannot be pulled is kept and assumed valid', async () => {
+    mockFetchResponses([makeLifterWithId('1', { name: 'Unverifiable Lifter', total: 180 })], {
+      '1': { ok: false },
+    });
+
+    renderGoalsWeightClass();
+
+    await waitFor(() => expect(screen.getByText(/Unverifiable Lifter/)).toBeInTheDocument());
+    await waitForVerificationToFinish();
+
+    expect(screen.getByText(/180kg • Unverifiable Lifter/)).toBeInTheDocument();
+  });
+
+  test('a failed rankings fetch leaves the spinner without crashing', async () => {
     (global.fetch as jest.Mock).mockRejectedValue(new Error('proxy down'));
 
     renderGoalsWeightClass();

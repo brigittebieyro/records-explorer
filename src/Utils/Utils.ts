@@ -7,7 +7,7 @@ import {
   u15WeightClasses,
   u17WeightClasses,
 } from '../Data/youthWeightClasses';
-import { AgeGroup, CombinedLiftData, SortKey, WeightClass } from './types';
+import { AgeGroup, CombinedLiftData, MeetRecord, SortKey, WeightClass } from './types';
 
 export const getAgeGroup = (ageGroupId: string): AgeGroup | undefined => {
   return ageGroups.find((group) => group.id === ageGroupId);
@@ -111,6 +111,37 @@ export const isWithinPlausibilityCaps = (lifter: {
     (lifter.best_snatch == null || lifter.best_snatch <= maxSnatch) &&
     (lifter['best_c&j'] == null || lifter['best_c&j'] <= maxCleanAndJerk) &&
     lifter.total <= maxTotal
+  );
+};
+
+export const findSupportingTotal = (
+  lifter: { total: number },
+  meets: MeetRecord[],
+  weightClass: WeightClass,
+  startDate: string,
+  endDate: string
+): number | undefined => {
+  const minBw = parseFloat(weightClass.minBodyweight);
+  const maxBw = parseFloat(weightClass.maxBodyweight);
+  const candidates: number[] = [];
+  for (const meet of meets) {
+    const meetBw = parseFloat(String(meet['body_weight_(kg)'] ?? 0));
+    if (
+      meetBw > 0 &&
+      meetBw >= minBw &&
+      meetBw <= maxBw &&
+      meet.date >= startDate &&
+      meet.date <= endDate &&
+      isWithinPlausibilityCaps(meet) &&
+      Math.abs(meet.total - lifter.total) <= 20
+    ) {
+      candidates.push(meet.total);
+    }
+  }
+  if (candidates.includes(lifter.total)) return lifter.total;
+  if (candidates.length === 0) return undefined;
+  return candidates.reduce((best, t) =>
+    Math.abs(t - lifter.total) < Math.abs(best - lifter.total) ? t : best
   );
 };
 

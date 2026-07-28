@@ -374,6 +374,7 @@ function RecordViewer() {
       {status === 'inprogress' && (
         <div className="records-viewer-loading-container">
           <CircleLoader loading={true} color="gold" />
+          <span className="fetching-text">Fetching</span>
         </div>
       )}
 
@@ -384,6 +385,7 @@ function RecordViewer() {
         (standardsStatus !== 'complete' || historicalRecordsStatus !== 'complete') && (
           <div className="records-viewer-loading-container">
             <CircleLoader loading={true} color="gold" />
+            <span className="fetching-text">Fetching</span>
           </div>
         )}
 

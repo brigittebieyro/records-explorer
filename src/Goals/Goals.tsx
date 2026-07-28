@@ -49,35 +49,37 @@ function Goals() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const descriptiveText = (
+    <>
+      <p className="page-title">Senior Nationals Qualification Rankings</p>
+      <p className="goals-descriptive-text">
+        With the 2027 change in format for Senior Nationals, everybody wants to reach their top
+        twelve (or six for the very lightest weight classes). Here's a view of what the top totals
+        for each group looks like, with {wsoName} WSO members already in that tier highlighted.
+      </p>
+      <p className="goals-descriptive-text">
+        Of course not every in the national top group will attempt to sign up for Nationals. We're
+        showing just a few extras, but if you're within 20kg of the bottom totals in your group,{' '}
+        <strong>give it a shot and sign up</strong>. The final ranking will not be out of everyone
+        who <strong>signs up</strong>, not solely the national ranking.{' '}
+      </p>
+      <p className="goals-descriptive-text">
+        To explore national rankings in more detail, see{' '}
+        <a
+          href={usawRankingsPublicSiteLink}
+          target="_blank"
+          className="common-text-link"
+          rel="noreferrer"
+        >
+          USAW's public rankings site
+        </a>
+        . You do not need to be logged in to USAW for this.
+      </p>
+    </>
+  );
+
   return (
     <div className="goals-parent">
-      <div className="common-text-header">
-        <p className="page-title">Senior Nationals Qualification Rankings</p>
-        <p className="goals-descriptive-text">
-          With the 2027 change in format for Senior Nationals, everybody wants to reach their top
-          twelve (or six for the very lightest weight classes). Here's a view of what the top totals
-          for each group looks like, with {wsoName} WSO members already in that tier highlighted.
-        </p>
-        <p className="goals-descriptive-text">
-          Of course not every in the national top group will attempt to sign up for Nationals. We're
-          showing just a few extras, but if you're within 20kg of the bottom totals in your group,{' '}
-          <strong>give it a shot and sign up</strong>. The final ranking will not be out of everyone
-          who <strong>signs up</strong>, not solely the national ranking.{' '}
-        </p>
-        <p className="goals-descriptive-text">
-          To explore national rankings in more detail, see{' '}
-          <a
-            href={usawRankingsPublicSiteLink}
-            target="_blank"
-            className="common-text-link"
-            rel="noreferrer"
-          >
-            USAW's public rankings site
-          </a>
-          . You do not need to be logged in to USAW for this.
-        </p>
-      </div>
-
       <OptionsBar
         label="Select a weight class: "
         selects={[
@@ -102,22 +104,28 @@ function Goals() {
         }
       />
 
-      {currentWeightClass && (
-        <section className="all-records-weight-class-section" key={currentWeightClass.id}>
-          <h2 className="goals-weight-class-header">{currentWeightClass.name}</h2>
-          <GoalsWeightClass
-            weightClass={currentWeightClass}
-            safeCount={getCount(currentWeightClass)}
-            startDate={startDate}
-            endDate={endDate}
-          />
-        </section>
+      {!currentWeightClass && (
+        <>
+          <div className="common-text-header">{descriptiveText}</div>
+          <p className="goals-descriptive-text">
+            Select a weight class above and hit Go to see its qualification rankings.
+          </p>
+        </>
       )}
 
-      {!currentWeightClass && (
-        <p className="goals-descriptive-text">
-          Select a weight class above and hit Go to see its qualification rankings.
-        </p>
+      {currentWeightClass && (
+        <div className="goals-results-parent">
+          <div className="goals-description-column common-text-header">{descriptiveText}</div>
+          <section className="goals-rankings-column" key={currentWeightClass.id}>
+            <h2 className="goals-weight-class-header">{currentWeightClass.name}</h2>
+            <GoalsWeightClass
+              weightClass={currentWeightClass}
+              safeCount={getCount(currentWeightClass)}
+              startDate={startDate}
+              endDate={endDate}
+            />
+          </section>
+        </div>
       )}
     </div>
   );

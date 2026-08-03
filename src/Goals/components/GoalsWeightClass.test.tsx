@@ -96,18 +96,18 @@ describe('GoalsWeightClass (user-based)', () => {
   });
 
   test('D-02: shows a spinner until the rankings load', () => {
-    (global.fetch as jest.Mock).mockImplementation(() => new Promise(() => {}));
+    (global.fetch as jest.Mock).mockImplementation(() => new Promise(() => { }));
 
     renderGoalsWeightClass();
 
     expect(screen.getByTestId('circle-loader')).toBeInTheDocument();
-    expect(screen.getByText('Fetching')).toBeInTheDocument();
+    expect(screen.getByText('Loading')).toBeInTheDocument();
     expect(screen.queryByText(/kg/)).toBeNull();
   });
 
   test('D-02: renders each entry as soon as the rankings arrive, without waiting on verification', async () => {
     (global.fetch as jest.Mock).mockImplementation((url: unknown) => {
-      if (String(url).includes('/athletes/')) return new Promise(() => {}); // verification never resolves
+      if (String(url).includes('/athletes/')) return new Promise(() => { }); // verification never resolves
       return Promise.resolve({ ok: true, json: async () => ({ data: [makeGoalLifter()] }) });
     });
 

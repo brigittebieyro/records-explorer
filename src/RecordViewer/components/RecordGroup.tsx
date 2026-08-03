@@ -196,7 +196,7 @@ function RecordGroup({
       {status === 'inprogress' && (
         <div className="records-viewer-loading-container">
           <CircleLoader loading={true} color="gold" />
-          <span className="fetching-text">Fetching</span>
+          <span className="loading-text">Loading</span>
         </div>
       )}
       {combinedLiftsData.length > 0 && (

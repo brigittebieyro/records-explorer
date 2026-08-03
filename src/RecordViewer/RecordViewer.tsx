@@ -359,12 +359,12 @@ function RecordViewer() {
         onReset={
           status === 'complete'
             ? () => {
-                setSelectedAgeGroup('OPEN');
-                setSelectedWeightClass('');
-                resetAllData();
-                setStatus(undefined);
-                setSearchParams({});
-              }
+              setSelectedAgeGroup('OPEN');
+              setSelectedWeightClass('');
+              resetAllData();
+              setStatus(undefined);
+              setSearchParams({});
+            }
             : undefined
         }
       />
@@ -374,7 +374,7 @@ function RecordViewer() {
       {status === 'inprogress' && (
         <div className="records-viewer-loading-container">
           <CircleLoader loading={true} color="gold" />
-          <span className="fetching-text">Fetching</span>
+          <span className="loading-text">Loading</span>
         </div>
       )}
 
@@ -385,7 +385,7 @@ function RecordViewer() {
         (standardsStatus !== 'complete' || historicalRecordsStatus !== 'complete') && (
           <div className="records-viewer-loading-container">
             <CircleLoader loading={true} color="gold" />
-            <span className="fetching-text">Fetching</span>
+            <span className="loading-text">Loading</span>
           </div>
         )}
 

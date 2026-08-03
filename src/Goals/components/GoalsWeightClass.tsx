@@ -108,7 +108,7 @@ function GoalsWeightClass({ weightClass, safeCount, startDate, endDate }: GoalsW
       {status === 'inprogress' && (
         <div className="goals-loading">
           <CircleLoader loading={true} color="gold" />
-          <span className="fetching-text">Fetching</span>
+          <span className="loading-text">Loading</span>
         </div>
       )}
       {status !== 'inprogress' && (

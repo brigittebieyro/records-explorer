@@ -671,7 +671,7 @@ body {
   margin: 22px 0;
 }
 
-.fetching-text {
+.loading-text {
   color: var(--main-accent-color);
   font-size: 12px;
   font-style: italic;

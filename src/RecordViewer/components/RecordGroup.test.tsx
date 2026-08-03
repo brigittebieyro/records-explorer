@@ -95,7 +95,7 @@ describe('RecordGroup (user-based)', () => {
   });
 
   test('B-08: shows a spinner while the rankings load', () => {
-    (global.fetch as jest.Mock).mockImplementation(() => new Promise(() => { }));
+    (global.fetch as jest.Mock).mockImplementation(() => new Promise(() => {}));
 
     renderRecordGroup();
 
@@ -104,7 +104,7 @@ describe('RecordGroup (user-based)', () => {
   });
 
   test('bug fix: does not show the empty message while the rankings are still loading', () => {
-    (global.fetch as jest.Mock).mockImplementation(() => new Promise(() => { }));
+    (global.fetch as jest.Mock).mockImplementation(() => new Promise(() => {}));
 
     renderRecordGroup();
 
@@ -114,7 +114,7 @@ describe('RecordGroup (user-based)', () => {
 
   test('renders the raw rankings list immediately, before individual lift verification finishes', async () => {
     (global.fetch as jest.Mock).mockImplementation((url: unknown) => {
-      if (String(url).includes('/athletes/')) return new Promise(() => { }); // verification never resolves
+      if (String(url).includes('/athletes/')) return new Promise(() => {}); // verification never resolves
       return Promise.resolve({
         ok: true,
         json: async () => ({
@@ -235,7 +235,7 @@ describe('RecordGroup (user-based)', () => {
     let resolveA: (value: {
       ok: boolean;
       json: () => Promise<{ data: CombinedLiftData[] }>;
-    }) => void = () => { };
+    }) => void = () => {};
     (global.fetch as jest.Mock).mockImplementation((_url: string, options: { body: string }) => {
       const body = JSON.parse(options.body);
       if (body.filters.weight_class === 111) {

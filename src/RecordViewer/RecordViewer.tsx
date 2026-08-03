@@ -359,12 +359,12 @@ function RecordViewer() {
         onReset={
           status === 'complete'
             ? () => {
-              setSelectedAgeGroup('OPEN');
-              setSelectedWeightClass('');
-              resetAllData();
-              setStatus(undefined);
-              setSearchParams({});
-            }
+                setSelectedAgeGroup('OPEN');
+                setSelectedWeightClass('');
+                resetAllData();
+                setStatus(undefined);
+                setSearchParams({});
+              }
             : undefined
         }
       />

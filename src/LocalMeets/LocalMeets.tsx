@@ -257,7 +257,12 @@ function LocalMeets() {
             )}
 
             {resultsStatus === 'error' && (
-              <p className="local-meets-empty">Failed to load results. Please try again.</p>
+              <p className="local-meets-empty">
+                Failed to load results. Please try again.
+                <br />
+                Sometimes this happens when the results aren't posted yet. If the USAW link doesn't
+                work yet, that's probably the case.
+              </p>
             )}
 
             {resultsStatus === 'complete' && meetResults.length === 0 && (

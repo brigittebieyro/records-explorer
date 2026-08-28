@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import LocalMeets from './LocalMeets';
@@ -108,9 +108,17 @@ const waitForMeetList = async () => {
   return screen.getByRole('list');
 };
 
+// handleGo chains several awaited fetches; a plain click's promise resolves
+// before those continuations run, so wrap the trigger in act() and drain the
+// microtask queue (via a macrotask boundary) while act is still open.
+const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
+
 const clickMeetInList = async (name: string) => {
   const list = await waitForMeetList();
-  await userEvent.click(within(list).getByText(name));
+  await act(async () => {
+    await userEvent.click(within(list).getByText(name));
+    await flushPromises();
+  });
 };
 
 describe('LocalMeets (user-based)', () => {
@@ -231,7 +239,10 @@ describe('LocalMeets (user-based)', () => {
         expect(screen.getByLabelText('Meet')).toBeInTheDocument();
       });
       await userEvent.selectOptions(screen.getByLabelText('Meet'), '1');
-      await userEvent.click(screen.getByRole('button', { name: 'Go' }));
+      await act(async () => {
+        await userEvent.click(screen.getByRole('button', { name: 'Go' }));
+        await flushPromises();
+      });
 
       await waitFor(() => {
         expect(screen.getByTestId('meet-results')).toBeInTheDocument();
@@ -263,7 +274,10 @@ describe('LocalMeets (user-based)', () => {
       const listItem = within(list).getByRole('button');
       expect(listItem).toHaveAttribute('tabIndex', '0');
 
-      fireEvent.keyDown(listItem, { key: 'Enter' });
+      await act(async () => {
+        fireEvent.keyDown(listItem, { key: 'Enter' });
+        await flushPromises();
+      });
 
       await waitFor(() => {
         expect(screen.getByTestId('meet-results')).toBeInTheDocument();
@@ -370,7 +384,10 @@ describe('LocalMeets (user-based)', () => {
       await clickMeetInList('Sacramento Open');
 
       await waitFor(() => {
-        expect(screen.getByText('Failed to load results. Please try again.')).toBeInTheDocument();
+        expect(screen.getByText(/Failed to load results\. Please try again\./)).toBeInTheDocument();
+        expect(
+          screen.getByText(/Sometimes this happens when the results aren't posted yet\./),
+        ).toBeInTheDocument();
       });
     });
   });

@@ -37,7 +37,8 @@ export interface LifterRankingData {
   total: number;
   lifter_age: string;
   lift_date: string;
-  club?: string | null;
+  // Empty text columns come back as { type: 'unset' }, not as a string, so always narrow before rendering.
+  club?: string | null | { type: string };
   action: LifterAction[];
   bodyweight?: number;
   classData?: WeightClassAnalog;

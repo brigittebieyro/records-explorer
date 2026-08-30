@@ -117,25 +117,31 @@ function GoalsWeightClass({ weightClass, safeCount, startDate, endDate }: GoalsW
       )}
       {status !== 'inprogress' && (
         <>
-          {lifters.slice(0, safeCount + maybeCount).map((lifter, index) => (
-            <div key={`goals-${index}-${lifter.name}`}>
-              <p
-                className={`goals-list-item ${lifter.wso === 'California North Central' ? 'goals-list-highlight' : ''} ${index >= safeCount ? 'goals-item-tentative' : ''}`}
-              >
-                <span className="goals-rank-circle">{index + 1}</span>
-                {lifter.total}kg &bull; {lifter.name}
-                {lifter.wso === 'California North Central' && <span> &bull; {lifter.club}</span>}
-                {lifter.wso !== 'California North Central' && <span> &bull; {lifter.wso}</span>}
-                {lifter.lift_date && <span> &bull; {lifter.lift_date}</span>}
-                {index >= safeCount && (
-                  <span>
-                    {' '}
-                    &bull; <i>Possible</i>
-                  </span>
-                )}
-              </p>
-            </div>
-          ))}
+          {lifters.slice(0, safeCount + maybeCount).map((lifter, index) => {
+            // The rankings API sends { type: 'unset' } rather than a string for empty columns.
+            const wso = typeof lifter.wso === 'string' ? lifter.wso : undefined;
+            const club = typeof lifter.club === 'string' ? lifter.club : 'Unaffiliated';
+            const isLocal = wso === 'California North Central';
+            return (
+              <div key={`goals-${index}-${lifter.name}`}>
+                <p
+                  className={`goals-list-item ${isLocal ? 'goals-list-highlight' : ''} ${index >= safeCount ? 'goals-item-tentative' : ''}`}
+                >
+                  <span className="goals-rank-circle">{index + 1}</span>
+                  {lifter.total}kg &bull; {lifter.name}
+                  {isLocal && <span> &bull; {club}</span>}
+                  {!isLocal && wso && <span> &bull; {wso}</span>}
+                  {typeof lifter.lift_date === 'string' && <span> &bull; {lifter.lift_date}</span>}
+                  {index >= safeCount && (
+                    <span>
+                      {' '}
+                      &bull; <i>Possible</i>
+                    </span>
+                  )}
+                </p>
+              </div>
+            );
+          })}
           {status === 'listed' && (
             <div className="verifying-indicator">
               <CircleLoader loading={true} color="gold" size={16} />

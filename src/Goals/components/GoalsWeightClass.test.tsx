@@ -183,6 +183,31 @@ describe('GoalsWeightClass (user-based)', () => {
     expect(outsideRow?.textContent).toContain('Pacific Northwest');
   });
 
+  test('D-04: unset club and WSO columns render as text instead of crashing', async () => {
+    // The rankings API returns { type: 'unset' } in place of a string for empty columns.
+    mockFetchResponses([
+      makeGoalLifter({
+        name: 'Member Lifter',
+        wso: 'California North Central',
+        club: { type: 'unset' },
+      }),
+      makeGoalLifter({ name: 'Outside Lifter', total: 170, wso: { type: 'unset' } }),
+    ]);
+
+    const { container } = renderGoalsWeightClass();
+
+    await waitFor(() => expect(screen.getByText(/Member Lifter/)).toBeInTheDocument());
+    await waitForVerificationToFinish();
+
+    const items = Array.from(container.querySelectorAll('.goals-list-item'));
+    const memberRow = items.find((item) => item.textContent?.includes('Member Lifter'));
+    const outsideRow = items.find((item) => item.textContent?.includes('Outside Lifter'));
+    expect(memberRow?.textContent).toContain('Unaffiliated');
+    expect(memberRow).toHaveClass('goals-list-highlight');
+    expect(outsideRow?.textContent).toContain('170kg • Outside Lifter');
+    expect(outsideRow?.textContent).not.toContain('unset');
+  });
+
   test('D-05: entries below the qualifying cutoff are marked tentative', async () => {
     const lifters = Array.from({ length: 4 }, (_, i) =>
       makeGoalLifter({ name: `Lifter ${i + 1}`, total: 200 - i })

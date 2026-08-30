@@ -98,10 +98,10 @@ function Goals() {
         onReset={
           currentWeightClass
             ? () => {
-                setSelectedWeightClass('');
-                setCurrentWeightClass(undefined);
-                setSearchParams({});
-              }
+              setSelectedWeightClass('');
+              setCurrentWeightClass(undefined);
+              setSearchParams({});
+            }
             : undefined
         }
       />
@@ -119,7 +119,7 @@ function Goals() {
         <div className="goals-results-parent">
           <div className="goals-description-column common-text-header">{descriptiveText}</div>
           <section className="goals-rankings-column" key={currentWeightClass.id}>
-            <h2 className="goals-weight-class-header">{currentWeightClass.name}</h2>
+            <h2 className="goals-weight-class-header">{currentWeightClass.name}: Top ranked athletes {startDate} - {endDate}</h2>
             <GoalsWeightClass
               weightClass={currentWeightClass}
               safeCount={getCount(currentWeightClass)}

@@ -19,7 +19,7 @@ export interface WeightClassAnalog {
 export interface WeightClass {
   id: string;
   name: string;
-  sport80Id: number;
+  sport80Id: number; // We may sometimes not have these, but always ts-ignore the file for those specific cases. 
   minBodyweight: string;
   maxBodyweight: string;
   gender: 'male' | 'female';

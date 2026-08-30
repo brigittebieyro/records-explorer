@@ -92,12 +92,12 @@ export const getSheetRoute = (sheetId: string, sheetName: string): string => {
   return `${_sheetsBaseUrl}/${sheetId}/values/${sheetName}?key=${_googleKey}`;
 };
 // for current records:
-// export const currentRecordsSheetId = '1EJgLNWI4v5KZo780RIZ6zSsaDnOinuhJHQOvZoDL8BM'; // Testing sheet with past data clone. Use locally only.
-export const currentRecordsSheetId = '1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ'; // Real sheet! Link is public! DO NOT alter data for testing.
-export const currentRecordsSheetName = 'Raw_Data';
-export const priorRecordsSheetNames = ['Pre-Aug2026', 'Pre-June2025', 'Pre-2018'];
+// export const currentRecordsSheetId = '1EJgLNWI4v5KZo780RIZ6zSsaDnOinuhJHQOvZoDL8BM'; // Test sheet. 
+export const currentRecordsSheetId = '1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ'; // Records sheet id. Production data! Link is public! DO NOT alter data for testing.
+export const currentRecordsSheetName = 'Post-Aug2026';
+export const priorRecordsSheetNames = ['Raw_Data', 'Pre-June2025', 'Pre-2018']; // Raw_Data is pre-Aug2026. There is a display sheet which references it, and we are not ready to rename.
 export const publicSpreadsheetLink =
-  'https://docs.google.com/spreadsheets/d/1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ';
+  'https://docs.google.com/spreadsheets/d/1EJgLNWI4v5KZo780RIZ6zSsaDnOinuhJHQOvZoDL8BM';
 
 // ----------------------------------------------------------------------------------------------------------------
 // External Links

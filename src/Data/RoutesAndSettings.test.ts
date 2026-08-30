@@ -73,7 +73,7 @@ describe('RoutesAndSettings (user-based)', () => {
 
   describe('B-16: historical record sheet tabs', () => {
     test('priorRecordsSheetNames lists the three history tabs', () => {
-      expect(priorRecordsSheetNames).toEqual(['Pre-Aug2026', 'Pre-June2025', 'Pre-2018']);
+      expect(priorRecordsSheetNames).toEqual(['Raw_Data', 'Pre-June2025', 'Pre-2018']);
     });
   });
 

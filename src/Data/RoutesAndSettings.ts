@@ -73,8 +73,12 @@ export const headers: Record<string, string> = {
     '',
   'Access-Control-Allow-Origin': '*',
 };
-// New weight classes begin August 1, 2026
-export const endDate = '2026-08-01';
+// The current weight classes took effect August 1, 2026 (see defaultWeightClasses.ts), and
+// each class supplies its own start date. Queries run through tomorrow so that meets logged
+// today are always inside the range.
+const _tomorrow = new Date();
+_tomorrow.setDate(_tomorrow.getDate() + 1);
+export const endDate = _tomorrow.toISOString().split('T')[0];
 // New york WSO starts tracking records in 1998, no reason we can't do the same.
 export const allTimeStartDate = '1998-01-01';
 export const youthAllTimeStartDate = '2014-01-01'; // This is a magic number - looking for a date which captures history, without the source API throwing errors.

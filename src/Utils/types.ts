@@ -19,7 +19,7 @@ export interface WeightClassAnalog {
 export interface WeightClass {
   id: string;
   name: string;
-  sport80Id: number; // We may sometimes not have these, but always ts-ignore the file for those specific cases. 
+  sport80Id: number; // We may sometimes not have these, but always ts-ignore the file for those specific cases.
   minBodyweight: string;
   maxBodyweight: string;
   gender: 'male' | 'female';
@@ -70,6 +70,9 @@ export interface PriorRecord {
   ageMax: number;
   bodyWeightMin: number;
   bodyWeightMax: number;
+  // The sheets write an open-ended top class as '>86'. bodyWeightMax holds the numeric
+  // bound (86) for display; this flag says the class actually has no ceiling.
+  bodyWeightMaxIsOpen: boolean;
   lift: string;
   weight: string;
   lifter: string;

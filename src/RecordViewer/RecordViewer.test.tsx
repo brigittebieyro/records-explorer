@@ -220,6 +220,63 @@ describe('RecordViewer helpers (user-based)', () => {
       expect(records[0].yearSpan).toBe('2018 - 2025');
     });
 
+    test("matches masters rows, which the sheets label with a gender prefix ('W35')", () => {
+      const mastersAgeGroup = getAgeGroup('35') as AgeGroup;
+      const rows = [
+        makeHistoricalRow({ ageGroup: 'W35', lifter: 'Masters Woman' }),
+        makeHistoricalRow({ ageGroup: 'M35', gender: 'M', lifter: 'Masters Man' }),
+        makeHistoricalRow({ ageGroup: 'W40', lifter: 'Wrong Masters Group' }),
+      ];
+
+      const records = computeHistoricalRecordsForWeightClass(
+        openWeightClass,
+        mastersAgeGroup,
+        rows
+      );
+
+      expect(records).toHaveLength(1);
+      expect(records[0].lifter).toBe('Masters Woman');
+      expect(records[0].ageGroup).toBe('35');
+    });
+
+    test('keeps a record class that straddles the top of the current class', () => {
+      // Women's 49kg is 0 - 49, so a 45 - 53kg class shares the 45 - 49kg band.
+      const rows = [makeHistoricalRow({ bwMin: '45', bwMax: '53', lifter: 'Straddles Top' })];
+
+      const records = computeHistoricalRecordsForWeightClass(openWeightClass, openAgeGroup, rows);
+
+      expect(records).toHaveLength(1);
+      expect(records[0].lifter).toBe('Straddles Top');
+    });
+
+    test('drops a record class that only meets the current class at a boundary', () => {
+      const rows = [makeHistoricalRow({ bwMin: '49', bwMax: '55', lifter: 'Touches Only' })];
+
+      expect(
+        computeHistoricalRecordsForWeightClass(openWeightClass, openAgeGroup, rows)
+      ).toHaveLength(0);
+    });
+
+    test('keeps the lightest class, whose lower bound is 0', () => {
+      const rows = [makeHistoricalRow({ bwMin: '0', bwMax: '45', lifter: 'Lightest Class' })];
+
+      const records = computeHistoricalRecordsForWeightClass(openWeightClass, openAgeGroup, rows);
+
+      expect(records).toHaveLength(1);
+      expect(records[0].bodyWeightMin).toBe(0);
+    });
+
+    test("keeps an open-ended top class, which the sheets write as '>86'", () => {
+      const superHeavy = defaultWeightClasses.find((wc) => wc.id === 'W86plus') as WeightClass;
+      const rows = [makeHistoricalRow({ bwMin: '86', bwMax: '>86', lifter: 'Super Heavy' })];
+
+      const records = computeHistoricalRecordsForWeightClass(superHeavy, openAgeGroup, rows);
+
+      expect(records).toHaveLength(1);
+      expect(records[0].bodyWeightMax).toBe(86);
+      expect(records[0].bodyWeightMaxIsOpen).toBe(true);
+    });
+
     test('skips short rows and rows missing a date or event', () => {
       const rows = [
         makeHistoricalRow().slice(0, 10),

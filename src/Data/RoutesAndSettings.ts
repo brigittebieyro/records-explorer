@@ -85,6 +85,23 @@ export const youthAllTimeStartDate = '2014-01-01'; // This is a magic number - l
 // Older meets don't all have logitude and latitude, so we can't filter them all.
 export const localMeetStartDate = '2026-01-01';
 
+// Must be manually updated each year.
+export const nationalsData = '2027-03-07'; // Mar 7, 2027
+export const nationalsQualifyingStartDate = '2026-02-04'; //February 4, 2026 – February 4, 2027
+export const nationalsQualifyingEndDate = '2027-02-04';
+
+// Until Nationals happens, rank on the official qualifying window. Once it's past, that window is
+// stale until next year's dates are entered, so fall back to a rolling 16 months.
+export const getNationalsDateRange = (
+  today: Date = new Date()
+): { startDate: string; endDate: string } => {
+  if (today.toISOString().split('T')[0] <= nationalsData) {
+    return { startDate: nationalsQualifyingStartDate, endDate: nationalsQualifyingEndDate };
+  }
+  const lookback = new Date(today);
+  lookback.setMonth(lookback.getMonth() - 16);
+  return { startDate: lookback.toISOString().split('T')[0], endDate };
+};
 // ----------------------------------------------------------------------------------------------------------------
 // Google Sheets Routes for Prior Recognized Records
 // ----------------------------------------------------------------------------------------------------------------
@@ -96,10 +113,10 @@ export const getSheetRoute = (sheetId: string, sheetName: string): string => {
   return `${_sheetsBaseUrl}/${sheetId}/values/${sheetName}?key=${_googleKey}`;
 };
 // for current records:
-// export const currentRecordsSheetId = '1EJgLNWI4v5KZo780RIZ6zSsaDnOinuhJHQOvZoDL8BM'; // Test sheet. 
+// export const currentRecordsSheetId = '1EJgLNWI4v5KZo780RIZ6zSsaDnOinuhJHQOvZoDL8BM'; // Test sheet.
 export const currentRecordsSheetId = '1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ'; // Records sheet id. Production data! Link is public! DO NOT alter data for testing.
 export const currentRecordsSheetName = 'Post-Aug2026';
-export const priorRecordsSheetNames = ['Raw_Data', 'Pre-June2025', 'Pre-2018']; // Raw_Data is pre-Aug2026. There is a display sheet which references it, and we are not ready to rename.
+export const priorRecordsSheetNames = ['Pre-Aug2026', 'Pre-June2025', 'Pre-2018']; // Raw_Data is pre-Aug2026. There is a display sheet which references it, and we are not ready to rename.
 export const publicSpreadsheetLink =
   'https://docs.google.com/spreadsheets/d/1EJgLNWI4v5KZo780RIZ6zSsaDnOinuhJHQOvZoDL8BM';
 

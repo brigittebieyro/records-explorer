@@ -1,10 +1,12 @@
 import {
   americanRecordsUrl,
+  endDate,
   getIndividualMeetResultsRoute,
   getLifterDataRoute,
   getLifterId,
   getLocalMeetByNameRoute,
   getMeetsRoute,
+  getNationalsDateRange,
   getRankingsRoute,
   getSheetRoute,
   githubUrl,
@@ -15,6 +17,8 @@ import {
   maxCleanAndJerk,
   maxSnatch,
   maxTotal,
+  nationalsQualifyingEndDate,
+  nationalsQualifyingStartDate,
   priorRecordsSheetNames,
   publicSpreadsheetLink,
   usawRankingsPublicSiteLink,
@@ -73,7 +77,7 @@ describe('RoutesAndSettings (user-based)', () => {
 
   describe('B-16: historical record sheet tabs', () => {
     test('priorRecordsSheetNames lists the three history tabs', () => {
-      expect(priorRecordsSheetNames).toEqual(['Raw_Data', 'Pre-June2025', 'Pre-2018']);
+      expect(priorRecordsSheetNames).toEqual(['Pre-Aug2026', 'Pre-June2025', 'Pre-2018']);
     });
   });
 
@@ -120,6 +124,30 @@ describe('RoutesAndSettings (user-based)', () => {
       expect(wsoBoundary.north).toBeGreaterThan(wsoBoundary.south);
       expect(wsoBoundary.east).toBeGreaterThan(wsoBoundary.west);
       expect(wsoBoundary).toEqual({ north: 42.01, south: 34.79, west: -124.41, east: -114.13 });
+    });
+  });
+
+  describe('D-01: nationals qualification date range', () => {
+    // Nationals is 2027-03-07, qualifying window 2026-02-04 through 2027-02-04.
+    test('well before Nationals, the official qualifying window is used', () => {
+      expect(getNationalsDateRange(new Date('2026-08-29'))).toEqual({
+        startDate: nationalsQualifyingStartDate,
+        endDate: nationalsQualifyingEndDate,
+      });
+    });
+
+    test('the qualifying window still applies on the day of Nationals', () => {
+      expect(getNationalsDateRange(new Date('2027-03-07'))).toEqual({
+        startDate: nationalsQualifyingStartDate,
+        endDate: nationalsQualifyingEndDate,
+      });
+    });
+
+    test('once Nationals has passed, the range falls back to the last 16 months', () => {
+      expect(getNationalsDateRange(new Date('2027-03-08'))).toEqual({
+        startDate: '2025-11-08',
+        endDate,
+      });
     });
   });
 

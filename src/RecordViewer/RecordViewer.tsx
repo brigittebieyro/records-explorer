@@ -24,7 +24,7 @@ import {
   u15WeightClasses,
   u17WeightClasses,
 } from '../Data/youthWeightClasses';
-import { getAgeGroup, getWeightClassSet } from '../Utils/Utils';
+import { getAgeGroup, getWeightClassSet, normalizeSheetAgeGroup } from '../Utils/Utils';
 import {
   AgeGroup,
   AgeGroupRecordSet,
@@ -85,13 +85,18 @@ export function computeHistoricalRecordsForWeightClass(
     const gender = row[5] === 'F' ? 'female' : 'male';
     if (!row[13] || !row[14]) return;
     const yearSpan = `${new Date(row[0]).getFullYear()} - ${new Date(row[1]).getFullYear()}`;
+    // The top class of every set is written '>86' rather than as a number. Keep the numeric
+    // bound so the row can be labelled, and remember that the class has no real ceiling.
+    const rawBodyWeightMax = String(row[9]).trim();
+    const bodyWeightMaxIsOpen = rawBodyWeightMax.startsWith('>');
     const record: PriorRecord = {
-      ageGroup: row[4].toUpperCase(),
+      ageGroup: normalizeSheetAgeGroup(row[4]),
       gender: gender,
       ageMin: parseInt(row[6]),
       ageMax: parseInt(row[7]),
-      bodyWeightMin: parseInt(row[8]),
-      bodyWeightMax: parseInt(row[9]),
+      bodyWeightMin: parseFloat(row[8]),
+      bodyWeightMax: parseFloat(bodyWeightMaxIsOpen ? rawBodyWeightMax.slice(1) : rawBodyWeightMax),
+      bodyWeightMaxIsOpen: bodyWeightMaxIsOpen,
       lift: row[10],
       weight: row[11],
       lifter: row[12],
@@ -102,16 +107,18 @@ export function computeHistoricalRecordsForWeightClass(
     if (
       ageGroup.id === record.ageGroup &&
       weightClass.gender === record.gender &&
-      record.bodyWeightMin &&
-      record.bodyWeightMax
+      // 0 is a real lower bound (the lightest class in every set), so test for a parsed
+      // number rather than truthiness.
+      !Number.isNaN(record.bodyWeightMin) &&
+      !Number.isNaN(record.bodyWeightMax)
     ) {
-      const classMin = parseInt(weightClass.minBodyweight);
-      const classMax = parseInt(weightClass.maxBodyweight);
-      if (
-        (classMin <= record.bodyWeightMin && classMin >= record.bodyWeightMin) ||
-        (classMin <= record.bodyWeightMax && classMax >= record.bodyWeightMax) ||
-        (classMin >= record.bodyWeightMin && classMax <= record.bodyWeightMax)
-      ) {
+      const classMin = parseFloat(weightClass.minBodyweight);
+      const classMax = parseFloat(weightClass.maxBodyweight);
+      const recordMax = record.bodyWeightMaxIsOpen ? Infinity : record.bodyWeightMax;
+      // Two classes overlap when each one starts below where the other ends. Both
+      // comparisons are strict so that classes which only meet at a shared boundary
+      // (77-86kg against 69.01-77kg) are not treated as overlapping.
+      if (classMin < recordMax && record.bodyWeightMin < classMax) {
         records.push(record);
       }
     }

@@ -18,6 +18,9 @@ interface GoalsWeightClassProps {
 
 type GoalsStatus = 'inprogress' | 'listed' | 'complete';
 
+// Rows shown past the qualifying cutoff: athletes who get in if others skip the event.
+const maybeCount = 10;
+
 function GoalsWeightClass({ weightClass, safeCount, startDate, endDate }: GoalsWeightClassProps) {
   const [status, setStatus] = useState<GoalsStatus>('inprogress');
   const [lifters, setLifters] = useState<CombinedLiftData[]>([]);
@@ -73,7 +76,8 @@ function GoalsWeightClass({ weightClass, safeCount, startDate, endDate }: GoalsW
           weight_class: wtClass.sport80Id,
         },
       });
-      const response = await fetch(getRankingsRoute(safeCount + 5), {
+      // Two spares beyond what we render, to absorb athletes dropped during verification.
+      const response = await fetch(getRankingsRoute(safeCount + maybeCount + 2), {
         headers,
         body,
         method: 'POST',
@@ -113,7 +117,7 @@ function GoalsWeightClass({ weightClass, safeCount, startDate, endDate }: GoalsW
       )}
       {status !== 'inprogress' && (
         <>
-          {lifters.slice(0, safeCount + 3).map((lifter, index) => (
+          {lifters.slice(0, safeCount + maybeCount).map((lifter, index) => (
             <div key={`goals-${index}-${lifter.name}`}>
               <p
                 className={`goals-list-item ${lifter.wso === 'California North Central' ? 'goals-list-highlight' : ''} ${index >= safeCount ? 'goals-item-tentative' : ''}`}
@@ -122,7 +126,13 @@ function GoalsWeightClass({ weightClass, safeCount, startDate, endDate }: GoalsW
                 {lifter.total}kg &bull; {lifter.name}
                 {lifter.wso === 'California North Central' && <span> &bull; {lifter.club}</span>}
                 {lifter.wso !== 'California North Central' && <span> &bull; {lifter.wso}</span>}
-                {index >= safeCount && <span> &bull; Probable</span>}
+                {lifter.lift_date && <span> &bull; {lifter.lift_date}</span>}
+                {index >= safeCount && (
+                  <span>
+                    {' '}
+                    &bull; <i>Possible</i>
+                  </span>
+                )}
               </p>
             </div>
           ))}

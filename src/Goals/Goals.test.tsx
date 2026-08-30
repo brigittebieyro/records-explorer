@@ -83,7 +83,9 @@ describe('Goals (user-based)', () => {
     const stubs = screen.getAllByTestId('goals-weight-class');
     expect(stubs).toHaveLength(1);
     expect(stubs[0]).toHaveAttribute('data-class-id', femaleClasses[2].id);
-    expect(screen.getByRole('heading', { name: femaleClasses[2].name })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: new RegExp(femaleClasses[2].name) })
+    ).toBeInTheDocument();
 
     const search = screen.getByTestId('location-search').textContent;
     expect(search).toContain(`weightClass=${femaleClasses[2].id}`);

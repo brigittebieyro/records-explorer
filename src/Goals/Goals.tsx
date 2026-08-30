@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import OptionsBar from '../Common/OptionsBar';
 import { defaultWeightClasses } from '../Data/defaultWeightClasses';
-import { endDate, usawRankingsPublicSiteLink, wsoName } from '../Data/RoutesAndSettings';
+import {
+  getNationalsDateRange,
+  usawRankingsPublicSiteLink,
+  wsoName,
+} from '../Data/RoutesAndSettings';
 import GoalsWeightClass from './components/GoalsWeightClass';
 import { WeightClass } from '../Utils/types';
 
@@ -16,9 +20,7 @@ const getCount = (weightClass: WeightClass): number => {
   return index < 2 ? 6 : 12;
 };
 
-const oneYearAgo = new Date();
-oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-const startDate = oneYearAgo.toISOString().split('T')[0];
+const { startDate, endDate } = getNationalsDateRange();
 
 function Goals() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -59,7 +61,7 @@ function Goals() {
       </p>
       <p className="goals-descriptive-text">
         Of course not every in the national top group will attempt to sign up for Nationals. We're
-        showing just a few extras, but if you're within 20kg of the bottom totals in your group,{' '}
+        showing up to ten extras, but if you're within 20kg of the bottom totals in your group,{' '}
         <strong>give it a shot and sign up</strong>. The final ranking will not be out of everyone
         who <strong>signs up</strong>, not solely the national ranking.{' '}
       </p>
@@ -96,10 +98,10 @@ function Goals() {
         onReset={
           currentWeightClass
             ? () => {
-                setSelectedWeightClass('');
-                setCurrentWeightClass(undefined);
-                setSearchParams({});
-              }
+              setSelectedWeightClass('');
+              setCurrentWeightClass(undefined);
+              setSearchParams({});
+            }
             : undefined
         }
       />
@@ -117,7 +119,7 @@ function Goals() {
         <div className="goals-results-parent">
           <div className="goals-description-column common-text-header">{descriptiveText}</div>
           <section className="goals-rankings-column" key={currentWeightClass.id}>
-            <h2 className="goals-weight-class-header">{currentWeightClass.name}</h2>
+            <h2 className="goals-weight-class-header">{currentWeightClass.name}: Top ranked athletes {startDate} - {endDate}</h2>
             <GoalsWeightClass
               weightClass={currentWeightClass}
               safeCount={getCount(currentWeightClass)}

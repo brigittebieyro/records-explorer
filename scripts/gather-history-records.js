@@ -4,8 +4,10 @@
  * Historic Records Gathering Script
  *
  * Fetches the best lifts for every age group / weight class combination defined
- * in weightClasses2018, querying only within each weight class's own start/end
- * date window.  Outputs a CSV of all results (no comparison against current records).
+ * in one of the historic sets in src/Data/historicWeightClasses.ts, selected by a
+ * -YYYY argument (weightClasses1998, weightClasses2018, weightClasses2025), querying
+ * only within each weight class's own start/end date window.  Outputs a CSV of all
+ * results (no comparison against current records).
  */
 
 const fs = require('fs');
@@ -443,7 +445,9 @@ function generateCsv(results) {
 async function main() {
   const yearArg = process.argv.slice(2).find(a => /^-\d{4}$/.test(a));
   if (!yearArg) {
-    console.error('Year parameter is missing. Usage: node gather-history-records.js -YYYY');
+    console.error(
+      'Year parameter is missing. Usage: node gather-history-records.js -YYYY (-1998, -2018, or -2025)',
+    );
     process.exit(1);
   }
   const variableName = `weightClasses${yearArg.slice(1)}`;

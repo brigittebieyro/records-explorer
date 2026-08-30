@@ -7,6 +7,7 @@ import RecordViewer, {
   computeStandardsForWeightClass,
 } from './RecordViewer';
 import { defaultWeightClasses } from '../Data/defaultWeightClasses';
+import { currentRecordsSheetName } from '../Data/RoutesAndSettings';
 import { u13WeightClasses } from '../Data/youthWeightClasses';
 import { getAgeGroup } from '../Utils/Utils';
 import { AgeGroup, WeightClass } from '../Utils/types';
@@ -38,13 +39,13 @@ jest.mock(
 
 jest.mock('./components/AssociatedPriorRecords', () => () => <div data-testid="prior-records" />);
 
-// Row shape for the Raw_Data sheet (see computeStandardsForWeightClass):
+// Row shape for the current standards sheet (see computeStandardsForWeightClass):
 // [2]=age group, [3]=gender, [7]=weight class indicator, [8]=lift, [9]=weight,
 // [10]=lifter, [11]=event, [12]=date.
 const makeStandardRow = ({
   ageKey = 'Open',
   gender = 'F',
-  indicator = '48',
+  indicator = '49',
   lift = 'Total',
   weight = '150',
   lifter = 'Jane Doe',
@@ -99,11 +100,11 @@ const makeHistoricalRow = ({
   event,
 ];
 
-const openWeightClass = defaultWeightClasses[0]; // Women's 48kg
+const openWeightClass = defaultWeightClasses[0]; // Women's 49kg
 
 const mockSheetResponses = (standardsRows: string[][], historicalRows: string[][] = []) => {
   (global.fetch as jest.Mock).mockImplementation((url: string) => {
-    const values = String(url).includes('Raw_Data') ? standardsRows : historicalRows;
+    const values = String(url).includes(currentRecordsSheetName) ? standardsRows : historicalRows;
     return Promise.resolve({ ok: true, json: async () => ({ values }) });
   });
 };
@@ -152,11 +153,11 @@ describe('RecordViewer helpers (user-based)', () => {
     });
 
     test('does not duplicate a youth age group under the default weight class it shares a max-bodyweight indicator with', () => {
-      // Default Women's 48kg and U17 Girls 48kg both use indicator '48', but represent
-      // different bodyweight brackets (0-48 vs 44.01-48).
+      // Default Women's 49kg and U17 Girls 49kg both use indicator '49', but represent
+      // different bodyweight brackets (0-49 vs 45.01-49).
       const rows = [
-        makeStandardRow({ ageKey: 'Open', indicator: '48', lifter: 'Open Lifter' }),
-        makeStandardRow({ ageKey: 'U17', indicator: '48', lifter: 'U17 Lifter' }),
+        makeStandardRow({ ageKey: 'Open', indicator: '49', lifter: 'Open Lifter' }),
+        makeStandardRow({ ageKey: 'U17', indicator: '49', lifter: 'U17 Lifter' }),
       ];
 
       const entries = buildAllCurrentRecords(rows);
@@ -165,7 +166,7 @@ describe('RecordViewer helpers (user-based)', () => {
         entry.groups.some((group) => group.ageGroup.id === 'U17')
       );
       expect(entriesWithU17).toHaveLength(1);
-      expect(entriesWithU17[0].weightClass.minBodyweight).toBe('44.01');
+      expect(entriesWithU17[0].weightClass.minBodyweight).toBe('45.01');
 
       const defaultEntry = entries.find((entry) => entry.weightClass.minBodyweight === '0');
       expect(defaultEntry?.groups.map((group) => group.ageGroup.id)).toEqual(['OPEN']);
@@ -217,6 +218,63 @@ describe('RecordViewer helpers (user-based)', () => {
       expect(records).toHaveLength(1);
       expect(records[0].lifter).toBe('Jane Doe');
       expect(records[0].yearSpan).toBe('2018 - 2025');
+    });
+
+    test("matches masters rows, which the sheets label with a gender prefix ('W35')", () => {
+      const mastersAgeGroup = getAgeGroup('35') as AgeGroup;
+      const rows = [
+        makeHistoricalRow({ ageGroup: 'W35', lifter: 'Masters Woman' }),
+        makeHistoricalRow({ ageGroup: 'M35', gender: 'M', lifter: 'Masters Man' }),
+        makeHistoricalRow({ ageGroup: 'W40', lifter: 'Wrong Masters Group' }),
+      ];
+
+      const records = computeHistoricalRecordsForWeightClass(
+        openWeightClass,
+        mastersAgeGroup,
+        rows
+      );
+
+      expect(records).toHaveLength(1);
+      expect(records[0].lifter).toBe('Masters Woman');
+      expect(records[0].ageGroup).toBe('35');
+    });
+
+    test('keeps a record class that straddles the top of the current class', () => {
+      // Women's 49kg is 0 - 49, so a 45 - 53kg class shares the 45 - 49kg band.
+      const rows = [makeHistoricalRow({ bwMin: '45', bwMax: '53', lifter: 'Straddles Top' })];
+
+      const records = computeHistoricalRecordsForWeightClass(openWeightClass, openAgeGroup, rows);
+
+      expect(records).toHaveLength(1);
+      expect(records[0].lifter).toBe('Straddles Top');
+    });
+
+    test('drops a record class that only meets the current class at a boundary', () => {
+      const rows = [makeHistoricalRow({ bwMin: '49', bwMax: '55', lifter: 'Touches Only' })];
+
+      expect(
+        computeHistoricalRecordsForWeightClass(openWeightClass, openAgeGroup, rows)
+      ).toHaveLength(0);
+    });
+
+    test('keeps the lightest class, whose lower bound is 0', () => {
+      const rows = [makeHistoricalRow({ bwMin: '0', bwMax: '45', lifter: 'Lightest Class' })];
+
+      const records = computeHistoricalRecordsForWeightClass(openWeightClass, openAgeGroup, rows);
+
+      expect(records).toHaveLength(1);
+      expect(records[0].bodyWeightMin).toBe(0);
+    });
+
+    test("keeps an open-ended top class, which the sheets write as '>86'", () => {
+      const superHeavy = defaultWeightClasses.find((wc) => wc.id === 'W86plus') as WeightClass;
+      const rows = [makeHistoricalRow({ bwMin: '86', bwMax: '>86', lifter: 'Super Heavy' })];
+
+      const records = computeHistoricalRecordsForWeightClass(superHeavy, openAgeGroup, rows);
+
+      expect(records).toHaveLength(1);
+      expect(records[0].bodyWeightMax).toBe(86);
+      expect(records[0].bodyWeightMaxIsOpen).toBe(true);
     });
 
     test('skips short rows and rows missing a date or event', () => {
@@ -324,7 +382,7 @@ describe('RecordViewer component (user-based)', () => {
 
     renderRecordViewer();
 
-    // Women's 86+kg has no U11 counterpart (W48 exists in both sets as Girls 48kg).
+    // Women's 86+kg has no U11 counterpart (W49 exists in both sets as Girls 49kg).
     await userEvent.selectOptions(screen.getByLabelText('Weight Class'), 'W86plus');
     expect(screen.getByRole('button', { name: 'Go' })).toBeEnabled();
 
@@ -395,7 +453,7 @@ describe('RecordViewer component (user-based)', () => {
       json: () => Promise<{ values: string[][] }>;
     }) => void = () => {};
     (global.fetch as jest.Mock).mockImplementation((url: string) => {
-      if (String(url).includes('Raw_Data')) {
+      if (String(url).includes(currentRecordsSheetName)) {
         return new Promise((resolve) => {
           resolveStandards = resolve;
         });
@@ -432,7 +490,7 @@ describe('RecordViewer component (user-based)', () => {
       json: () => Promise<{ values: string[][] }>;
     }) => void = () => {};
     (global.fetch as jest.Mock).mockImplementation((url: string) => {
-      if (String(url).includes('Raw_Data')) {
+      if (String(url).includes(currentRecordsSheetName)) {
         return new Promise((resolve) => {
           resolveStandards = resolve;
         });

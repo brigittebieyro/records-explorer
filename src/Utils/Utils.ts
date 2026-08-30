@@ -13,6 +13,16 @@ export const getAgeGroup = (ageGroupId: string): AgeGroup | undefined => {
   return ageGroups.find((group) => group.id === ageGroupId);
 };
 
+// The records sheets label masters groups with a gender prefix ('W35', 'M40'), while our
+// AgeGroup ids are the bare starting age ('35', '40'). Open/Junior/youth labels already
+// match. The current-records sheet sidesteps this by keying masters off its ageMin column;
+// the historical sheets have no such column in the same position, so normalize here.
+export const normalizeSheetAgeGroup = (sheetAgeGroup: string): string => {
+  const value = String(sheetAgeGroup).toUpperCase();
+  const mastersLabel = /^[WM](\d{2})$/.exec(value);
+  return mastersLabel ? mastersLabel[1] : value;
+};
+
 export const getWeightClassSet = (ageGroup: AgeGroup | undefined | null): WeightClass[] => {
   if (!ageGroup || !ageGroup.customWeightClasses) {
     return defaultWeightClasses;

@@ -15,6 +15,7 @@ import {
   hashPassword,
   isWithinPlausibilityCaps,
   isWithinWSOBoundary,
+  normalizeSheetAgeGroup,
   shouldIncludePastLifter,
   sortLifts,
 } from './Utils';
@@ -49,6 +50,28 @@ describe('Utils (user-based)', () => {
 
     test('G-05: returns undefined for a bogus id', () => {
       expect(getAgeGroup('BOGUS')).toBeUndefined();
+    });
+  });
+
+  describe('B-21: normalizeSheetAgeGroup', () => {
+    test('strips the gender prefix the sheets put on masters brackets', () => {
+      expect(normalizeSheetAgeGroup('W35')).toBe('35');
+      expect(normalizeSheetAgeGroup('M40')).toBe('40');
+      expect(normalizeSheetAgeGroup('w90')).toBe('90');
+    });
+
+    test('leaves the labels that already match our ids alone, upcased', () => {
+      expect(normalizeSheetAgeGroup('OPEN')).toBe('OPEN');
+      expect(normalizeSheetAgeGroup('open')).toBe('OPEN');
+      expect(normalizeSheetAgeGroup('u13')).toBe('U13');
+      expect(normalizeSheetAgeGroup('JR')).toBe('JR');
+    });
+
+    test('every normalized label is an id we can resolve to an age group', () => {
+      for (const group of ageGroups) {
+        const prefixed = /^\d{2}$/.test(group.id) ? `W${group.id}` : group.id;
+        expect(getAgeGroup(normalizeSheetAgeGroup(prefixed))).toBeDefined();
+      }
     });
   });
 

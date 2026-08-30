@@ -130,14 +130,14 @@ describe('GoalsWeightClass (user-based)', () => {
     expect(screen.getByText(/180kg • Jane Doe/)).toBeInTheDocument();
   });
 
-  test('D-02: requests rankings for the weight class with safeCount + 5 entries', async () => {
+  test('D-02: requests rankings for the weight class with room for the maybes plus spares', async () => {
     mockFetchResponses([]);
 
     renderGoalsWeightClass({ safeCount: 6 });
 
     await waitFor(() => expect(global.fetch).toHaveBeenCalled());
     const [url, options] = (global.fetch as jest.Mock).mock.calls[0];
-    expect(String(url)).toContain('l=11'); // safeCount 6 + 5
+    expect(String(url)).toContain('l=18'); // safeCount 6 + 10 maybes + 2 spares
     expect(options.method).toBe('POST');
     const body = JSON.parse(options.body);
     expect(body.filters.weight_class).toBe(709);
@@ -145,17 +145,18 @@ describe('GoalsWeightClass (user-based)', () => {
     expect(body.filters.date_range_end).toBe('2026-08-01');
   });
 
-  test('D-03: renders at most safeCount + 3 entries', async () => {
-    const lifters = Array.from({ length: 7 }, (_, i) =>
+  test('D-03: renders at most safeCount + 10 entries', async () => {
+    const lifters = Array.from({ length: 15 }, (_, i) =>
       makeGoalLifter({ name: `Lifter ${i + 1}`, total: 200 - i })
     );
     mockFetchResponses(lifters);
 
     const { container } = renderGoalsWeightClass({ safeCount: 2 });
 
-    await waitFor(() => expect(screen.getByText(/Lifter 1/)).toBeInTheDocument());
+    // "Lifter 9" is the last name that isn't also a prefix of a higher-numbered one.
+    await waitFor(() => expect(screen.getByText(/Lifter 9/)).toBeInTheDocument());
     await waitForVerificationToFinish();
-    expect(container.querySelectorAll('.goals-list-item')).toHaveLength(5);
+    expect(container.querySelectorAll('.goals-list-item')).toHaveLength(12);
   });
 
   test('D-04: WSO members are gold-highlighted and show their club', async () => {
@@ -182,6 +183,31 @@ describe('GoalsWeightClass (user-based)', () => {
     expect(outsideRow?.textContent).toContain('Pacific Northwest');
   });
 
+  test('D-04: unset club and WSO columns render as text instead of crashing', async () => {
+    // The rankings API returns { type: 'unset' } in place of a string for empty columns.
+    mockFetchResponses([
+      makeGoalLifter({
+        name: 'Member Lifter',
+        wso: 'California North Central',
+        club: { type: 'unset' },
+      }),
+      makeGoalLifter({ name: 'Outside Lifter', total: 170, wso: { type: 'unset' } }),
+    ]);
+
+    const { container } = renderGoalsWeightClass();
+
+    await waitFor(() => expect(screen.getByText(/Member Lifter/)).toBeInTheDocument());
+    await waitForVerificationToFinish();
+
+    const items = Array.from(container.querySelectorAll('.goals-list-item'));
+    const memberRow = items.find((item) => item.textContent?.includes('Member Lifter'));
+    const outsideRow = items.find((item) => item.textContent?.includes('Outside Lifter'));
+    expect(memberRow?.textContent).toContain('Unaffiliated');
+    expect(memberRow).toHaveClass('goals-list-highlight');
+    expect(outsideRow?.textContent).toContain('170kg • Outside Lifter');
+    expect(outsideRow?.textContent).not.toContain('unset');
+  });
+
   test('D-05: entries below the qualifying cutoff are marked tentative', async () => {
     const lifters = Array.from({ length: 4 }, (_, i) =>
       makeGoalLifter({ name: `Lifter ${i + 1}`, total: 200 - i })
@@ -199,8 +225,19 @@ describe('GoalsWeightClass (user-based)', () => {
     expect(items[1]).not.toHaveClass('goals-item-tentative');
     expect(items[2]).toHaveClass('goals-item-tentative');
     expect(items[3]).toHaveClass('goals-item-tentative');
-    expect(items[2].textContent).toContain('Probable');
-    expect(items[0].textContent).not.toContain('Probable');
+    expect(items[2].textContent).toContain('Possible');
+    expect(items[0].textContent).not.toContain('Possible');
+  });
+
+  test('D-04: each entry shows the date of the lift behind the total', async () => {
+    mockFetchResponses([makeGoalLifter({ name: 'Dated Lifter', lift_date: '2026-01-15' })]);
+
+    const { container } = renderGoalsWeightClass();
+
+    await waitFor(() => expect(screen.getByText(/Dated Lifter/)).toBeInTheDocument());
+    await waitForVerificationToFinish();
+
+    expect(container.querySelector('.goals-list-item')?.textContent).toContain('2026-01-15');
   });
 
   test('D-05: WSO member highlighting still applies to tentative rows', async () => {

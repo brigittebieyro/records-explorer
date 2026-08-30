@@ -3,17 +3,26 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import Goals from './Goals';
 import { defaultWeightClasses } from '../Data/defaultWeightClasses';
+import { getNationalsDateRange } from '../Data/RoutesAndSettings';
 import { WeightClass } from '../Utils/types';
 
 jest.mock(
   './components/GoalsWeightClass',
-  () => (props: { weightClass: WeightClass; safeCount: number }) => (
-    <div
-      data-testid="goals-weight-class"
-      data-safecount={props.safeCount}
-      data-class-id={props.weightClass.id}
-    />
-  )
+  () =>
+    (props: {
+      weightClass: WeightClass;
+      safeCount: number;
+      startDate: string;
+      endDate: string;
+    }) => (
+      <div
+        data-testid="goals-weight-class"
+        data-safecount={props.safeCount}
+        data-class-id={props.weightClass.id}
+        data-startdate={props.startDate}
+        data-enddate={props.endDate}
+      />
+    )
 );
 
 const femaleClasses = defaultWeightClasses.filter((wc) => wc.gender === 'female');
@@ -74,10 +83,23 @@ describe('Goals (user-based)', () => {
     const stubs = screen.getAllByTestId('goals-weight-class');
     expect(stubs).toHaveLength(1);
     expect(stubs[0]).toHaveAttribute('data-class-id', femaleClasses[2].id);
-    expect(screen.getByRole('heading', { name: femaleClasses[2].name })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: new RegExp(femaleClasses[2].name) })
+    ).toBeInTheDocument();
 
     const search = screen.getByTestId('location-search').textContent;
     expect(search).toContain(`weightClass=${femaleClasses[2].id}`);
+  });
+
+  test('D-01: rankings are pulled over the nationals qualification date range', async () => {
+    const { startDate, endDate } = getNationalsDateRange();
+
+    renderGoals();
+    await runSearch(femaleClasses[0].id);
+
+    const stub = screen.getByTestId('goals-weight-class');
+    expect(stub).toHaveAttribute('data-startdate', startDate);
+    expect(stub).toHaveAttribute('data-enddate', endDate);
   });
 
   test('the two lightest classes per gender get a qualifying count of 6, the rest 12', async () => {

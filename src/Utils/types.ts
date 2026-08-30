@@ -19,7 +19,7 @@ export interface WeightClassAnalog {
 export interface WeightClass {
   id: string;
   name: string;
-  sport80Id: number;
+  sport80Id: number; // We may sometimes not have these, but always ts-ignore the file for those specific cases.
   minBodyweight: string;
   maxBodyweight: string;
   gender: 'male' | 'female';
@@ -37,7 +37,8 @@ export interface LifterRankingData {
   total: number;
   lifter_age: string;
   lift_date: string;
-  club?: string | null;
+  // Empty text columns come back as { type: 'unset' }, not as a string, so always narrow before rendering.
+  club?: string | null | { type: string };
   action: LifterAction[];
   bodyweight?: number;
   classData?: WeightClassAnalog;
@@ -70,6 +71,9 @@ export interface PriorRecord {
   ageMax: number;
   bodyWeightMin: number;
   bodyWeightMax: number;
+  // The sheets write an open-ended top class as '>86'. bodyWeightMax holds the numeric
+  // bound (86) for display; this flag says the class actually has no ceiling.
+  bodyWeightMaxIsOpen: boolean;
   lift: string;
   weight: string;
   lifter: string;

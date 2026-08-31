@@ -14,12 +14,20 @@ jest.mock('../Data/scripts', () => ({
     {
       name: 'Fetch Record Updates',
       description: 'Test script description.',
+      fileName: 'record-breaking-analysis.csv',
+      source: jest.fn(),
+    },
+    {
+      name: 'Fetch Adaptive Record Updates',
+      description: 'Test adaptive script description.',
+      fileName: 'adaptive-record-breaking-analysis.csv',
       source: jest.fn(),
     },
   ],
 }));
 
 const scriptSource = scripts[0].source as jest.Mock;
+const adaptiveScriptSource = scripts[1].source as jest.Mock;
 
 const getPasswordInput = (container: HTMLElement): HTMLInputElement => {
   const input = container.querySelector('input[type="password"]');
@@ -141,6 +149,22 @@ describe('Scripts (user-based)', () => {
     expect(downloadLink.download).toBe('record-breaking-analysis.csv');
     expect(downloadLink.href).toContain('blob:fake-url');
     expect(screen.getByRole('button', { name: 'Run' })).toBeEnabled();
+  });
+
+  test('F-05: each script downloads under its own filename', async () => {
+    adaptiveScriptSource.mockResolvedValue('category,lift\nAdaptive_All,Snatch');
+    const { container } = render(<Scripts />);
+    await unlock(container);
+    await userEvent.selectOptions(screen.getByLabelText('Script'), 'Fetch Adaptive Record Updates');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Run' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Download complete.')).toBeInTheDocument();
+    });
+    expect(scriptSource).not.toHaveBeenCalled();
+    const downloadLink = clickSpy.mock.instances[0] as unknown as HTMLAnchorElement;
+    expect(downloadLink.download).toBe('adaptive-record-breaking-analysis.csv');
   });
 
   test('F-04: a failing script shows the error box instead of failing silently', async () => {

@@ -17,6 +17,7 @@ import {
   isWithinWSOBoundary,
   normalizeSheetAgeGroup,
   shouldIncludePastLifter,
+  rateLimitedFetch,
   sortLifts,
 } from './Utils';
 import { CombinedLiftData } from './types';
@@ -217,6 +218,61 @@ describe('Utils (user-based)', () => {
       expect(await hashPassword('secret', 'salt-a')).not.toBe(
         await hashPassword('secret', 'salt-b')
       );
+    });
+  });
+
+  describe('rateLimitedFetch', () => {
+    const originalFetch = global.fetch;
+    const originalSetTimeout = global.setTimeout;
+    let requestedWaits: number[];
+
+    beforeEach(() => {
+      requestedWaits = [];
+      // Resolve the pacing instantly, but record what it asked to wait for. The clock is
+      // therefore frozen, so each successive slot has to ask for a further 100ms.
+      global.setTimeout = ((callback: () => void, ms?: number) => {
+        requestedWaits.push(ms ?? 0);
+        callback();
+        return 0;
+      }) as unknown as typeof global.setTimeout;
+      global.fetch = jest.fn(async () => ({ ok: true }) as Response) as unknown as typeof fetch;
+    });
+
+    afterEach(() => {
+      global.setTimeout = originalSetTimeout;
+      global.fetch = originalFetch;
+    });
+
+    test('spaces requests at least 100ms apart — ten a second at most', async () => {
+      await rateLimitedFetch('https://example.test/a');
+      await rateLimitedFetch('https://example.test/b');
+      await rateLimitedFetch('https://example.test/c');
+
+      const gaps = requestedWaits.slice(1).map((wait, index) => wait - requestedWaits[index]);
+      expect(gaps.length).toBeGreaterThanOrEqual(1);
+      expect(gaps.every((gap) => gap === 100)).toBe(true);
+    });
+
+    test('passes the url and init straight through to fetch', async () => {
+      const init = { method: 'POST', headers: { 'content-type': 'application/json' } };
+
+      await rateLimitedFetch('https://example.test/data', init);
+
+      expect(global.fetch).toHaveBeenCalledWith('https://example.test/data', init);
+    });
+
+    test('shares one budget across callers, so scripts cannot compound', async () => {
+      // Issued together rather than awaited in turn: the slot is claimed before the await,
+      // so concurrency cannot collapse the spacing.
+      await Promise.all([
+        rateLimitedFetch('https://example.test/1'),
+        rateLimitedFetch('https://example.test/2'),
+        rateLimitedFetch('https://example.test/3'),
+      ]);
+
+      const gaps = requestedWaits.slice(1).map((wait, index) => wait - requestedWaits[index]);
+      expect(gaps.every((gap) => gap === 100)).toBe(true);
+      expect(global.fetch).toHaveBeenCalledTimes(3);
     });
   });
 });

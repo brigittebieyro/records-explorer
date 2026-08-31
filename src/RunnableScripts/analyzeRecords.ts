@@ -18,6 +18,7 @@ import {
   u15WeightClasses,
   u17WeightClasses,
 } from '../Data/youthWeightClasses';
+import { csvField, rateLimitedFetch } from '../Utils/Utils';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -33,22 +34,11 @@ function getWeightClassSetForAgeGroup(ageGroup: AgeGroup): WeightClass[] {
   return youthWeightClassMap[ageGroup.id] ?? defaultWeightClasses;
 }
 
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function csvField(value: unknown): string {
-  const str = String(value ?? '');
-  return str.includes(',') || str.includes('"') || str.includes('\n')
-    ? `"${str.replace(/"/g, '""')}"`
-    : str;
-}
-
 // ─── API fetching ─────────────────────────────────────────────────────────────
 
 async function fetchCurrentRecords(): Promise<string[][]> {
   const url = getSheetRoute(currentRecordsSheetId, currentRecordsSheetName);
-  const response = await fetch(url);
+  const response = await rateLimitedFetch(url);
   if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
   const data = await response.json();
   if (!data.values) throw new Error('No data in response');
@@ -114,7 +104,7 @@ async function fetchTopAthletes(
     },
   });
   try {
-    const response = await fetch(getRankingsRoute(5), { method: 'POST', headers, body });
+    const response = await rateLimitedFetch(getRankingsRoute(5), { method: 'POST', headers, body });
     if (!response.ok) return [];
     const data = await response.json();
     return data.data || [];
@@ -129,7 +119,10 @@ async function fetchAthleteLifts(
   dateRangeEnd: string
 ): Promise<MeetRecord[]> {
   try {
-    const response = await fetch(getLifterDataRoute(lifterId), { method: 'POST', headers });
+    const response = await rateLimitedFetch(getLifterDataRoute(lifterId), {
+      method: 'POST',
+      headers,
+    });
     if (!response.ok) return [];
     const data = await response.json();
     const lifts: MeetRecord[] = data.data || [];
@@ -316,8 +309,6 @@ export async function runAnalyzeRecords(): Promise<string> {
             }
           }
         }
-
-        await delay(100);
       } catch {
         // continue on error
       }

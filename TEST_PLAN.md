@@ -144,9 +144,10 @@ deployed Fly.io environment, where the server injects API secrets at request tim
 | ID   | Test                  | Steps                                                                   | Expected result                                                                                                                          | Pass  |
 | ---- | --------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ----- |
 | F-01 | Scripts password gate | Navigate directly to `/scripts`; enter a wrong password and press Enter | "Incorrect password." shows; the tools remain hidden                                                                                     | - [ ] |
-| F-02 | Scripts unlock        | Enter the correct password (from the maintainer)                        | Script dropdown appears with "Fetch Record Updates" and a Run button                                                                     | - [ ] |
+| F-02 | Scripts unlock        | Enter the correct password (from the maintainer)                        | Script dropdown appears with "Fetch Record Updates" and "Fetch Adaptive Record Updates", plus a Run button                               | - [ ] |
 | F-03 | Run script            | Click Run and wait (do not run twice concurrently)                      | "Running…" shows, then `record-breaking-analysis.csv` downloads and "Download complete." appears; open the CSV and sanity-check contents | - [ ] |
 | F-04 | Script error display  | Run with the proxy server stopped                                       | An error message displays instead of a silent failure                                                                                    | - [ ] |
+| F-05 | Run adaptive script   | Select "Fetch Adaptive Record Updates", click Run and wait              | `adaptive-record-breaking-analysis.csv` downloads; every roster athlete resolves to a member id, and each row names an adaptive category the athlete is registered for | - [ ] |
 
 ## 8. Section G — Error handling & resilience
 

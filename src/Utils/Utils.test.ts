@@ -228,8 +228,11 @@ describe('Utils (user-based)', () => {
 
     beforeEach(() => {
       requestedWaits = [];
-      // Resolve the pacing instantly, but record what it asked to wait for. The clock is
-      // therefore frozen, so each successive slot has to ask for a further 100ms.
+      // Pin the clock. Real time advancing mid-test would shrink the waits the limiter asks
+      // for, which is correct behaviour but makes the numbers unpredictable under load.
+      jest.spyOn(Date, 'now').mockReturnValue(1_700_000_000_000);
+      // Resolve the pacing instantly, but record what it asked to wait for. With the clock
+      // frozen, each successive slot has to ask for a further 100ms.
       global.setTimeout = ((callback: () => void, ms?: number) => {
         requestedWaits.push(ms ?? 0);
         callback();
@@ -239,6 +242,7 @@ describe('Utils (user-based)', () => {
     });
 
     afterEach(() => {
+      jest.restoreAllMocks();
       global.setTimeout = originalSetTimeout;
       global.fetch = originalFetch;
     });

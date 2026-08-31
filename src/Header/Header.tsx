@@ -31,6 +31,9 @@ function Header() {
                 <li>
                   <a href="/">WSO Records & Results</a>
                 </li>
+                {/* <li>
+                  <a href="/adaptive">Adaptive WSO Records</a>
+                </li> */}
                 <li>
                   <a href="/local-meet-results">Local Meet Results</a>
                 </li>

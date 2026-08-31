@@ -184,4 +184,50 @@ describe('AllCurrentRecordsView (user-based)', () => {
     expect(columns[0].textContent).not.toContain("Men's 60kg");
     expect(columns[1].textContent).toContain("Men's 60kg");
   });
+
+  describe('reused by the adaptive records page', () => {
+    test('a caller can supply its own title and description', () => {
+      render(
+        <AllCurrentRecordsView
+          data={[makeEntry()]}
+          title="All Adaptive Record Holders"
+          description="Lorem ipsum dolor sit amet."
+        />
+      );
+
+      expect(screen.getByText('All Adaptive Record Holders')).toBeInTheDocument();
+      expect(screen.getByText('Lorem ipsum dolor sit amet.')).toBeInTheDocument();
+      expect(screen.queryByText('All Current Record Holders')).toBeNull();
+      expect(screen.queryByText(/85% of the national record standard/)).toBeNull();
+    });
+
+    test('a description node renders as real markup, links included', () => {
+      render(
+        <AllCurrentRecordsView
+          data={[makeEntry()]}
+          description={
+            <>
+              <p>First paragraph.</p>
+              <p>
+                Opt in with <a href="https://forms.example/opt-in">this form</a>.
+              </p>
+            </>
+          }
+        />
+      );
+
+      expect(screen.getByText('First paragraph.')).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'this form' })).toHaveAttribute(
+        'href',
+        'https://forms.example/opt-in'
+      );
+    });
+
+    test('a caller can distinguish an empty set from a slow fetch', () => {
+      render(<AllCurrentRecordsView data={[]} emptyContent="No adaptive records yet." />);
+
+      expect(screen.getByText('No adaptive records yet.')).toBeInTheDocument();
+      expect(screen.queryByText('Loading current records…')).toBeNull();
+    });
+  });
 });

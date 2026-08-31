@@ -34,6 +34,27 @@ describe('Header (user-based)', () => {
     expect(container.querySelectorAll('.menu-flyout a')).toHaveLength(6);
   });
 
+  // Skipped while the Adaptive WSO Records menu item is commented out in Header.tsx — the
+  // page is not ready to go live. Re-enable this and bump the link count above to 7 when the
+  // menu item is restored.
+  test.skip('A-02: Adaptive WSO Records sits directly below WSO Records & Results', () => {
+    const { container } = render(<Header />);
+    const linkText = Array.from(container.querySelectorAll('.menu-flyout a')).map(
+      (link) => link.textContent
+    );
+
+    expect(linkText.slice(0, 2)).toEqual(['WSO Records & Results', 'Adaptive WSO Records']);
+  });
+
+  test.skip('A-03: the Adaptive WSO Records link points at /adaptive', () => {
+    render(<Header />);
+
+    expect(screen.getByRole('link', { name: 'Adaptive WSO Records' })).toHaveAttribute(
+      'href',
+      '/adaptive'
+    );
+  });
+
   test('A-03: internal navigation links point at the app routes', () => {
     render(<Header />);
 

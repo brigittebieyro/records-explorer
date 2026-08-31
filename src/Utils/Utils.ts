@@ -168,6 +168,34 @@ export const isWithinWSOBoundary = (latitude: number, longitude: number): boolea
   );
 };
 
+const delay = (ms: number): Promise<void> => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+// Ten requests a second, hard ceiling. The state is module-level on purpose: every script
+// and endpoint shares one budget, because they all land on the same upstream APIs and would
+// otherwise compound. Each caller claims the next free slot before it awaits, so the spacing
+// holds even when requests are issued concurrently.
+const minRequestIntervalMs = 100;
+let nextRequestAt = 0;
+
+export const rateLimitedFetch = async (url: string, init?: RequestInit): Promise<Response> => {
+  const now = Date.now();
+  const scheduledAt = Math.max(now, nextRequestAt);
+  nextRequestAt = scheduledAt + minRequestIntervalMs;
+  const wait = scheduledAt - now;
+  if (wait > 0) await delay(wait);
+  return fetch(url, init);
+};
+
+// Shared by the runnable scripts, which all download their results as CSV.
+export const csvField = (value: unknown): string => {
+  const str = String(value ?? '');
+  return str.includes(',') || str.includes('"') || str.includes('\n')
+    ? `"${str.replace(/"/g, '""')}"`
+    : str;
+};
+
 export async function hashPassword(input: string, salt: string): Promise<string> {
   const encoded = new TextEncoder().encode(`${input}---${salt}`);
   const hashBuffer = await crypto.subtle.digest('SHA-256', encoded);

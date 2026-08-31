@@ -36,7 +36,7 @@ function Scripts() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'record-breaking-analysis.csv';
+      link.download = selectedScript.fileName;
       link.target = '_blank';
       document.body.appendChild(link);
       link.click();

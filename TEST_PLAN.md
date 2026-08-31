@@ -101,7 +101,25 @@ deployed Fly.io environment, where the server injects API secrets at request tim
 | ---- | ------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ----- |
 | B-18 | URL params auto-run | Run a search, copy the URL (contains `?ageGroup=…&weightClass=…`), open it in a new tab | The same search runs automatically on load with dropdowns pre-selected | - [ ] |
 
-## 4. Section C — Local Meet Results (`/local-meet-results`)
+## 4. Section BA — Adaptive WSO Records (`/adaptive`)
+
+**Not live yet.** The menu item is commented out in `Header.tsx`, so reach this page by typing
+`/adaptive` directly. BA-01 is on hold until the page is ready to launch; the rest can be
+exercised now.
+
+| ID    | Test                  | Steps                                                                  | Expected result                                                                                                                                          | Pass  |
+| ----- | --------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| BA-01 | Menu link (on hold)   | Once the menu item is uncommented, open the flyout menu                | "Adaptive WSO Records" appears directly below "WSO Records & Results" and opens `/adaptive`                                                               | - [ ] |
+| BA-02 | Default view          | Load `/adaptive` fresh                                                 | Spinner, then the combined `Adaptive_All` view titled "All Adaptive Record Holders", laid out in Women/Men columns like the home page                     | - [ ] |
+| BA-03 | Empty state           | Load `/adaptive` while the adaptive sheets still hold only standards    | "No adaptive records have been set yet." — **not** a spinner and not "Loading current records…"                                                           | - [ ] |
+| BA-04 | No STANDARD rows      | Scan the view once records exist                                       | No entry shows "STANDARD" as the lifter name                                                                                                             | - [ ] |
+| BA-05 | Category dropdown     | Choose a category, e.g. "Visual Impairment"                            | The view switches to that category's sheet immediately (no Go button) and the title becomes "Visual Impairment Record Holders"                            | - [ ] |
+| BA-06 | Reset appears         | Observe the options bar before and after choosing a category           | No Reset button on the combined view; Reset appears once a category is chosen                                                                             | - [ ] |
+| BA-07 | Reset returns to all  | Click Reset                                                            | Back to the combined all-categories view, and the Reset button disappears again                                                                           | - [ ] |
+| BA-08 | Cached categories     | Visit a category, Reset, then choose that same category again          | It renders immediately; the network tab shows no second request for that sheet                                                                            | - [ ] |
+| BA-09 | Fetch failure         | Load with the sheet unreachable (e.g. offline)                         | "Adaptive records could not be loaded. Please try again later." instead of an endless spinner                                                             | - [ ] |
+
+## 5. Section C — Local Meet Results (`/local-meet-results`)
 
 | ID   | Test                   | Steps                                               | Expected result                                                                                                                                             | Pass  |
 | ---- | ---------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
@@ -116,7 +134,7 @@ deployed Fly.io environment, where the server injects API secrets at request tim
 | C-09 | Deep-link              | Copy a URL with `?meetId=…`, open in a new tab      | The meet's results load automatically                                                                                                                       | - [ ] |
 | C-10 | Empty results          | Select a meet with no usable results (if available) | "No results found for this meet." message; no crash                                                                                                         | - [ ] |
 
-## 5. Section D — Senior Nationals Qualification Rankings (`/goals`)
+## 6. Section D — Senior Nationals Qualification Rankings (`/goals`)
 
 | ID   | Test                 | Steps                                                                                               | Expected result                                                                                                                                                                | Pass  |
 | ---- | -------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- |
@@ -131,7 +149,7 @@ deployed Fly.io environment, where the server injects API secrets at request tim
 | D-09 | Stale-window fallback | After Nationals (Mar 7, 2027) has passed with no updated dates entered, reload the page             | Rankings fall back to a rolling 16-month window ending today rather than the stale qualifying window; lift dates reflect the newer range                                        | - [ ] |
 | D-10 | Deep-link            | Run a search, copy the URL (contains `?weightClass=…`), open it in a new tab                        | The same weight class loads automatically with the dropdown pre-selected                                                                                                       | - [ ] |
 
-## 6. Section E — About (`/info`)
+## 7. Section E — About (`/info`)
 
 | ID   | Test            | Steps                                                                                         | Expected result                                                                          | Pass  |
 | ---- | --------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ----- |
@@ -139,16 +157,17 @@ deployed Fly.io environment, where the server injects API secrets at request tim
 | E-02 | External links  | Click each link: American Records, WSO committee info, public Google spreadsheet, GitHub repo | Each opens the correct destination; the spreadsheet is publicly viewable without sign-in | - [ ] |
 | E-03 | Contact link    | Click the maintainer email link                                                               | A `mailto:` compose window opens with the maintainer's address                           | - [ ] |
 
-## 7. Section F — Hidden / admin routes
+## 8. Section F — Hidden / admin routes
 
 | ID   | Test                  | Steps                                                                   | Expected result                                                                                                                          | Pass  |
 | ---- | --------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ----- |
 | F-01 | Scripts password gate | Navigate directly to `/scripts`; enter a wrong password and press Enter | "Incorrect password." shows; the tools remain hidden                                                                                     | - [ ] |
-| F-02 | Scripts unlock        | Enter the correct password (from the maintainer)                        | Script dropdown appears with "Fetch Record Updates" and a Run button                                                                     | - [ ] |
+| F-02 | Scripts unlock        | Enter the correct password (from the maintainer)                        | Script dropdown appears with "Fetch Record Updates" and "Fetch Adaptive Record Updates", plus a Run button                               | - [ ] |
 | F-03 | Run script            | Click Run and wait (do not run twice concurrently)                      | "Running…" shows, then `record-breaking-analysis.csv` downloads and "Download complete." appears; open the CSV and sanity-check contents | - [ ] |
 | F-04 | Script error display  | Run with the proxy server stopped                                       | An error message displays instead of a silent failure                                                                                    | - [ ] |
+| F-05 | Run adaptive script   | Select "Fetch Adaptive Record Updates", click Run and wait              | `adaptive-record-breaking-analysis.csv` downloads; every roster athlete resolves to a member id, and each row names an adaptive category the athlete is registered for | - [ ] |
 
-## 8. Section G — Error handling & resilience
+## 9. Section G — Error handling & resilience
 
 | ID   | Test                 | Steps                                                                                | Expected result                                                                                                                         | Pass  |
 | ---- | -------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- | ----- |
@@ -159,7 +178,7 @@ deployed Fly.io environment, where the server injects API secrets at request tim
 | G-05 | Bad deep-links       | Open `/?ageGroup=BOGUS&weightClass=BOGUS` and `/local-meet-results?meetId=999999999` | No crash; app either ignores the params or shows an error/empty state                                                                   | - [ ] |
 | G-06 | Unknown route        | Navigate to `/does-not-exist`                                                        | Header renders with an empty body (no route matches); no crash                                                                          | - [ ] |
 
-## 9. Section H — Responsive & cross-browser
+## 10. Section H — Responsive & cross-browser
 
 The stylesheets contain no media queries, so mobile layout is a known risk area.
 

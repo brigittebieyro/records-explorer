@@ -39,6 +39,18 @@ describe('App routing (user-based)', () => {
     });
   });
 
+  test('A-03: /adaptive renders the adaptive records page', async () => {
+    renderAt('/adaptive');
+
+    expect(screen.getByText(HEADER_TEXT)).toBeInTheDocument();
+    expect(screen.getByLabelText('Category')).toBeInTheDocument();
+    // The stubbed sheet comes back empty, so the page settles on its own empty state rather
+    // than the home page's "Loading current records…".
+    await waitFor(() => {
+      expect(screen.getByText('No adaptive records have been set yet.')).toBeInTheDocument();
+    });
+  });
+
   test('A-03: /info renders the About page with the header', () => {
     renderAt('/info');
 

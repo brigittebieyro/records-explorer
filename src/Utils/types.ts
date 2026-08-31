@@ -37,6 +37,11 @@ export interface LifterRankingData {
   total: number;
   lifter_age: string;
   lift_date: string;
+  // The USAW membership number ('1068141'). It is how the adaptive roster identifies an
+  // athlete, but the athlete-results endpoint will not accept it — only the sport80 member
+  // id inside `action[0].url` works there.
+  membership?: string;
+  gender?: string;
   // Empty text columns come back as { type: 'unset' }, not as a string, so always narrow before rendering.
   club?: string | null | { type: string };
   action: LifterAction[];

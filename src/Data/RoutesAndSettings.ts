@@ -9,9 +9,12 @@ export const wsoRegion = '66'; // This will be used to search for california by 
 // Use a relative local base path so the client works when deployed behind a reverse proxy.
 const _baseUrl = '/api/lifter-data'; // instead of https://admin-usaw-rankings.sport80.com/
 
-export const getRankingsRoute = (count?: number): string => {
+// The rankings endpoint returns nothing unless a weight_class filter is supplied — there is
+// no wildcard — so `search` only ever narrows a single-class query, never replaces it.
+export const getRankingsRoute = (count?: number, search?: string): string => {
   const limit = typeof count === 'number' && count > 0 ? count : 3;
-  return `${_baseUrl}/categories/all/rankings/table/data?platform=1&p=0&l=${limit}&sort=action&d=asc&s=&st=`;
+  const searchTerm = search ? encodeURIComponent(search) : '';
+  return `${_baseUrl}/categories/all/rankings/table/data?platform=1&p=0&l=${limit}&sort=action&d=asc&s=${searchTerm}&st=`;
 };
 
 export const usawRankingsPublicSiteLink =
@@ -117,8 +120,40 @@ export const getSheetRoute = (sheetId: string, sheetName: string): string => {
 export const currentRecordsSheetId = '1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ'; // Records sheet id. Production data! Link is public! DO NOT alter data for testing.
 export const currentRecordsSheetName = 'Post-Aug2026';
 export const priorRecordsSheetNames = ['Pre-Aug2026', 'Pre-June2025', 'Pre-2018']; // Raw_Data is pre-Aug2026. There is a display sheet which references it, and we are not ready to rename.
+export const adaptiveAllRecordsSheetName = 'Adaptive_All';
+export const adptiveCategoryRecordsSheetNames = [
+  'Adaptive_Physical',
+  'Adaptive_Hearing',
+  'Adaptive_Vision',
+  'Adaptive_Cognitive',
+];
 export const publicSpreadsheetLink =
   'https://docs.google.com/spreadsheets/d/1EJgLNWI4v5KZo780RIZ6zSsaDnOinuhJHQOvZoDL8BM';
+export const adaptiveLiftersListSheetId = '1hO6VHntKEujjtx8P0kIMJQ_vM46INg2D_jHei_HZUW0';
+export const adaptiveLiftersListSheetName = 'IDsAndCategories';
+export const adaptiveOptInFormUrl = 'https://forms.gle/2Y7qKS7C2pa3d4jLA';
+
+// ----------------------------------------------------------------------------------------------------------------
+// Adaptive Category Names
+// ----------------------------------------------------------------------------------------------------------------
+export const adaptiveCategories = [
+  {
+    id: 'Adaptive_Physical',
+    displayName: 'Physical Disability',
+  },
+  {
+    id: 'Adaptive_Hearing',
+    displayName: 'Deaf, Deafened, or Hard of Hearing',
+  },
+  {
+    id: 'Adaptive_Vision',
+    displayName: 'Visual Impairment',
+  },
+  {
+    id: 'Adaptive_Cognitive',
+    displayName: 'Intellectual Impairment',
+  },
+];
 
 // ----------------------------------------------------------------------------------------------------------------
 // External Links

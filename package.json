@@ -26,8 +26,8 @@
     "eject": "react-scripts eject",
     "server": "node-env-run server --exec nodemon | pino-colada",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,json}\"",
-    "analyze-records": "node scripts/analyze-records.js",
-    "gather-history-records": "node scripts/gather-history-records.js"
+    "analyze-records": "node --env-file-if-exists=.env.local scripts/analyze-records.js",
+    "gather-history-records": "node --env-file-if-exists=.env.local scripts/gather-history-records.js"
   },
   "jest": {
     "collectCoverageFrom": [

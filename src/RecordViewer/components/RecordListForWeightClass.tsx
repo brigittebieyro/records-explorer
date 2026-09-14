@@ -1,5 +1,6 @@
-import CertificateLink, { buildCertificateCategory, weightClassIndicator } from './CertificateLink';
+import CertificateLink, { buildCertificateCategory } from './CertificateLink';
 import CompactRecordView from './CompactRecordView';
+import { weightClassIndicator } from '../../Utils/Utils';
 import { AllCurrentRecordsGroup, WeightClass } from '../../Utils/types';
 
 interface RecordListForWeightClassProps {

@@ -19,8 +19,9 @@ import {
   shouldIncludePastLifter,
   rateLimitedFetch,
   sortLifts,
+  weightClassIndicator,
 } from './Utils';
-import { CombinedLiftData } from './types';
+import { CombinedLiftData, WeightClass } from './types';
 
 // jsdom does not provide crypto.subtle or TextEncoder; hashPassword needs both.
 if (!globalThis.crypto?.subtle) {
@@ -72,6 +73,56 @@ describe('Utils (user-based)', () => {
       for (const group of ageGroups) {
         const prefixed = /^\d{2}$/.test(group.id) ? `W${group.id}` : group.id;
         expect(getAgeGroup(normalizeSheetAgeGroup(prefixed))).toBeDefined();
+      }
+    });
+  });
+
+  describe('weightClassIndicator', () => {
+    const makeWeightClass = (overrides: Partial<WeightClass> = {}): WeightClass => ({
+      id: 'W53',
+      name: "Women's 53kg",
+      sport80Id: 1,
+      minBodyweight: '49',
+      maxBodyweight: '53',
+      gender: 'female',
+      start: '2026-08-01',
+      ...overrides,
+    });
+
+    test('uses the max bodyweight for a normal class', () => {
+      expect(weightClassIndicator(makeWeightClass())).toBe('53');
+    });
+
+    test('uses > plus the minimum for the open-ended top class', () => {
+      expect(
+        weightClassIndicator(makeWeightClass({ minBodyweight: '86', maxBodyweight: '1000' }))
+      ).toBe('>86');
+    });
+
+    test('drops a fractional floor, matching how the sheets write the top class', () => {
+      expect(
+        weightClassIndicator(makeWeightClass({ minBodyweight: '86.5', maxBodyweight: '1000' }))
+      ).toBe('>86');
+    });
+
+    test('every real weight class set produces exactly one open-ended top class', () => {
+      // The rule only works because the sentinel max is the last class of each set. If a set is
+      // ever authored without one -- or with two -- the page and the certificate would key
+      // records by a string the sheets never write.
+      const sets = [
+        defaultWeightClasses,
+        u11WeightClasses,
+        u13WeightClasses,
+        u15WeightClasses,
+        u17WeightClasses,
+      ];
+      for (const set of sets) {
+        for (const gender of ['female', 'male'] as const) {
+          const classes = set.filter((wc) => wc.gender === gender);
+          if (classes.length === 0) continue;
+          const openEnded = classes.filter((wc) => weightClassIndicator(wc).startsWith('>'));
+          expect(openEnded).toHaveLength(1);
+        }
       }
     });
   });

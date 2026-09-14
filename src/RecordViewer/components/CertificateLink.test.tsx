@@ -1,10 +1,8 @@
-import { render, screen } from '@testing-library/react';
-import CertificateLink, {
-  buildCertificateCategory,
-  buildCertificateHref,
-  weightClassIndicator,
-} from './CertificateLink';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import CertificateLink, { buildCertificateCategory, certificateEndpoint } from './CertificateLink';
 import { ageGroups } from '../../Data/ageGroups';
+import { currentRecordsSheetId } from '../../Data/RoutesAndSettings';
 import { AgeGroup, WeightClass } from '../../Utils/types';
 
 const ageGroupById = (id: string): AgeGroup =>
@@ -22,81 +20,135 @@ const makeWeightClass = (overrides: object = {}): WeightClass =>
     ...overrides,
   }) as WeightClass;
 
-describe('buildCertificateHref', () => {
-  test('B-27: encodes a lift name containing an ampersand', () => {
-    const href = buildCertificateHref({
-      sheet: 'Post-Aug2026',
-      ageGroup: 'OPEN',
-      gender: 'female',
-      weightClass: '53',
-      lift: 'Clean & Jerk',
-    });
-    // A bare template literal would truncate the lift at the ampersand and silently request
-    // lift=Clean, which matches nothing.
-    expect(href).toContain('lift=Clean+%26+Jerk');
-    expect(new URLSearchParams(href.split('?')[1]).get('lift')).toBe('Clean & Jerk');
+const PROPS = {
+  sheet: 'Post-Aug2026',
+  ageGroup: 'OPEN',
+  gender: 'female' as const,
+  weightClass: '53',
+  lift: 'Snatch',
+  category: "Women's Open 53kg",
+};
+
+// jsdom has neither window.open nor the object-URL API, and the component needs both.
+let openedTab: { location: { href: string }; close: jest.Mock };
+let objectUrls: string[];
+
+const mockCertificateFetch = (ok = true) =>
+  jest.fn().mockResolvedValue({
+    ok,
+    status: ok ? 200 : 404,
+    blob: async () => new Blob(['%PDF-'], { type: 'application/pdf' }),
   });
 
-  test('B-27: encodes the > in an open-ended weight class', () => {
-    const href = buildCertificateHref({
-      sheet: 'Post-Aug2026',
-      ageGroup: 'OPEN',
-      gender: 'female',
-      weightClass: '>86',
-      lift: 'Total',
-    });
-    expect(href).toContain('weightClass=%3E86');
-    expect(new URLSearchParams(href.split('?')[1]).get('weightClass')).toBe('>86');
+beforeEach(() => {
+  objectUrls = [];
+  openedTab = { location: { href: '' }, close: jest.fn() };
+  window.open = jest.fn().mockReturnValue(openedTab);
+  (URL as unknown as { createObjectURL: unknown }).createObjectURL = jest.fn(() => {
+    const url = `blob:mock/${objectUrls.length}`;
+    objectUrls.push(url);
+    return url;
   });
-
-  test('carries every parameter the endpoint requires', () => {
-    const params = new URLSearchParams(
-      buildCertificateHref({
-        sheet: 'Adaptive_Physical',
-        ageGroup: 'U11',
-        gender: 'male',
-        weightClass: '30',
-        lift: 'Snatch',
-      }).split('?')[1]
-    );
-    expect(Object.fromEntries(params)).toEqual({
-      sheet: 'Adaptive_Physical',
-      ageGroup: 'U11',
-      gender: 'male',
-      weightClass: '30',
-      lift: 'Snatch',
-    });
-  });
+  (URL as unknown as { revokeObjectURL: unknown }).revokeObjectURL = jest.fn();
 });
 
-describe('weightClassIndicator', () => {
-  test('uses the max bodyweight for a normal class', () => {
-    expect(weightClassIndicator(makeWeightClass())).toBe('53');
-  });
-
-  test('uses > plus the minimum for the open-ended top class', () => {
-    // Mirrors computeStandardsForWeightClass, which keys the top class of each set this way.
-    expect(
-      weightClassIndicator(makeWeightClass({ minBodyweight: '86', maxBodyweight: '1000' }))
-    ).toBe('>86');
-  });
+afterEach(() => {
+  jest.restoreAllMocks();
 });
 
-describe('CertificateLink', () => {
-  test('B-27: opens in a new tab with a safe rel', () => {
-    render(
-      <CertificateLink
-        sheet="Post-Aug2026"
-        ageGroup="OPEN"
-        gender="female"
-        weightClass="53"
-        lift="Snatch"
-      />
-    );
-    const link = screen.getByRole('link', { name: /^print$/i });
-    expect(link).toHaveAttribute('target', '_blank');
-    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
-    expect(link.getAttribute('href')).toContain('/api/certificate?');
+describe('CertificateLink (user-based)', () => {
+  test('B-27: clicking posts the record and opens the PDF in a new tab', async () => {
+    const fetchMock = mockCertificateFetch();
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    render(<CertificateLink {...PROPS} />);
+    await userEvent.click(screen.getByRole('button', { name: /^print$/i }));
+
+    await waitFor(() => expect(openedTab.location.href).toBe('blob:mock/0'));
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe(certificateEndpoint);
+    expect(init.method).toBe('POST');
+    // The spreadsheet id rides along with the caller's props. The server keeps no copy of it, so
+    // if this stops being sent, certificates stop resolving rather than quietly reading the
+    // wrong spreadsheet.
+    expect(JSON.parse(init.body)).toEqual({ ...PROPS, sheetId: currentRecordsSheetId });
+  });
+
+  test('B-27: the tab is opened synchronously, before the request resolves', async () => {
+    // Opening it after the await puts it outside the user-gesture window, and Chrome and Safari
+    // block it as a popup. This pins the ordering that avoids that.
+    let resolveFetch: (value: unknown) => void = () => {};
+    global.fetch = jest.fn(
+      () =>
+        new Promise((resolve) => {
+          resolveFetch = resolve;
+        })
+    ) as unknown as typeof fetch;
+
+    render(<CertificateLink {...PROPS} />);
+    await userEvent.click(screen.getByRole('button', { name: /^print$/i }));
+
+    expect(window.open).toHaveBeenCalledWith('', '_blank');
+    expect(openedTab.location.href).toBe('');
+
+    resolveFetch({ ok: true, status: 200, blob: async () => new Blob() });
+    await waitFor(() => expect(openedTab.location.href).toBe('blob:mock/0'));
+  });
+
+  test('the record parameters never appear in a URL', async () => {
+    // The whole point of posting: the athlete never sees the machinery.
+    const fetchMock = mockCertificateFetch();
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    render(<CertificateLink {...PROPS} />);
+    const button = screen.getByRole('button', { name: /^print$/i });
+    expect(button).not.toHaveAttribute('href');
+
+    await userEvent.click(button);
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    expect(fetchMock.mock.calls[0][0]).not.toContain('?');
+  });
+
+  test('a failed request leaves the originating page unchanged', async () => {
+    global.fetch = mockCertificateFetch(false) as unknown as typeof fetch;
+
+    render(<CertificateLink {...PROPS} />);
+    const before = document.body.innerHTML;
+    await userEvent.click(screen.getByRole('button', { name: /^print$/i }));
+
+    // The blank tab is closed rather than stranded...
+    await waitFor(() => expect(openedTab.close).toHaveBeenCalled());
+    // ...and the page the athlete is looking at is byte-for-byte what it was.
+    await waitFor(() => expect(document.body.innerHTML).toBe(before));
+  });
+
+  test('the button is usable again after a failure', async () => {
+    const fetchMock = mockCertificateFetch(false);
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    render(<CertificateLink {...PROPS} />);
+    const button = screen.getByRole('button', { name: /^print$/i });
+    await userEvent.click(button);
+    await waitFor(() => expect(button).toBeEnabled());
+
+    await userEvent.click(button);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  test('a blocked popup falls back to the current tab rather than doing nothing', async () => {
+    (window.open as jest.Mock).mockReturnValue(null);
+    global.fetch = mockCertificateFetch() as unknown as typeof fetch;
+    const assign = jest.fn();
+    Object.defineProperty(window, 'location', {
+      value: { ...window.location, assign },
+      writable: true,
+    });
+
+    render(<CertificateLink {...PROPS} />);
+    await userEvent.click(screen.getByRole('button', { name: /^print$/i }));
+
+    await waitFor(() => expect(assign).toHaveBeenCalledWith('blob:mock/0'));
   });
 });
 
@@ -133,40 +185,11 @@ describe('buildCertificateCategory', () => {
   });
 
   test('tracks edits to ageGroups.ts without any other file changing', () => {
-    // This is the whole point of passing the wording from the client: src/Data is the single
-    // source of truth, so a new certificateDisplayKey shows up on the certificate immediately.
+    // src/Data is the single source of truth for this wording, so a new certificateDisplayKey
+    // shows up on the certificate immediately.
     const edited = { ...ageGroupById('OPEN'), certificateDisplayKey: 'Brand New Wording' };
     expect(buildCertificateCategory(makeWeightClass(), edited)).toBe(
       "Women's Brand New Wording 53kg"
     );
-  });
-
-  test('the composed wording survives the round trip through the URL', () => {
-    const category = buildCertificateCategory(
-      makeWeightClass(),
-      ageGroupById('OPEN'),
-      'Adaptive (Deaf and Hard of Hearing)'
-    );
-    const href = buildCertificateHref({
-      sheet: 'Adaptive_Hearing',
-      ageGroup: 'OPEN',
-      gender: 'female',
-      weightClass: '53',
-      lift: 'Snatch',
-      category,
-    });
-    // Spaces, parentheses and the apostrophe all need encoding.
-    expect(new URLSearchParams(href.split('?')[1]).get('category')).toBe(category);
-  });
-
-  test('the category is omitted from the URL when there is none', () => {
-    const href = buildCertificateHref({
-      sheet: 'Post-Aug2026',
-      ageGroup: 'OPEN',
-      gender: 'female',
-      weightClass: '53',
-      lift: 'Snatch',
-    });
-    expect(href).not.toContain('category=');
   });
 });

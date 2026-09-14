@@ -23,6 +23,21 @@ export const normalizeSheetAgeGroup = (sheetAgeGroup: string): string => {
   return mastersLabel ? mastersLabel[1] : value;
 };
 
+// How a weight class is written in the records sheets' bodyweight-max column: the max bodyweight
+// for a normal class, or '>' plus the minimum for the open-ended top class of each set.
+//
+// The top class has no real ceiling, so the sheets give it a sentinel max ('1000') and label it
+// by its floor instead. Anything above 200kg is that sentinel -- no real class comes close, and
+// testing the bound rather than the literal keeps this working if the sentinel is ever rewritten.
+//
+// Lives here because the page and the certificate must agree on it exactly: the page keys its
+// record lookup by this string and the certificate asks the server for a record by the same
+// string, so two spellings of the rule would print a different record than the page displays.
+export const weightClassIndicator = (weightClass: WeightClass): string =>
+  parseFloat(weightClass.maxBodyweight) > 200
+    ? `>${parseInt(weightClass.minBodyweight)}`
+    : weightClass.maxBodyweight;
+
 export const getWeightClassSet = (ageGroup: AgeGroup | undefined | null): WeightClass[] => {
   if (!ageGroup || !ageGroup.customWeightClasses) {
     return defaultWeightClasses;

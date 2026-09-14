@@ -1,13 +1,17 @@
 // Dev-server proxy for the Express API.
 //
-// This file is REQUIRED for the certificate link to work under `npm start`. CRA's "proxy" field
-// in package.json skips any GET whose Accept header includes text/html
+// Not strictly required any more. It was added when the certificate opened via a link: CRA's
+// "proxy" field skips any GET whose Accept header includes text/html
 // (react-dev-utils/WebpackDevServerUtils.js), which is exactly what a target="_blank" navigation
-// sends -- so /api/certificate would return index.html instead of a PDF, and you would get the
-// app shell in a new tab.
+// sends, so /api/certificate came back as the app shell. The certificate is posted now, and a
+// fetch never sends that Accept header, so the built-in proxy would cope.
+//
+// Kept because it is more predictable than the "proxy" field: an explicit 127.0.0.1 target, and
+// no content-type-dependent skipping to reason about. If you do delete it, re-test a certificate
+// under `npm start` rather than assuming.
 //
 // Mounting here takes over all four existing /api routes too. That is benign: they are fetch()
-// calls (no text/html Accept), and the server applies a blanket cors().
+// calls, and the server applies a blanket cors().
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 module.exports = function (app) {

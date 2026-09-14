@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import RecordListForWeightClass from './RecordListForWeightClass';
 import { AgeGroup, StandardRecord, WeightClass } from '../../Utils/types';
 
@@ -105,6 +106,38 @@ describe('RecordListForWeightClass (user-based)', () => {
 });
 
 describe('RecordListForWeightClass print certificate link (user-based)', () => {
+  // The print button posts and opens a blob URL; jsdom has none of that machinery.
+  let certificateFetch: jest.Mock;
+
+  const printPayload = async (index = 0, total = 1): Promise<Record<string, string>> => {
+    // The label becomes "Printing…" mid-flight, so a button drops out of this query while it is
+    // working. Wait for the whole set to settle before clicking, or the indices shift underfoot.
+    await waitFor(() =>
+      expect(screen.getAllByRole('button', { name: /^print$/i })).toHaveLength(total)
+    );
+    certificateFetch.mockClear();
+    await userEvent.click(screen.getAllByRole('button', { name: /^print$/i })[index]!);
+    await waitFor(() => expect(certificateFetch).toHaveBeenCalled());
+    const { body } = certificateFetch.mock.calls[certificateFetch.mock.calls.length - 1][1];
+    return JSON.parse(body);
+  };
+
+  beforeEach(() => {
+    certificateFetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      blob: async () => new Blob(['%PDF-'], { type: 'application/pdf' }),
+    });
+    global.fetch = certificateFetch as unknown as typeof fetch;
+    window.open = jest.fn().mockReturnValue({ location: { href: '' }, close: jest.fn() });
+    (URL as unknown as { createObjectURL: unknown }).createObjectURL = jest.fn(() => 'blob:mock');
+    (URL as unknown as { revokeObjectURL: unknown }).revokeObjectURL = jest.fn();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   const groups = [
     {
       ageGroup: makeAgeGroup(),
@@ -116,10 +149,10 @@ describe('RecordListForWeightClass print certificate link (user-based)', () => {
     // The home page's all-records list omits the prop, so it is unchanged.
     render(<RecordListForWeightClass weightClass={makeWeightClass()} groups={groups} />);
 
-    expect(screen.queryByRole('link', { name: /^print$/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /^print$/i })).toBeNull();
   });
 
-  test('BA-10: naming a sheet opts the list into print links', () => {
+  test('BA-10: naming a sheet opts the list into print links', async () => {
     render(
       <RecordListForWeightClass
         weightClass={makeWeightClass()}
@@ -128,16 +161,15 @@ describe('RecordListForWeightClass print certificate link (user-based)', () => {
       />
     );
 
-    const links = screen.getAllByRole('link', { name: /^print$/i });
-    expect(links).toHaveLength(3);
-    const params = new URLSearchParams(links[0]!.getAttribute('href')!.split('?')[1]);
-    expect(params.get('sheet')).toBe('Adaptive_Physical');
-    expect(params.get('ageGroup')).toBe('OPEN');
-    expect(params.get('gender')).toBe('female');
-    expect(params.get('weightClass')).toBe('48');
+    expect(screen.getAllByRole('button', { name: /^print$/i })).toHaveLength(3);
+    const payload = await printPayload(0, 3);
+    expect(payload.sheet).toBe('Adaptive_Physical');
+    expect(payload.ageGroup).toBe('OPEN');
+    expect(payload.gender).toBe('female');
+    expect(payload.weightClass).toBe('48');
   });
 
-  test('BA-10: the open-ended top class links with its > indicator', () => {
+  test('BA-10: the open-ended top class prints its > indicator', async () => {
     render(
       <RecordListForWeightClass
         weightClass={makeWeightClass({ minBodyweight: '86', maxBodyweight: '1000' })}
@@ -146,16 +178,10 @@ describe('RecordListForWeightClass print certificate link (user-based)', () => {
       />
     );
 
-    const params = new URLSearchParams(
-      screen
-        .getAllByRole('link', { name: /^print$/i })[0]!
-        .getAttribute('href')!
-        .split('?')[1]
-    );
-    expect(params.get('weightClass')).toBe('>86');
+    expect((await printPayload(0, 3)).weightClass).toBe('>86');
   });
 
-  test('BA-10: only lifts that have a record get a link', () => {
+  test('BA-10: only lifts that have a record get a button', async () => {
     render(
       <RecordListForWeightClass
         weightClass={makeWeightClass()}
@@ -164,10 +190,7 @@ describe('RecordListForWeightClass print certificate link (user-based)', () => {
       />
     );
 
-    const links = screen.getAllByRole('link', { name: /^print$/i });
-    expect(links).toHaveLength(1);
-    expect(new URLSearchParams(links[0]!.getAttribute('href')!.split('?')[1]).get('lift')).toBe(
-      'Snatch'
-    );
+    expect(screen.getAllByRole('button', { name: /^print$/i })).toHaveLength(1);
+    expect((await printPayload()).lift).toBe('Snatch');
   });
 });

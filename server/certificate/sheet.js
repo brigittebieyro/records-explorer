@@ -1,13 +1,10 @@
-// Fetches raw rows from a records sheet tab, cached per tab.
+// Fetches raw rows from a records sheet tab, cached per spreadsheet + tab.
+//
+// The spreadsheet id is named by the caller, like the tab name already was. The server keeps no
+// copy of it: src/Data/RoutesAndSettings.ts is the single source of truth, and a mirror here
+// would have to be swapped in lockstep every time development points at the test sheet.
 
-const { MAX_SHEET_NAME_LENGTH } = require('./labels');
-
-// Mirrored from currentRecordsSheetId in src/Data/RoutesAndSettings.ts -- the server cannot read
-// that file (it is .ts, and src/ is never copied into the runtime image). The drift test pins
-// the two together, which matters because this id gets swapped to the test sheet during
-// development and both sides must move as one.
-const SHEET_ID = '1EJgLNWI4v5KZo780RIZ6zSsaDnOinuhJHQOvZoDL8BM'; // Test sheet.
-// const SHEET_ID = '1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ'; // Production records sheet.
+const { MAX_SHEET_NAME_LENGTH, MAX_SHEET_ID_LENGTH, SHEET_ID_PATTERN } = require('./labels');
 
 const CACHE_TTL_MS = 60 * 1000;
 // Failures are cached too, briefly, so a bad tab requested in a loop does not become a fetch per
@@ -23,8 +20,14 @@ class SheetError extends Error {
   }
 }
 
-// tab -> { rows, expires } | { promise } | { error, expires }
+// "<sheetId>!<tab>" -> { rows, expires } | { promise } | { error, expires }
 const cache = new Map();
+
+// The id and the tab both vary now, so the key has to carry both: keying on the tab alone would
+// serve one spreadsheet's rows for another's request for the same tab name -- exactly what
+// happens when development points at the test sheet while a cached production entry is live.
+// '!' cannot appear in a validated id, so the two parts can never run together ambiguously.
+const cacheKey = (sheetId, sheetName) => `${sheetId}!${sheetName}`;
 
 function assertUsableSheetName(sheetName) {
   const name = typeof sheetName === 'string' ? sheetName.trim() : '';
@@ -37,7 +40,27 @@ function assertUsableSheetName(sheetName) {
   return name;
 }
 
-async function fetchRows(sheetName) {
+/**
+ * The id lands in a URL path segment, so it is checked against a strict charset rather than just
+ * a length: no '/', '?', '#' or '..' can reach the Sheets URL and bend it somewhere else. The
+ * host stays pinned to sheets.googleapis.com, so the widest this opens things is reading some
+ * other world-readable spreadsheet through our API key.
+ */
+function assertUsableSheetId(sheetId) {
+  const id = typeof sheetId === 'string' ? sheetId.trim() : '';
+  if (!id) {
+    throw new SheetError(400, 'sheetId is required');
+  }
+  if (id.length > MAX_SHEET_ID_LENGTH) {
+    throw new SheetError(400, `sheetId must be ${MAX_SHEET_ID_LENGTH} characters or fewer`);
+  }
+  if (!SHEET_ID_PATTERN.test(id)) {
+    throw new SheetError(400, 'sheetId is not a valid spreadsheet id');
+  }
+  return id;
+}
+
+async function fetchRows(sheetId, sheetName) {
   const key = process.env.REACT_APP_GOOGLE_API_KEY ?? '';
   if (!key) {
     // Distinct from a Google-side failure: the process was started without the credential.
@@ -46,7 +69,7 @@ async function fetchRows(sheetName) {
 
   // Built the same way as getSheetRoute in src/Data/RoutesAndSettings.ts, for consistency with
   // the client.
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${sheetName}?key=${key}`;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${key}`;
 
   let response;
   try {
@@ -79,14 +102,17 @@ async function fetchRows(sheetName) {
 }
 
 /**
+ * @param {string} sheetId the spreadsheet to read, named by the caller
  * @param {string} sheetName the tab to read, named by the caller
  * @returns {Promise<string[][]>}
  * @throws {SheetError} with `status` set to what the route should return
  */
-async function getRecordRows(sheetName) {
+async function getRecordRows(sheetId, sheetName) {
+  const id = assertUsableSheetId(sheetId);
   const name = assertUsableSheetName(sheetName);
+  const key = cacheKey(id, name);
   const now = Date.now();
-  const entry = cache.get(name);
+  const entry = cache.get(key);
 
   // Store the in-flight promise, not just the value, so concurrent requests for a cold tab
   // trigger one fetch rather than one each.
@@ -96,24 +122,24 @@ async function getRecordRows(sheetName) {
 
   const promise = (async () => {
     try {
-      const rows = await fetchRows(name);
-      cache.set(name, { rows, expires: Date.now() + CACHE_TTL_MS });
+      const rows = await fetchRows(id, name);
+      cache.set(key, { rows, expires: Date.now() + CACHE_TTL_MS });
       return rows;
     } catch (err) {
       // Serve stale rows rather than failing, if we ever had any -- a refresh failure should not
       // take down a tab that was working a minute ago.
-      const stale = cache.get(name);
+      const stale = cache.get(key);
       if (stale && stale.rows) {
-        cache.set(name, { rows: stale.rows, expires: Date.now() + FAILURE_TTL_MS });
+        cache.set(key, { rows: stale.rows, expires: Date.now() + FAILURE_TTL_MS });
         return stale.rows;
       }
-      cache.set(name, { error: err, expires: Date.now() + FAILURE_TTL_MS });
+      cache.set(key, { error: err, expires: Date.now() + FAILURE_TTL_MS });
       throw err;
     }
   })();
 
   // Preserve any stale rows alongside the in-flight promise so the catch above can find them.
-  cache.set(name, { promise, rows: entry && entry.rows });
+  cache.set(key, { promise, rows: entry && entry.rows });
   return promise;
 }
 
@@ -127,9 +153,10 @@ module.exports = {
   getRecordRows,
   clearCache,
   SheetError,
-  SHEET_ID,
   assertUsableSheetName,
+  assertUsableSheetId,
   CACHE_TTL_MS,
-  // Test-only handle, so expiry can be simulated without waiting out the TTL.
+  // Test-only handles, so expiry can be simulated without waiting out the TTL.
   __cacheForTests: cache,
+  __cacheKeyForTests: cacheKey,
 };

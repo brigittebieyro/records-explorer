@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import Standards from './Standards';
 import { AgeGroupRecordSet, StandardRecord } from '../../Utils/types';
 
@@ -105,6 +106,38 @@ describe('Standards (user-based)', () => {
 });
 
 describe('Standards print certificate link (user-based)', () => {
+  // The print button posts and opens a blob URL; jsdom has none of that machinery.
+  let certificateFetch: jest.Mock;
+
+  const printPayload = async (index = 0, total = 1): Promise<Record<string, string>> => {
+    // The label becomes "Printing…" mid-flight, so a button drops out of this query while it is
+    // working. Wait for the whole set to settle before clicking, or the indices shift underfoot.
+    await waitFor(() =>
+      expect(screen.getAllByRole('button', { name: /^print$/i })).toHaveLength(total)
+    );
+    certificateFetch.mockClear();
+    await userEvent.click(screen.getAllByRole('button', { name: /^print$/i })[index]!);
+    await waitFor(() => expect(certificateFetch).toHaveBeenCalled());
+    const { body } = certificateFetch.mock.calls[certificateFetch.mock.calls.length - 1][1];
+    return JSON.parse(body);
+  };
+
+  beforeEach(() => {
+    certificateFetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      blob: async () => new Blob(['%PDF-'], { type: 'application/pdf' }),
+    });
+    global.fetch = certificateFetch as unknown as typeof fetch;
+    window.open = jest.fn().mockReturnValue({ location: { href: '' }, close: jest.fn() });
+    (URL as unknown as { createObjectURL: unknown }).createObjectURL = jest.fn(() => 'blob:mock');
+    (URL as unknown as { revokeObjectURL: unknown }).revokeObjectURL = jest.fn();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   const withLinkProps = {
     weightClassName: "Women's 48kg",
     ageGroupName: 'Open',
@@ -117,21 +150,20 @@ describe('Standards print certificate link (user-based)', () => {
     render(<Standards relevantRecords={makeRecordSet()} {...withLinkProps} />);
 
     // One per lift.
-    expect(screen.getAllByRole('link', { name: /^print$/i })).toHaveLength(3);
+    expect(screen.getAllByRole('button', { name: /^print$/i })).toHaveLength(3);
   });
 
-  test('B-25: the link carries the lift it sits under', () => {
+  test('B-25: each button prints the lift it sits under', async () => {
     render(<Standards relevantRecords={makeRecordSet()} {...withLinkProps} />);
 
-    const hrefs = screen
-      .getAllByRole('link', { name: /^print$/i })
-      .map((a) => new URLSearchParams(a.getAttribute('href')!.split('?')[1]).get('lift'));
-    expect(hrefs).toEqual(['Total', 'Snatch', 'Clean & Jerk']);
+    expect((await printPayload(0, 3)).lift).toBe('Total');
+    expect((await printPayload(1, 3)).lift).toBe('Snatch');
+    expect((await printPayload(2, 3)).lift).toBe('Clean & Jerk');
   });
 
-  test('B-25: the link uses the record set weight class, not the age key', () => {
+  test('B-25: the request uses the record set weight class, not the age key', async () => {
     // relevantRecords.ageGroup is the sheet's ageKey ('W35'), NOT the record key -- so the
-    // ageGroup param must come from the prop instead.
+    // ageGroup must come from the prop instead.
     render(
       <Standards
         relevantRecords={{ ...makeRecordSet(), ageGroup: 'W35', weightClass: '>86' }}
@@ -139,14 +171,10 @@ describe('Standards print certificate link (user-based)', () => {
         ageGroupId="35"
       />
     );
-    const params = new URLSearchParams(
-      screen
-        .getAllByRole('link', { name: /^print$/i })[0]!
-        .getAttribute('href')!
-        .split('?')[1]
-    );
-    expect(params.get('ageGroup')).toBe('35');
-    expect(params.get('weightClass')).toBe('>86');
+
+    const payload = await printPayload(0, 3);
+    expect(payload.ageGroup).toBe('35');
+    expect(payload.weightClass).toBe('>86');
   });
 
   test('B-26: STANDARD placeholders get no print certificate link', () => {
@@ -161,7 +189,7 @@ describe('Standards print certificate link (user-based)', () => {
       />
     );
 
-    expect(screen.queryByRole('link', { name: /^print$/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /^print$/i })).toBeNull();
   });
 
   test('B-26: a mixed record set links only the real holders', () => {
@@ -172,7 +200,7 @@ describe('Standards print certificate link (user-based)', () => {
       />
     );
 
-    expect(screen.getAllByRole('link', { name: /^print$/i })).toHaveLength(2);
+    expect(screen.getAllByRole('button', { name: /^print$/i })).toHaveLength(2);
   });
 
   test('no link renders when the certificate props are not supplied', () => {
@@ -185,7 +213,7 @@ describe('Standards print certificate link (user-based)', () => {
       />
     );
 
-    expect(screen.queryByRole('link', { name: /^print$/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /^print$/i })).toBeNull();
   });
 
   test('a partial record set renders the lifts it has without crashing', () => {
@@ -199,6 +227,6 @@ describe('Standards print certificate link (user-based)', () => {
     );
 
     expect(screen.getByText('80kg')).toBeInTheDocument();
-    expect(screen.getAllByRole('link', { name: /^print$/i })).toHaveLength(1);
+    expect(screen.getAllByRole('button', { name: /^print$/i })).toHaveLength(1);
   });
 });

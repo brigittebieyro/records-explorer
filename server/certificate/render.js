@@ -155,15 +155,17 @@ function drawRightAligned(doc, run, { rightX, baselineY }) {
  * @returns {Array<{y: number, runs: Array<{text: string, font: string, size: number}>}>}
  */
 function buildCertificateLines(record) {
+  // Everything from the preamble down sits half a line (~11pt) lower than the logo block, so the
+  // centred text reads as its own group rather than crowding the crest.
   const lines = [
     // Title sits above the logo.
     { id: 'title', y: 142, runs: [{ text: 'California North Central WSO', font: SCRIPT, size: 46 }] },
-    { id: 'preamble', y: 276, runs: [{ text: 'hereby certifies that', font: BODY_ITALIC, size: 17 }] },
+    { id: 'preamble', y: 287, runs: [{ text: 'hereby certifies that', font: BODY_ITALIC, size: 17 }] },
     // Drawn inside the name frame banner, so it gets its own narrower maxWidth.
-    { id: 'lifter', y: 326, runs: [{ text: record.lifter, font: BODY_BOLD, size: 24 }] },
+    { id: 'lifter', y: 337, runs: [{ text: record.lifter, font: BODY_BOLD, size: 24 }] },
     {
       id: 'category',
-      y: 370,
+      y: 381,
       // Long adaptive/masters categories wrap onto a second line rather than shrinking; the
       // design leaves vertical room for one.
       wrap: true,
@@ -179,14 +181,14 @@ function buildCertificateLines(record) {
         },
       ],
     },
-    { id: 'record', y: 406, runs: [{ text: `${record.weight}kg ${record.lift}`, font: BODY, size: 22 }] },
+    { id: 'record', y: 417, runs: [{ text: `${record.weight}kg ${record.lift}`, font: BODY, size: 22 }] },
   ];
 
   // The date sits tight under the record rather than in its own block. It can be missing: the
   // adaptive tabs trim trailing empty cells, and STANDARD rows never have one.
   const when = formatDate(record.date);
   if (when) {
-    lines.push({ id: 'date', y: 426, runs: [{ text: `on ${when}`, font: BODY_ITALIC, size: 15 }] });
+    lines.push({ id: 'date', y: 437, runs: [{ text: `on ${when}`, font: BODY_ITALIC, size: 15 }] });
   }
 
   return lines;
@@ -236,8 +238,9 @@ function renderCertificate(record) {
       }
 
       if (fs.existsSync(LOGO_FILE)) {
-        const size = 82;
-        // Grown from 68; held to the same centre so it does not crowd the line beneath it.
+        const size = 94;
+        // Grown from 68 to 82 to 94; held to the same centre each time so it does not crowd the
+        // line beneath it.
         doc.image(LOGO_FILE, centerX - size / 2, LOGO_CENTER_Y - size / 2, {
           width: size,
           height: size,
@@ -249,7 +252,7 @@ function renderCertificate(record) {
       const NAME_FRAME_WIDTH = 530;
       const NAME_FRAME_ASPECT = 610 / 56;
       const nameFrameHeight = NAME_FRAME_WIDTH / NAME_FRAME_ASPECT;
-      const NAME_FRAME_CENTER_Y = 318;
+      const NAME_FRAME_CENTER_Y = 329;
       const nameFrameTop = NAME_FRAME_CENTER_Y - nameFrameHeight / 2;
       if (fs.existsSync(NAME_FRAME_FILE)) {
         doc.image(NAME_FRAME_FILE, centerX - NAME_FRAME_WIDTH / 2, nameFrameTop, {

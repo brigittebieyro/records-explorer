@@ -342,6 +342,22 @@ body {
   margin: 0;
 }
 
+/* The certificate link posts rather than navigating, so it is a button. Strip the native
+   chrome so it still reads as the link it replaced. */
+.certificate-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.certificate-link:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
 .records-viewer-loading-container {
   display: flex;
   flex-direction: column;

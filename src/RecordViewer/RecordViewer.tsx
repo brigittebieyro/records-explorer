@@ -26,7 +26,12 @@ import {
   u15WeightClasses,
   u17WeightClasses,
 } from '../Data/youthWeightClasses';
-import { getAgeGroup, getWeightClassSet, normalizeSheetAgeGroup } from '../Utils/Utils';
+import {
+  getAgeGroup,
+  getWeightClassSet,
+  normalizeSheetAgeGroup,
+  weightClassIndicator,
+} from '../Utils/Utils';
 import {
   AgeGroup,
   AgeGroupRecordSet,
@@ -43,12 +48,11 @@ export function computeStandardsForWeightClass(
   standards: string[][]
 ): StandardsResult {
   const recordSet: StandardsResult = {};
-  let weightClassIndicator: string = weightClass.maxBodyweight;
-  if (parseFloat(weightClass.maxBodyweight) > 200) {
-    weightClassIndicator = `>${parseInt(weightClass.minBodyweight)}`;
-  }
+  // Named classIndicator rather than shadowing the imported helper, and to stay clear of the
+  // unrelated `indicator` (the age group's leading letter) inside the loop below.
+  const classIndicator = weightClassIndicator(weightClass);
   standards.forEach((standard) => {
-    if (standard[7] === weightClassIndicator) {
+    if (standard[7] === classIndicator) {
       const ageKey = String(standard[2]).toUpperCase();
       const indicator = ageKey[0];
       const recordKey = indicator === 'W' || indicator === 'M' ? standard[4] : ageKey;

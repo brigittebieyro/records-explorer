@@ -110,8 +110,8 @@ describe('Standards print certificate link (user-based)', () => {
   let certificateFetch: jest.Mock;
 
   const printPayload = async (index = 0, total = 1): Promise<Record<string, string>> => {
-    // The label becomes "Printing…" mid-flight, so a button drops out of this query while it is
-    // working. Wait for the whole set to settle before clicking, or the indices shift underfoot.
+    // Wait for the whole set to render before clicking, so the indices are not read off a
+    // half-built list.
     await waitFor(() =>
       expect(screen.getAllByRole('button', { name: /^print$/i })).toHaveLength(total)
     );

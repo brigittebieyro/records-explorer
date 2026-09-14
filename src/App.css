@@ -208,6 +208,7 @@ body {
   margin-right: 3%;
   padding: 0px 24px 12px;
   width: 30%;
+  position: relative;
 }
 
 .record-viewer-record-holder {
@@ -342,20 +343,29 @@ body {
   margin: 0;
 }
 
-/* The certificate link posts rather than navigating, so it is a button. Strip the native
-   chrome so it still reads as the link it replaced. */
 .certificate-link {
   background: none;
   border: none;
   padding: 0;
   font: inherit;
   cursor: pointer;
-  text-decoration: underline;
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 18px;
 }
 
 .certificate-link:disabled {
   cursor: default;
   opacity: 0.6;
+}
+
+/* print.svg is solid black and would disappear against the dark page. An <img> cannot take
+   currentColor, so the black is inverted to white and then dimmed to silver -- keep the
+   brightness in step with --main-border-color if that stops being silver. */
+.certificate-link-icon {
+  display: block;
+  filter: invert(1) brightness(0.753);
 }
 
 .records-viewer-loading-container {

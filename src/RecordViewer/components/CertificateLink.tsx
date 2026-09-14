@@ -62,7 +62,6 @@ export const fetchCertificate = async (request: CertificateRequest): Promise<str
   return URL.createObjectURL(await response.blob());
 };
 
-// TODO: replace with vector icon button.
 function CertificateLink(props: CertificateRequest) {
   const [status, setStatus] = useState<'idle' | 'working'>('idle');
 
@@ -103,7 +102,7 @@ function CertificateLink(props: CertificateRequest) {
       onClick={handleClick}
       disabled={status === 'working'}
     >
-      {status === 'working' ? 'Printing…' : 'Print'}
+      <img className="certificate-link-icon" src="/print.svg" width="18" height="18" alt="Print" />
     </button>
   );
 }

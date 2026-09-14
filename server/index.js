@@ -54,6 +54,87 @@ app.use('/api/meet-results', (req, res) => {
   proxyServer.emit('request', req, res);
 });
 
+// Printable record certificates.
+//
+// Mounted BEFORE the build-dir block below: the app.get('*') catch-all inside it would otherwise
+// swallow this route, including locally, since build/ exists in the working tree.
+//
+// The response is buffered rather than piped. You cannot change the status code after piping
+// begins, so a mid-render throw would leave a truncated PDF under a 200. A one-page certificate
+// is well under 150KB, so there is nothing to gain from streaming, and Content-Length makes the
+// browser's inline viewer behave.
+const { getRecordRows } = require('./certificate/sheet');
+const { findRecord } = require('./certificate/lookup');
+const { renderCertificate } = require('./certificate/render');
+const { MAX_CATEGORY_LENGTH } = require('./certificate/labels');
+
+// The lifter name comes from a spreadsheet cell, so a stray quote or newline in it would produce
+// a malformed Content-Disposition header and a broken download name.
+const safeFilePart = (value) =>
+  String(value || 'record').replace(/[^A-Za-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '') || 'record';
+
+app.get('/api/certificate', async (req, res) => {
+  const { sheet = 'Post-Aug2026', ageGroup, gender, weightClass, lift, category } = req.query;
+
+  if (!ageGroup || !gender || !weightClass || !lift) {
+    res.status(400).json({ error: 'ageGroup, gender, weightClass and lift are all required' });
+    return;
+  }
+  if (gender !== 'male' && gender !== 'female') {
+    res.status(400).json({ error: "gender must be 'male' or 'female'" });
+    return;
+  }
+  // The class wording is composed by the client from src/Data, which is the single source of
+  // truth for it -- the server keeps no copy. It is printed verbatim, so cap the length and
+  // strip control characters; omitting it drops the class from the sentence rather than failing.
+  if (category !== undefined && typeof category !== 'string') {
+    res.status(400).json({ error: 'category must be a single value' });
+    return;
+  }
+  if (category && category.length > MAX_CATEGORY_LENGTH) {
+    res.status(400).json({ error: `category must be ${MAX_CATEGORY_LENGTH} characters or fewer` });
+    return;
+  }
+  const printedCategory = category ? category.replace(/[\p{Cc}\p{Cf}]/gu, '').trim() : '';
+
+  let rows;
+  try {
+    // Throws a SheetError carrying the status: 400 for a malformed tab (before any outbound
+    // request), 404 for a tab that does not exist, 503 when the Sheets API is unreachable.
+    rows = await getRecordRows(sheet);
+  } catch (err) {
+    const status = err.status || 503;
+    if (status >= 500) console.error(`[certificate] ${err.message}`);
+    res.status(status).json({ error: err.message });
+    return;
+  }
+
+  const record = findRecord(rows, { ageGroup, gender, weightClass, lift });
+  if (!record) {
+    res.status(404).json({ error: 'no matching record' });
+    return;
+  }
+
+  let pdf;
+  try {
+    pdf = await renderCertificate({
+      ...record,
+      sheetName: String(sheet).trim(),
+      category: printedCategory,
+    });
+  } catch (err) {
+    console.error(`[certificate] render failed: ${err.stack || err.message}`);
+    res.status(500).json({ error: 'could not render the certificate' });
+    return;
+  }
+
+  const filename = `${safeFilePart(record.lifter)}-${safeFilePart(record.lift)}-record.pdf`;
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Length', pdf.length);
+  res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+  res.end(pdf);
+});
+
 // Serve React build if available (for containerized deployments)
 const path = require('path');
 const fs = require('fs');

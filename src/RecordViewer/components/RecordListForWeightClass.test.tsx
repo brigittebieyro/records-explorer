@@ -7,6 +7,7 @@ const makeAgeGroup = (overrides: object = {}): AgeGroup =>
     id: 'OPEN',
     name: 'Open',
     usawDisplayKey: 'Open',
+    certificateDisplayKey: 'Open',
     minimum_lifter_age: '0',
     maximum_lifter_age: '1000',
     disabled: false,
@@ -100,5 +101,73 @@ describe('RecordListForWeightClass (user-based)', () => {
     expect(screen.getByText('Open')).toBeInTheDocument();
     expect(screen.getByText('35 - 39 years old')).toBeInTheDocument();
     expect(screen.getByText('Masters Lifter')).toBeInTheDocument();
+  });
+});
+
+describe('RecordListForWeightClass print certificate link (user-based)', () => {
+  const groups = [
+    {
+      ageGroup: makeAgeGroup(),
+      records: { Snatch: makeRecord(), 'Clean & Jerk': makeRecord(), Total: makeRecord() },
+    },
+  ];
+
+  test('B-31: no link renders unless a certificate sheet is named', () => {
+    // The home page's all-records list omits the prop, so it is unchanged.
+    render(<RecordListForWeightClass weightClass={makeWeightClass()} groups={groups} />);
+
+    expect(screen.queryByRole('link', { name: /^print$/i })).toBeNull();
+  });
+
+  test('BA-10: naming a sheet opts the list into print links', () => {
+    render(
+      <RecordListForWeightClass
+        weightClass={makeWeightClass()}
+        groups={groups}
+        certificateSheet="Adaptive_Physical"
+      />
+    );
+
+    const links = screen.getAllByRole('link', { name: /^print$/i });
+    expect(links).toHaveLength(3);
+    const params = new URLSearchParams(links[0]!.getAttribute('href')!.split('?')[1]);
+    expect(params.get('sheet')).toBe('Adaptive_Physical');
+    expect(params.get('ageGroup')).toBe('OPEN');
+    expect(params.get('gender')).toBe('female');
+    expect(params.get('weightClass')).toBe('48');
+  });
+
+  test('BA-10: the open-ended top class links with its > indicator', () => {
+    render(
+      <RecordListForWeightClass
+        weightClass={makeWeightClass({ minBodyweight: '86', maxBodyweight: '1000' })}
+        groups={groups}
+        certificateSheet="Adaptive_All"
+      />
+    );
+
+    const params = new URLSearchParams(
+      screen
+        .getAllByRole('link', { name: /^print$/i })[0]!
+        .getAttribute('href')!
+        .split('?')[1]
+    );
+    expect(params.get('weightClass')).toBe('>86');
+  });
+
+  test('BA-10: only lifts that have a record get a link', () => {
+    render(
+      <RecordListForWeightClass
+        weightClass={makeWeightClass()}
+        groups={[{ ageGroup: makeAgeGroup(), records: { Snatch: makeRecord() } }]}
+        certificateSheet="Adaptive_All"
+      />
+    );
+
+    const links = screen.getAllByRole('link', { name: /^print$/i });
+    expect(links).toHaveLength(1);
+    expect(new URLSearchParams(links[0]!.getAttribute('href')!.split('?')[1]).get('lift')).toBe(
+      'Snatch'
+    );
   });
 });

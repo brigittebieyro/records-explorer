@@ -103,3 +103,102 @@ describe('Standards (user-based)', () => {
     expect(screen.queryByRole('heading', { name: 'Total' })).toBeNull();
   });
 });
+
+describe('Standards print certificate link (user-based)', () => {
+  const withLinkProps = {
+    weightClassName: "Women's 48kg",
+    ageGroupName: 'Open',
+    ageGroupId: 'OPEN',
+    gender: 'female' as const,
+    sheet: 'Post-Aug2026',
+  };
+
+  test('B-25: a real record holder gets a print certificate link', () => {
+    render(<Standards relevantRecords={makeRecordSet()} {...withLinkProps} />);
+
+    // One per lift.
+    expect(screen.getAllByRole('link', { name: /^print$/i })).toHaveLength(3);
+  });
+
+  test('B-25: the link carries the lift it sits under', () => {
+    render(<Standards relevantRecords={makeRecordSet()} {...withLinkProps} />);
+
+    const hrefs = screen
+      .getAllByRole('link', { name: /^print$/i })
+      .map((a) => new URLSearchParams(a.getAttribute('href')!.split('?')[1]).get('lift'));
+    expect(hrefs).toEqual(['Total', 'Snatch', 'Clean & Jerk']);
+  });
+
+  test('B-25: the link uses the record set weight class, not the age key', () => {
+    // relevantRecords.ageGroup is the sheet's ageKey ('W35'), NOT the record key -- so the
+    // ageGroup param must come from the prop instead.
+    render(
+      <Standards
+        relevantRecords={{ ...makeRecordSet(), ageGroup: 'W35', weightClass: '>86' }}
+        {...withLinkProps}
+        ageGroupId="35"
+      />
+    );
+    const params = new URLSearchParams(
+      screen
+        .getAllByRole('link', { name: /^print$/i })[0]!
+        .getAttribute('href')!
+        .split('?')[1]
+    );
+    expect(params.get('ageGroup')).toBe('35');
+    expect(params.get('weightClass')).toBe('>86');
+  });
+
+  test('B-26: STANDARD placeholders get no print certificate link', () => {
+    render(
+      <Standards
+        relevantRecords={makeRecordSet({
+          Total: makeRecord({ lifter: 'STANDARD' }),
+          Snatch: makeRecord({ lifter: 'STANDARD' }),
+          'Clean & Jerk': makeRecord({ lifter: 'STANDARD' }),
+        })}
+        {...withLinkProps}
+      />
+    );
+
+    expect(screen.queryByRole('link', { name: /^print$/i })).toBeNull();
+  });
+
+  test('B-26: a mixed record set links only the real holders', () => {
+    render(
+      <Standards
+        relevantRecords={makeRecordSet({ Snatch: makeRecord({ lifter: 'STANDARD' }) })}
+        {...withLinkProps}
+      />
+    );
+
+    expect(screen.getAllByRole('link', { name: /^print$/i })).toHaveLength(2);
+  });
+
+  test('no link renders when the certificate props are not supplied', () => {
+    // The props are optional so existing callers are unaffected.
+    render(
+      <Standards
+        relevantRecords={makeRecordSet()}
+        weightClassName="Women's 48kg"
+        ageGroupName="Open"
+      />
+    );
+
+    expect(screen.queryByRole('link', { name: /^print$/i })).toBeNull();
+  });
+
+  test('a partial record set renders the lifts it has without crashing', () => {
+    // records is a Record<string, StandardRecord>, so indexing is not type-checked and a missing
+    // lift used to blow up on standardData.weight.
+    render(
+      <Standards
+        relevantRecords={{ ageGroup: 'OPEN', weightClass: '48', records: { Snatch: makeRecord() } }}
+        {...withLinkProps}
+      />
+    );
+
+    expect(screen.getByText('80kg')).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: /^print$/i })).toHaveLength(1);
+  });
+});

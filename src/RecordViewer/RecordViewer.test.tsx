@@ -41,7 +41,7 @@ jest.mock('./components/AssociatedPriorRecords', () => () => <div data-testid="p
 
 // Row shape for the current standards sheet (see computeStandardsForWeightClass):
 // [2]=age group, [3]=gender, [7]=weight class indicator, [8]=lift, [9]=weight,
-// [10]=lifter, [11]=event, [12]=date.
+// [10]=lifter, [11]=date, [12]=event.
 const makeStandardRow = ({
   ageKey = 'Open',
   gender = 'F',
@@ -63,8 +63,8 @@ const makeStandardRow = ({
   lift,
   weight,
   lifter,
-  event,
   date,
+  event,
 ];
 
 // Row shape for the historical sheets (see computeHistoricalRecordsForWeightClass):

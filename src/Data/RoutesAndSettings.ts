@@ -116,11 +116,14 @@ export const getSheetRoute = (sheetId: string, sheetName: string): string => {
   return `${_sheetsBaseUrl}/${sheetId}/values/${sheetName}?key=${_googleKey}`;
 };
 // for current records:
-// export const currentRecordsSheetId = '1EJgLNWI4v5KZo780RIZ6zSsaDnOinuhJHQOvZoDL8BM'; // Test sheet.
-export const currentRecordsSheetId = '1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ'; // Records sheet id. Production data! Link is public! DO NOT alter data for testing.
+export const currentRecordsSheetId = '1EJgLNWI4v5KZo780RIZ6zSsaDnOinuhJHQOvZoDL8BM'; // Test sheet.
+// export const currentRecordsSheetId = '1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ'; // Records sheet id. Production data! Link is public! DO NOT alter data for testing.
 export const currentRecordsSheetName = 'Post-Aug2026';
 export const priorRecordsSheetNames = ['Pre-Aug2026', 'Pre-June2025', 'Pre-2018']; // Raw_Data is pre-Aug2026. There is a display sheet which references it, and we are not ready to rename.
 export const adaptiveAllRecordsSheetName = 'Adaptive_All';
+// The lifter column holds this sentinel when the WSO has set a record standard nobody has
+// reached yet. It is sheet data, so it must match the sheet exactly.
+export const standardKey = 'STANDARD';
 export const adptiveCategoryRecordsSheetNames = [
   'Adaptive_Physical',
   'Adaptive_Hearing',
@@ -136,24 +139,35 @@ export const adaptiveOptInFormUrl = 'https://forms.gle/2Y7qKS7C2pa3d4jLA';
 // ----------------------------------------------------------------------------------------------------------------
 // Adaptive Category Names
 // ----------------------------------------------------------------------------------------------------------------
+// `displayName` is the on-screen wording; `certificateDisplayKey` is how the category reads
+// mid-sentence on a printed certificate, where the longer screen wording is a mouthful.
+// Mirrored into server/certificate/labels.js, with a drift test pinning the two together.
 export const adaptiveCategories = [
   {
     id: 'Adaptive_Physical',
     displayName: 'Physical Disability',
+    certificateDisplayKey: 'Adaptive (Physical Disability)',
   },
   {
     id: 'Adaptive_Hearing',
     displayName: 'Deaf, Deafened, or Hard of Hearing',
+    certificateDisplayKey: 'Adaptive (Deaf and Hard of Hearing)',
   },
   {
     id: 'Adaptive_Vision',
     displayName: 'Visual Impairment',
+    certificateDisplayKey: 'Adaptive (Visual Impairment)',
   },
   {
     id: 'Adaptive_Cognitive',
     displayName: 'Intellectual Impairment',
+    certificateDisplayKey: 'Adaptive (Intellectual Impairment)',
   },
 ];
+
+// The combined Adaptive_All tab is not one of the four categories, so it has no entry above
+// to draw from and needs its own certificate wording.
+export const adaptiveAllCertificateDisplayKey = 'Adaptive (Overall)';
 
 // ----------------------------------------------------------------------------------------------------------------
 // External Links

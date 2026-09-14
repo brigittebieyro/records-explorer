@@ -15,7 +15,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -23,3 +23,11 @@ jobs:
 
       - name: Run unit tests
         run: npm run test -- --watchAll=false
+
+      - name: Run server tests
+        run: npm run test:server
+
+      # Typechecks the app as well as building it. Without this, a breaking change to a
+      # shared type only fails CI if some test happens to import the file that uses it.
+      - name: Build
+        run: npm run build

@@ -95,6 +95,21 @@ deployed Fly.io environment, where the server injects API secrets at request tim
 | B-23 | Overlap vs. touching  | Search a class whose bounds meet an old class at a single number (e.g. Women's 77kg against an old 69.01–77kg class) | Old classes that genuinely share a bodyweight band are listed; ones that only meet at a shared boundary are not. The lightest class of each set (lower bound 0) is still listed | - [ ] |
 | B-24 | Prior records refresh | Run a search, then search a different weight class without reloading | The prior-records list is fully replaced. No rows from the previous class remain, including where a lifter's Snatch, Clean & Jerk, and Total share one date | - [ ] |
 
+
+### Printable record certificates
+
+| ID   | Test                        | Steps                                                                                          | Expected result                                                                                                                                        | Pass  |
+| ---- | --------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| B-25 | Print link appears          | Search a class/age group with a real record holder and scroll to the Standards cards            | A "Print certificate" link shows under each lift that has a real holder                                                                                | - [ ] |
+| B-26 | Hidden for STANDARD         | Search a class where a lift's recordholder is "STANDARD"                                        | No "Print certificate" link on that card. The weight and "STANDARD" still show                                                                          | - [ ] |
+| B-27 | Opens a PDF in a new tab    | Click "Print certificate"                                                                       | A new tab opens showing a one-page landscape PDF with the ornamental border, the logo, the lifter's name in the banner, the class, the weight and lift, and the date. **This is the step that catches a missing `src/setupProxy.js`** — without it you get the app shell instead of a PDF | - [ ] |
+| B-28 | Certificate matches page    | Compare the PDF against the card it was printed from                                            | Same lifter, weight and date. The date reads long-form (e.g. "October 18, 2025") regardless of how the sheet stores it. The meet name is deliberately not printed | - [ ] |
+| B-32 | Long category wraps         | Print a certificate whose category line is long (e.g. an adaptive Masters 90+ open-ended class) | The category wraps onto a second line at full size - it must NOT shrink - and the lines below it move down to keep their spacing                         | - [ ] |
+| B-33 | Long name fits the banner   | Print a certificate for the longest lifter name in the sheet                                     | The name shrinks to stay inside the name frame artwork, clear of its flared ends                                                                         | - [ ] |
+| B-29 | Youth wording               | Print a certificate for a U11/U13/U15/U17 record                                                 | The class line reads "Girls"/"Boys" (e.g. "Under 11 Girls 30kg"), not "Women's"/"Men's"                                                                 | - [ ] |
+| B-30 | Masters wording             | Print a certificate for a Masters record (e.g. 35-39)                                            | The class line reads "Masters 35-39 ..." - the sheet's `W35`/`M35` prefix is resolved to the bracket                                                    | - [ ] |
+| B-31 | Absent from all-records list| Scroll to "All Current Record Holders" on the home page                                          | No "Print certificate" links there - the capability is opt-in and the home list does not opt in                                                          | - [ ] |
+
 ### Deep-linking
 
 | ID   | Test                | Steps                                                                                   | Expected result                                                        | Pass  |
@@ -113,11 +128,13 @@ exercised now.
 | BA-02 | Default view          | Load `/adaptive` fresh                                                 | Spinner, then the combined `Adaptive_All` view titled "All Adaptive Record Holders", laid out in Women/Men columns like the home page                     | - [ ] |
 | BA-03 | Empty state           | Load `/adaptive` while the adaptive sheets still hold only standards    | "No adaptive records have been set yet." — **not** a spinner and not "Loading current records…"                                                           | - [ ] |
 | BA-04 | No STANDARD rows      | Scan the view once records exist                                       | No entry shows "STANDARD" as the lifter name                                                                                                             | - [ ] |
-| BA-05 | Category dropdown     | Choose a category, e.g. "Visual Impairment"                            | The view switches to that category's sheet immediately (no Go button) and the title becomes "Visual Impairment Record Holders"                            | - [ ] |
+| BA-05 | Category dropdown     | Choose a category, e.g. "Visual Impairment", then click Go            | The view switches to that category's sheet and the title becomes "Visual Impairment Record Holders". Selecting alone does nothing until Go is clicked     | - [ ] |
 | BA-06 | Reset appears         | Observe the options bar before and after choosing a category           | No Reset button on the combined view; Reset appears once a category is chosen                                                                             | - [ ] |
 | BA-07 | Reset returns to all  | Click Reset                                                            | Back to the combined all-categories view, and the Reset button disappears again                                                                           | - [ ] |
 | BA-08 | Cached categories     | Visit a category, Reset, then choose that same category again          | It renders immediately; the network tab shows no second request for that sheet                                                                            | - [ ] |
 | BA-09 | Fetch failure         | Load with the sheet unreachable (e.g. offline)                         | "Adaptive records could not be loaded. Please try again later." instead of an endless spinner                                                             | - [ ] |
+| BA-10 | Adaptive print links  | Load `/adaptive` with records present                                  | Each record shows a "Print certificate" link, and the PDF's class line carries the category (e.g. "Physical Disability Open Women's 53kg")                | - [ ] |
+| BA-11 | Category changes tab  | Print from the combined view, then pick a category, click Go and print the same athlete | The link's `sheet=` parameter changes from `Adaptive_All` to the category's tab, and the certificate's category wording changes to match                  | - [ ] |
 
 ## 5. Section C — Local Meet Results (`/local-meet-results`)
 
@@ -177,6 +194,10 @@ exercised now.
 | G-04 | Plausibility filters | Spot-check top athletes and meet results                                             | No absurd values appear (the app drops results above 200 snatch / 280 C&J / 470 total as data errors)                                   | - [ ] |
 | G-05 | Bad deep-links       | Open `/?ageGroup=BOGUS&weightClass=BOGUS` and `/local-meet-results?meetId=999999999` | No crash; app either ignores the params or shows an error/empty state                                                                   | - [ ] |
 | G-06 | Unknown route        | Navigate to `/does-not-exist`                                                        | Header renders with an empty body (no route matches); no crash                                                                          | - [ ] |
+| G-07 | Certificate not found | Request `/api/certificate?ageGroup=OPEN&gender=female&weightClass=999&lift=Snatch`   | `404` with a JSON error, not a crash and not an empty PDF                                                                                               | - [ ] |
+| G-08 | Certificate bad tab   | Add `&sheet=NoSuchTab` to a working certificate URL                                  | `404`. Google reports a missing tab as a `400 INVALID_ARGUMENT`, so this confirms the translation                                                        | - [ ] |
+| G-09 | Certificate bad input | Request with `&sheet=` empty, and again with a 200-character sheet name              | `400` both times, and no outbound request to Google (check the server log)                                                                              | - [ ] |
+| G-10 | Certificate no key    | Restart the server with `REACT_APP_GOOGLE_API_KEY` unset, then request a certificate | `503` with a logged reason; the server stays up and the rest of the site still serves                                                                   | - [ ] |
 
 ## 10. Section H — Responsive & cross-browser
 

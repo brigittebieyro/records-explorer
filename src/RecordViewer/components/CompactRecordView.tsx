@@ -12,9 +12,9 @@ function CompactRecordView({ record }: CompactRecordViewProps) {
       {' — '}
       <strong>{record.lifter}</strong>
       {', '}
-      {record.event}
-      {', '}
       {record.date}
+      {', '}
+      {record.event}
     </span>
   );
 }

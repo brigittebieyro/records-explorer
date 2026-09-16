@@ -18,6 +18,7 @@ const select = (container: HTMLElement, id: string): HTMLSelectElement =>
 
 const lifterInput = () => screen.getByPlaceholderText('Athlete Name');
 const dateInput = () => screen.getByPlaceholderText('Date, any format');
+const eventInput = () => screen.getByPlaceholderText('Event Name');
 const weightInput = () => screen.getByPlaceholderText('##');
 const weightClassInput = () => screen.getByPlaceholderText('##+');
 const goButton = () => screen.getByRole('button', { name: 'Go' });
@@ -26,6 +27,7 @@ const goButton = () => screen.getByRole('button', { name: 'Go' });
 const fillForm = async (container: HTMLElement) => {
   await userEvent.type(lifterInput(), 'Jade Morales');
   await userEvent.type(dateInput(), '2019-05-04');
+  await userEvent.type(eventInput(), 'California State Championships');
   await userEvent.selectOptions(select(container, 'certificate-lift'), 'Snatch');
   await userEvent.type(weightInput(), '76');
   await userEvent.selectOptions(select(container, 'certificate-division'), "Women's");
@@ -61,6 +63,7 @@ describe('PastRecordCertificateForm (user-based)', () => {
 
     expect(lifterInput()).toBeInTheDocument();
     expect(dateInput()).toBeInTheDocument();
+    expect(eventInput()).toBeInTheDocument();
     expect(weightInput()).toBeInTheDocument();
     expect(weightClassInput()).toBeInTheDocument();
     expect(select(container, 'certificate-lift')).toBeInTheDocument();
@@ -99,6 +102,11 @@ describe('PastRecordCertificateForm (user-based)', () => {
 
     await fillForm(container);
     expect(goButton()).toBeEnabled();
+
+    // The meet is required like the rest: a past record the committee cannot name a meet for is
+    // one they have to go and find, not print with the line missing.
+    await userEvent.clear(eventInput());
+    expect(goButton()).toBeDisabled();
   });
 
   test('F-06: Go posts the entered details and saves the PDF under the server name', async () => {
@@ -122,6 +130,7 @@ describe('PastRecordCertificateForm (user-based)', () => {
       lift: 'Snatch',
       weight: '76',
       date: '2019-05-04',
+      event: 'California State Championships',
       category: "Women's Open 53kg",
       timeZone: recordTimeZone,
     });

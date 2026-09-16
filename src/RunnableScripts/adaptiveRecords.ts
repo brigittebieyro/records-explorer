@@ -141,10 +141,12 @@ export function parseAdaptiveRoster(sheetData: string[][]): AdaptiveLifter[] {
     const usawNumber = String(row[usawIndex] ?? '').trim();
     // The sheet carries a long tail of blank rows with FALSE in every flag column.
     if (!usawNumber) continue;
-    const categorySheetNames = adptiveCategoryRecordsSheetNames.filter((_unused, categoryPosition) => {
-      const column = categoryIndexes[categoryPosition];
-      return column !== undefined && isTrue(row[column]);
-    });
+    const categorySheetNames = adptiveCategoryRecordsSheetNames.filter(
+      (_unused, categoryPosition) => {
+        const column = categoryIndexes[categoryPosition];
+        return column !== undefined && isTrue(row[column]);
+      }
+    );
     lifters.push({
       name: String(row[nameIndex] ?? '').trim(),
       usawNumber,

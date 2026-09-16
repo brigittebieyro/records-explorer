@@ -13,6 +13,7 @@ const emptyForm: PastRecordCertificateInput = {
   lift: '',
   weight: '',
   date: '',
+  event: '',
   division: '',
   ageCategory: '',
   weightClass: '',
@@ -28,6 +29,7 @@ const isComplete = (form: PastRecordCertificateInput): boolean =>
     form.lift,
     form.weight,
     form.date,
+    form.event,
     form.division,
     form.ageCategory,
     form.weightClass,
@@ -94,6 +96,18 @@ function PastRecordCertificateForm() {
           disabled={isWorking}
           placeholder="Date, any format"
           onChange={(eventObj) => update('date', eventObj.target.value)}
+        />
+      </div>
+
+      <div className="script-form-item">
+        <input
+          id="certificate-event"
+          type="text"
+          className="header-button"
+          placeholder="Event Name"
+          value={form.event}
+          disabled={isWorking}
+          onChange={(eventObj) => update('event', eventObj.target.value)}
         />
       </div>
 

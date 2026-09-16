@@ -27,6 +27,7 @@ function buildManualRecord(body) {
       weight: stripUnprintable(source.weight),
       date: stripUnprintable(source.date),
       category: stripUnprintable(source.category),
+      event: stripUnprintable(source.event),
       timeZone: source.timeZone,
     },
   };

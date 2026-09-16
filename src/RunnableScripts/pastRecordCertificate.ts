@@ -33,6 +33,8 @@ export interface PastRecordCertificateInput {
   weight: string;
   /** Free text. Printed as written, give or take the reformatting formatDate does. */
   date: string;
+  /** The meet the record was set at. Free text, printed as written. */
+  event: string;
   division: string;
   /** Free text, e.g. 'Open', 'Under 15', 'Masters (35-39)'. */
   ageCategory: string;
@@ -83,6 +85,7 @@ export const fetchPastRecordCertificate = async (
       lift: input.lift,
       weight: input.weight,
       date: input.date,
+      event: input.event.trim(),
       category: buildPastRecordCategory(input),
       timeZone: recordTimeZone,
     }),

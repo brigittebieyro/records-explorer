@@ -747,7 +747,7 @@ body {
 }
 
 /* Scripts page: the input block a script renders when it needs details from the operator.
-   Seven controls, so they are stacked in labelled rows rather than run along one line the way the
+   Eight controls, so they are stacked in labelled rows rather than run along one line the way the
    options bar's two selects are. */
 .script-form {
   color: var(--main-text-color);

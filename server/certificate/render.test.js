@@ -174,15 +174,23 @@ test('buildCertificateLines produces the certificate copy in order', () => {
     "has established the following record for the Women's Open 53kg category:",
     '76kg Snatch',
     'on June 23, 2026',
+    'at 2026 USAW National Championships & Mountain North WSO Championships',
   ]);
 });
 
-test('the meet name is deliberately not printed', () => {
-  // The designed sample omits it. RECORD carries one, so this pins the omission as a choice
-  // rather than letting it come back by accident.
-  const rendered = textOf(buildCertificateLines(RECORD)).join(' | ');
-  assert.ok(RECORD.event);
-  assert.ok(!rendered.includes(RECORD.event), 'the meet name should not appear');
+test('the meet name is printed under the date, a size smaller', () => {
+  const byId = Object.fromEntries(buildCertificateLines(RECORD).map((l) => [l.id, l]));
+  assert.strictEqual(byId.event.runs[0].text, `at ${RECORD.event}`);
+  assert.ok(byId.event.y > byId.date.y, 'the meet sits below the date');
+  assert.ok(byId.event.runs[0].size < byId.date.runs[0].size, 'the meet is set smaller');
+});
+
+test('without a meet the line is dropped rather than left dangling', () => {
+  for (const event of [undefined, null, '', '   ']) {
+    const lines = buildCertificateLines({ ...RECORD, event });
+    assert.ok(!lines.some((l) => l.id === 'event'));
+    assert.deepStrictEqual(textOf(lines).slice(-1), ['on June 23, 2026']);
+  }
 });
 
 test('fonts follow the design: script title, bold name, italic prose, roman record', () => {
@@ -194,6 +202,7 @@ test('fonts follow the design: script title, bold name, italic prose, roman reco
   assert.deepStrictEqual(byId.preamble, [BODY_ITALIC]);
   assert.deepStrictEqual(byId.category, [BODY_ITALIC]);
   assert.deepStrictEqual(byId.date, [BODY_ITALIC]);
+  assert.deepStrictEqual(byId.event, [BODY_ITALIC]);
   assert.deepStrictEqual(byId.record, [BODY]);
 });
 
@@ -228,9 +237,21 @@ test('without a category the sentence still closes cleanly', () => {
 
 test('a missing date drops only the date line', () => {
   const noDate = buildCertificateLines({ ...RECORD, date: null });
-  assert.deepStrictEqual(textOf(noDate).slice(-1), ['76kg Snatch']);
-  assert.strictEqual(noDate.length, 5);
+  assert.deepStrictEqual(textOf(noDate).slice(-2), ['76kg Snatch', `at ${RECORD.event}`]);
+  assert.strictEqual(noDate.length, 6);
   assert.ok(!noDate.some((l) => l.id === 'date'));
+  // The meet closes the gap the date left rather than hanging 19pt below an empty slot.
+  const withDate = buildCertificateLines(RECORD);
+  assert.strictEqual(
+    noDate.find((l) => l.id === 'event').y,
+    withDate.find((l) => l.id === 'date').y
+  );
+});
+
+test('with neither a date nor a meet the record line is the last', () => {
+  const bare = buildCertificateLines({ ...RECORD, date: null, event: null });
+  assert.deepStrictEqual(textOf(bare).slice(-1), ['76kg Snatch']);
+  assert.strictEqual(bare.length, 5);
 });
 
 test('the kg suffix attaches to the weight, not the lift', () => {

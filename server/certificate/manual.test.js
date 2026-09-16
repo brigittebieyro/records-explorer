@@ -8,6 +8,7 @@ const body = (overrides = {}) => ({
   lift: 'Snatch',
   weight: '76',
   date: '2019-05-04',
+  event: 'California State Championships',
   category: "Women's Open 53kg",
   timeZone: 'America/Los_Angeles',
   ...overrides,
@@ -21,6 +22,7 @@ test('a complete body becomes the record shape the renderer takes', () => {
       weight: '76',
       date: '2019-05-04',
       category: "Women's Open 53kg",
+      event: 'California State Championships',
       timeZone: 'America/Los_Angeles',
     },
   });
@@ -59,10 +61,12 @@ test('invisible characters are stripped from every printed field', () => {
     body({
       lifter: `Jade${rightToLeftOverride} Morales`,
       category: `Women's${zeroWidthSpace} Open 53kg`,
+      event: `California${zeroWidthSpace} State Championships`,
     })
   );
   assert.strictEqual(record.lifter, 'Jade Morales');
   assert.strictEqual(record.category, "Women's Open 53kg");
+  assert.strictEqual(record.event, 'California State Championships');
 });
 
 test('a missing field becomes an empty string, not an error', () => {
@@ -74,6 +78,7 @@ test('a missing field becomes an empty string, not an error', () => {
     weight: '',
     date: '',
     category: '',
+    event: '',
     timeZone: undefined,
   });
 });

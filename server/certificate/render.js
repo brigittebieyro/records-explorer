@@ -269,9 +269,19 @@ function buildCertificateLines(record) {
 
   // The date sits tight under the record rather than in its own block. It can be missing: the
   // adaptive tabs trim trailing empty cells, and STANDARD rows never have one.
+  let nextY = 437;
   const when = formatDate(record.date, record.timeZone);
   if (when) {
-    lines.push({ id: 'date', y: 437, runs: [{ text: `on ${when}`, font: BODY_ITALIC, size: 15 }] });
+    lines.push({ id: 'date', y: nextY, runs: [{ text: `on ${when}`, font: BODY_ITALIC, size: 15 }] });
+    nextY += 19;
+  }
+
+  // The meet, a step smaller than the date so the two read as one footnote to the record line.
+  // Missing under the same conditions the date is, and the two are independent: an event with no
+  // date takes the date's own baseline rather than leaving a hole under the record.
+  const event = record.event ? String(record.event).trim() : '';
+  if (event) {
+    lines.push({ id: 'event', y: nextY, runs: [{ text: `at ${event}`, font: BODY_ITALIC, size: 13 }] });
   }
 
   return lines;

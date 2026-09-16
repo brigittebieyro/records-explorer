@@ -745,3 +745,18 @@ body {
   color: var(--main-accent-color);
   font-size: 11px;
 }
+
+/* Scripts page: the input block a script renders when it needs details from the operator.
+   Seven controls, so they are stacked in labelled rows rather than run along one line the way the
+   options bar's two selects are. */
+.script-form {
+  color: var(--main-text-color);
+  text-align: left;
+  padding: 12px 0;
+}
+
+.script-form-item {
+  display: inline-block;
+  max-width: 25%;
+  margin-bottom: 12px;
+}

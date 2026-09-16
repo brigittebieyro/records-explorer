@@ -23,6 +23,12 @@ jest.mock('../Data/scripts', () => ({
       fileName: 'adaptive-record-breaking-analysis.csv',
       source: jest.fn(),
     },
+    {
+      // A script that needs details from the operator: no source, no fileName, its own controls.
+      name: 'Past Recordholder Certificate',
+      description: 'Test certificate script description.',
+      Form: () => <p>Stand-in for the certificate form</p>,
+    },
   ],
 }));
 
@@ -165,6 +171,29 @@ describe('Scripts (user-based)', () => {
     expect(scriptSource).not.toHaveBeenCalled();
     const downloadLink = clickSpy.mock.instances[0] as unknown as HTMLAnchorElement;
     expect(downloadLink.download).toBe('adaptive-record-breaking-analysis.csv');
+  });
+
+  test('F-06: a script that needs details shows its form in place of Run', async () => {
+    const { container } = render(<Scripts />);
+    await unlock(container);
+
+    await userEvent.selectOptions(screen.getByLabelText('Script'), 'Past Recordholder Certificate');
+
+    expect(screen.getByText('Stand-in for the certificate form')).toBeInTheDocument();
+    expect(screen.getByText('Test certificate script description.')).toBeInTheDocument();
+    // Run would be a second, meaningless button next to the form's own.
+    expect(screen.queryByRole('button', { name: 'Run' })).toBeNull();
+  });
+
+  test('F-06: switching back to a CSV script restores Run and drops the form', async () => {
+    const { container } = render(<Scripts />);
+    await unlock(container);
+    await userEvent.selectOptions(screen.getByLabelText('Script'), 'Past Recordholder Certificate');
+
+    await userEvent.selectOptions(screen.getByLabelText('Script'), 'Fetch Record Updates');
+
+    expect(screen.queryByText('Stand-in for the certificate form')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Run' })).toBeEnabled();
   });
 
   test('F-04: a failing script shows the error box instead of failing silently', async () => {

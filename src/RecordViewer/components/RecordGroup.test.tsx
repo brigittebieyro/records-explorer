@@ -167,8 +167,8 @@ describe('RecordGroup (user-based)', () => {
   });
 
   test('B-10: renders at most `count` lifters', async () => {
-    const lifters = Array.from({ length: 7 }, (_, i) =>
-      makeLifter(String(i + 1), { name: `Lifter ${i + 1}`, total: 200 - i })
+    const lifters = Array.from({ length: 7 }, (_, index) =>
+      makeLifter(String(index + 1), { name: `Lifter ${index + 1}`, total: 200 - index })
     );
     mockFetchResponses(lifters);
 

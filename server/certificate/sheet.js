@@ -4,7 +4,13 @@
 // copy of it: src/Data/RoutesAndSettings.ts is the single source of truth, and a mirror here
 // would have to be swapped in lockstep every time development points at the test sheet.
 
-const { MAX_SHEET_NAME_LENGTH, MAX_SHEET_ID_LENGTH, SHEET_ID_PATTERN } = require('./labels');
+/**
+ * The charset of a Google spreadsheet id. Anchored, and deliberately narrower than "not empty":
+ * the id is interpolated into a URL path, so anything that could introduce a path segment or a
+ * query string has to be impossible rather than merely unlikely. This is URL construction safety,
+ * not input validation -- it is about what we send Google, not about trusting the caller.
+ */
+const SHEET_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 
 const CACHE_TTL_MS = 60 * 1000;
 // Failures are cached too, briefly, so a bad tab requested in a loop does not become a fetch per
@@ -34,25 +40,18 @@ function assertUsableSheetName(sheetName) {
   if (!name) {
     throw new SheetError(400, 'sheet is required');
   }
-  if (name.length > MAX_SHEET_NAME_LENGTH) {
-    throw new SheetError(400, `sheet must be ${MAX_SHEET_NAME_LENGTH} characters or fewer`);
-  }
   return name;
 }
 
 /**
- * The id lands in a URL path segment, so it is checked against a strict charset rather than just
- * a length: no '/', '?', '#' or '..' can reach the Sheets URL and bend it somewhere else. The
- * host stays pinned to sheets.googleapis.com, so the widest this opens things is reading some
- * other world-readable spreadsheet through our API key.
+ * The id lands in a URL path segment: no '/', '?', '#' or '..' can reach the Sheets URL and bend
+ * it somewhere else. The host stays pinned to sheets.googleapis.com, so the widest this opens
+ * things is reading some other world-readable spreadsheet through our API key.
  */
 function assertUsableSheetId(sheetId) {
   const id = typeof sheetId === 'string' ? sheetId.trim() : '';
   if (!id) {
     throw new SheetError(400, 'sheetId is required');
-  }
-  if (id.length > MAX_SHEET_ID_LENGTH) {
-    throw new SheetError(400, `sheetId must be ${MAX_SHEET_ID_LENGTH} characters or fewer`);
   }
   if (!SHEET_ID_PATTERN.test(id)) {
     throw new SheetError(400, 'sheetId is not a valid spreadsheet id');

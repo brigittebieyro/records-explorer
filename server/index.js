@@ -71,7 +71,7 @@ app.use('/api/meet-results', (req, res) => {
 const { getRecordRows } = require('./certificate/sheet');
 const { findRecord } = require('./certificate/lookup');
 const { renderCertificate, certificateFileName } = require('./certificate/render');
-const { MAX_CATEGORY_LENGTH } = require('./certificate/labels');
+const { buildManualRecord } = require('./certificate/manual');
 
 // The JSON body parser is mounted on this ROUTE, never app-wide. The four cors-anywhere routes
 // above proxy POSTs whose content-type is application/json (see `headers` in
@@ -88,7 +88,8 @@ const certificateBody = express.json({ limit: '8kb' });
 // is the single source of truth for them, and a default is just a mirror that goes stale quietly.
 // getRecordRows validates both before anything is fetched.
 app.post('/api/certificate', certificateBody, async (req, res) => {
-  const { sheetId, sheet, ageGroup, gender, weightClass, lift, category } = req.body || {};
+  const { sheetId, sheet, ageGroup, gender, weightClass, lift, category, timeZone } =
+    req.body || {};
 
   if (!ageGroup || !gender || !weightClass || !lift) {
     res.status(400).json({ error: 'ageGroup, gender, weightClass and lift are all required' });
@@ -99,14 +100,11 @@ app.post('/api/certificate', certificateBody, async (req, res) => {
     return;
   }
   // The class wording is composed by the client from src/Data, which is the single source of
-  // truth for it -- the server keeps no copy. It is printed verbatim, so cap the length and
-  // strip control characters; omitting it drops the class from the sentence rather than failing.
+  // truth for it -- the server keeps no copy and prints it verbatim, less the control characters,
+  // which are invisible in the form but would reorder the line in the PDF. Omitting it drops the
+  // class from the sentence rather than failing.
   if (category !== undefined && typeof category !== 'string') {
     res.status(400).json({ error: 'category must be a single value' });
-    return;
-  }
-  if (category && category.length > MAX_CATEGORY_LENGTH) {
-    res.status(400).json({ error: `category must be ${MAX_CATEGORY_LENGTH} characters or fewer` });
     return;
   }
   const printedCategory = category ? category.replace(/[\p{Cc}\p{Cf}]/gu, '').trim() : '';
@@ -136,9 +134,38 @@ app.post('/api/certificate', certificateBody, async (req, res) => {
       ...record,
       sheetName: String(sheet).trim(),
       category: printedCategory,
+      timeZone,
     });
   } catch (err) {
     console.error(`[certificate] render failed: ${err.stack || err.message}`);
+    res.status(500).json({ error: 'could not render the certificate' });
+    return;
+  }
+
+  const filename = certificateFileName(record);
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Length', pdf.length);
+  res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+  res.end(pdf);
+});
+
+// The same certificate, for a record that is not in the sheet.
+//
+// A past recordholder has no row to look up -- their record has been beaten, or predates the
+// current tab -- so the committee types the details in on /scripts and they arrive here whole.
+// Nothing about the document changes: this renders through the same renderCertificate and names
+// the file through the same certificateFileName, so a manual certificate and a sheet-backed one
+// are the same artifact.
+//
+// No sheet is read, which also means this route works with no REACT_APP_GOOGLE_API_KEY set.
+app.post('/api/certificate/manual', certificateBody, async (req, res) => {
+  const { record, error } = buildManualRecord(req.body);
+
+  let pdf;
+  try {
+    pdf = await renderCertificate(record);
+  } catch (err) {
+    console.error(`[certificate] manual render failed: ${err.stack || err.message}`);
     res.status(500).json({ error: 'could not render the certificate' });
     return;
   }

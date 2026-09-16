@@ -146,8 +146,8 @@ describe('GoalsWeightClass (user-based)', () => {
   });
 
   test('D-03: renders at most safeCount + 10 entries', async () => {
-    const lifters = Array.from({ length: 15 }, (_, i) =>
-      makeGoalLifter({ name: `Lifter ${i + 1}`, total: 200 - i })
+    const lifters = Array.from({ length: 15 }, (_, index) =>
+      makeGoalLifter({ name: `Lifter ${index + 1}`, total: 200 - index })
     );
     mockFetchResponses(lifters);
 
@@ -209,8 +209,8 @@ describe('GoalsWeightClass (user-based)', () => {
   });
 
   test('D-05: entries below the qualifying cutoff are marked tentative', async () => {
-    const lifters = Array.from({ length: 4 }, (_, i) =>
-      makeGoalLifter({ name: `Lifter ${i + 1}`, total: 200 - i })
+    const lifters = Array.from({ length: 4 }, (_, index) =>
+      makeGoalLifter({ name: `Lifter ${index + 1}`, total: 200 - index })
     );
     mockFetchResponses(lifters);
 
@@ -262,8 +262,8 @@ describe('GoalsWeightClass (user-based)', () => {
   });
 
   test('D-06: rank circles count 1, 2, 3… in order', async () => {
-    const lifters = Array.from({ length: 4 }, (_, i) =>
-      makeGoalLifter({ name: `Lifter ${i + 1}`, total: 200 - i })
+    const lifters = Array.from({ length: 4 }, (_, index) =>
+      makeGoalLifter({ name: `Lifter ${index + 1}`, total: 200 - index })
     );
     mockFetchResponses(lifters);
 

@@ -4,6 +4,15 @@
 //
 export const wsoId = 21;
 export const wsoName = 'California North Central';
+/**
+ * The time zone every record date is read and written in. Hard-coded rather than taken from the
+ * viewer's machine: a record was set on one particular day, and that day must not change with who
+ * is looking at it.
+ *
+ * Sent with every certificate request. The server keeps no copy -- this file is the single source
+ * of truth, the same way it is for the sheet ids and the class wording.
+ */
+export const recordTimeZone = 'America/Los_Angeles';
 export const wsoRegion = '66'; // This will be used to search for california by state.
 //
 // Use a relative local base path so the client works when deployed behind a reverse proxy.

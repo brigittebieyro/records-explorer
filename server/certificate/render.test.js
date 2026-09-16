@@ -69,6 +69,46 @@ test('formatDate handles both sheet formats and degrades on anything else', () =
   assert.strictEqual(formatDate(undefined), null);
 });
 
+test('formatDate renders a whole date written in any other format', () => {
+  // Hand-entered certificates are not limited to what the sheets write.
+  assert.strictEqual(formatDate('May 4, 2019'), 'May 4, 2019');
+  assert.strictEqual(formatDate('4 May 2019'), 'May 4, 2019');
+  assert.strictEqual(formatDate('Oct 18, 2025'), 'October 18, 2025');
+  assert.strictEqual(formatDate('18 October 2025'), 'October 18, 2025');
+  assert.strictEqual(formatDate('12-25-2020'), 'December 25, 2020');
+  assert.strictEqual(formatDate('2019/05/04'), 'May 4, 2019');
+});
+
+test('formatDate never invents the parts of a partial date', () => {
+  // The runtime's parser fills these in silently -- 'Spring 1998' comes back as January 1st, and
+  // a bare '1998' as the New Year's Eve before it -- and printing either as an exact day would be
+  // inventing the date of a record. They are printed as written instead.
+  assert.strictEqual(formatDate('Spring 1998'), 'Spring 1998');
+  assert.strictEqual(formatDate('1998'), '1998');
+  assert.strictEqual(formatDate('May 2019'), 'May 2019');
+  assert.strictEqual(formatDate('March 3rd, 2020'), 'March 3rd, 2020');
+});
+
+test('formatDate renders the same day whatever zone the client names', () => {
+  // The day is pinned at noon UTC, so a record's date cannot drift onto a neighbouring day.
+  for (const zone of ['America/Los_Angeles', 'America/New_York', 'UTC', 'Asia/Kolkata']) {
+    assert.strictEqual(formatDate('2019-05-04', zone), 'May 4, 2019');
+    assert.strictEqual(formatDate('May 4, 2019', zone), 'May 4, 2019');
+  }
+});
+
+test('formatDate falls back to UTC rather than throwing on a zone it does not know', () => {
+  assert.strictEqual(formatDate('2019-05-04', 'Mars/Olympus_Mons'), 'May 4, 2019');
+  assert.strictEqual(formatDate('2019-05-04', undefined), 'May 4, 2019');
+  assert.strictEqual(formatDate('2019-05-04', ''), 'May 4, 2019');
+});
+
+test('formatDate never prints the word undefined for an impossible month', () => {
+  // MONTHS is indexed directly, so an out-of-range month used to render as "undefined 4, 2019".
+  assert.strictEqual(formatDate('2019-13-04'), '2019-13-04');
+  assert.strictEqual(formatDate('0/5/2019'), '0/5/2019');
+});
+
 // ---------------------------------------------------------------------------------------------
 // Download naming
 // ---------------------------------------------------------------------------------------------

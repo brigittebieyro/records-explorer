@@ -101,10 +101,10 @@ function WeightClassSection({ group }: { group: WeightClassGroup }) {
         <strong>{getDisplayName(group.gender, group.weightClassLabel)}</strong>
       </p>
       <ul className="local-meets-results-list">
-        {group.results.map((result, i) => (
-          <li key={`${result.lifter}-${i}`} className="local-meet-result-item">
+        {group.results.map((result, index) => (
+          <li key={`${result.lifter}-${index}`} className="local-meet-result-item">
             <div className="record-viewer-ranking" style={{ textAlign: 'center' }}>
-              {i + 1}
+              {index + 1}
             </div>
             <strong>{result.lifter}</strong>
             <br />
@@ -153,8 +153,8 @@ function LocalMeetResultsByWeightClass({ meetResults }: Props) {
             </strong>
           </p>
           <ul className="local-meets-results-list">
-            {unclassified.map((result, i) => (
-              <li key={`unclassified-${i}`} className="local-meet-result-item">
+            {unclassified.map((result, index) => (
+              <li key={`unclassified-${index}`} className="local-meet-result-item">
                 <p>
                   <strong>{result.lifter}</strong>
                 </p>

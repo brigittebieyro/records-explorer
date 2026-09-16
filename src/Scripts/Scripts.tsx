@@ -26,17 +26,20 @@ function Scripts() {
   };
 
   const handleRun = async () => {
-    if (!selectedScript) return;
+    // A form-driven script has neither, and never reaches here -- its own controls replace the
+    // Run button below. Destructured so both stay narrowed across the await.
+    const { source, fileName } = selectedScript ?? {};
+    if (!source || !fileName) return;
     setIsRunning(true);
     setStatus('idle');
     setError(undefined);
     try {
-      const csv = await selectedScript.source();
+      const csv = await source();
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = selectedScript.fileName;
+      link.download = fileName;
       link.target = '_blank';
       document.body.appendChild(link);
       link.click();
@@ -68,13 +71,19 @@ function Scripts() {
                 : [],
             },
           ]}
-          buttons={[
-            {
-              label: isRunning ? 'Running…' : 'Run',
-              onClick: handleRun,
-              enablement: isUnlocked && !!selectedName && !isRunning ? 'enabled' : 'disabled',
-            },
-          ]}
+          buttons={
+            // A form-driven script supplies its own submit control, so Run would be a second,
+            // meaningless button. With nothing selected yet, Run still shows disabled.
+            selectedScript?.Form
+              ? []
+              : [
+                  {
+                    label: isRunning ? 'Running…' : 'Run',
+                    onClick: handleRun,
+                    enablement: isUnlocked && !!selectedName && !isRunning ? 'enabled' : 'disabled',
+                  },
+                ]
+          }
         />
 
         <h2>Scripts</h2>
@@ -90,6 +99,12 @@ function Scripts() {
         {selectedScript && (
           <div className="info-page-box">
             <p>{selectedScript.description}</p>
+          </div>
+        )}
+
+        {selectedScript?.Form && (
+          <div className="info-page-box">
+            <selectedScript.Form />
           </div>
         )}
 

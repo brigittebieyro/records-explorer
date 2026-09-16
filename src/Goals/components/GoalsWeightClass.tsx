@@ -96,10 +96,10 @@ function GoalsWeightClass({ weightClass, safeCount, startDate, endDate }: GoalsW
       );
       if (isCancelled()) return;
 
-      const surviving = validated.filter((l): l is CombinedLiftData => l !== null);
+      const surviving = validated.filter((lift): lift is CombinedLiftData => lift !== null);
       const changed =
         surviving.length !== json.data.length ||
-        surviving.some((l, i) => l.total !== json.data[i].total);
+        surviving.some((lift, index) => lift.total !== json.data[index].total);
       if (changed) setLifters(sortLifts(surviving, 'total'));
       setStatus('complete');
     } catch (error) {

@@ -28,25 +28,66 @@ const BODY = 'Times-Roman';
 const BODY_BOLD = 'Times-Bold';
 const BODY_ITALIC = 'Times-Italic';
 
-const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-];
+/**
+ * Formats a calendar day as "October 18, 2025", or null if it is not a real one.
+ *
+ * The day is pinned at noon UTC before formatting. A record has a date but no time, so the instant
+ * only has to sit far enough from both midnights that the time zone cannot move it to a
+ * neighbouring day.
+ *
+ * `timeZone` is named by the client (recordTimeZone in src/Data/RoutesAndSettings.ts). UTC stands
+ * in when it is missing or not a zone this runtime knows, which keeps a bad value from throwing
+ * mid-render -- and against the noon pin, UTC prints the intended day regardless.
+ */
+function writeDate(year, month, day, timeZone) {
+  if (!(month >= 1 && month <= 12) || !(day >= 1 && day <= 31)) return null;
+  const when = new Date(Date.UTC(year, month - 1, day, 12));
+  const options = { month: 'long', day: 'numeric', year: 'numeric' };
+  try {
+    return new Intl.DateTimeFormat('en-US', { ...options, timeZone: timeZone || 'UTC' }).format(when);
+  } catch {
+    return new Intl.DateTimeFormat('en-US', { ...options, timeZone: 'UTC' }).format(when);
+  }
+}
 
 /**
- * The sheets disagree on date format -- production writes 2025-10-18, the test sheet writes
- * 10/18/2025 -- and neither reads well on a formal certificate. Parsing both keeps the output
- * identical whichever sheet the server is pointed at; an unrecognised format degrades to the
- * raw string rather than throwing.
+ * Renders any date we can recognise as "October 18, 2025", and prints anything else as written.
+ *
+ * The sheets disagree on format -- production writes 2025-10-18, the test sheet writes
+ * 10/18/2025 -- and neither reads well on a formal certificate. Certificates entered by hand add
+ * whatever the operator typed on top of that, so the sheet formats are matched explicitly and
+ * everything else is handed to the runtime's own parser.
  */
-function formatDate(raw) {
+function formatDate(raw, timeZone) {
   if (raw === undefined || raw === null) return null;
   const s = String(raw).trim();
   if (!s) return null;
+
+  // The two sheet formats, read straight off the string. The ISO one has to be: the runtime parses
+  // a bare '2019-05-04' as UTC midnight but 'May 4, 2019' as midnight wherever the server happens
+  // to be, so the two cannot go down the same path and both come out right.
   let m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s);
-  if (m) return `${MONTHS[+m[2] - 1]} ${+m[3]}, ${+m[1]}`;
+  if (m) return writeDate(+m[1], +m[2], +m[3], timeZone) || s;
   m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s);
-  if (m) return `${MONTHS[+m[1] - 1]} ${+m[2]}, ${+m[3]}`;
+  if (m) return writeDate(+m[3], +m[1], +m[2], timeZone) || s;
+
+  // Anything else an operator might reasonably type -- 'May 4, 2019', '4 May 2019', '12-25-2020'.
+  //
+  // Guarded on the string holding at least two numbers, which is what separates a whole date from
+  // a partial one. The parser invents the missing pieces otherwise, and silently: 'May 2019' and
+  // 'Spring 1998' both come back as the 1st of a month, and a bare '1998' as the New Year's Eve
+  // before it. Printing any of those as an exact day would be inventing the date of a record.
+  //
+  // The parsed day is read back with local getters because that is the clock the runtime just used
+  // to parse it; writeDate then re-pins it, so the server's own setting never reaches the page.
+  if ((s.match(/\d+/g) || []).length >= 2) {
+    const parsed = new Date(s);
+    if (!Number.isNaN(parsed.getTime())) {
+      return writeDate(parsed.getFullYear(), parsed.getMonth() + 1, parsed.getDate(), timeZone) || s;
+    }
+  }
+
+  // Not a date we can read, so it goes on the certificate exactly as it was written.
   return s;
 }
 
@@ -228,7 +269,7 @@ function buildCertificateLines(record) {
 
   // The date sits tight under the record rather than in its own block. It can be missing: the
   // adaptive tabs trim trailing empty cells, and STANDARD rows never have one.
-  const when = formatDate(record.date);
+  const when = formatDate(record.date, record.timeZone);
   if (when) {
     lines.push({ id: 'date', y: 437, runs: [{ text: `on ${when}`, font: BODY_ITALIC, size: 15 }] });
   }

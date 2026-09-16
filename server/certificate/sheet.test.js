@@ -48,14 +48,6 @@ test('an empty or missing tab is rejected as 400 with no outbound request', asyn
   assert.strictEqual(calls(), 0, 'must not call the Sheets API for malformed input');
 });
 
-test('an over-long tab is rejected as 400 with no outbound request', async () => {
-  const calls = stubFetch(() => ok([]));
-  await assert.rejects(() => getRecordRows(SHEET, 'x'.repeat(101)), (err) => err.status === 400);
-  assert.strictEqual(calls(), 0);
-  // The boundary itself is allowed.
-  assert.strictEqual(assertUsableSheetName('x'.repeat(100)).length, 100);
-});
-
 test('the tab name is trimmed before use', () => {
   assert.strictEqual(assertUsableSheetName('  Post-Aug2026  '), 'Post-Aug2026');
 });
@@ -87,14 +79,6 @@ test('a spreadsheet id that could bend the URL is rejected as 400', async () => 
     );
   }
   assert.strictEqual(calls(), 0, 'no malformed id should reach the Sheets API');
-});
-
-test('an over-long spreadsheet id is rejected as 400', async () => {
-  const calls = stubFetch(() => ok([]));
-  await assert.rejects(() => getRecordRows('a'.repeat(121), 'Post-Aug2026'), (err) => err.status === 400);
-  assert.strictEqual(calls(), 0);
-  // The boundary itself is allowed.
-  assert.strictEqual(assertUsableSheetId('a'.repeat(120)).length, 120);
 });
 
 test('the spreadsheet id is trimmed, and reaches the Sheets URL', async () => {

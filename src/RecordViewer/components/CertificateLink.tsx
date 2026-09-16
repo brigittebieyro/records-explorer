@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { currentRecordsSheetId } from '../../Data/RoutesAndSettings';
+import { currentRecordsSheetId, recordTimeZone } from '../../Data/RoutesAndSettings';
 import { AgeGroup, WeightClass } from '../../Utils/types';
 
 export const certificateEndpoint = '/api/certificate';
@@ -77,7 +77,7 @@ export const fetchCertificate = async (request: CertificateRequest): Promise<Cer
   const response = await fetch(certificateEndpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...request, sheetId: currentRecordsSheetId }),
+    body: JSON.stringify({ ...request, sheetId: currentRecordsSheetId, timeZone: recordTimeZone }),
   });
   if (!response.ok) {
     throw new Error(`Certificate request failed: ${response.status}`);
@@ -88,6 +88,29 @@ export const fetchCertificate = async (request: CertificateRequest): Promise<Cer
   };
 };
 
+/**
+ * Saves a fetched certificate to disk and releases its object URL.
+ *
+ * Saved through an anchor rather than opened in a tab: a blob URL carries no name, so a tab's
+ * viewer would offer the object URL's uuid as the filename. The download attribute is the only
+ * way the server's name reaches the athlete's disk.
+ *
+ * Shared with the past-recordholder script on /scripts (see
+ * src/RunnableScripts/pastRecordCertificate.ts), so both entry points save the same way.
+ */
+export const saveCertificate = ({ url, filename }: Certificate): void => {
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  // Firefox only honours a click on an anchor that is in the document.
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  // Let the browser finish reading the blob before releasing it. Revoking immediately races
+  // the save and produces an empty file.
+  window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+};
+
 function CertificateLink(props: CertificateRequest) {
   const [status, setStatus] = useState<'idle' | 'working'>('idle');
 
@@ -96,21 +119,8 @@ function CertificateLink(props: CertificateRequest) {
 
     setStatus('working');
     try {
-      const { url, filename } = await fetchCertificate(props);
-      // Saved through an anchor rather than opened in a tab: a blob URL carries no name, so a
-      // tab's viewer would offer the object URL's uuid as the filename. The download attribute
-      // is the only way the server's name reaches the athlete's disk.
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      // Firefox only honours a click on an anchor that is in the document.
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      saveCertificate(await fetchCertificate(props));
       setStatus('idle');
-      // Let the browser finish reading the blob before releasing it. Revoking immediately races
-      // the save and produces an empty file.
-      window.setTimeout(() => URL.revokeObjectURL(url), 60000);
     } catch {
       // A failed print leaves the originating page exactly as it was, and returns to idle so the
       // button can be clicked again. Nothing is shown to the athlete, by design.

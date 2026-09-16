@@ -7,7 +7,7 @@ import CertificateLink, {
   filenameFromDisposition,
 } from './CertificateLink';
 import { ageGroups } from '../../Data/ageGroups';
-import { currentRecordsSheetId } from '../../Data/RoutesAndSettings';
+import { currentRecordsSheetId, recordTimeZone } from '../../Data/RoutesAndSettings';
 import { AgeGroup, WeightClass } from '../../Utils/types';
 
 const ageGroupById = (id: string): AgeGroup =>
@@ -85,7 +85,11 @@ describe('CertificateLink (user-based)', () => {
     // The spreadsheet id rides along with the caller's props. The server keeps no copy of it, so
     // if this stops being sent, certificates stop resolving rather than quietly reading the
     // wrong spreadsheet.
-    expect(JSON.parse(init.body)).toEqual({ ...PROPS, sheetId: currentRecordsSheetId });
+    expect(JSON.parse(init.body)).toEqual({
+      ...PROPS,
+      sheetId: currentRecordsSheetId,
+      timeZone: recordTimeZone,
+    });
   });
 
   test('B-27: the file is saved under the name the server chose', async () => {

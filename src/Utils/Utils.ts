@@ -75,9 +75,9 @@ export const sortLifts = (lifts: CombinedLiftData[], key?: SortKey): CombinedLif
       return (parseInt(String(liftB.total)) || 0) - (parseInt(String(liftA.total)) || 0);
     });
     const trimmedResult: CombinedLiftData[] = [];
-    for (let i = 0; i < result.length; i++) {
-      if (trimmedResult.indexOf(result[i]) === -1) {
-        trimmedResult.push(result[i]);
+    for (let index = 0; index < result.length; index++) {
+      if (trimmedResult.indexOf(result[index]) === -1) {
+        trimmedResult.push(result[index]);
       }
     }
     return trimmedResult;
@@ -165,8 +165,8 @@ export const findSupportingTotal = (
   }
   if (candidates.includes(lifter.total)) return lifter.total;
   if (candidates.length === 0) return undefined;
-  return candidates.reduce((best, t) =>
-    Math.abs(t - lifter.total) < Math.abs(best - lifter.total) ? t : best
+  return candidates.reduce((best, candidate) =>
+    Math.abs(candidate - lifter.total) < Math.abs(best - lifter.total) ? candidate : best
   );
 };
 

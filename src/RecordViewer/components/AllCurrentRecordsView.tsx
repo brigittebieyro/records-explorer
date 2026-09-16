@@ -31,8 +31,8 @@ const defaultDescription = (
   </>
 );
 
-const byBodyweight = (a: AllCurrentRecordsEntry, b: AllCurrentRecordsEntry) =>
-  parseFloat(a.weightClass.maxBodyweight) - parseFloat(b.weightClass.maxBodyweight);
+const byBodyweight = (first: AllCurrentRecordsEntry, second: AllCurrentRecordsEntry) =>
+  parseFloat(first.weightClass.maxBodyweight) - parseFloat(second.weightClass.maxBodyweight);
 
 // ageGroups is already ordered youngest to oldest (Open, then U11-U17, then
 // Junior, then Masters 35-90); reuse that ordering so merged sections always
@@ -40,9 +40,9 @@ const byBodyweight = (a: AllCurrentRecordsEntry, b: AllCurrentRecordsEntry) =>
 // each age group's row.
 const ageGroupOrder = new Map(ageGroups.map((ageGroup, index) => [ageGroup.id, index]));
 const byAgeGroupOrder = (
-  a: AllCurrentRecordsEntry['groups'][number],
-  b: AllCurrentRecordsEntry['groups'][number]
-) => (ageGroupOrder.get(a.ageGroup.id) ?? 0) - (ageGroupOrder.get(b.ageGroup.id) ?? 0);
+  first: AllCurrentRecordsEntry['groups'][number],
+  second: AllCurrentRecordsEntry['groups'][number]
+) => (ageGroupOrder.get(first.ageGroup.id) ?? 0) - (ageGroupOrder.get(second.ageGroup.id) ?? 0);
 
 const mergeByBodyweight = (entries: AllCurrentRecordsEntry[]): AllCurrentRecordsEntry[] => {
   const map = new Map<string, AllCurrentRecordsEntry>();

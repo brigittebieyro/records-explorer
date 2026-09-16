@@ -132,7 +132,7 @@ export function parseAdaptiveRoster(sheetData: string[][]): AdaptiveLifter[] {
     return values.length > 0 && values.every((value) => value === 'TRUE' || value === 'FALSE');
   };
   const categoryIndexes = header
-    .map((_, index) => index)
+    .map((_unused, index) => index)
     .filter((index) => !labelled.has(index) && isFlagColumn(index));
 
   const lifters: AdaptiveLifter[] = [];
@@ -141,7 +141,7 @@ export function parseAdaptiveRoster(sheetData: string[][]): AdaptiveLifter[] {
     const usawNumber = String(row[usawIndex] ?? '').trim();
     // The sheet carries a long tail of blank rows with FALSE in every flag column.
     if (!usawNumber) continue;
-    const categorySheetNames = adptiveCategoryRecordsSheetNames.filter((_, categoryPosition) => {
+    const categorySheetNames = adptiveCategoryRecordsSheetNames.filter((_unused, categoryPosition) => {
       const column = categoryIndexes[categoryPosition];
       return column !== undefined && isTrue(row[column]);
     });

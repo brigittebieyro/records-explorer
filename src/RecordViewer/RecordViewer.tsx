@@ -4,6 +4,7 @@ import { CircleLoader } from 'react-spinners';
 import AllCurrentRecordsView from './components/AllCurrentRecordsView';
 import AssociatedPriorRecords from './components/AssociatedPriorRecords';
 import RecordGroup from './components/RecordGroup';
+import { buildCertificateCategory } from './components/CertificateLink';
 import Standards from './components/Standards';
 import OptionsBar from '../Common/OptionsBar';
 import { ageGroups } from '../Data/ageGroups';
@@ -15,6 +16,7 @@ import {
   endDate,
   getSheetRoute,
   priorRecordsSheetNames,
+  standardKey,
   wsoName,
   youthAllTimeStartDate,
 } from '../Data/RoutesAndSettings';
@@ -24,7 +26,12 @@ import {
   u15WeightClasses,
   u17WeightClasses,
 } from '../Data/youthWeightClasses';
-import { getAgeGroup, getWeightClassSet, normalizeSheetAgeGroup } from '../Utils/Utils';
+import {
+  getAgeGroup,
+  getWeightClassSet,
+  normalizeSheetAgeGroup,
+  weightClassIndicator,
+} from '../Utils/Utils';
 import {
   AgeGroup,
   AgeGroupRecordSet,
@@ -41,12 +48,11 @@ export function computeStandardsForWeightClass(
   standards: string[][]
 ): StandardsResult {
   const recordSet: StandardsResult = {};
-  let weightClassIndicator: string = weightClass.maxBodyweight;
-  if (parseFloat(weightClass.maxBodyweight) > 200) {
-    weightClassIndicator = `>${parseInt(weightClass.minBodyweight)}`;
-  }
+  // Named classIndicator rather than shadowing the imported helper, and to stay clear of the
+  // unrelated `indicator` (the age group's leading letter) inside the loop below.
+  const classIndicator = weightClassIndicator(weightClass);
   standards.forEach((standard) => {
-    if (standard[7] === weightClassIndicator) {
+    if (standard[7] === classIndicator) {
       const ageKey = String(standard[2]).toUpperCase();
       const indicator = ageKey[0];
       const recordKey = indicator === 'W' || indicator === 'M' ? standard[4] : ageKey;
@@ -62,11 +68,14 @@ export function computeStandardsForWeightClass(
             records: {},
           };
         }
+        // Column 11 is the date and column 12 is the meet, matching the historical sheets'
+        // 13/14 pair. These were swapped until now; the mistake was invisible because both
+        // views rendered the fields in declaration order, which happened to read correctly.
         recordSet[recordKey].records[standard[8]] = {
           weight: standard[9],
           lifter: standard[10],
-          event: standard[11],
-          date: standard[12],
+          date: standard[11],
+          event: standard[12],
         };
       }
     }
@@ -138,7 +147,7 @@ export function buildAllCurrentRecords(standards: string[][]): AllCurrentRecords
       if (!ageGroupData) continue;
       const realRecords: Record<string, StandardRecord> = {};
       Object.entries(ageGroupData.records).forEach(([liftType, record]) => {
-        if (record.lifter !== 'STANDARD') {
+        if (record.lifter !== standardKey) {
           realRecords[liftType] = record;
         }
       });
@@ -166,7 +175,7 @@ export function buildAllCurrentRecords(standards: string[][]): AllCurrentRecords
       if (!ageGroupData) continue;
       const realRecords: Record<string, StandardRecord> = {};
       Object.entries(ageGroupData.records).forEach(([liftType, record]) => {
-        if (record.lifter !== 'STANDARD') {
+        if (record.lifter !== standardKey) {
           realRecords[liftType] = record;
         }
       });
@@ -321,19 +330,6 @@ function RecordViewer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // TEMP DEBUG — remove once the masters/empty-standards bug is diagnosed.
-  if (status === 'complete' && currentWeightClass && currentAgeGroup) {
-    console.log('[DEBUG-STANDARDS-BUG] render decision', {
-      currentWeightClassId: currentWeightClass.id,
-      currentAgeGroupId: currentAgeGroup.id,
-      standardsStatus,
-      historicalRecordsStatus,
-      localStandardsLength: localStandards.length,
-      displayedStandardsKeys: Object.keys(displayedStandards),
-      relevantRecordsPresent: Object.hasOwn(displayedStandards, currentAgeGroup.id),
-    });
-  }
-
   return (
     <div className="App">
       <OptionsBar
@@ -376,7 +372,9 @@ function RecordViewer() {
         }
       />
 
-      {!status && standardsStatus !== 'error' && <AllCurrentRecordsView data={allRecordsData} />}
+      {!status && standardsStatus !== 'error' && (
+        <AllCurrentRecordsView data={allRecordsData} certificateSheet={currentRecordsSheetName} />
+      )}
 
       {status === 'inprogress' && (
         <div className="records-viewer-loading-container">
@@ -433,6 +431,10 @@ function RecordViewer() {
                 }
                 weightClassName={currentWeightClass.name}
                 ageGroupName={currentAgeGroup.name}
+                ageGroupId={currentAgeGroup.id}
+                gender={currentWeightClass.gender}
+                sheet={currentRecordsSheetName}
+                certificateCategory={buildCertificateCategory(currentWeightClass, currentAgeGroup)}
               />
 
               <AssociatedPriorRecords records={displayedHistoricalRecords} />

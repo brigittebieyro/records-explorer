@@ -174,6 +174,20 @@ function normalizeAgeGroupId(id) {
 // Configuration
 // ---------------------------------------------------------------------------
 
+/**
+ * Read a required credential from the environment. Run this script through its npm
+ * script, which loads .env.local (see README); a missing value stops the run rather
+ * than firing off unauthenticated requests.
+ */
+function requireEnv(name) {
+  const value = process.env[name];
+  if (!value) {
+    console.error(`❌ Missing ${name}. Set it in .env.local (see README) or export it first.`);
+    process.exit(1);
+  }
+  return value;
+}
+
 const USAW_API = 'https://admin-usaw-rankings.sport80.com/api';
 const WSO_ID = 21; // California North Central
 
@@ -187,7 +201,7 @@ const headers = {
   accept: 'application/json, text/plain, */*',
   'accept-language': 'en-US,en;q=0.9',
   'content-type': 'application/json',
-  'x-api-token': '14ced0f3-421f-4acf-94ad-cc63a371af19',
+  'x-api-token': requireEnv('REACT_APP_SPORT80_API_TOKEN'),
 };
 
 // ---------------------------------------------------------------------------

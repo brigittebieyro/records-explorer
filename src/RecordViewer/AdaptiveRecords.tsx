@@ -4,6 +4,7 @@ import AllCurrentRecordsView from './components/AllCurrentRecordsView';
 import { buildAllCurrentRecords } from './RecordViewer';
 import OptionsBar from '../Common/OptionsBar';
 import {
+  adaptiveAllCertificateDisplayKey,
   adaptiveAllRecordsSheetName,
   adaptiveCategories,
   adaptiveOptInFormUrl,
@@ -156,6 +157,13 @@ function AdaptiveRecords() {
       {status === 'complete' && (
         <AllCurrentRecordsView
           data={recordsData}
+          // The certificate is looked up in whichever tab is on display, so the same athlete
+          // printed from the combined view and from their category view is read from different
+          // tabs -- by design, it matches what the user was actually looking at.
+          certificateSheet={activeSheetName}
+          adaptiveCategory={
+            activeCategory ? activeCategory.certificateDisplayKey : adaptiveAllCertificateDisplayKey
+          }
           title={
             activeCategory
               ? `${activeCategory.displayName} Record Holders`

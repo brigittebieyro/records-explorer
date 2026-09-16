@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "proxy": "http://0.0.0.0:5001",
+  "engines": {
+    "node": ">=24"
+  },
   "dependencies": {
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
@@ -10,6 +13,7 @@
     "@testing-library/user-event": "^13.5.0",
     "cors": "^2.8.5",
     "cors-anywhere": "^0.4.4",
+    "pdfkit": "^0.20.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^6.14.1",
@@ -22,12 +26,13 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "test:coverage": "CI=true react-scripts test --watchAll=false --coverage",
+    "test:server": "node --test 'server/**/*.test.js'",
     "coverage": "npm run test:coverage",
     "eject": "react-scripts eject",
-    "server": "node-env-run server --exec nodemon | pino-colada",
+    "server": "nodemon --exec \"node --env-file-if-exists=.env.local\" server/index.js | pino-colada",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,json}\"",
-    "analyze-records": "node scripts/analyze-records.js",
-    "gather-history-records": "node scripts/gather-history-records.js"
+    "analyze-records": "node --env-file-if-exists=.env.local scripts/analyze-records.js",
+    "gather-history-records": "node --env-file-if-exists=.env.local scripts/gather-history-records.js"
   },
   "jest": {
     "collectCoverageFrom": [

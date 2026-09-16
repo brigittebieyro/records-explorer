@@ -6,6 +6,7 @@ import RecordViewer, {
   computeHistoricalRecordsForWeightClass,
   computeStandardsForWeightClass,
 } from './RecordViewer';
+import { certificateEndpoint } from './components/CertificateLink';
 import { defaultWeightClasses } from '../Data/defaultWeightClasses';
 import { currentRecordsSheetName } from '../Data/RoutesAndSettings';
 import { u13WeightClasses } from '../Data/youthWeightClasses';
@@ -41,7 +42,7 @@ jest.mock('./components/AssociatedPriorRecords', () => () => <div data-testid="p
 
 // Row shape for the current standards sheet (see computeStandardsForWeightClass):
 // [2]=age group, [3]=gender, [7]=weight class indicator, [8]=lift, [9]=weight,
-// [10]=lifter, [11]=event, [12]=date.
+// [10]=lifter, [11]=date, [12]=event.
 const makeStandardRow = ({
   ageKey = 'Open',
   gender = 'F',
@@ -63,8 +64,8 @@ const makeStandardRow = ({
   lift,
   weight,
   lifter,
-  event,
   date,
+  event,
 ];
 
 // Row shape for the historical sheets (see computeHistoricalRecordsForWeightClass):
@@ -318,6 +319,37 @@ describe('RecordViewer component (user-based)', () => {
       expect(screen.getByText('All Current Record Holders')).toBeInTheDocument();
     });
     expect(screen.getByText('Jane Doe')).toBeInTheDocument();
+  });
+
+  test('every record in the all-records list can be printed from the current sheet', async () => {
+    // The home page rendered this list without a certificateSheet, so no record on it offered a
+    // print button at all. The sheet it prints from is the one the list itself was built from.
+    mockSheetResponses([makeStandardRow()]);
+    // jsdom treats the component's anchor click as a navigation it has not implemented.
+    jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    (URL as unknown as { createObjectURL: unknown }).createObjectURL = jest.fn(() => 'blob:mock');
+    (URL as unknown as { revokeObjectURL: unknown }).revokeObjectURL = jest.fn();
+
+    renderRecordViewer();
+    await waitFor(() => expect(screen.getByText('Jane Doe')).toBeInTheDocument());
+
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: { get: () => 'inline; filename="Record.pdf"' },
+      blob: async () => new Blob(['%PDF-']),
+    });
+    await userEvent.click(screen.getByRole('button', { name: /^print$/i }));
+
+    await waitFor(() =>
+      expect(
+        (global.fetch as jest.Mock).mock.calls.some(([url]) => url === certificateEndpoint)
+      ).toBe(true)
+    );
+    const [, init] = (global.fetch as jest.Mock).mock.calls.find(
+      ([url]) => url === certificateEndpoint
+    )!;
+    expect(JSON.parse(init.body).sheet).toBe(currentRecordsSheetName);
   });
 
   test('B-08: Go renders both record groups, standards, and writes URL params', async () => {

@@ -11,7 +11,7 @@ describe('CompactRecordView (user-based)', () => {
 
     expect(screen.getByText('80kg')).toBeInTheDocument();
     expect(screen.getByText('Jane Doe')).toBeInTheDocument();
-    expect(container.textContent).toBe('80kg — Jane Doe, Sacramento Open, 2026-01-15');
+    expect(container.textContent).toBe('80kg — Jane Doe, 2026-01-15, Sacramento Open');
   });
 
   test('renders nothing when no record is provided', () => {

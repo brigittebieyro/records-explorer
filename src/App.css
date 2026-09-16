@@ -208,6 +208,7 @@ body {
   margin-right: 3%;
   padding: 0px 24px 12px;
   width: 30%;
+  position: relative;
 }
 
 .record-viewer-record-holder {
@@ -340,6 +341,61 @@ body {
   text-align: right;
   justify-content: end;
   margin: 0;
+}
+
+.certificate-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  width: 18px;
+  /* In the all-records list the button is one item in a short flex row, so it stays in flow and
+     the auto margin pushes it to the end of the row. */
+  margin-left: auto;
+}
+
+/* On the detail view the card is a positioned ancestor and tall enough to spare the space, so the
+   glyph pins to its bottom-right corner and lines up across the three cards. */
+.record-viewer-standard .certificate-link {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  margin-left: 0;
+}
+
+/* The all-records list on the home and adaptive pages packs a record into one 11px row, so the
+   glyph runs smaller there. align-self overrides the row's baseline alignment, which pinned the
+   glyph to the first line's baseline and so left it up at the top of any record whose text wrapped;
+   flex-end holds it to the bottom of the row however many lines the text takes. The 2px nudge is a
+   relative offset, not a margin, so it does not add to the row's height.
+
+   flex-shrink is off for the same reason .all-records-lift-label turns it off: a long record
+   string overflows the row, and a shrinkable button would give up width and scale the glyph with
+   it, so the icon's size would vary with how much text each record happened to need. */
+.all-records-lift .certificate-link {
+  width: 14px;
+  flex-shrink: 0;
+  align-self: flex-end;
+  position: relative;
+}
+
+.certificate-link:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+/* print.svg is solid black and would disappear against the dark page. An <img> cannot take
+   currentColor, so the black is inverted to white and then dimmed with brightness -- the value is
+   the shade of gray the glyph ends up, 1 being white. */
+.certificate-link-icon {
+  display: block;
+  /* The glyph fills whatever the button is sized to, so a context only has to set the button's
+     width. height: auto is explicit because the img's height attribute would otherwise hold it
+     at 18px and squash the shape. */
+  width: 100%;
+  height: auto;
+  filter: invert(1) brightness(0.55);
 }
 
 .records-viewer-loading-container {

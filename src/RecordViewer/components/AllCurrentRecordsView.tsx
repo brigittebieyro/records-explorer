@@ -14,6 +14,11 @@ interface AllCurrentRecordsViewProps {
   title?: string;
   description?: ReactNode;
   emptyContent?: ReactNode;
+  // Opt-in: when a sheet tab is named, each record gets a print-certificate link built from
+  // that tab. Still optional so a caller can render the list without one.
+  certificateSheet?: string;
+  // The adaptive category's certificate wording, forwarded to the print link.
+  adaptiveCategory?: string;
 }
 
 const defaultDescription = (
@@ -67,6 +72,8 @@ function AllCurrentRecordsView({
   title = 'All Current Record Holders',
   description = defaultDescription,
   emptyContent = 'Loading current records…',
+  certificateSheet,
+  adaptiveCategory,
 }: AllCurrentRecordsViewProps) {
   const womensData = mergeByBodyweight(
     data.filter((item) => item.weightClass.gender === 'female').sort(byBodyweight)
@@ -101,6 +108,8 @@ function AllCurrentRecordsView({
               key={`female-${weightClass.minBodyweight}`}
               weightClass={weightClass}
               groups={groups}
+              certificateSheet={certificateSheet}
+              adaptiveCategory={adaptiveCategory}
             />
           ))}
         </div>
@@ -111,6 +120,8 @@ function AllCurrentRecordsView({
               key={`male-${weightClass.minBodyweight}`}
               weightClass={weightClass}
               groups={groups}
+              certificateSheet={certificateSheet}
+              adaptiveCategory={adaptiveCategory}
             />
           ))}
         </div>

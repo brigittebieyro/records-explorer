@@ -1,9 +1,15 @@
+import CertificateLink, { buildCertificateCategory } from './CertificateLink';
 import CompactRecordView from './CompactRecordView';
+import { weightClassIndicator } from '../../Utils/Utils';
 import { AllCurrentRecordsGroup, WeightClass } from '../../Utils/types';
 
 interface RecordListForWeightClassProps {
   weightClass: WeightClass;
   groups: AllCurrentRecordsGroup[];
+  // Opt-in; see AllCurrentRecordsView. Present only on the adaptive page today.
+  certificateSheet?: string;
+  // The adaptive category's certificate wording, when one is on display.
+  adaptiveCategory?: string;
 }
 
 const getDisplayName = (weightClass: WeightClass): string => {
@@ -15,7 +21,14 @@ const getDisplayName = (weightClass: WeightClass): string => {
   return `${prefix} ${weightClass.maxBodyweight}kg`;
 };
 
-function RecordListForWeightClass({ weightClass, groups }: RecordListForWeightClassProps) {
+const LIFTS = ['Snatch', 'Clean & Jerk', 'Total'] as const;
+
+function RecordListForWeightClass({
+  weightClass,
+  groups,
+  certificateSheet,
+  adaptiveCategory,
+}: RecordListForWeightClassProps) {
   return (
     <section className="all-records-weight-class-section">
       <h2 className="all-records-weight-class-header">{getDisplayName(weightClass)}</h2>
@@ -25,23 +38,25 @@ function RecordListForWeightClass({ weightClass, groups }: RecordListForWeightCl
             <strong>{ageGroup.name}</strong>
           </p>
           <div className="all-records-lift-set">
-            {records['Snatch'] && (
-              <div className="all-records-lift">
-                <span className="all-records-lift-label">Snatch</span>
-                <CompactRecordView record={records['Snatch']} />
-              </div>
-            )}
-            {records['Clean & Jerk'] && (
-              <div className="all-records-lift">
-                <span className="all-records-lift-label">Clean & Jerk</span>
-                <CompactRecordView record={records['Clean & Jerk']} />
-              </div>
-            )}
-            {records['Total'] && (
-              <div className="all-records-lift">
-                <span className="all-records-lift-label">Total</span>
-                <CompactRecordView record={records['Total']} />
-              </div>
+            {LIFTS.map((lift) =>
+              records[lift] ? (
+                <div className="all-records-lift" key={lift}>
+                  <span className="all-records-lift-label">{lift}</span>
+                  <CompactRecordView record={records[lift]} />
+                  {/* buildAllCurrentRecords has already dropped every STANDARD row, so anything
+                      rendered here is a real record holder and needs no further gating. */}
+                  {certificateSheet && (
+                    <CertificateLink
+                      sheet={certificateSheet}
+                      ageGroup={ageGroup.id}
+                      gender={weightClass.gender}
+                      weightClass={weightClassIndicator(weightClass)}
+                      lift={lift}
+                      category={buildCertificateCategory(weightClass, ageGroup, adaptiveCategory)}
+                    />
+                  )}
+                </div>
+              ) : null
             )}
           </div>
         </div>

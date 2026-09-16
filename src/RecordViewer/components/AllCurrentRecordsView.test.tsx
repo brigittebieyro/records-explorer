@@ -7,6 +7,7 @@ const makeAgeGroup = (overrides: object = {}): AgeGroup =>
     id: 'OPEN',
     name: 'Open',
     usawDisplayKey: 'Open',
+    certificateDisplayKey: 'Open',
     minimum_lifter_age: '0',
     maximum_lifter_age: '1000',
     disabled: false,

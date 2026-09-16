@@ -2,6 +2,10 @@ export interface AgeGroup {
   id: string;
   name: string;
   usawDisplayKey: string;
+  // How this group is named mid-sentence on a printed record certificate, where `name`'s
+  // parenthetical age ranges read badly. Mirrored into server/certificate/labels.js, which
+  // cannot import this file; a drift test pins the two together.
+  certificateDisplayKey: string;
   minimum_lifter_age: string;
   maximum_lifter_age: string;
   disabled: boolean;

@@ -126,10 +126,14 @@ describe('RecordListForWeightClass print certificate link (user-based)', () => {
     certificateFetch = jest.fn().mockResolvedValue({
       ok: true,
       status: 200,
+      // The component reads the download name off this header; without it the save throws and
+      // these tests would pass against a print button that no longer works.
+      headers: { get: () => 'inline; filename="Record.pdf"' },
       blob: async () => new Blob(['%PDF-'], { type: 'application/pdf' }),
     });
     global.fetch = certificateFetch as unknown as typeof fetch;
-    window.open = jest.fn().mockReturnValue({ location: { href: '' }, close: jest.fn() });
+    // jsdom treats the component's anchor click as a navigation it has not implemented.
+    jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
     (URL as unknown as { createObjectURL: unknown }).createObjectURL = jest.fn(() => 'blob:mock');
     (URL as unknown as { revokeObjectURL: unknown }).revokeObjectURL = jest.fn();
   });

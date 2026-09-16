@@ -51,6 +51,48 @@ function formatDate(raw) {
 }
 
 /**
+ * Encodes an arbitrary string as a single ASCII filename token.
+ *
+ * Accents are decomposed first so an accented letter keeps its base form -- 'é' becomes 'e'
+ * rather than being lost. Whitespace is then dropped rather than replaced, so a separator placed
+ * around the token stays meaningful, and everything outside [A-Za-z0-9.-] collapses to '-', which
+ * keeps punctuation-separated values readable.
+ *
+ * The result is plain ASCII, so it needs no further encoding to go on a filesystem or into a
+ * header. It is '' when nothing survives -- a name written in a script with no ASCII form, say --
+ * and callers decide what an empty token means.
+ */
+function encodeStringForFileName(value) {
+  return String(value ?? '')
+    .normalize('NFD')
+    .replace(/\p{M}+/gu, '')
+    .replace(/\s+/g, '')
+    .replace(/[^A-Za-z0-9.-]+/g, '-')
+    .replace(/-{2,}/g, '-')
+    .replace(/^[.-]+|[.-]+$/g, '');
+}
+
+/**
+ * The download name for a record's certificate: AthleteName_Lift_<date>.pdf
+ *
+ * The middle part is the lift, which is what kind of record this is -- an athlete who holds all
+ * three gets three files that sort together and stay tellable apart. It is required on the
+ * request, so 'Record' is only a floor for a row that somehow carries none.
+ *
+ * The date is whatever the sheet holds, only made filename-safe -- the tabs disagree on format
+ * (see formatDate), and that only matters for the certificate's own text, not for this.
+ *
+ * Either outer part can be missing -- an unnamed holder, or a row with no date -- so the parts
+ * are joined rather than interpolated, and a gap closes up instead of leaving a stray separator.
+ */
+function certificateFileName(record) {
+  const name = encodeStringForFileName(record && record.lifter);
+  const lift = encodeStringForFileName(record && record.lift) || 'Record';
+  const when = encodeStringForFileName(record && record.date);
+  return `${[name, lift, when].filter(Boolean).join('_')}.pdf`;
+}
+
+/**
  * Draws a line made of runs that may each use a different font, centered as a whole.
  *
  * `continued: true` + align:'center' does NOT center a multi-run line -- each fragment centers
@@ -311,6 +353,8 @@ module.exports = {
   buildCertificateLines,
   renderCertificate,
   formatDate,
+  encodeStringForFileName,
+  certificateFileName,
   SCRIPT,
   BODY,
   BODY_BOLD,

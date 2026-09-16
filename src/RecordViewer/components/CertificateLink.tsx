@@ -38,19 +38,42 @@ export const buildCertificateCategory = (
     .join(' ');
 };
 
+/** Used when the response carries no usable Content-Disposition; see filenameFromDisposition. */
+export const fallbackCertificateFileName = 'Record.pdf';
+
 /**
- * Requests the certificate and hands back an object URL for the PDF.
+ * Reads the download name the server chose out of a Content-Disposition header.
+ *
+ * The name is the server's to decide: it is built from the athlete and date on the matched row,
+ * and the client never sees that row. Content-Disposition is readable here only because the
+ * endpoint is same-origin -- it is not a CORS-safelisted response header.
+ *
+ * certificateFileName (server/certificate/render.js) emits plain ASCII with no spaces, so the
+ * unquoted and quoted forms are both a simple read and there is no filename* to decode.
+ */
+export const filenameFromDisposition = (header: string | null): string => {
+  const match = header ? /filename="?([^";]+)"?/i.exec(header) : null;
+  return match ? match[1].trim() || fallbackCertificateFileName : fallbackCertificateFileName;
+};
+
+export interface Certificate {
+  /** Object URL for the PDF. The caller owns it and must revoke it. */
+  url: string;
+  filename: string;
+}
+
+/**
+ * Requests the certificate and hands back an object URL for the PDF and the name to save it as.
  *
  * Posted rather than linked so the athlete never sees the machinery: a query string spelling out
- * ageGroup, weightClass and lift reads like a form submission, while an opaque blob URL reads
- * like a document.
+ * ageGroup, weightClass and lift reads like a form submission.
  *
  * The spreadsheet id is attached here rather than threaded through every caller: it is the same
  * one the pages themselves read, and every call site would otherwise pass the identical value.
  * The server holds no copy of it -- src/Data is the single source of truth, so pointing the site
  * at the test sheet points the certificates there too, with nothing to keep in step by hand.
  */
-export const fetchCertificate = async (request: CertificateRequest): Promise<string> => {
+export const fetchCertificate = async (request: CertificateRequest): Promise<Certificate> => {
   const response = await fetch(certificateEndpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -59,7 +82,10 @@ export const fetchCertificate = async (request: CertificateRequest): Promise<str
   if (!response.ok) {
     throw new Error(`Certificate request failed: ${response.status}`);
   }
-  return URL.createObjectURL(await response.blob());
+  return {
+    url: URL.createObjectURL(await response.blob()),
+    filename: filenameFromDisposition(response.headers.get('Content-Disposition')),
+  };
 };
 
 function CertificateLink(props: CertificateRequest) {
@@ -68,29 +94,26 @@ function CertificateLink(props: CertificateRequest) {
   const handleClick = async (): Promise<void> => {
     if (status === 'working') return;
 
-    // The tab has to be opened synchronously, inside the click handler. Opening it after the
-    // await puts it outside the user-gesture window and Chrome and Safari block it as a popup.
-    const tab = window.open('', '_blank');
     setStatus('working');
     try {
-      const url = await fetchCertificate(props);
-      if (tab) {
-        tab.location.href = url;
-      } else {
-        // Popups blocked entirely; fall back to the current tab rather than doing nothing.
-        window.location.assign(url);
-      }
+      const { url, filename } = await fetchCertificate(props);
+      // Saved through an anchor rather than opened in a tab: a blob URL carries no name, so a
+      // tab's viewer would offer the object URL's uuid as the filename. The download attribute
+      // is the only way the server's name reaches the athlete's disk.
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      // Firefox only honours a click on an anchor that is in the document.
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
       setStatus('idle');
-      // Give the viewer time to load before releasing the blob. Revoking immediately races the
-      // navigation and shows an empty tab.
+      // Let the browser finish reading the blob before releasing it. Revoking immediately races
+      // the save and produces an empty file.
       window.setTimeout(() => URL.revokeObjectURL(url), 60000);
     } catch {
-      // A failed print leaves the originating page exactly as it was: close the blank tab so
-      // none is stranded, and return to idle so the button can be clicked again. Nothing is
-      // shown to the athlete, by design.
-      //
-      // TODO: send the opened tab to a proper error page instead of closing it.
-      if (tab) tab.close();
+      // A failed print leaves the originating page exactly as it was, and returns to idle so the
+      // button can be clicked again. Nothing is shown to the athlete, by design.
       setStatus('idle');
     }
   };

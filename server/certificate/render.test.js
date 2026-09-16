@@ -8,6 +8,8 @@ const {
   buildCertificateLines,
   renderCertificate,
   formatDate,
+  encodeStringForFileName,
+  certificateFileName,
   SCRIPT,
   BODY,
   BODY_BOLD,
@@ -65,6 +67,59 @@ test('formatDate handles both sheet formats and degrades on anything else', () =
   assert.strictEqual(formatDate(''), null);
   assert.strictEqual(formatDate(null), null);
   assert.strictEqual(formatDate(undefined), null);
+});
+
+// ---------------------------------------------------------------------------------------------
+// Download naming
+// ---------------------------------------------------------------------------------------------
+
+test('encodeStringForFileName returns an ASCII token, whatever the cell held', () => {
+  assert.strictEqual(encodeStringForFileName('Jane Doe'), 'JaneDoe');
+  // Accented letters keep their base form rather than vanishing.
+  assert.strictEqual(encodeStringForFileName('José Álvarez'), 'JoseAlvarez');
+  // A date the sheet wrote with slashes stays readable.
+  assert.strictEqual(encodeStringForFileName('10/18/2025'), '10-18-2025');
+  assert.strictEqual(encodeStringForFileName('2025-10-18'), '2025-10-18');
+  // A quote or newline in a cell cannot reach the Content-Disposition header.
+  assert.strictEqual(encodeStringForFileName('Jane "JD"\nDoe'), 'Jane-JD-Doe');
+  assert.strictEqual(encodeStringForFileName("O'Brien-Smith"), 'O-Brien-Smith');
+  assert.strictEqual(encodeStringForFileName(''), '');
+  assert.strictEqual(encodeStringForFileName(null), '');
+  assert.strictEqual(encodeStringForFileName(undefined), '');
+});
+
+test('certificateFileName is AthleteName_Lift_<date>.pdf', () => {
+  assert.strictEqual(
+    certificateFileName({ lifter: 'Jane Doe', lift: 'Snatch', date: '2025-10-18' }),
+    'JaneDoe_Snatch_2025-10-18.pdf'
+  );
+  assert.strictEqual(
+    certificateFileName({ lifter: 'Jane Doe', lift: 'Total', date: '10/18/2025' }),
+    'JaneDoe_Total_10-18-2025.pdf'
+  );
+  // The three lifts an athlete can hold stay tellable apart, ampersand and all.
+  assert.strictEqual(
+    certificateFileName({ lifter: 'Jane Doe', lift: 'Clean & Jerk', date: '2025-10-18' }),
+    'JaneDoe_Clean-Jerk_2025-10-18.pdf'
+  );
+});
+
+test('certificateFileName closes the gap when a part is missing', () => {
+  // A row with no date is normal on the adaptive tabs -- no trailing separator.
+  assert.strictEqual(
+    certificateFileName({ lifter: 'Jane Doe', lift: 'Snatch', date: null }),
+    'JaneDoe_Snatch.pdf'
+  );
+  assert.strictEqual(
+    certificateFileName({ lifter: '', lift: 'Snatch', date: '2025-10-18' }),
+    'Snatch_2025-10-18.pdf'
+  );
+  // The lift is required on the request, so this only guards the middle from collapsing away.
+  assert.strictEqual(
+    certificateFileName({ lifter: 'Jane Doe', date: '2025-10-18' }),
+    'JaneDoe_Record_2025-10-18.pdf'
+  );
+  assert.strictEqual(certificateFileName({}), 'Record.pdf');
 });
 
 // ---------------------------------------------------------------------------------------------

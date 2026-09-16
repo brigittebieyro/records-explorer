@@ -372,7 +372,9 @@ function RecordViewer() {
         }
       />
 
-      {!status && standardsStatus !== 'error' && <AllCurrentRecordsView data={allRecordsData} />}
+      {!status && standardsStatus !== 'error' && (
+        <AllCurrentRecordsView data={allRecordsData} certificateSheet={currentRecordsSheetName} />
+      )}
 
       {status === 'inprogress' && (
         <div className="records-viewer-loading-container">

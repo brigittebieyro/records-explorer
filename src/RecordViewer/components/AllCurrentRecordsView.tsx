@@ -15,7 +15,7 @@ interface AllCurrentRecordsViewProps {
   description?: ReactNode;
   emptyContent?: ReactNode;
   // Opt-in: when a sheet tab is named, each record gets a print-certificate link built from
-  // that tab. Omitted by the home page, so its all-records list is unchanged.
+  // that tab. Still optional so a caller can render the list without one.
   certificateSheet?: string;
   // The adaptive category's certificate wording, forwarded to the print link.
   adaptiveCategory?: string;

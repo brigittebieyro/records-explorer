@@ -70,13 +70,8 @@ app.use('/api/meet-results', (req, res) => {
 // browser's inline viewer behave.
 const { getRecordRows } = require('./certificate/sheet');
 const { findRecord } = require('./certificate/lookup');
-const { renderCertificate } = require('./certificate/render');
+const { renderCertificate, certificateFileName } = require('./certificate/render');
 const { MAX_CATEGORY_LENGTH } = require('./certificate/labels');
-
-// The lifter name comes from a spreadsheet cell, so a stray quote or newline in it would produce
-// a malformed Content-Disposition header and a broken download name.
-const safeFilePart = (value) =>
-  String(value || 'record').replace(/[^A-Za-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '') || 'record';
 
 // The JSON body parser is mounted on this ROUTE, never app-wide. The four cors-anywhere routes
 // above proxy POSTs whose content-type is application/json (see `headers` in
@@ -148,7 +143,7 @@ app.post('/api/certificate', certificateBody, async (req, res) => {
     return;
   }
 
-  const filename = `${safeFilePart(record.lifter)}-${safeFilePart(record.lift)}-record.pdf`;
+  const filename = certificateFileName(record);
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Length', pdf.length);
   res.setHeader('Content-Disposition', `inline; filename="${filename}"`);

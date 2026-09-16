@@ -1,6 +1,11 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CertificateLink, { buildCertificateCategory, certificateEndpoint } from './CertificateLink';
+import CertificateLink, {
+  buildCertificateCategory,
+  certificateEndpoint,
+  fallbackCertificateFileName,
+  filenameFromDisposition,
+} from './CertificateLink';
 import { ageGroups } from '../../Data/ageGroups';
 import { currentRecordsSheetId } from '../../Data/RoutesAndSettings';
 import { AgeGroup, WeightClass } from '../../Utils/types';
@@ -29,21 +34,28 @@ const PROPS = {
   category: "Women's Open 53kg",
 };
 
-// jsdom has neither window.open nor the object-URL API, and the component needs both.
-let openedTab: { location: { href: string }; close: jest.Mock };
+// jsdom has no object-URL API, and the component needs it.
 let objectUrls: string[];
+// Anchor clicks are captured rather than let through: jsdom treats one as a navigation it has
+// not implemented, and the download attribute is exactly what these tests are checking.
+let saved: Array<{ href: string; download: string }>;
 
-const mockCertificateFetch = (ok = true) =>
+const mockCertificateFetch = (ok = true, disposition: string | null = 'inline; filename="X.pdf"') =>
   jest.fn().mockResolvedValue({
     ok,
     status: ok ? 200 : 404,
+    headers: { get: (name: string) => (/^content-disposition$/i.test(name) ? disposition : null) },
     blob: async () => new Blob(['%PDF-'], { type: 'application/pdf' }),
   });
 
 beforeEach(() => {
   objectUrls = [];
-  openedTab = { location: { href: '' }, close: jest.fn() };
-  window.open = jest.fn().mockReturnValue(openedTab);
+  saved = [];
+  jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
+    this: HTMLAnchorElement
+  ) {
+    saved.push({ href: this.href, download: this.download });
+  });
   (URL as unknown as { createObjectURL: unknown }).createObjectURL = jest.fn(() => {
     const url = `blob:mock/${objectUrls.length}`;
     objectUrls.push(url);
@@ -57,14 +69,15 @@ afterEach(() => {
 });
 
 describe('CertificateLink (user-based)', () => {
-  test('B-27: clicking posts the record and opens the PDF in a new tab', async () => {
+  test('B-27: clicking posts the record and saves the PDF', async () => {
     const fetchMock = mockCertificateFetch();
     global.fetch = fetchMock as unknown as typeof fetch;
 
     render(<CertificateLink {...PROPS} />);
     await userEvent.click(screen.getByRole('button', { name: /^print$/i }));
 
-    await waitFor(() => expect(openedTab.location.href).toBe('blob:mock/0'));
+    await waitFor(() => expect(saved).toHaveLength(1));
+    expect(saved[0].href).toBe('blob:mock/0');
 
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe(certificateEndpoint);
@@ -75,25 +88,30 @@ describe('CertificateLink (user-based)', () => {
     expect(JSON.parse(init.body)).toEqual({ ...PROPS, sheetId: currentRecordsSheetId });
   });
 
-  test('B-27: the tab is opened synchronously, before the request resolves', async () => {
-    // Opening it after the await puts it outside the user-gesture window, and Chrome and Safari
-    // block it as a popup. This pins the ordering that avoids that.
-    let resolveFetch: (value: unknown) => void = () => {};
-    global.fetch = jest.fn(
-      () =>
-        new Promise((resolve) => {
-          resolveFetch = resolve;
-        })
+  test('B-27: the file is saved under the name the server chose', async () => {
+    // The name is built from the athlete and date on the matched row, which the client never
+    // sees -- so it can only come off the response header. A blob URL carries no name of its own.
+    global.fetch = mockCertificateFetch(
+      true,
+      'inline; filename="JaneDoe_Snatch_2025-10-18.pdf"'
     ) as unknown as typeof fetch;
 
     render(<CertificateLink {...PROPS} />);
     await userEvent.click(screen.getByRole('button', { name: /^print$/i }));
 
-    expect(window.open).toHaveBeenCalledWith('', '_blank');
-    expect(openedTab.location.href).toBe('');
+    await waitFor(() => expect(saved).toHaveLength(1));
+    expect(saved[0].download).toBe('JaneDoe_Snatch_2025-10-18.pdf');
+  });
 
-    resolveFetch({ ok: true, status: 200, blob: async () => new Blob() });
-    await waitFor(() => expect(openedTab.location.href).toBe('blob:mock/0'));
+  test('a response with no usable Content-Disposition still saves under some name', async () => {
+    // Better a generic name than an empty download attribute, which saves the uuid instead.
+    global.fetch = mockCertificateFetch(true, null) as unknown as typeof fetch;
+
+    render(<CertificateLink {...PROPS} />);
+    await userEvent.click(screen.getByRole('button', { name: /^print$/i }));
+
+    await waitFor(() => expect(saved).toHaveLength(1));
+    expect(saved[0].download).toBe(fallbackCertificateFileName);
   });
 
   test('the record parameters never appear in a URL', async () => {
@@ -117,9 +135,10 @@ describe('CertificateLink (user-based)', () => {
     const before = document.body.innerHTML;
     await userEvent.click(screen.getByRole('button', { name: /^print$/i }));
 
-    // The blank tab is closed rather than stranded...
-    await waitFor(() => expect(openedTab.close).toHaveBeenCalled());
-    // ...and the page the athlete is looking at is byte-for-byte what it was.
+    // Nothing is saved...
+    await waitFor(() => expect(saved).toHaveLength(0));
+    // ...and the page the athlete is looking at is byte-for-byte what it was. The anchor the
+    // component builds is appended to the body, so this also pins that it is cleaned up again.
     await waitFor(() => expect(document.body.innerHTML).toBe(before));
   });
 
@@ -135,20 +154,24 @@ describe('CertificateLink (user-based)', () => {
     await userEvent.click(button);
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
+});
 
-  test('a blocked popup falls back to the current tab rather than doing nothing', async () => {
-    (window.open as jest.Mock).mockReturnValue(null);
-    global.fetch = mockCertificateFetch() as unknown as typeof fetch;
-    const assign = jest.fn();
-    Object.defineProperty(window, 'location', {
-      value: { ...window.location, assign },
-      writable: true,
-    });
+describe('filenameFromDisposition', () => {
+  test('reads the name the server sent, quoted or not', () => {
+    expect(filenameFromDisposition('inline; filename="JaneDoe_Record_2025-10-18.pdf"')).toBe(
+      'JaneDoe_Record_2025-10-18.pdf'
+    );
+    expect(filenameFromDisposition('inline; filename=JaneDoe_Record.pdf')).toBe(
+      'JaneDoe_Record.pdf'
+    );
+    expect(filenameFromDisposition('attachment; filename="A.pdf"; size=100')).toBe('A.pdf');
+  });
 
-    render(<CertificateLink {...PROPS} />);
-    await userEvent.click(screen.getByRole('button', { name: /^print$/i }));
-
-    await waitFor(() => expect(assign).toHaveBeenCalledWith('blob:mock/0'));
+  test('falls back rather than returning an empty name', () => {
+    // An empty download attribute makes the browser save the object URL's uuid instead.
+    expect(filenameFromDisposition(null)).toBe(fallbackCertificateFileName);
+    expect(filenameFromDisposition('inline')).toBe(fallbackCertificateFileName);
+    expect(filenameFromDisposition('inline; filename=""')).toBe(fallbackCertificateFileName);
   });
 });
 

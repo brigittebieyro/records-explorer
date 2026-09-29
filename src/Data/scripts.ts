@@ -1,6 +1,7 @@
 import { ComponentType } from 'react';
 import { runAdaptiveRecords } from '../RunnableScripts/adaptiveRecords';
 import { runAnalyzeRecords } from '../RunnableScripts/analyzeRecords';
+import ParticipationLevelsForm from '../Scripts/components/ParticipationLevelsForm';
 import PastRecordCertificateForm from '../Scripts/components/PastRecordCertificateForm';
 
 export interface Script {
@@ -40,5 +41,11 @@ export const scripts: Script[] = [
     Form: PastRecordCertificateForm,
     description:
       'Prints a record certificate for a past recordholder — an athlete whose record has since been broken, or whose record predates the current records sheet. Nothing is looked up: fill in every detail below exactly as it should read on the certificate, and the finished PDF is identical to the one the print button produces on a current record.',
+  },
+  {
+    name: 'Gather Participation Levels',
+    Form: ParticipationLevelsForm,
+    description:
+      'Counts how many athletes in the WSO have competed in each potential medal category over a period of month, and downloads a stats a CSV. Choose the number of months to investigate.',
   },
 ];

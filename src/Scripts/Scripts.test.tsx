@@ -5,7 +5,10 @@ import { scriptsPassword } from '../Data/RoutesAndSettings';
 import { hashPassword } from '../Utils/Utils';
 import { scripts } from '../Data/scripts';
 
+// Only the password check is stubbed. The rest of the module stays real so that the download this
+// page performs is the shipped one -- the assertions below are about its Blob and anchor.
 jest.mock('../Utils/Utils', () => ({
+  ...jest.requireActual('../Utils/Utils'),
   hashPassword: jest.fn(),
 }));
 
@@ -28,6 +31,11 @@ jest.mock('../Data/scripts', () => ({
       name: 'Past Recordholder Certificate',
       description: 'Test certificate script description.',
       Form: () => <p>Stand-in for the certificate form</p>,
+    },
+    {
+      name: 'Gather Participation Levels',
+      description: 'Test participation script description.',
+      Form: () => <p>Stand-in for the participation form</p>,
     },
   ],
 }));
@@ -182,6 +190,16 @@ describe('Scripts (user-based)', () => {
     expect(screen.getByText('Stand-in for the certificate form')).toBeInTheDocument();
     expect(screen.getByText('Test certificate script description.')).toBeInTheDocument();
     // Run would be a second, meaningless button next to the form's own.
+    expect(screen.queryByRole('button', { name: 'Run' })).toBeNull();
+  });
+
+  test('F-11: the participation script also replaces Run with its own form', async () => {
+    const { container } = render(<Scripts />);
+    await unlock(container);
+
+    await userEvent.selectOptions(screen.getByLabelText('Script'), 'Gather Participation Levels');
+
+    expect(screen.getByText('Stand-in for the participation form')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Run' })).toBeNull();
   });
 

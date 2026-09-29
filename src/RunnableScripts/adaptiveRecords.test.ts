@@ -301,10 +301,18 @@ describe('resolveLifter', () => {
   // sweep, so let the pacing resolve instantly here while recording what it asked for.
   const originalFetch = global.fetch;
   const originalSetTimeout = global.setTimeout;
+  const originalDateNow = Date.now;
   let requestedWaits: number[] = [];
 
   beforeEach(() => {
     requestedWaits = [];
+    // rateLimitedFetch measures each slot against Date.now(), so the clock has to be held still
+    // as well as the timer: a single real millisecond elapsing mid-sweep shortens that slot's
+    // wait to 99, and the gaps stop being the round numbers the pacing assertion reads. Eight
+    // iterations fit inside one millisecond on a fast machine and do not on a loaded one, which
+    // is the difference between passing here and failing on CI.
+    const frozen = originalDateNow();
+    Date.now = () => frozen;
     global.setTimeout = ((callback: () => void, ms?: number) => {
       requestedWaits.push(ms ?? 0);
       callback();
@@ -315,6 +323,7 @@ describe('resolveLifter', () => {
   afterEach(() => {
     global.setTimeout = originalSetTimeout;
     global.fetch = originalFetch;
+    Date.now = originalDateNow;
   });
 
   const rankingRow = (membership: string, memberId: string, overrides = {}) => ({

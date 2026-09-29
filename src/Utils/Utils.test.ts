@@ -9,6 +9,7 @@ import {
   u17WeightClasses,
 } from '../Data/youthWeightClasses';
 import {
+  downloadCsv,
   getAgeGroup,
   getWeightClassSet,
   getYear,
@@ -328,6 +329,55 @@ describe('Utils (user-based)', () => {
       const gaps = requestedWaits.slice(1).map((wait, index) => wait - requestedWaits[index]);
       expect(gaps.every((gap) => gap === 100)).toBe(true);
       expect(global.fetch).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('F-03 / F-11: downloadCsv', () => {
+    let createObjectURL: jest.Mock;
+    let revokeObjectURL: jest.Mock;
+    let clickSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      createObjectURL = jest.fn(() => 'blob:fake-url');
+      revokeObjectURL = jest.fn();
+      Object.defineProperty(window.URL, 'createObjectURL', {
+        value: createObjectURL,
+        configurable: true,
+      });
+      Object.defineProperty(window.URL, 'revokeObjectURL', {
+        value: revokeObjectURL,
+        configurable: true,
+      });
+      clickSpy = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      clickSpy.mockRestore();
+      jest.useRealTimers();
+    });
+
+    test('hands the csv to the browser under the given filename', () => {
+      downloadCsv('lifter,total\nJane Doe,180', 'counts.csv');
+
+      expect(createObjectURL).toHaveBeenCalledTimes(1);
+      const blob = createObjectURL.mock.calls[0][0] as Blob;
+      expect(blob).toBeInstanceOf(Blob);
+      expect(blob.type).toBe('text/csv;charset=utf-8;');
+      expect(clickSpy).toHaveBeenCalledTimes(1);
+      const link = clickSpy.mock.instances[0] as unknown as HTMLAnchorElement;
+      expect(link.download).toBe('counts.csv');
+      expect(link.href).toContain('blob:fake-url');
+    });
+
+    test('leaves the link out of the page and releases the url once the save has had time', () => {
+      downloadCsv('lifter,total', 'counts.csv');
+
+      expect(document.querySelector('a[download]')).toBeNull();
+      // Revoking immediately races the save and can produce an empty file.
+      expect(revokeObjectURL).not.toHaveBeenCalled();
+      jest.advanceTimersByTime(10000);
+      expect(revokeObjectURL).toHaveBeenCalledWith('blob:fake-url');
     });
   });
 });

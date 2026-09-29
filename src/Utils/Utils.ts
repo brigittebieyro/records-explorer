@@ -211,6 +211,22 @@ export const csvField = (value: unknown): string => {
     : str;
 };
 
+// Hands the finished CSV to the browser as a download. Shared by the Scripts page's Run button and
+// by the forms of the scripts that own their own download.
+export const downloadCsv = (csv: string, fileName: string): void => {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  link.target = '_blank';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  // Revoking immediately races the save and can produce an empty file.
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+};
+
 export async function hashPassword(input: string, salt: string): Promise<string> {
   const encoded = new TextEncoder().encode(`${input}---${salt}`);
   const hashBuffer = await crypto.subtle.digest('SHA-256', encoded);

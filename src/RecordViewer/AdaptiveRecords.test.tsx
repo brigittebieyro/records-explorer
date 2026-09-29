@@ -79,6 +79,12 @@ const chooseCategory = async (label: string) => {
   await userEvent.click(screen.getByRole('button', { name: 'Go' }));
 };
 
+/**
+ * The page opens on its preamble: records are per-category now, so nothing is listed until a
+ * category has been applied. Waiting on the preamble is how a test knows the page has settled.
+ */
+const landing = () => screen.findByText(/Keeping track of local adaptive athletes/);
+
 describe('AdaptiveRecords (user-based)', () => {
   const originalFetch = global.fetch;
 
@@ -87,15 +93,16 @@ describe('AdaptiveRecords (user-based)', () => {
     jest.clearAllMocks();
   });
 
-  test('defaults to the combined Adaptive_All records', async () => {
-    const fetchMock = mockSheets({ Adaptive_All: withRecord('Jane Doe') });
+  test('opens on the preamble, listing no records until a category is applied', async () => {
+    mockSheets({ Adaptive_All: withRecord('Jane Doe') });
 
     render(<AdaptiveRecords />);
 
-    expect(await screen.findByText('All Adaptive Record Holders')).toBeInTheDocument();
-    expect(screen.getByText('Jane Doe')).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock.mock.calls[0][0]).toContain('Adaptive_All');
+    expect(await landing()).toBeInTheDocument();
+    // Records are per-category: there is no combined listing to land on.
+    expect(screen.queryByText('All Adaptive Record Holders')).toBeNull();
+    expect(screen.queryByText('Jane Doe')).toBeNull();
+    expect(screen.queryByTestId('circle-loader')).toBeNull();
   });
 
   test('shows its own description rather than the home page fine print', async () => {
@@ -124,22 +131,30 @@ describe('AdaptiveRecords (user-based)', () => {
     // The real sheets carry exactly one row per slot, so the unclaimed standard sits in a
     // different weight class from the held record — here Women's 86kg beside Women's 77kg.
     mockSheets({
-      Adaptive_All: [
-        ...withRecord('Jane Doe'),
+      Adaptive_All: withRecord('Jane Doe'),
+      Adaptive_Vision: [
+        ...withRecord('Vision Holder'),
         row('Open', 'F', '77', '86', 'Snatch', '0', 'STANDARD'),
       ],
     });
 
     render(<AdaptiveRecords />);
+    await landing();
+    await chooseCategory('Visual Impairment');
 
-    await screen.findByText('Jane Doe');
+    await screen.findByText('Vision Holder');
     expect(screen.queryByText('STANDARD')).toBeNull();
   });
 
-  test('says so plainly when a sheet holds only standards, instead of hanging on the loader', async () => {
-    mockSheets({ Adaptive_All: standardsOnly });
+  test('says so plainly when a category holds only standards, instead of hanging on the loader', async () => {
+    mockSheets({
+      Adaptive_All: withRecord('Jane Doe'),
+      Adaptive_Vision: standardsOnly,
+    });
 
     render(<AdaptiveRecords />);
+    await landing();
+    await chooseCategory('Visual Impairment');
 
     expect(await screen.findByText('No adaptive records have been set yet.')).toBeInTheDocument();
     expect(screen.queryByText('Loading current records…')).toBeNull();
@@ -153,15 +168,16 @@ describe('AdaptiveRecords (user-based)', () => {
     });
 
     render(<AdaptiveRecords />);
-    await screen.findByText('Jane Doe');
+    await landing();
+    const fetchesOnLoad = fetchMock.mock.calls.length;
     expect(screen.getByRole('button', { name: 'Go' })).toBeDisabled();
 
     await userEvent.selectOptions(screen.getByLabelText('Category'), 'Visual Impairment');
 
     // Armed, but the view has not moved and no request went out yet.
     expect(screen.getByRole('button', { name: 'Go' })).toBeEnabled();
-    expect(screen.getByText('Jane Doe')).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText('Vision Holder')).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(fetchesOnLoad);
   });
 
   test('choosing a category and pressing Go loads that category sheet', async () => {
@@ -171,24 +187,25 @@ describe('AdaptiveRecords (user-based)', () => {
     });
 
     render(<AdaptiveRecords />);
-    await screen.findByText('Jane Doe');
+    await landing();
 
     await chooseCategory('Visual Impairment');
 
     expect(await screen.findByText('Vision Holder')).toBeInTheDocument();
     expect(screen.getByText('Visual Impairment Record Holders')).toBeInTheDocument();
-    expect(screen.queryByText('Jane Doe')).toBeNull();
-    expect(fetchMock.mock.calls[1][0]).toContain('Adaptive_Vision');
+    expect(fetchMock.mock.calls.some(([url]) => String(url).includes('Adaptive_Vision'))).toBe(
+      true
+    );
   });
 
-  test('the Reset button appears only once a category is chosen, and returns to the combined view', async () => {
+  test('the Reset button appears only once a category is chosen, and returns to the preamble', async () => {
     mockSheets({
       Adaptive_All: withRecord('Jane Doe'),
       Adaptive_Physical: withRecord('Physical Holder'),
     });
 
     render(<AdaptiveRecords />);
-    await screen.findByText('Jane Doe');
+    await landing();
     expect(screen.queryByRole('button', { name: 'Reset' })).toBeNull();
 
     await chooseCategory('Physical Disability');
@@ -197,8 +214,10 @@ describe('AdaptiveRecords (user-based)', () => {
 
     await userEvent.click(reset);
 
-    expect(await screen.findByText('Jane Doe')).toBeInTheDocument();
-    expect(screen.getByText('All Adaptive Record Holders')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText('Physical Holder')).toBeNull();
+    });
+    expect(screen.getByText(/Keeping track of local adaptive athletes/)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Reset' })).toBeNull();
   });
 
@@ -209,17 +228,20 @@ describe('AdaptiveRecords (user-based)', () => {
     });
 
     render(<AdaptiveRecords />);
-    await screen.findByText('Jane Doe');
+    await landing();
     await chooseCategory('Deaf, Deafened, or Hard of Hearing');
     await screen.findByText('Hearing Holder');
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const fetchesAfterFirstView = fetchMock.mock.calls.length;
 
     await userEvent.click(screen.getByRole('button', { name: 'Reset' }));
-    await screen.findByText('Jane Doe');
+    await waitFor(() => {
+      expect(screen.queryByText('Hearing Holder')).toBeNull();
+    });
     await chooseCategory('Deaf, Deafened, or Hard of Hearing');
 
     expect(await screen.findByText('Hearing Holder')).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    // Every sheet on this path has been seen already, so nothing went back out.
+    expect(fetchMock).toHaveBeenCalledTimes(fetchesAfterFirstView);
   });
 
   test('a failed fetch reports the problem rather than spinning forever', async () => {

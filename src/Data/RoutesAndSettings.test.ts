@@ -8,6 +8,7 @@ import {
   getMeetsRoute,
   getNationalsDateRange,
   getRankingsRoute,
+  getRecentMonthsDateRange,
   getSheetRoute,
   githubUrl,
   localHomeUrl,
@@ -15,6 +16,7 @@ import {
   localScheduleUrl,
   maintainerEmail,
   maxCleanAndJerk,
+  maxMonthsLookback,
   maxSnatch,
   maxTotal,
   nationalsQualifyingEndDate,
@@ -148,6 +150,33 @@ describe('RoutesAndSettings (user-based)', () => {
         startDate: '2025-11-08',
         endDate,
       });
+    });
+  });
+
+  describe('F-11: rolling months date range', () => {
+    test('the window runs from the given number of months back through tomorrow', () => {
+      expect(getRecentMonthsDateRange(12, new Date('2026-09-29T12:00:00Z'))).toEqual({
+        startDate: '2025-09-29',
+        endDate: '2026-09-30',
+      });
+    });
+
+    test('a single month is a real window', () => {
+      expect(getRecentMonthsDateRange(1, new Date('2026-09-29T12:00:00Z'))).toEqual({
+        startDate: '2026-08-29',
+        endDate: '2026-09-30',
+      });
+    });
+
+    test('month arithmetic on a short month widens the window rather than narrowing it', () => {
+      // There is no May 31 three months before Aug 31, so the date rolls into June.
+      expect(getRecentMonthsDateRange(3, new Date('2026-05-31T12:00:00Z')).startDate).toBe(
+        '2026-03-03'
+      );
+    });
+
+    test('the cap leaves room for a decade of history', () => {
+      expect(maxMonthsLookback).toBe(120);
     });
   });
 

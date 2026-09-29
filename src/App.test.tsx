@@ -44,11 +44,12 @@ describe('App routing (user-based)', () => {
 
     expect(screen.getByText(HEADER_TEXT)).toBeInTheDocument();
     expect(screen.getByLabelText('Category')).toBeInTheDocument();
-    // The stubbed sheet comes back empty, so the page settles on its own empty state rather
-    // than the home page's "Loading current records…".
+    // No category is applied yet, so the page settles on its own preamble rather than on any
+    // record list or the home page's "Loading current records…".
     await waitFor(() => {
-      expect(screen.getByText('No adaptive records have been set yet.')).toBeInTheDocument();
+      expect(screen.getByText(/Keeping track of local adaptive athletes/)).toBeInTheDocument();
     });
+    expect(screen.queryByText('Loading current records…')).toBeNull();
   });
 
   test('A-03: /info renders the About page with the header', () => {

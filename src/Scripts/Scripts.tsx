@@ -2,7 +2,7 @@ import { useState } from 'react';
 import OptionsBar from '../Common/OptionsBar';
 import { scripts } from '../Data/scripts';
 import { scriptsPassword, wsoName } from '../Data/RoutesAndSettings';
-import { hashPassword } from '../Utils/Utils';
+import { downloadCsv, hashPassword } from '../Utils/Utils';
 
 function Scripts() {
   const [selectedName, setSelectedName] = useState('');
@@ -34,17 +34,7 @@ function Scripts() {
     setStatus('idle');
     setError(undefined);
     try {
-      const csv = await source();
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      downloadCsv(await source(), fileName);
       setStatus('done');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred.');

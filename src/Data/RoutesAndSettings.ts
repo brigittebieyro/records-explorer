@@ -114,6 +114,33 @@ export const getNationalsDateRange = (
   lookback.setMonth(lookback.getMonth() - 16);
   return { startDate: lookback.toISOString().split('T')[0], endDate };
 };
+
+// The longest lookback the participation script accepts. This bounds the date range asked for, not
+// the number of requests: that is one per age group and weight class combination however wide the
+// window is.
+export const maxMonthsLookback = 120;
+
+/**
+ * A rolling window of the last `monthCount` months, ending tomorrow so that a meet logged today is
+ * always inside it -- the rule module-level `endDate` follows.
+ *
+ * `today` is injectable because `endDate` is fixed at module load and so cannot be pinned in a test.
+ * Month arithmetic rolls over on short months (May 31 less three months is Mar 3), which widens the
+ * window by a couple of days rather than narrowing it.
+ */
+export const getRecentMonthsDateRange = (
+  monthCount: number,
+  today: Date = new Date()
+): { startDate: string; endDate: string } => {
+  const lookback = new Date(today);
+  lookback.setMonth(lookback.getMonth() - monthCount);
+  const through = new Date(today);
+  through.setDate(through.getDate() + 1);
+  return {
+    startDate: lookback.toISOString().split('T')[0],
+    endDate: through.toISOString().split('T')[0],
+  };
+};
 // ----------------------------------------------------------------------------------------------------------------
 // Google Sheets Routes for Prior Recognized Records
 // ----------------------------------------------------------------------------------------------------------------

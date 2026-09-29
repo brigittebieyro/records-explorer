@@ -41,10 +41,10 @@ const adaptiveDescription = (
       not bar you from holding records in the open category or placing in open competition.
     </p>
     <p>
-      We are tracking overall, combined adaptive achievements, in addition to per-category. Athletes
-      who USAW has recognized as adaptive can qualify for national events with 50% of the open
-      qualifying total for their weight class and age group. For more information on categories for
-      adapative athletes, or how to compete nationally as an adaptive athlete, refer to{' '}
+      We are tracking adaptive records per-category. Athletes who USAW has recognized as adaptive
+      can qualify for national events with 50% of the open qualifying total for their weight class
+      and age group. For more information on categories for adapative athletes, or how to compete
+      nationally as an adaptive athlete, refer to{' '}
       <a
         href="https://www.usaweightlifting.org/resources/qualifying-totals/adaptive-athlete-competition-requirements"
         target="_blank"
@@ -117,7 +117,7 @@ function AdaptiveRecords() {
             name: 'Category',
             value: selectedCategory,
             onChange: setSelectedCategory,
-            placeholder: 'All Adaptive Records',
+            placeholder: 'Category',
             options: adaptiveCategories.map((category) => ({
               value: category.id,
               label: category.displayName,
@@ -154,7 +154,7 @@ function AdaptiveRecords() {
         </div>
       )}
 
-      {status === 'complete' && (
+      {status === 'complete' && !!activeCategory && (
         <AllCurrentRecordsView
           data={recordsData}
           // The certificate is looked up in whichever tab is on display, so the same athlete
@@ -172,6 +172,11 @@ function AdaptiveRecords() {
           description={adaptiveDescription}
           emptyContent="No adaptive records have been set yet."
         />
+      )}
+      {status === 'complete' && !activeCategory && (
+        <div className="common-text-header record-viewer-fine-print all-records-fine-print">
+          {adaptiveDescription}
+        </div>
       )}
     </div>
   );

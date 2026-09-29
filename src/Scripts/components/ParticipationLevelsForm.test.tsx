@@ -1,7 +1,6 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ParticipationLevelsForm from './ParticipationLevelsForm';
-import { maxMonthsLookback } from '../../Data/RoutesAndSettings';
 import { runParticipationLevels } from '../../RunnableScripts/participationLevels';
 import { downloadCsv } from '../../Utils/Utils';
 
@@ -20,7 +19,7 @@ const sweep = runParticipationLevels as jest.Mock;
 const download = downloadCsv as jest.Mock;
 
 /** The field carries no visible label; the operator reads its placeholder. */
-const monthsInput = () => screen.getByPlaceholderText('12');
+const monthsInput = () => screen.getByPlaceholderText('Number of months');
 const goButton = () => screen.getByRole('button', { name: 'Go' });
 
 describe('ParticipationLevelsForm (user-based)', () => {
@@ -31,7 +30,7 @@ describe('ParticipationLevelsForm (user-based)', () => {
   test('F-12: the field starts empty and Go waits for a window', () => {
     render(<ParticipationLevelsForm />);
 
-    // The placeholder is an example, not a value -- nothing is gathered until it is typed.
+    // The placeholder names the field; it is not a value, so nothing is gathered until one is typed.
     expect(monthsInput()).toHaveValue('');
     expect(goButton()).toBeDisabled();
   });
@@ -39,7 +38,7 @@ describe('ParticipationLevelsForm (user-based)', () => {
   test('F-12: Go stays disabled for anything that is not a count of months', async () => {
     render(<ParticipationLevelsForm />);
 
-    for (const value of ['0', '-1', '1.5', 'abc', String(maxMonthsLookback + 1)]) {
+    for (const value of ['0', '-1', '1.5', 'abc']) {
       await userEvent.clear(monthsInput());
       await userEvent.type(monthsInput(), value);
       expect(goButton()).toBeDisabled();
@@ -47,6 +46,11 @@ describe('ParticipationLevelsForm (user-based)', () => {
 
     await userEvent.clear(monthsInput());
     await userEvent.type(monthsInput(), '12');
+    expect(goButton()).toBeEnabled();
+
+    // No ceiling: a wide window costs the same number of requests as a narrow one.
+    await userEvent.clear(monthsInput());
+    await userEvent.type(monthsInput(), '600');
     expect(goButton()).toBeEnabled();
   });
 

@@ -3,7 +3,6 @@ import {
   getRankingsRoute,
   getRecentMonthsDateRange,
   headers,
-  maxMonthsLookback,
   wsoId,
 } from '../Data/RoutesAndSettings';
 import { AgeGroup, LifterRankingData, WeightClass } from '../Utils/types';
@@ -41,7 +40,7 @@ export const parseMonthCount = (value: string): number | undefined => {
   const trimmed = value.trim();
   if (!/^\d+$/.test(trimmed)) return undefined;
   const parsed = Number(trimmed);
-  return parsed >= 1 && parsed <= maxMonthsLookback ? parsed : undefined;
+  return parsed >= 1 ? parsed : undefined;
 };
 
 export const participationFileName = (monthCount: number): string =>
@@ -221,7 +220,7 @@ export async function runParticipationLevels(
 ): Promise<string> {
   // The form's disabled Go button is UI, not a contract.
   if (parseMonthCount(String(monthCount)) === undefined) {
-    throw new Error(`Enter a whole number of months between 1 and ${maxMonthsLookback}.`);
+    throw new Error('Enter a whole number of months, one or more.');
   }
 
   const { startDate, endDate } = getRecentMonthsDateRange(monthCount);

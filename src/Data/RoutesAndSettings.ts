@@ -115,11 +115,6 @@ export const getNationalsDateRange = (
   return { startDate: lookback.toISOString().split('T')[0], endDate };
 };
 
-// The longest lookback the participation script accepts. This bounds the date range asked for, not
-// the number of requests: that is one per age group and weight class combination however wide the
-// window is.
-export const maxMonthsLookback = 120;
-
 /**
  * A rolling window of the last `monthCount` months, ending tomorrow so that a meet logged today is
  * always inside it -- the rule module-level `endDate` follows.

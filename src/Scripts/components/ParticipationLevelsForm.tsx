@@ -12,13 +12,6 @@ interface ParticipationLevelsInput {
 
 const emptyForm: ParticipationLevelsInput = { months: '' };
 
-/**
- * The lookback for the participation sweep.
- *
- * One field, deliberately empty to begin with: how far back to look is the question the operator is
- * answering, so there is no default worth guessing on their behalf. Rendered by the Scripts page
- * when its script is selected.
- */
 function ParticipationLevelsForm() {
   const [form, setForm] = useState<ParticipationLevelsInput>(emptyForm);
   const [isWorking, setIsWorking] = useState(false);
@@ -66,7 +59,7 @@ function ParticipationLevelsForm() {
           id="participation-months"
           type="text"
           className="header-button"
-          placeholder="12"
+          placeholder="Number of months"
           value={form.months}
           disabled={isWorking}
           onChange={(eventObj) => update('months', eventObj.target.value)}

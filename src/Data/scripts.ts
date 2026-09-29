@@ -46,6 +46,6 @@ export const scripts: Script[] = [
     name: 'Gather Participation Levels',
     Form: ParticipationLevelsForm,
     description:
-      'Counts how many athletes in the WSO have competed in each age group and weight class over a recent stretch of time, and downloads the counts as a CSV. Enter how many months to look back; every combination is asked for, so one nobody entered comes back as a zero rather than being left out. This is one request per combination, close to three hundred of them, so allow a few minutes.',
+      'Counts how many athletes in the WSO have competed in each potential medal category over a period of month, and downloads a stats a CSV. Choose the number of months to investigate.',
   },
 ];

@@ -16,7 +16,6 @@ import {
   localScheduleUrl,
   maintainerEmail,
   maxCleanAndJerk,
-  maxMonthsLookback,
   maxSnatch,
   maxTotal,
   nationalsQualifyingEndDate,
@@ -173,10 +172,6 @@ describe('RoutesAndSettings (user-based)', () => {
       expect(getRecentMonthsDateRange(3, new Date('2026-05-31T12:00:00Z')).startDate).toBe(
         '2026-03-03'
       );
-    });
-
-    test('the cap leaves room for a decade of history', () => {
-      expect(maxMonthsLookback).toBe(120);
     });
   });
 

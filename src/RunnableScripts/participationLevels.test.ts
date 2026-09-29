@@ -9,7 +9,7 @@ import {
 } from './participationLevels';
 import { ageGroups } from '../Data/ageGroups';
 import { defaultWeightClasses } from '../Data/defaultWeightClasses';
-import { maxMonthsLookback, wsoId } from '../Data/RoutesAndSettings';
+import { wsoId } from '../Data/RoutesAndSettings';
 import { u11WeightClasses } from '../Data/youthWeightClasses';
 import { getAgeGroup, getWeightClassSet, rateLimitedFetch } from '../Utils/Utils';
 import { AgeGroup, WeightClass } from '../Utils/types';
@@ -69,11 +69,12 @@ describe('participationLevels', () => {
   });
 
   describe('F-12: the months field', () => {
-    test('a whole number of months inside the cap is accepted', () => {
+    test('any whole number of months is accepted', () => {
       expect(parseMonthCount('1')).toBe(1);
       expect(parseMonthCount('12')).toBe(12);
       expect(parseMonthCount(' 12 ')).toBe(12);
-      expect(parseMonthCount(String(maxMonthsLookback))).toBe(maxMonthsLookback);
+      // However far back the window reaches, it is still one request per combination.
+      expect(parseMonthCount('600')).toBe(600);
     });
 
     test('anything that is not a plain count of months is rejected', () => {
@@ -81,10 +82,6 @@ describe('participationLevels', () => {
       for (const value of ['', '   ', '0', '-1', '1.5', '1e3', '+12', 'abc', '12 months']) {
         expect(parseMonthCount(value)).toBeUndefined();
       }
-    });
-
-    test('a lookback past the cap is rejected', () => {
-      expect(parseMonthCount(String(maxMonthsLookback + 1))).toBeUndefined();
     });
 
     test('the download is named after the window that produced it', () => {
@@ -391,7 +388,7 @@ describe('participationLevels', () => {
 
     test('a months count the form would never submit is refused rather than swept', async () => {
       await expect(runParticipationLevels(0)).rejects.toThrow(
-        `Enter a whole number of months between 1 and ${maxMonthsLookback}.`
+        'Enter a whole number of months, one or more.'
       );
       expect(fetchMock).not.toHaveBeenCalled();
     });

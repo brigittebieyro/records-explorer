@@ -23,7 +23,8 @@ interface RankingsEnvelope {
 
 export interface ParticipationRow {
   ageGroupId: string;
-  weightClassId: string;
+  /** The class as it is named for people -- "Women's 49kg", "Girls 30kg" -- not its id. */
+  weightClassName: string;
   gender: 'male' | 'female';
   /** null when the response carried no number worth trusting -- which is not the same as zero. */
   count: number | null;
@@ -128,31 +129,77 @@ export async function fetchParticipationCount(
 // ─── Analysis ─────────────────────────────────────────────────────────────────
 
 /**
+ * How an age group is written in the output. Masters groups are identified by their starting age
+ * alone ('35', '40'), which does not say who the group is for, so the gender is prefixed: M35 for
+ * men, W35 for women, as the records sheets spell them. Every other group already names itself
+ * (OPEN, JR, U13).
+ */
+const ageGroupLabel = (ageGroupId: string, gender: 'male' | 'female'): string =>
+  /^\d+$/.test(ageGroupId) ? `${gender === 'female' ? 'W' : 'M'}${ageGroupId}` : ageGroupId;
+
+/** Adds up the counts that came back, leaving the uncounted ones out of the sum entirely. */
+const sumCounts = (rows: ParticipationRow[]): number =>
+  rows.reduce((sum, row) => sum + (row.count ?? 0), 0);
+
+/**
+ * The summary table: how many categories drew anyone, the split by gender, and a line per age
+ * group. Each is a sum over the counts above, so an uncounted combination is missing from its
+ * totals rather than being read as a zero -- the errors table below names those.
+ */
+const statsTable = (rows: ParticipationRow[]): Array<Array<string | number>> => {
+  const table: Array<Array<string | number>> = [
+    ['Stats'],
+    // A medal category is one combination: a weight class within an age group.
+    ['Total Medal Categories', rows.filter((row) => (row.count ?? 0) > 0).length],
+    ['Total Women', sumCounts(rows.filter((row) => row.gender === 'female'))],
+    ['Total Men', sumCounts(rows.filter((row) => row.gender === 'male'))],
+  ];
+
+  // Walked in the order the age groups are configured rather than the order they appear in the
+  // rows, so the summary reads youngest to oldest however the sweep was assembled.
+  for (const ageGroup of ageGroups) {
+    const groupRows = rows.filter((row) => row.ageGroupId === ageGroup.id);
+    if (groupRows.length === 0) continue;
+    table.push([ageGroup.id, sumCounts(groupRows)]);
+  }
+
+  return table;
+};
+
+/**
  * The counts, one row per combination -- an empty class included as a 0 rather than left out, so
- * the file is a complete grid.
+ * the file is a complete grid -- followed by a stats table summarising them.
  *
  * A combination that could not be counted leaves its Total cell empty and is listed again in an
  * errors table below, the way the adaptive script reports its unresolved athletes. A blank caused
  * by a proxy hiccup must not be mistaken for a class nobody entered.
  */
 export function generateCsv(rows: ParticipationRow[]): string {
-  const table = [
-    ['Age Group ID', 'Weight Class ID', 'Gender', 'Total'],
+  const table: Array<Array<string | number>> = [
+    ['Age Group', 'Weight Class', 'Gender', 'Total'],
     ...rows.map((row) => [
-      row.ageGroupId,
-      row.weightClassId,
+      ageGroupLabel(row.ageGroupId, row.gender),
+      row.weightClassName,
       row.gender,
       row.count === null ? '' : row.count,
     ]),
   ];
 
+  table.push([]);
+  table.push(...statsTable(rows));
+
   const unavailable = rows.filter((row) => row.count === null);
   if (unavailable.length > 0) {
     table.push([]);
     table.push(['Errors']);
-    table.push(['Age Group ID', 'Weight Class ID', 'Gender', 'Error']);
+    table.push(['Age Group', 'Weight Class', 'Gender', 'Error']);
     for (const row of unavailable) {
-      table.push([row.ageGroupId, row.weightClassId, row.gender, row.reason ?? '']);
+      table.push([
+        ageGroupLabel(row.ageGroupId, row.gender),
+        row.weightClassName,
+        row.gender,
+        row.reason ?? '',
+      ]);
     }
   }
 
@@ -190,7 +237,7 @@ export async function runParticipationLevels(
     );
     rows.push({
       ageGroupId: ageGroup.id,
-      weightClassId: weightClass.id,
+      weightClassName: weightClass.name,
       gender: weightClass.gender,
       count,
       reason,

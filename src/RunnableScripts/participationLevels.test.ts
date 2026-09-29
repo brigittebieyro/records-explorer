@@ -55,7 +55,7 @@ const envelope = (total: unknown) => ({
 
 const row = (overrides: Partial<ParticipationRow> = {}): ParticipationRow => ({
   ageGroupId: 'OPEN',
-  weightClassId: 'W49',
+  weightClassName: "Women's 49kg",
   gender: 'female',
   count: 7,
   ...overrides,
@@ -242,36 +242,98 @@ describe('participationLevels', () => {
     test('one row per combination, an empty class included as a zero', () => {
       const csv = generateCsv([
         row({ count: 7 }),
-        row({ weightClassId: 'W53', count: 0 }),
-        row({ ageGroupId: '35', weightClassId: 'M60', gender: 'male', count: 3 }),
+        row({ weightClassName: "Women's 53kg", count: 0 }),
+        row({
+          ageGroupId: '35',
+          weightClassName: "Men's 60kg",
+          gender: 'male',
+          count: 3,
+        }),
       ]);
 
+      // A masters group is named by its starting age alone, so the gender is prefixed onto it.
       expect(csv).toBe(
-        'Age Group ID,Weight Class ID,Gender,Total\n' +
-          'OPEN,W49,female,7\n' +
-          'OPEN,W53,female,0\n' +
-          '35,M60,male,3\n'
+        'Age Group,Weight Class,Gender,Total\n' +
+          "OPEN,Women's 49kg,female,7\n" +
+          "OPEN,Women's 53kg,female,0\n" +
+          "M35,Men's 60kg,male,3\n" +
+          '\n' +
+          'Stats\n' +
+          'Total Medal Categories,2\n' +
+          'Total Women,7\n' +
+          'Total Men,3\n' +
+          'OPEN,7\n' +
+          '35,3\n'
       );
     });
 
-    test('a clean run ends after the counts', () => {
+    test('a clean run ends after the stats', () => {
       expect(generateCsv([row()])).not.toContain('Errors');
     });
 
     test('an uncounted combination leaves its total blank and is listed as an error', () => {
       const csv = generateCsv([
         row({ count: 0 }),
-        row({ weightClassId: 'W53', count: null, reason: 'HTTP 502: Bad Gateway' }),
+        row({ weightClassName: "Women's 53kg", count: null, reason: 'HTTP 502: Bad Gateway' }),
       ]);
       const lines = csv.trimEnd().split('\n');
 
       // A blank total and a zero must not read the same: one is a class nobody entered, the other
       // is a request that failed.
-      expect(lines).toContain('OPEN,W49,female,0');
-      expect(lines).toContain('OPEN,W53,female,');
+      expect(lines).toContain("OPEN,Women's 49kg,female,0");
+      expect(lines).toContain("OPEN,Women's 53kg,female,");
       expect(lines).toContain('Errors');
-      expect(lines).toContain('OPEN,W53,female,HTTP 502: Bad Gateway');
-      expect(lines.filter((line) => line.startsWith('OPEN,W53'))).toHaveLength(2);
+      expect(lines).toContain("OPEN,Women's 53kg,female,HTTP 502: Bad Gateway");
+      expect(lines.filter((line) => line.startsWith("OPEN,Women's 53kg"))).toHaveLength(2);
+    });
+
+    test('an uncounted combination is left out of the stats rather than summed as a zero', () => {
+      const csv = generateCsv([
+        row({ count: 4 }),
+        row({ weightClassName: "Women's 53kg", count: null, reason: 'HTTP 502: Bad Gateway' }),
+        row({ weightClassName: "Men's 60kg", gender: 'male', count: 6 }),
+      ]);
+      const lines = csv.trimEnd().split('\n');
+
+      // Three combinations, but only the two that answered drew anyone.
+      expect(lines).toContain('Total Medal Categories,2');
+      expect(lines).toContain('Total Women,4');
+      expect(lines).toContain('Total Men,6');
+      expect(lines).toContain('OPEN,10');
+    });
+
+    test('the age group lines follow the configured order, youngest first', () => {
+      const csv = generateCsv([
+        row({ ageGroupId: '40', count: 1 }),
+        row({ ageGroupId: 'U13', count: 2 }),
+        row({ ageGroupId: 'OPEN', count: 3 }),
+      ]);
+      const lines = csv.trimEnd().split('\n');
+      const ageGroupLines = lines.slice(lines.indexOf('Total Men,0') + 1);
+
+      // Each line sums both genders, so a masters group is named plainly here rather than being
+      // split into M40 and F40 the way the counts above are.
+      expect(ageGroupLines).toEqual(['OPEN,3', 'U13,2', '40,1']);
+    });
+
+    test('an age group nobody was asked about gets no line at all', () => {
+      expect(generateCsv([row({ ageGroupId: 'OPEN', count: 3 })])).not.toContain('\nJR,');
+    });
+
+    test('a masters age group carries the gender it belongs to, others stand alone', () => {
+      const csv = generateCsv([
+        row({ ageGroupId: '35', weightClassName: "Women's 49kg", gender: 'female', count: 1 }),
+        row({ ageGroupId: '35', weightClassName: "Men's 60kg", gender: 'male', count: 2 }),
+        row({ ageGroupId: 'JR', weightClassName: "Women's 49kg", gender: 'female', count: 3 }),
+        row({ ageGroupId: 'U13', weightClassName: 'Girls 30kg', gender: 'female', count: 4 }),
+      ]);
+      const lines = csv.trimEnd().split('\n');
+
+      // '35' alone does not say whose group it is; OPEN, JR and U13 already do.
+      expect(lines).toContain("W35,Women's 49kg,female,1");
+      expect(lines).toContain("M35,Men's 60kg,male,2");
+      expect(lines).toContain("JR,Women's 49kg,female,3");
+      expect(lines).toContain('U13,Girls 30kg,female,4');
     });
   });
 
@@ -284,7 +346,8 @@ describe('participationLevels', () => {
         progress.push([completed, total])
       );
 
-      const dataRows = csv.trimEnd().split('\n').slice(1);
+      // Up to the blank line is the grid of counts; the stats table follows it.
+      const dataRows = csv.split('\n').slice(1, csv.split('\n').indexOf(''));
       expect(dataRows).toHaveLength(expectedCombinationCount);
       expect(fetchMock).toHaveBeenCalledTimes(expectedCombinationCount);
       expect(progress).toHaveLength(expectedCombinationCount);
@@ -319,7 +382,7 @@ describe('participationLevels', () => {
 
       expect(fetchMock).toHaveBeenCalledTimes(expectedCombinationCount);
       expect(lines).toContain(
-        `${firstCombination.ageGroup.id},${firstCombination.weightClass.id},` +
+        `${firstCombination.ageGroup.id},${firstCombination.weightClass.name},` +
           `${firstCombination.weightClass.gender},`
       );
       expect(lines).toContain('Errors');

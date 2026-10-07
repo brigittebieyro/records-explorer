@@ -4,7 +4,7 @@ const { buildManualRecord, stripUnprintable } = require('./manual');
 const { renderCertificate, certificateFileName } = require('./render');
 
 const body = (overrides = {}) => ({
-  lifter: 'Jade Morales',
+  lifter: 'Jane Smith',
   lift: 'Snatch',
   weight: '76',
   date: '2019-05-04',
@@ -17,7 +17,7 @@ const body = (overrides = {}) => ({
 test('a complete body becomes the record shape the renderer takes', () => {
   assert.deepStrictEqual(buildManualRecord(body()), {
     record: {
-      lifter: 'Jade Morales',
+      lifter: 'Jane Smith',
       lift: 'Snatch',
       weight: '76',
       date: '2019-05-04',
@@ -59,12 +59,12 @@ test('invisible characters are stripped from every printed field', () => {
   const zeroWidthSpace = '\u200B';
   const { record } = buildManualRecord(
     body({
-      lifter: `Jade${rightToLeftOverride} Morales`,
+      lifter: `Jane${rightToLeftOverride} Smith`,
       category: `Women's${zeroWidthSpace} Open 53kg`,
       event: `California${zeroWidthSpace} State Championships`,
     })
   );
-  assert.strictEqual(record.lifter, 'Jade Morales');
+  assert.strictEqual(record.lifter, 'Jane Smith');
   assert.strictEqual(record.category, "Women's Open 53kg");
   assert.strictEqual(record.event, 'California State Championships');
 });
@@ -88,7 +88,7 @@ test('a missing body is handled rather than throwing', () => {
 });
 
 test('stripUnprintable trims, and survives a value it cannot read', () => {
-  assert.strictEqual(stripUnprintable('  Jade Morales  '), 'Jade Morales');
+  assert.strictEqual(stripUnprintable('  Jane Smith  '), 'Jane Smith');
   assert.strictEqual(stripUnprintable(''), '');
   assert.strictEqual(stripUnprintable(null), '');
   assert.strictEqual(stripUnprintable(undefined), '');
@@ -111,5 +111,5 @@ test('the built record renders a PDF and names its file the same way a sheet rec
 
   // The filename comes from the shared helper, so a manual certificate is named exactly as a
   // sheet-backed one for the same athlete, lift and date.
-  assert.strictEqual(certificateFileName(record), 'JadeMorales_Snatch_2019-05-04.pdf');
+  assert.strictEqual(certificateFileName(record), 'JaneSmith_Snatch_2019-05-04.pdf');
 });

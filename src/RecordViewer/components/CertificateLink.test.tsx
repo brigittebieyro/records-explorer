@@ -97,14 +97,14 @@ describe('CertificateLink (user-based)', () => {
     // sees -- so it can only come off the response header. A blob URL carries no name of its own.
     global.fetch = mockCertificateFetch(
       true,
-      'inline; filename="JaneDoe_Snatch_2025-10-18.pdf"'
+      'inline; filename="JaneSmith_Snatch_2025-10-18.pdf"'
     ) as unknown as typeof fetch;
 
     render(<CertificateLink {...PROPS} />);
     await userEvent.click(screen.getByRole('button', { name: /^print$/i }));
 
     await waitFor(() => expect(saved).toHaveLength(1));
-    expect(saved[0].download).toBe('JaneDoe_Snatch_2025-10-18.pdf');
+    expect(saved[0].download).toBe('JaneSmith_Snatch_2025-10-18.pdf');
   });
 
   test('a response with no usable Content-Disposition still saves under some name', async () => {
@@ -162,11 +162,11 @@ describe('CertificateLink (user-based)', () => {
 
 describe('filenameFromDisposition', () => {
   test('reads the name the server sent, quoted or not', () => {
-    expect(filenameFromDisposition('inline; filename="JaneDoe_Record_2025-10-18.pdf"')).toBe(
-      'JaneDoe_Record_2025-10-18.pdf'
+    expect(filenameFromDisposition('inline; filename="JaneSmith_Record_2025-10-18.pdf"')).toBe(
+      'JaneSmith_Record_2025-10-18.pdf'
     );
-    expect(filenameFromDisposition('inline; filename=JaneDoe_Record.pdf')).toBe(
-      'JaneDoe_Record.pdf'
+    expect(filenameFromDisposition('inline; filename=JaneSmith_Record.pdf')).toBe(
+      'JaneSmith_Record.pdf'
     );
     expect(filenameFromDisposition('attachment; filename="A.pdf"; size=100')).toBe('A.pdf');
   });

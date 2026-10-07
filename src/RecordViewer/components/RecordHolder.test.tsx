@@ -8,7 +8,7 @@ jest.mock('react-spinners', () => ({
 
 const makeLifter = (overrides: object = {}): CombinedLiftData =>
   ({
-    name: 'Jane Doe',
+    name: 'Jane Smith',
     total: 180,
     lifter_age: '25',
     lift_date: '2026-01-15',
@@ -26,7 +26,7 @@ describe('RecordHolder (user-based)', () => {
       <RecordHolder lifterData={makeLifter()} index={0} individualLiftsData={[]} sortType="total" />
     );
 
-    expect(screen.getByText('Jane Doe')).toBeInTheDocument();
+    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
     expect(screen.getByText('Total:')).toBeInTheDocument();
     expect(screen.getByText('180')).toBeInTheDocument();
     expect(screen.getByText('Snatch:')).toBeInTheDocument();

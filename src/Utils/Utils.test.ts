@@ -34,7 +34,7 @@ if (typeof globalThis.TextEncoder === 'undefined') {
 
 const makeLift = (overrides: object = {}): CombinedLiftData =>
   ({
-    name: 'Jane Doe',
+    name: 'Jane Smith',
     total: 150,
     lifter_age: '25',
     lift_date: '2026-01-15',
@@ -156,40 +156,40 @@ describe('Utils (user-based)', () => {
   describe('B-13: sortLifts', () => {
     test('defaults to sorting by total, descending, keeping the best per athlete', () => {
       const lifts = [
-        makeLift({ name: 'A', total: 100 }),
-        makeLift({ name: 'A', total: 120 }),
-        makeLift({ name: 'B', total: 110 }),
+        makeLift({ name: 'Jane A. Smith', total: 100 }),
+        makeLift({ name: 'Jane A. Smith', total: 120 }),
+        makeLift({ name: 'Jane B. Smith', total: 110 }),
       ];
       const sorted = sortLifts(lifts);
       expect(sorted).toHaveLength(2);
-      expect(sorted[0].name).toBe('A');
+      expect(sorted[0].name).toBe('Jane A. Smith');
       expect(sorted[0].total).toBe(120);
-      expect(sorted[1].name).toBe('B');
+      expect(sorted[1].name).toBe('Jane B. Smith');
     });
 
     test('sorts by best_snatch when requested', () => {
       const lifts = [
-        makeLift({ name: 'A', total: 200, best_snatch: 80 }),
-        makeLift({ name: 'B', total: 150, best_snatch: 95 }),
+        makeLift({ name: 'Jane A. Smith', total: 200, best_snatch: 80 }),
+        makeLift({ name: 'Jane B. Smith', total: 150, best_snatch: 95 }),
       ];
       const sorted = sortLifts(lifts, 'best_snatch');
-      expect(sorted[0].name).toBe('B');
+      expect(sorted[0].name).toBe('Jane B. Smith');
     });
 
     test('sorts by best_c&j when requested', () => {
       const lifts = [
-        makeLift({ name: 'A', 'best_c&j': 100 }),
-        makeLift({ name: 'B', 'best_c&j': 130 }),
+        makeLift({ name: 'Jane A. Smith', 'best_c&j': 100 }),
+        makeLift({ name: 'Jane B. Smith', 'best_c&j': 130 }),
       ];
       const sorted = sortLifts(lifts, 'best_c&j');
-      expect(sorted[0].name).toBe('B');
+      expect(sorted[0].name).toBe('Jane B. Smith');
     });
 
     test('sorts by lift_date newest first, keeping all lifts', () => {
       const lifts = [
-        makeLift({ name: 'A', lift_date: '2025-01-01' }),
-        makeLift({ name: 'A', lift_date: '2026-03-01' }),
-        makeLift({ name: 'B', lift_date: '2026-01-01' }),
+        makeLift({ name: 'Jane A. Smith', lift_date: '2025-01-01' }),
+        makeLift({ name: 'Jane A. Smith', lift_date: '2026-03-01' }),
+        makeLift({ name: 'Jane B. Smith', lift_date: '2026-01-01' }),
       ];
       const sorted = sortLifts(lifts, 'lift_date');
       expect(sorted).toHaveLength(3);
@@ -200,11 +200,11 @@ describe('Utils (user-based)', () => {
 
     test('treats missing sort values as 0', () => {
       const lifts = [
-        makeLift({ name: 'A', best_snatch: undefined }),
-        makeLift({ name: 'B', best_snatch: 50 }),
+        makeLift({ name: 'Jane A. Smith', best_snatch: undefined }),
+        makeLift({ name: 'Jane B. Smith', best_snatch: 50 }),
       ];
       const sorted = sortLifts(lifts, 'best_snatch');
-      expect(sorted[0].name).toBe('B');
+      expect(sorted[0].name).toBe('Jane B. Smith');
     });
   });
 
@@ -358,7 +358,7 @@ describe('Utils (user-based)', () => {
     });
 
     test('hands the csv to the browser under the given filename', () => {
-      downloadCsv('lifter,total\nJane Doe,180', 'counts.csv');
+      downloadCsv('lifter,total\nJane Smith,180', 'counts.csv');
 
       expect(createObjectURL).toHaveBeenCalledTimes(1);
       const blob = createObjectURL.mock.calls[0][0] as Blob;

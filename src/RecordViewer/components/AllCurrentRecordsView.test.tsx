@@ -29,7 +29,7 @@ const makeWeightClass = (overrides: object = {}): WeightClass =>
 
 const makeRecord = (overrides: object = {}): StandardRecord => ({
   weight: '80',
-  lifter: 'Jane Doe',
+  lifter: 'Jane Smith',
   event: 'Sacramento Open',
   date: '2026-01-15',
   ...overrides,
@@ -94,7 +94,7 @@ describe('AllCurrentRecordsView (user-based)', () => {
 
     expect(screen.getByText('Total')).toBeInTheDocument();
     expect(screen.getByText('80kg')).toBeInTheDocument();
-    expect(screen.getByText('Jane Doe')).toBeInTheDocument();
+    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
     expect(screen.getByText(/Sacramento Open/)).toBeInTheDocument();
     expect(screen.getByText(/2026-01-15/)).toBeInTheDocument();
   });
@@ -121,12 +121,12 @@ describe('AllCurrentRecordsView (user-based)', () => {
           makeEntry(
             { id: 'W86plus', minBodyweight: '86.01', maxBodyweight: '1000' },
             {},
-            { Total: makeRecord({ lifter: 'Adult Plus Lifter' }) }
+            { Total: makeRecord({ lifter: 'Jane A. Smith' }) }
           ),
           makeEntry(
             { id: 'W63plus', minBodyweight: '63.01', maxBodyweight: '1000' },
             { id: 'U11', name: 'Under 11' },
-            { Total: makeRecord({ lifter: 'Youth Plus Lifter' }) }
+            { Total: makeRecord({ lifter: 'Jane B. Smith' }) }
           ),
         ]}
       />
@@ -136,8 +136,8 @@ describe('AllCurrentRecordsView (user-based)', () => {
       (node) => node.textContent
     );
     expect(headers).toEqual(["Women's 86+kg", "Women's 63+kg"]);
-    expect(screen.getByText('Adult Plus Lifter')).toBeInTheDocument();
-    expect(screen.getByText('Youth Plus Lifter')).toBeInTheDocument();
+    expect(screen.getByText('Jane A. Smith')).toBeInTheDocument();
+    expect(screen.getByText('Jane B. Smith')).toBeInTheDocument();
   });
 
   test('B-02: merged age-group rows display youngest to oldest: Open, youth (youngest first), Junior, Masters (youngest first)', () => {

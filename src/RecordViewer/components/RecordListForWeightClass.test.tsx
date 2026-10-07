@@ -30,7 +30,7 @@ const makeWeightClass = (overrides: object = {}): WeightClass =>
 
 const makeRecord = (overrides: object = {}): StandardRecord => ({
   weight: '80',
-  lifter: 'Jane Doe',
+  lifter: 'Jane Smith',
   event: 'Sacramento Open',
   date: '2026-01-15',
   ...overrides,
@@ -93,7 +93,7 @@ describe('RecordListForWeightClass (user-based)', () => {
           { ageGroup: makeAgeGroup(), records: { Total: makeRecord() } },
           {
             ageGroup: makeAgeGroup({ id: '35', name: '35 - 39 years old' }),
-            records: { Total: makeRecord({ lifter: 'Masters Lifter' }) },
+            records: { Total: makeRecord({ lifter: 'Jane B. Smith' }) },
           },
         ]}
       />
@@ -101,7 +101,7 @@ describe('RecordListForWeightClass (user-based)', () => {
 
     expect(screen.getByText('Open')).toBeInTheDocument();
     expect(screen.getByText('35 - 39 years old')).toBeInTheDocument();
-    expect(screen.getByText('Masters Lifter')).toBeInTheDocument();
+    expect(screen.getByText('Jane B. Smith')).toBeInTheDocument();
   });
 });
 

@@ -12,7 +12,7 @@ const makeResult = (overrides: object = {}): MeetResult =>
     'c&j_lift_2': 100,
     'c&j_lift_3': -105,
     date: '2026-03-01',
-    lifter: 'Jane Doe',
+    lifter: 'Jane Smith',
     meet: 'Sacramento Open',
     snatch_lift_1: 75,
     snatch_lift_2: 80,
@@ -27,7 +27,7 @@ describe('LocalMeetResultsByWeightClass (user-based)', () => {
       <LocalMeetResultsByWeightClass
         meetResults={[
           makeResult(),
-          makeResult({ age_category: "Open Men's 73kg", lifter: 'John Doe', total: 250 }),
+          makeResult({ age_category: "Open Men's 73kg", lifter: 'Jim Brown', total: 250 }),
         ]}
       />
     );
@@ -35,10 +35,10 @@ describe('LocalMeetResultsByWeightClass (user-based)', () => {
     const columns = container.querySelectorAll('.all-records-column');
     expect(within(columns[0] as HTMLElement).getByText('Women')).toBeInTheDocument();
     expect(within(columns[0] as HTMLElement).getByText("Women's 59kg")).toBeInTheDocument();
-    expect(within(columns[0] as HTMLElement).getByText('Jane Doe')).toBeInTheDocument();
+    expect(within(columns[0] as HTMLElement).getByText('Jane Smith')).toBeInTheDocument();
     expect(within(columns[1] as HTMLElement).getByText('Men')).toBeInTheDocument();
     expect(within(columns[1] as HTMLElement).getByText("Men's 73kg")).toBeInTheDocument();
-    expect(within(columns[1] as HTMLElement).getByText('John Doe')).toBeInTheDocument();
+    expect(within(columns[1] as HTMLElement).getByText('Jim Brown')).toBeInTheDocument();
   });
 
   test('C-05: keeps only the best total per lifter', () => {
@@ -51,7 +51,7 @@ describe('LocalMeetResultsByWeightClass (user-based)', () => {
       />
     );
 
-    expect(screen.getAllByText('Jane Doe')).toHaveLength(1);
+    expect(screen.getAllByText('Jane Smith')).toHaveLength(1);
     expect(screen.getByText(/180kg Total/)).toBeInTheDocument();
     expect(screen.queryByText(/150kg Total/)).toBeNull();
   });
@@ -60,17 +60,17 @@ describe('LocalMeetResultsByWeightClass (user-based)', () => {
     const { container } = render(
       <LocalMeetResultsByWeightClass
         meetResults={[
-          makeResult({ lifter: 'Lower Total', total: 150 }),
-          makeResult({ lifter: 'Higher Total', total: 190 }),
+          makeResult({ lifter: 'Jane B. Smith', total: 150 }),
+          makeResult({ lifter: 'Jane A. Smith', total: 190 }),
         ]}
       />
     );
 
     const items = container.querySelectorAll('.local-meet-result-item');
     expect(items[0].textContent).toContain('1');
-    expect(items[0].textContent).toContain('Higher Total');
+    expect(items[0].textContent).toContain('Jane A. Smith');
     expect(items[1].textContent).toContain('2');
-    expect(items[1].textContent).toContain('Lower Total');
+    expect(items[1].textContent).toContain('Jane B. Smith');
   });
 
   test('C-05: each row shows the snatch, clean & jerk, and total', () => {
@@ -83,8 +83,8 @@ describe('LocalMeetResultsByWeightClass (user-based)', () => {
     const { container } = render(
       <LocalMeetResultsByWeightClass
         meetResults={[
-          makeResult({ age_category: "Open Women's 71kg", lifter: 'Heavier' }),
-          makeResult({ age_category: "Open Women's 45kg", lifter: 'Lighter' }),
+          makeResult({ age_category: "Open Women's 71kg", lifter: 'Jane A. Smith' }),
+          makeResult({ age_category: "Open Women's 45kg", lifter: 'Jane B. Smith' }),
         ]}
       />
     );
@@ -98,12 +98,12 @@ describe('LocalMeetResultsByWeightClass (user-based)', () => {
   test('C-06: unclassifiable divisions land under And More instead of disappearing', () => {
     render(
       <LocalMeetResultsByWeightClass
-        meetResults={[makeResult({ age_category: 'Mixed Session 1', lifter: 'Mystery Lifter' })]}
+        meetResults={[makeResult({ age_category: 'Mixed Session 1', lifter: 'Jane Smith' })]}
       />
     );
 
     expect(screen.getByText('And More')).toBeInTheDocument();
-    expect(screen.getByText('Mystery Lifter')).toBeInTheDocument();
+    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
   });
 
   test('C-06: the And More section is hidden when every result is classified', () => {
@@ -114,19 +114,19 @@ describe('LocalMeetResultsByWeightClass (user-based)', () => {
   test("C-05: female keywords win over the men's substring in women's divisions", () => {
     const { container } = render(
       <LocalMeetResultsByWeightClass
-        meetResults={[makeResult({ age_category: 'Female 64kg', lifter: 'Jane Doe' })]}
+        meetResults={[makeResult({ age_category: 'Female 64kg', lifter: 'Jane Smith' })]}
       />
     );
 
     const columns = container.querySelectorAll('.all-records-column');
-    expect(within(columns[0] as HTMLElement).getByText('Jane Doe')).toBeInTheDocument();
-    expect(within(columns[1] as HTMLElement).queryByText('Jane Doe')).toBeNull();
+    expect(within(columns[0] as HTMLElement).getByText('Jane Smith')).toBeInTheDocument();
+    expect(within(columns[1] as HTMLElement).queryByText('Jane Smith')).toBeNull();
   });
 
   test('C-05: empty columns show their own empty messages', () => {
     render(
       <LocalMeetResultsByWeightClass
-        meetResults={[makeResult({ age_category: "Open Men's 73kg", lifter: 'John Doe' })]}
+        meetResults={[makeResult({ age_category: "Open Men's 73kg", lifter: 'Jim Brown' })]}
       />
     );
 

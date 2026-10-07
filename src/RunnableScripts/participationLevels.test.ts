@@ -50,7 +50,7 @@ const envelope = (total: unknown) => ({
   ok: true,
   status: 200,
   statusText: 'OK',
-  json: async () => ({ data: [{ name: 'Jane Doe', total: 180 }], total }),
+  json: async () => ({ data: [{ name: 'Jane Smith', total: 180 }], total }),
 });
 
 const row = (overrides: Partial<ParticipationRow> = {}): ParticipationRow => ({
@@ -181,7 +181,7 @@ describe('participationLevels', () => {
         ok: true,
         status: 200,
         statusText: 'OK',
-        json: async () => ({ data: [{ name: 'Jane Doe', total: 180 }] }),
+        json: async () => ({ data: [{ name: 'Jane Smith', total: 180 }] }),
       });
 
       const result = await fetchParticipationCount(

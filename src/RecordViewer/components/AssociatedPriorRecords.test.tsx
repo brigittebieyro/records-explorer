@@ -12,7 +12,7 @@ const makePriorRecord = (overrides: object = {}): PriorRecord => ({
   bodyWeightMaxIsOpen: false,
   lift: 'Total',
   weight: '140',
-  lifter: 'Jane Doe',
+  lifter: 'Jane Smith',
   event: 'Sacramento Open',
   date: '2019-05-04',
   yearSpan: '2018 - 2025',
@@ -38,7 +38,7 @@ describe('AssociatedPriorRecords (user-based)', () => {
     const title = container.querySelector('.prior-record-title');
     expect(title?.textContent).toBe("2018 - 2025 Women's 49kg • Total:");
     const contents = container.querySelector('.prior-record-contents');
-    expect(contents?.textContent).toBe('140kg - Jane Doe, 2019-05-04, Sacramento Open');
+    expect(contents?.textContent).toBe('140kg - Jane Smith, 2019-05-04, Sacramento Open');
   });
 
   test("B-16: a men's record row uses the Men's prefix", () => {
@@ -50,7 +50,7 @@ describe('AssociatedPriorRecords (user-based)', () => {
             bodyWeightMax: 109,
             lift: 'Snatch',
             weight: '155',
-            lifter: 'John Doe',
+            lifter: 'Jim Brown',
             date: '2005-11-20',
             yearSpan: '1998 - 2018',
           }),
@@ -89,14 +89,14 @@ describe('AssociatedPriorRecords (user-based)', () => {
 
   test('B-16: switching weight classes replaces the rows, even when records share a date', () => {
     const mensRecords = [
-      makePriorRecord({ gender: 'male', bodyWeightMax: 60, lifter: 'John Doe', lift: 'Snatch' }),
+      makePriorRecord({ gender: 'male', bodyWeightMax: 60, lifter: 'Jim Brown', lift: 'Snatch' }),
       makePriorRecord({
         gender: 'male',
         bodyWeightMax: 60,
-        lifter: 'John Doe',
+        lifter: 'Jim Brown',
         lift: 'Clean & Jerk',
       }),
-      makePriorRecord({ gender: 'male', bodyWeightMax: 60, lifter: 'John Doe', lift: 'Total' }),
+      makePriorRecord({ gender: 'male', bodyWeightMax: 60, lifter: 'Jim Brown', lift: 'Total' }),
     ];
     const { container, rerender } = render(<AssociatedPriorRecords records={mensRecords} />);
     expect(container.querySelectorAll('.prior-record')).toHaveLength(3);

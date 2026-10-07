@@ -2,6 +2,7 @@ import {
   classSearchOrder,
   collectRecordBreakers,
   eligibleAgeGroups,
+  fetchLifterResults,
   findWeightClass,
   generateCsv,
   parseAdaptiveRecords,
@@ -24,7 +25,7 @@ const rosterHeader = [
   'Lifter Name',
   'USAW Number',
   'Start Date',
-  'WeightClass',
+  'End Date',
   'Physical Disability',
   'Deaf, Deafened, or Hard of Hearing',
   'Visual Impairment',
@@ -74,10 +75,10 @@ const recordSheetHeader = [
 ];
 
 const resolvedLifter = {
-  name: 'Brigitte Bieyro',
+  name: 'Jane Smith',
   usawNumber: '1013597',
   startDate: '2020-01-15',
-  weightClassName: "Women's 77kg",
+  endDate: '',
   categorySheetNames: ['Adaptive_Vision', 'Adaptive_Cognitive'],
   lifterId: '56984',
   birthYear: 1990,
@@ -112,28 +113,28 @@ describe('parseAdaptiveRoster', () => {
   test('reads the roster and maps the flag columns onto the category sheets in order', () => {
     const roster = parseAdaptiveRoster([
       rosterHeader,
-      ['Brigitte Bieyro', '1013597', '1/15/2020', "Women's 77kg", 'FALSE', 'FALSE', 'TRUE', 'TRUE'],
-      [
-        'Katherine Young',
-        '1022461',
-        '6/22/2021',
-        "Women's 86+kg",
-        'TRUE',
-        'FALSE',
-        'FALSE',
-        'FALSE',
-      ],
+      ['Jane Smith', '1013597', '1/15/2020', '12/31/2026', 'FALSE', 'FALSE', 'TRUE', 'TRUE'],
+      ['Jane B. Smith', '1022461', '6/22/2021', '', 'TRUE', 'FALSE', 'FALSE', 'FALSE'],
     ]);
 
     expect(roster).toHaveLength(2);
     expect(roster[0]).toEqual({
-      name: 'Brigitte Bieyro',
+      name: 'Jane Smith',
       usawNumber: '1013597',
       startDate: '2020-01-15',
-      weightClassName: "Women's 77kg",
+      endDate: '2026-12-31',
       categorySheetNames: ['Adaptive_Vision', 'Adaptive_Cognitive'],
     });
     expect(roster[1].categorySheetNames).toEqual(['Adaptive_Physical']);
+  });
+
+  test('a blank end date reads as empty', () => {
+    const roster = parseAdaptiveRoster([
+      rosterHeader,
+      ['Jane B. Smith', '1022461', '6/22/2021', '', 'TRUE', 'FALSE', 'FALSE', 'FALSE'],
+    ]);
+
+    expect(roster[0].endDate).toBe('');
   });
 
   test('locates columns by header text, so an inserted column does not shift the flags', () => {
@@ -141,10 +142,10 @@ describe('parseAdaptiveRoster', () => {
       ['Preferred email', ...rosterHeader],
       [
         'lifter@example.com',
-        'Brigitte Bieyro',
+        'Jane Smith',
         '1013597',
         '1/15/2020',
-        "Women's 77kg",
+        '12/31/2026',
         'FALSE',
         'FALSE',
         'TRUE',
@@ -152,16 +153,16 @@ describe('parseAdaptiveRoster', () => {
       ],
     ]);
 
-    expect(roster[0].name).toBe('Brigitte Bieyro');
+    expect(roster[0].name).toBe('Jane Smith');
     expect(roster[0].usawNumber).toBe('1013597');
-    expect(roster[0].weightClassName).toBe("Women's 77kg");
+    expect(roster[0].endDate).toBe('2026-12-31');
     expect(roster[0].categorySheetNames).toEqual(['Adaptive_Vision', 'Adaptive_Cognitive']);
   });
 
   test('skips the blank filler rows that follow the real entries', () => {
     const roster = parseAdaptiveRoster([
       rosterHeader,
-      ['Brigitte Bieyro', '1013597', '1/15/2020', "Women's 77kg", 'FALSE', 'FALSE', 'TRUE', 'TRUE'],
+      ['Jane Smith', '1013597', '1/15/2020', '', 'FALSE', 'FALSE', 'TRUE', 'TRUE'],
       ['', '', '', '', 'FALSE', 'FALSE', 'FALSE', 'FALSE'],
       ['', '', '', '', 'FALSE', 'FALSE', 'FALSE', 'FALSE'],
     ]);
@@ -174,7 +175,7 @@ describe('parseAdaptiveRecords', () => {
   test('indexes by age group, gender and lift, normalizing gendered masters labels', () => {
     const index = parseAdaptiveRecords([
       recordSheetHeader,
-      recordRow('W50', 'F', '69', '77', 'Snatch', '60', 'Someone Else'),
+      recordRow('W50', 'F', '69', '77', 'Snatch', '60', 'Jane B. Smith'),
     ]);
 
     expect(index['50_F_Snatch']).toEqual([
@@ -183,7 +184,7 @@ describe('parseAdaptiveRecords', () => {
         bodyWeightMax: 77,
         bodyWeightMaxIsOpen: false,
         weight: 60,
-        holder: 'Someone Else',
+        holder: 'Jane B. Smith',
         ageGroupLabel: 'W50',
       },
     ]);
@@ -243,56 +244,34 @@ describe('findWeightClass', () => {
 });
 
 describe('classSearchOrder', () => {
-  test('widens outwards from the chosen class, heavier then lighter', () => {
-    const order = classSearchOrder("Women's 61kg").map((weightClass) => weightClass.name);
+  test('starts at the heaviest classes, alternating men and women', () => {
+    const order = classSearchOrder().map((weightClass) => weightClass.name);
 
-    expect(order.slice(0, 8)).toEqual([
-      "Women's 61kg",
-      "Women's 69kg",
-      "Women's 57kg",
-      "Women's 77kg",
-      "Women's 53kg",
-      "Women's 86kg",
-      "Women's 49kg",
+    expect(order.slice(0, 4)).toEqual([
+      "Men's 110+kg",
       "Women's 86+kg",
+      "Men's 110kg",
+      "Women's 86kg",
     ]);
   });
 
-  test('keeps going in the one available direction at the ends of the range', () => {
-    expect(
-      classSearchOrder("Men's 60kg")
-        .slice(0, 3)
-        .map((weightClass) => weightClass.name)
-    ).toEqual(["Men's 60kg", "Men's 65kg", "Men's 70kg"]);
-    expect(
-      classSearchOrder("Men's 110+kg")
-        .slice(0, 3)
-        .map((weightClass) => weightClass.name)
-    ).toEqual(["Men's 110+kg", "Men's 110kg", "Men's 95kg"]);
+  test('ends at the lightest class of each gender', () => {
+    const order = classSearchOrder().map((weightClass) => weightClass.name);
+
+    expect(order.slice(-2)).toEqual(["Men's 60kg", "Women's 49kg"]);
   });
 
-  test("searches only the athlete's own gender, and nothing else", () => {
-    const order = classSearchOrder("Women's 61kg");
+  test('searches every adult class exactly once', () => {
+    const order = classSearchOrder();
 
-    // Keeping the search to the eight women's classes is the point — the men's classes and
-    // the youth sets are requests that could never match.
-    expect(order).toHaveLength(8);
-    expect(order.every((weightClass) => weightClass.gender === 'female')).toBe(true);
+    expect(order).toHaveLength(16);
+    expect(new Set(order).size).toBe(16);
   });
 
   test('never searches youth classes, since youth appear in the lightest adult class', () => {
     const youthNames = new Set(u17WeightClasses.map((weightClass) => weightClass.name));
 
-    expect(classSearchOrder("Women's 49kg").some((wc) => youthNames.has(wc.name))).toBe(false);
-    expect(classSearchOrder('Not A Real Class').some((wc) => youthNames.has(wc.name))).toBe(false);
-  });
-
-  test('falls back to every adult class when the roster names something unrecognized', () => {
-    const order = classSearchOrder('Not A Real Class');
-
-    expect(order).toHaveLength(16);
-    expect(order.some((weightClass) => weightClass.gender === 'male')).toBe(true);
-    expect(order.some((weightClass) => weightClass.gender === 'female')).toBe(true);
+    expect(classSearchOrder().some((wc) => youthNames.has(wc.name))).toBe(false);
   });
 });
 
@@ -327,7 +306,7 @@ describe('resolveLifter', () => {
   });
 
   const rankingRow = (membership: string, memberId: string, overrides = {}) => ({
-    name: 'Brigitte Bieyro',
+    name: 'Jane Smith',
     membership,
     gender: 'F',
     lifter_age: '36',
@@ -338,10 +317,10 @@ describe('resolveLifter', () => {
   });
 
   const rosterEntry = {
-    name: 'Brigitte Bieyro',
+    name: 'Jane Smith',
     usawNumber: '1013597',
     startDate: '2020-01-15',
-    weightClassName: "Women's 77kg",
+    endDate: '',
     categorySheetNames: [],
   };
 
@@ -359,7 +338,7 @@ describe('resolveLifter', () => {
     // A name search returns everyone matching the string — 'Fernandes' returns three
     // different lifters — so the membership number is what identifies the athlete.
     mockRankings([
-      rankingRow('9999999', '11111', { name: 'Brigitte Bieyroux' }),
+      rankingRow('9999999', '11111', { name: 'Jane Smith' }),
       rankingRow('1013597', '56984'),
     ]);
 
@@ -374,20 +353,26 @@ describe('resolveLifter', () => {
     const resolved = await resolveLifter(rosterEntry);
 
     expect(resolved?.birthYear).toBe(1990);
-    expect(resolved?.gender).toBe('F');
   });
 
-  test("tries the roster's weight class first", async () => {
+  test("searches Men's 110+kg first", async () => {
     const fetchMock = mockRankings([rankingRow('1013597', '56984')]);
 
     await resolveLifter(rosterEntry);
 
-    // Women's 77kg is sport80Id 947.
+    // Men's 110+kg is sport80Id 941.
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(JSON.parse(fetchMock.mock.calls[0][1].body).filters.weight_class).toBe(947);
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).filters.weight_class).toBe(941);
   });
 
-  test('falls back to sweeping other classes when the roster class is stale', async () => {
+  test('takes the gender from the class the athlete is found in', async () => {
+    // The second class searched is Women's 86+kg.
+    mockRankings([], [rankingRow('1013597', '56984', { gender: undefined })]);
+
+    expect((await resolveLifter(rosterEntry))?.gender).toBe('F');
+  });
+
+  test('keeps sweeping down through the classes until the athlete is found', async () => {
     const fetchMock = mockRankings([], [], [rankingRow('1013597', '56984')]);
 
     const resolved = await resolveLifter(rosterEntry);
@@ -405,15 +390,55 @@ describe('resolveLifter', () => {
   test('paces requests to no more than ten a second', async () => {
     mockRankings();
 
-    // A full sweep: eight classes, so eight requests.
+    // A full sweep: sixteen classes, so sixteen requests.
     await resolveLifter(rosterEntry);
 
     // The stubbed clock never advances, so each successive request has to wait a further
     // 100ms for its slot. A gap of exactly 100ms between consecutive slots is the ceiling
     // of ten per second.
-    expect(requestedWaits.length).toBeGreaterThanOrEqual(7);
+    expect(requestedWaits.length).toBeGreaterThanOrEqual(15);
     const gaps = requestedWaits.slice(1).map((wait, index) => wait - requestedWaits[index]);
     expect(gaps.every((gap) => gap === 100)).toBe(true);
+  });
+});
+
+describe('fetchLifterResults', () => {
+  const originalFetch = global.fetch;
+  const originalSetTimeout = global.setTimeout;
+
+  beforeEach(() => {
+    // Let the request pacing resolve instantly.
+    global.setTimeout = ((callback: () => void) => {
+      callback();
+      return 0;
+    }) as unknown as typeof global.setTimeout;
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        data: [
+          meetResult({ date: '2026-08-09' }),
+          meetResult({ date: '2026-09-01' }),
+          meetResult({ date: '2026-09-02' }),
+        ],
+      }),
+    }) as unknown as typeof fetch;
+  });
+
+  afterEach(() => {
+    global.setTimeout = originalSetTimeout;
+    global.fetch = originalFetch;
+  });
+
+  test('drops results after the end date and keeps one on it', async () => {
+    const results = await fetchLifterResults('56984', '2020-01-15', '2026-09-01');
+
+    expect(results.map((result) => result.date)).toEqual(['2026-08-09', '2026-09-01']);
+  });
+
+  test('keeps every result when there is no end date', async () => {
+    const results = await fetchLifterResults('56984', '2020-01-15', '');
+
+    expect(results).toHaveLength(3);
   });
 });
 
@@ -427,7 +452,7 @@ describe('collectRecordBreakers', () => {
     ]),
     Adaptive_Vision: parseAdaptiveRecords([
       recordSheetHeader,
-      recordRow('Open', 'F', '69', '77', 'Snatch', '65', 'Prior Holder'),
+      recordRow('Open', 'F', '69', '77', 'Snatch', '65', 'Jane B. Smith'),
     ]),
     Adaptive_Cognitive: parseAdaptiveRecords([
       recordSheetHeader,
@@ -458,7 +483,7 @@ describe('collectRecordBreakers', () => {
     expect(visionSnatch).toMatchObject({
       weight: 70,
       previousRecord: 65,
-      previousHolder: 'Prior Holder',
+      previousHolder: 'Jane B. Smith',
       weightClassName: "Women's 77kg",
       ageGroupLabel: 'Open',
       usawNumber: '1013597',
@@ -534,7 +559,7 @@ describe('generateCsv', () => {
         {
           Adaptive_Vision: parseAdaptiveRecords([
             recordSheetHeader,
-            recordRow('Open', 'F', '69', '77', 'Snatch', '65', 'Prior Holder'),
+            recordRow('Open', 'F', '69', '77', 'Snatch', '65', 'Jane B. Smith'),
           ]),
         }
       )
@@ -545,7 +570,7 @@ describe('generateCsv', () => {
       'AdaptiveCategory,Weight Class,Age Group,Bodyweight,Lift,Record,Lifter Name,Date,Event Name,USAW Number,Previous Record,Previous Holder'
     );
     expect(lines[1]).toBe(
-      "Adaptive_Vision,Women's 77kg,Open,72.5,Snatch,70,Brigitte Bieyro,2026-08-09,Money In The Bank 2026,1013597,65,Prior Holder"
+      "Adaptive_Vision,Women's 77kg,Open,72.5,Snatch,70,Jane Smith,2026-08-09,Money In The Bank 2026,1013597,65,Jane B. Smith"
     );
   });
 
@@ -577,10 +602,10 @@ describe('generateCsv', () => {
       [],
       [
         {
-          name: 'Missing Person',
+          name: 'Jane B. Smith',
           usawNumber: '9999999',
           startDate: '2024-01-01',
-          weightClassName: "Women's 61kg",
+          endDate: '',
           categorySheetNames: [],
         },
       ]
@@ -589,9 +614,9 @@ describe('generateCsv', () => {
 
     expect(lines[1]).toBe('');
     expect(lines[2]).toBe('Errors');
-    expect(lines[3]).toBe('Lifter Name,USAW Number,Weight Class,Error');
+    expect(lines[3]).toBe('Lifter Name,USAW Number,Error');
     expect(lines[4]).toBe(
-      "Missing Person,9999999,Women's 61kg,Not found in the USAW rankings. Check the name and USAW number on the roster sheet."
+      'Jane B. Smith,9999999,Not found in the USAW rankings. Check the name and USAW number on the roster sheet.'
     );
   });
 
@@ -605,10 +630,10 @@ describe('generateCsv', () => {
       }),
       [
         {
-          name: 'Missing Person',
+          name: 'Jane B. Smith',
           usawNumber: '9999999',
           startDate: '2024-01-01',
-          weightClassName: "Women's 61kg",
+          endDate: '',
           categorySheetNames: [],
         },
       ]

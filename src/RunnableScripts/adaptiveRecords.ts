@@ -29,9 +29,14 @@ import { AgeGroup, LifterRankingData, MeetRecord, WeightClass } from '../Utils/t
 const liftLabels = ['Snatch', 'Clean & Jerk', 'Total'] as const;
 type LiftLabel = (typeof liftLabels)[number];
 
-// Adaptive_All applies to everyone on the roster; the category sheets apply only to the
-// athletes flagged for them. An athlete may be flagged for several.
-const allCategorySheetNames = [adaptiveAllRecordsSheetName, ...adptiveCategoryRecordsSheetNames];
+// The combined tab, when the config names one, applies to everyone on the roster; the category
+// sheets apply only to the athletes flagged for them. An athlete may be flagged for several.
+const combinedSheetNames = (): string[] =>
+  adaptiveAllRecordsSheetName === undefined ? [] : [adaptiveAllRecordsSheetName];
+const allCategorySheetNames = (): string[] => [
+  ...combinedSheetNames(),
+  ...adptiveCategoryRecordsSheetNames,
+];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -378,7 +383,7 @@ export function collectRecordBreakers(
       const matchedClass = findWeightClass(ageGroup, bodyweight, lifter.gender);
       if (!matchedClass) continue;
 
-      for (const category of [adaptiveAllRecordsSheetName, ...lifter.categorySheetNames]) {
+      for (const category of [...combinedSheetNames(), ...lifter.categorySheetNames]) {
         const index = recordIndex[category];
         if (!index) continue;
 
@@ -408,7 +413,7 @@ export function collectRecordBreakers(
             usawNumber: lifter.usawNumber,
             previousRecord: record.weight,
             previousHolder: record.holder,
-            categoryIndex: allCategorySheetNames.indexOf(category),
+            categoryIndex: allCategorySheetNames().indexOf(category),
             ageGroupIndex: ageGroups.indexOf(ageGroup),
             weightClassIndex: matchedClass.index,
             liftIndex: liftLabels.indexOf(lift),
@@ -491,12 +496,16 @@ export function generateCsv(
 // ─── Exported entry point ─────────────────────────────────────────────────────
 
 export async function runAdaptiveRecords(): Promise<string> {
+  // The Scripts page lists this script only when adaptiveRecordsScriptAvailable, which needs both.
+  if (adaptiveLiftersListSheetId === undefined || adaptiveLiftersListSheetName === undefined) {
+    throw new Error('wsoConfig.json names no adaptive athlete roster sheet');
+  }
   const roster = parseAdaptiveRoster(
     await fetchSheet(adaptiveLiftersListSheetId, adaptiveLiftersListSheetName)
   );
 
   const recordIndex: AdaptiveRecordIndex = {};
-  for (const sheetName of allCategorySheetNames) {
+  for (const sheetName of allCategorySheetNames()) {
     recordIndex[sheetName] = parseAdaptiveRecords(
       await fetchSheet(currentRecordsSheetId, sheetName)
     );

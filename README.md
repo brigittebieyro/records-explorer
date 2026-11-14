@@ -120,16 +120,17 @@ The app reads recognized records from a Google Sheet. Create a sheet with the ex
 | `currentRecordsSheetId` | The long string in the sheet's URL: `https://docs.google.com/spreadsheets/d/<SHEET_ID>/edit`. The public spreadsheet link on the site is built from it. |
 | `currentRecordsSheetName` | The tab holding current records. |
 | `priorRecordsSheetNames` | History tabs in the same spreadsheet, newest first. Use `[]` if you have none. |
-| `adaptiveLiftersListSheetId`, `adaptiveLiftersListSheetName` | The adaptive athlete roster sheet and tab. |
-
-The adaptive record tabs (`Adaptive_All`, `Adaptive_Physical`, ...) and the `STANDARD` placeholder are part of the sheet template and stay in `RoutesAndSettings.ts`.
+| `adaptiveLiftersListSheetId`, `adaptiveLiftersListSheetName` | Optional. The adaptive athlete roster sheet and tab, read by the adaptive records script. |
+| `standardKey` | The lifter-column text that marks a record standard nobody has reached yet, e.g. `"STANDARD"`. |
+| `adaptiveAllRecordsSheetName` | Optional. The tab holding the combined adaptive records, e.g. `"Adaptive_All"`. |
+| `adaptiveCategoryRecordsSheetNames` | Optional. The tab for each adaptive category you track, keyed `physical`, `hearing`, `vision`, `cognitive`. With none, there is no Adaptive Records page or menu item. |
 
 ### 3. Adaptive records
 
 | Field | What it is |
 | --- | --- |
-| `showAdaptiveRecordsInMenu` | Whether the header menu links to the Adaptive WSO Records page. |
-| `adaptiveOptInFormUrl` | The form adaptive athletes use to opt in. |
+| `showAdaptiveRecordsInMenu` | Whether the header menu links to the Adaptive WSO Records page. Has no effect without adaptive category tabs. |
+| `adaptiveOptInFormUrl` | Optional. The form adaptive athletes use to opt in. |
 
 ### 4. Certificates
 

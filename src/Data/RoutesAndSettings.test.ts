@@ -197,18 +197,102 @@ describe('RoutesAndSettings (user-based)', () => {
     expect(certificateTitle).toBe(`${wsoDisplayName} WSO`);
   });
 
-  describe('WSO names', () => {
-    /** Loads this module against `config` in place of the shipped wsoConfig.json. */
-    const loadWithConfig = (config: object): typeof import('./RoutesAndSettings') => {
-      let settings: typeof import('./RoutesAndSettings') | undefined;
-      jest.isolateModules(() => {
-        jest.doMock('./wsoConfig.json', () => config);
-        settings = require('./RoutesAndSettings');
-      });
-      jest.dontMock('./wsoConfig.json');
-      return settings!;
-    };
+  /** Loads this module against `config` in place of the shipped wsoConfig.json. */
+  const loadWithConfig = (config: object): typeof import('./RoutesAndSettings') => {
+    let settings: typeof import('./RoutesAndSettings') | undefined;
+    jest.isolateModules(() => {
+      jest.doMock('./wsoConfig.json', () => config);
+      settings = require('./RoutesAndSettings');
+    });
+    jest.dontMock('./wsoConfig.json');
+    if (!settings) throw new Error('RoutesAndSettings did not load');
+    return settings;
+  };
 
+  describe('optional adaptive settings', () => {
+    const {
+      adaptiveAllRecordsSheetName: _all,
+      adaptiveCategoryRecordsSheetNames: _categories,
+      adaptiveLiftersListSheetId: _rosterId,
+      adaptiveLiftersListSheetName: _rosterName,
+      adaptiveOptInFormUrl: _form,
+      ...configWithoutAdaptive
+    } = wsoConfig;
+
+    test('a config with no adaptive settings passes the schema check', () => {
+      expect(findInvalidConfigFields(configWithoutAdaptive, configSchema)).toEqual([]);
+    });
+
+    test('with no adaptive settings, the page, menu item and script are all unavailable', () => {
+      const settings = loadWithConfig({
+        ...configWithoutAdaptive,
+        showAdaptiveRecordsInMenu: true,
+      });
+      expect(settings.adaptiveAllRecordsSheetName).toBeUndefined();
+      expect(settings.adaptiveCategories).toEqual([]);
+      expect(settings.adptiveCategoryRecordsSheetNames).toEqual([]);
+      expect(settings.adaptiveLiftersListSheetId).toBeUndefined();
+      expect(settings.adaptiveLiftersListSheetName).toBeUndefined();
+      expect(settings.adaptiveOptInFormUrl).toBeUndefined();
+      expect(settings.adaptiveRecordsPageAvailable).toBe(false);
+      expect(settings.showAdaptiveRecordsInMenu).toBe(false);
+      expect(settings.adaptiveRecordsScriptAvailable).toBe(false);
+    });
+
+    test('only the categories with a tab are listed, in category order, and a blank tab counts as none', () => {
+      const settings = loadWithConfig({
+        ...configWithoutAdaptive,
+        adaptiveCategoryRecordsSheetNames: { cognitive: 'Cog', hearing: '  ', vision: 'Vis' },
+      });
+      expect(settings.adaptiveCategories.map((category) => category.id)).toEqual(['Vis', 'Cog']);
+      expect(settings.adaptiveCategories[0].displayName).toBe('Visual Impairment');
+      expect(settings.adptiveCategoryRecordsSheetNames).toEqual(['Vis', 'Cog']);
+      expect(settings.adaptiveRecordsPageAvailable).toBe(true);
+    });
+
+    test('the menu item needs both a category tab and showAdaptiveRecordsInMenu', () => {
+      const withCategory = {
+        ...configWithoutAdaptive,
+        adaptiveCategoryRecordsSheetNames: { physical: 'Phys' },
+      };
+      expect(
+        loadWithConfig({ ...withCategory, showAdaptiveRecordsInMenu: true })
+          .showAdaptiveRecordsInMenu
+      ).toBe(true);
+      expect(
+        loadWithConfig({ ...withCategory, showAdaptiveRecordsInMenu: false })
+          .showAdaptiveRecordsInMenu
+      ).toBe(false);
+      expect(
+        loadWithConfig({ ...configWithoutAdaptive, adaptiveAllRecordsSheetName: 'All' })
+          .showAdaptiveRecordsInMenu
+      ).toBe(false);
+    });
+
+    test('the script needs the roster sheet and at least one adaptive records tab', () => {
+      const roster = { adaptiveLiftersListSheetId: 'id', adaptiveLiftersListSheetName: 'tab' };
+      expect(
+        loadWithConfig({ ...configWithoutAdaptive, ...roster }).adaptiveRecordsScriptAvailable
+      ).toBe(false);
+      expect(
+        loadWithConfig({
+          ...configWithoutAdaptive,
+          adaptiveAllRecordsSheetName: 'All',
+          adaptiveLiftersListSheetId: 'id',
+        }).adaptiveRecordsScriptAvailable
+      ).toBe(false);
+
+      const combinedOnly = loadWithConfig({
+        ...configWithoutAdaptive,
+        ...roster,
+        adaptiveAllRecordsSheetName: 'All',
+      });
+      expect(combinedOnly.adaptiveRecordsScriptAvailable).toBe(true);
+      expect(combinedOnly.adaptiveRecordsPageAvailable).toBe(false);
+    });
+  });
+
+  describe('WSO names', () => {
     test('the display name is the official name when the config has no wsoDisplayName', () => {
       const { wsoDisplayName: displayName, wsoOfficialName: officialName } = loadWithConfig({
         ...wsoConfig,

@@ -12,6 +12,14 @@ jest.mock('./LocalMeets/LocalMeets', () => () => <div data-testid="local-meets-p
 
 jest.mock('./Scripts/Scripts', () => () => <div data-testid="scripts-page" />);
 
+let mockAdaptiveRecordsPageAvailable = true;
+jest.mock('./Data/RoutesAndSettings', () => ({
+  ...jest.requireActual('./Data/RoutesAndSettings'),
+  get adaptiveRecordsPageAvailable() {
+    return mockAdaptiveRecordsPageAvailable;
+  },
+}));
+
 const renderAt = (path: string) => {
   window.history.pushState({}, '', path);
   return render(<App />);
@@ -28,6 +36,7 @@ describe('App routing (user-based)', () => {
   afterEach(() => {
     jest.restoreAllMocks();
     window.history.pushState({}, '', '/');
+    mockAdaptiveRecordsPageAvailable = true;
   });
 
   test('A-03: the root route renders the records viewer with the header', async () => {
@@ -51,6 +60,16 @@ describe('App routing (user-based)', () => {
       expect(screen.getByText(/Keeping track of local adaptive athletes/)).toBeInTheDocument();
     });
     expect(screen.queryByText('Loading current records…')).toBeNull();
+  });
+
+  test('A-03: with no adaptive category tabs configured, /adaptive is not served', () => {
+    mockAdaptiveRecordsPageAvailable = false;
+    renderAt('/adaptive');
+
+    expect(screen.getByText(HEADER_TEXT)).toBeInTheDocument();
+    expect(screen.queryByLabelText('Category')).toBeNull();
+    expect(screen.queryByText(/Keeping track of local adaptive athletes/)).toBeNull();
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 
   test('A-03: /info renders the About page with the header', () => {

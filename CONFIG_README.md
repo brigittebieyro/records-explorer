@@ -36,7 +36,11 @@ JSON doesn't allow comments or trailing commas.
 
 ## Quick reference
 
-Every field is required except `wsoDisplayName` and `wsoBoundary`.
+Most itemps are required.
+Optional items:
+`wsoDisplayName`,
+`wsoBoundary`
+ the adaptive records settings OTHER than `showAdaptiveRecordsInMenu`.
 
 | Field | Type | Required | Section |
 | --- | --- | --- | --- |
@@ -50,9 +54,12 @@ Every field is required except `wsoDisplayName` and `wsoBoundary`.
 | `currentRecordsSheetId` | string | yes | [Records Google Sheet](#records-google-sheet) |
 | `currentRecordsSheetName` | string | yes | [Records Google Sheet](#records-google-sheet) |
 | `priorRecordsSheetNames` | list of strings | yes (may be `[]`) | [Records Google Sheet](#records-google-sheet) |
-| `adaptiveLiftersListSheetId` | string | yes | [Adaptive records](#adaptive-records) |
-| `adaptiveLiftersListSheetName` | string | yes | [Adaptive records](#adaptive-records) |
-| `adaptiveOptInFormUrl` | URL | yes | [Adaptive records](#adaptive-records) |
+| `standardKey` | string | yes | [Records Google Sheet](#records-google-sheet) |
+| `adaptiveAllRecordsSheetName` | string | **no** | [Adaptive records](#adaptive-records) |
+| `adaptiveCategoryRecordsSheetNames` | object of up to 4 strings | **no** | [Adaptive records](#adaptive-records) |
+| `adaptiveLiftersListSheetId` | string | **no** | [Adaptive records](#adaptive-records) |
+| `adaptiveLiftersListSheetName` | string | **no** | [Adaptive records](#adaptive-records) |
+| `adaptiveOptInFormUrl` | URL | **no** | [Adaptive records](#adaptive-records) |
 | `showAdaptiveRecordsInMenu` | boolean | yes | [Adaptive records](#adaptive-records) |
 | `includeClubNameOnCertificate` | boolean | yes | [Certificates](#certificates) |
 | `certificateWebsiteText` | string | yes (may be `""`) | [Certificates](#certificates) |
@@ -152,32 +159,68 @@ Tabs in the same spreadsheet that hold records from earlier periods, such as bef
 "priorRecordsSheetNames": ["Pre-Aug2026", "Pre-June2025", "Pre-2018"]
 ```
 
-The adaptive record tab names (`Adaptive_All`, `Adaptive_Physical`, …) and the `STANDARD` placeholder used for unclaimed records come from the sheet template, so they're set in `RoutesAndSettings.ts`, not here.
+### `standardKey` (string)
+The text in a record's lifter column that marks a record standard: a mark your WSO has set that nobody has reached yet. The site shows these as standards rather than record holders, and doesn't offer a certificate for them. It must match the sheet exactly, including capitals.
+
+```json
+"standardKey": "STANDARD"
+```
 
 ---
 
 ## Adaptive records
 
-### `adaptiveLiftersListSheetId` (string)
+Adaptive records are optional. Every setting in this section except `showAdaptiveRecordsInMenu` can be left out, and a blank string (`""`) counts as left out. What's available depends on which settings are present:
+
+| You set | What you get |
+| --- | --- |
+| At least one tab in `adaptiveCategoryRecordsSheetNames` | The Adaptive Records page at `/adaptive`, listing those categories, and its menu item if `showAdaptiveRecordsInMenu` is `true`. |
+| Both `adaptiveLiftersListSheetId` and `adaptiveLiftersListSheetName`, plus `adaptiveAllRecordsSheetName` or at least one category tab | The "Fetch Adaptive Record Updates" script on `/scripts`. |
+| None of them | No adaptive page, menu item or script. `showAdaptiveRecordsInMenu` is still required, but has no effect. |
+
+### `adaptiveLiftersListSheetId` (string, optional)
 The id of the spreadsheet that holds your adaptive athletes and their categories. It's taken from the URL the same way as [`currentRecordsSheetId`](#currentrecordssheetid-string), and can be the same spreadsheet or a different one.
 
-### `adaptiveLiftersListSheetName` (string)
-The tab in that spreadsheet that lists the athletes.
+### `adaptiveLiftersListSheetName` (string, optional)
+The tab in that spreadsheet that lists the athletes. The adaptive records script needs both this and `adaptiveLiftersListSheetId`.
 
 ```json
 "adaptiveLiftersListSheetId": "1hO6VHntKEujjtx8P0kIMJQ_vM46INg2D_jHei_HZUW0",
 "adaptiveLiftersListSheetName": "IDsAndCategories"
 ```
 
-### `adaptiveOptInFormUrl` (URL)
-The form adaptive athletes fill in to opt in. It's linked from the Adaptive Records page.
+The athletes tab marks each athlete's categories with TRUE/FALSE columns: one for each category you set a tab for, in the order physical, hearing, vision, cognitive.
+
+### `adaptiveAllRecordsSheetName` (string, optional)
+The tab, in the [current records spreadsheet](#currentrecordssheetid-string), that holds the combined adaptive records across every category. The adaptive records script checks every athlete on the roster against it. The Adaptive Records page doesn't list it.
+
+```json
+"adaptiveAllRecordsSheetName": "Adaptive_All"
+```
+
+### `adaptiveCategoryRecordsSheetNames` (object of up to 4 strings, optional)
+The tab, in the same spreadsheet, for each adaptive category you track. The keys are `physical`, `hearing`, `vision` and `cognitive`; leave out any category you don't track, and it won't appear on the site. Without any category tabs there is no Adaptive Records page.
+
+```json
+"adaptiveCategoryRecordsSheetNames": {
+  "physical": "Adaptive_Physical",
+  "hearing": "Adaptive_Hearing",
+  "vision": "Adaptive_Vision",
+  "cognitive": "Adaptive_Cognitive"
+}
+```
+
+The category names shown on the site and on certificates are wording, not tab names, so they're set in `RoutesAndSettings.ts`.
+
+### `adaptiveOptInFormUrl` (URL, optional)
+The form adaptive athletes fill in to opt in. When it's set, the Adaptive Records page links to it; when it's left out, the page leaves out the opt-in paragraph.
 
 ```json
 "adaptiveOptInFormUrl": "https://forms.gle/2Y7qKS7C2pa3d4jLA"
 ```
 
 ### `showAdaptiveRecordsInMenu` (boolean)
-Whether the header menu links to the Adaptive WSO Records page. Set to `false` to hide the menu item. The page still works for anyone who has its address.
+Whether the header menu links to the Adaptive WSO Records page. Set to `false` to hide the menu item; the page still works for anyone who has its address. With no category tabs configured there is no page, so there's no menu item even when this is `true`.
 
 ```json
 "showAdaptiveRecordsInMenu": true

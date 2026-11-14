@@ -14,8 +14,9 @@ import {
 import { AllCurrentRecordsEntry } from '../Utils/types';
 
 // Written as JSX rather than a string of markup: React escapes strings, so tags in one would
-// show up on the page as literal text. The standards figure is still a placeholder.
-const adaptiveDescription = (
+// show up on the page as literal text. The standards figure is still a placeholder. Built on
+// render rather than at import, so it reads the settings as they are when the page is shown.
+const adaptiveDescription = () => (
   <>
     <p>
       Keeping track of local adaptive athletes' accomplishments can be a bit tricky. The WSO has no
@@ -24,22 +25,24 @@ const adaptiveDescription = (
       have both role models and reasonable standards to work towards. Standards have been set at
       PLACEHOLDER FIX ME to start with.
     </p>
-    <p>
-      <strong>
-        Use{' '}
-        <a
-          href={adaptiveOptInFormUrl}
-          className="common-text-link"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          this form
-        </a>{' '}
-        to opt-in to having your results tracked as an adaptive athlete
-      </strong>
-      . You will continue to be ranked in our regular automatic record keeping as well, this does
-      not bar you from holding records in the open category or placing in open competition.
-    </p>
+    {adaptiveOptInFormUrl && (
+      <p>
+        <strong>
+          Use{' '}
+          <a
+            href={adaptiveOptInFormUrl}
+            className="common-text-link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            this form
+          </a>{' '}
+          to opt-in to having your results tracked as an adaptive athlete
+        </strong>
+        . You will continue to be ranked in our regular automatic record keeping as well, this does
+        not bar you from holding records in the open category or placing in open competition.
+      </p>
+    )}
     <p>
       We are tracking adaptive records per-category. Athletes who USAW has recognized as adaptive
       can qualify for national events with 50% of the open qualifying total for their weight class
@@ -68,12 +71,13 @@ function AdaptiveRecords() {
   const [sheetsByName, setSheetsByName] = useState<Record<string, string[][]>>({});
   const [status, setStatus] = useState<'inprogress' | 'complete' | 'error'>('inprogress');
 
+  // With no category applied and no combined tab configured, there is nothing to fetch.
   const activeSheetName = appliedCategory || adaptiveAllRecordsSheetName;
   const activeCategory = adaptiveCategories.find((category) => category.id === appliedCategory);
-  const activeRows = sheetsByName[activeSheetName];
+  const activeRows = activeSheetName ? sheetsByName[activeSheetName] : undefined;
 
   useEffect(() => {
-    if (activeRows) {
+    if (activeRows || !activeSheetName) {
       setStatus('complete');
       return;
     }
@@ -160,7 +164,7 @@ function AdaptiveRecords() {
           // The certificate is looked up in whichever tab is on display, so the same athlete
           // printed from the combined view and from their category view is read from different
           // tabs -- by design, it matches what the user was actually looking at.
-          certificateSheet={activeSheetName}
+          certificateSheet={activeCategory.id}
           adaptiveCategory={
             activeCategory ? activeCategory.certificateDisplayKey : adaptiveAllCertificateDisplayKey
           }
@@ -169,13 +173,13 @@ function AdaptiveRecords() {
               ? `${activeCategory.displayName} Record Holders`
               : 'All Adaptive Record Holders'
           }
-          description={adaptiveDescription}
+          description={adaptiveDescription()}
           emptyContent="No adaptive records have been set yet."
         />
       )}
       {status === 'complete' && !activeCategory && (
         <div className="common-text-header record-viewer-fine-print all-records-fine-print">
-          {adaptiveDescription}
+          {adaptiveDescription()}
         </div>
       )}
     </div>

@@ -14,6 +14,23 @@ import { u17WeightClasses } from '../Data/youthWeightClasses';
 import { getAgeGroup } from '../Utils/Utils';
 import { AgeGroup, MeetRecord } from '../Utils/types';
 
+// undefined means "as configured"; null stands for a combined tab the config leaves out.
+let mockAllRecordsSheetName: string | null | undefined;
+jest.mock('../Data/RoutesAndSettings', () => {
+  const actual = jest.requireActual('../Data/RoutesAndSettings');
+  return {
+    ...actual,
+    get adaptiveAllRecordsSheetName() {
+      return mockAllRecordsSheetName === undefined
+        ? actual.adaptiveAllRecordsSheetName
+        : (mockAllRecordsSheetName ?? undefined);
+    },
+  };
+});
+afterEach(() => {
+  mockAllRecordsSheetName = undefined;
+});
+
 // The eslint config bans non-null assertions, and every id used here is a real age group.
 const ageGroupOrThrow = (id: string): AgeGroup => {
   const ageGroup = getAgeGroup(id);
@@ -474,6 +491,17 @@ describe('collectRecordBreakers', () => {
     expect(snatchCategories).toEqual(['Adaptive_All', 'Adaptive_Cognitive', 'Adaptive_Vision']);
     // Not flagged for Physical, so it never appears.
     expect(breakers.some((breaker) => breaker.category === 'Adaptive_Physical')).toBe(false);
+  });
+
+  test('with no combined tab configured, emits rows only in the flagged categories', () => {
+    mockAllRecordsSheetName = null;
+    const breakers = collectRecordBreakers(resolvedLifter, [meetResult()], recordIndex);
+    const snatchCategories = breakers
+      .filter((breaker) => breaker.lift === 'Snatch')
+      .map((breaker) => breaker.category)
+      .sort();
+
+    expect(snatchCategories).toEqual(['Adaptive_Cognitive', 'Adaptive_Vision']);
   });
 
   test('carries the beaten record and its holder onto the row', () => {

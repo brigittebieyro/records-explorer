@@ -35,9 +35,17 @@ export const configSchema: ConfigSchema = {
   currentRecordsSheetId: 'string',
   currentRecordsSheetName: 'string',
   priorRecordsSheetNames: 'string[]',
-  adaptiveLiftersListSheetId: 'string',
-  adaptiveLiftersListSheetName: 'string',
-  adaptiveOptInFormUrl: 'WebUrl',
+  standardKey: 'string',
+  'adaptiveAllRecordsSheetName?': 'string',
+  'adaptiveCategoryRecordsSheetNames?': {
+    'physical?': 'string',
+    'hearing?': 'string',
+    'vision?': 'string',
+    'cognitive?': 'string',
+  },
+  'adaptiveLiftersListSheetId?': 'string',
+  'adaptiveLiftersListSheetName?': 'string',
+  'adaptiveOptInFormUrl?': 'WebUrl',
   showAdaptiveRecordsInMenu: 'boolean',
   localScheduleUrl: 'WebUrl',
   localHomeUrl: 'WebUrl',
@@ -228,32 +236,55 @@ const _googleKey =
 export const getSheetRoute = (sheetId: string, sheetName: string): string => {
   return `${_sheetsBaseUrl}/${sheetId}/values/${sheetName}?key=${_googleKey}`;
 };
-// for current records. California North Central's sheets, for switching wsoConfig.json between them:
+
+// Debug overrides for current records. These are norcals' test and real sheets
+// You can add or swap in your own.
 //   1EJgLNWI4v5KZo780RIZ6zSsaDnOinuhJHQOvZoDL8BM -- test sheet.
 //   1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ -- production data! Link is public! DO NOT alter data for testing.
 export const currentRecordsSheetId: string = wsoConfig.currentRecordsSheetId;
 export const currentRecordsSheetName: string = wsoConfig.currentRecordsSheetName;
 /** History tabs in the same spreadsheet, newest first. */
 export const priorRecordsSheetNames: string[] = wsoConfig.priorRecordsSheetNames;
-export const adaptiveAllRecordsSheetName = 'Adaptive_All';
+// ----------------------------------------------------------------------------------------------------------------
+// Adaptive records settings, all optional. Read through a wider type: the JSON import's inferred type has
+// no field the file leaves out, and requires every field the file has.
+// ----------------------------------------------------------------------------------------------------------------
+//
+type AdaptiveCategoryKey = 'physical' | 'hearing' | 'vision' | 'cognitive';
+interface AdaptiveConfig {
+  adaptiveAllRecordsSheetName?: string;
+  adaptiveCategoryRecordsSheetNames?: Partial<Record<AdaptiveCategoryKey, string>>;
+  adaptiveLiftersListSheetId?: string;
+  adaptiveLiftersListSheetName?: string;
+  adaptiveOptInFormUrl?: string;
+}
+const _adaptiveConfig = wsoConfig as AdaptiveConfig;
+/** The value, or undefined when the config leaves it out or blank. */
+const _configured = (value: string | undefined): string | undefined =>
+  value !== undefined && value.trim() !== '' ? value : undefined;
+
+/**
+ * The tab in the current records spreadsheet holding the combined adaptive records, or undefined
+ * when the WSO has none.
+ */
+export const adaptiveAllRecordsSheetName: string | undefined = _configured(
+  _adaptiveConfig.adaptiveAllRecordsSheetName
+);
 // The lifter column holds this sentinel when the WSO has set a record standard nobody has
 // reached yet. It is sheet data, so it must match the sheet exactly.
-export const standardKey = 'STANDARD';
-export const adptiveCategoryRecordsSheetNames = [
-  'Adaptive_Physical',
-  'Adaptive_Hearing',
-  'Adaptive_Vision',
-  'Adaptive_Cognitive',
-];
+export const standardKey: string = wsoConfig.standardKey;
 export const publicSpreadsheetLink = `https://docs.google.com/spreadsheets/d/${currentRecordsSheetId}`;
-export const adaptiveLiftersListSheetId: string = wsoConfig.adaptiveLiftersListSheetId;
-export const adaptiveLiftersListSheetName: string = wsoConfig.adaptiveLiftersListSheetName;
-export const adaptiveOptInFormUrl: WebUrl = wsoConfig.adaptiveOptInFormUrl as WebUrl;
-/**
- * Whether the header menu links to the Adaptive WSO Records page. The /adaptive route is served
- * either way; this only controls the menu item.
- */
-export const showAdaptiveRecordsInMenu: boolean = wsoConfig.showAdaptiveRecordsInMenu;
+/** The adaptive athlete roster's spreadsheet and tab, or undefined when the WSO has none. */
+export const adaptiveLiftersListSheetId: string | undefined = _configured(
+  _adaptiveConfig.adaptiveLiftersListSheetId
+);
+export const adaptiveLiftersListSheetName: string | undefined = _configured(
+  _adaptiveConfig.adaptiveLiftersListSheetName
+);
+/** Linked from the Adaptive Records page when set. */
+export const adaptiveOptInFormUrl: WebUrl | undefined = _configured(
+  _adaptiveConfig.adaptiveOptInFormUrl
+) as WebUrl | undefined;
 
 // ----------------------------------------------------------------------------------------------------------------
 // Adaptive Category Names
@@ -261,28 +292,68 @@ export const showAdaptiveRecordsInMenu: boolean = wsoConfig.showAdaptiveRecordsI
 // `displayName` is the on-screen wording; `certificateDisplayKey` is how the category reads
 // mid-sentence on a printed certificate, where the longer screen wording is a mouthful.
 // Both are sent to the server as part of the composed certificate wording; the server keeps no copy.
-export const adaptiveCategories = [
-  {
-    id: 'Adaptive_Physical',
-    displayName: 'Physical Disability',
-    certificateDisplayKey: 'Adaptive (Physical Disability)',
-  },
-  {
-    id: 'Adaptive_Hearing',
-    displayName: 'Deaf, Deafened, or Hard of Hearing',
-    certificateDisplayKey: 'Adaptive (Deaf and Hard of Hearing)',
-  },
-  {
-    id: 'Adaptive_Vision',
-    displayName: 'Visual Impairment',
-    certificateDisplayKey: 'Adaptive (Visual Impairment)',
-  },
-  {
-    id: 'Adaptive_Cognitive',
-    displayName: 'Intellectual Impairment',
-    certificateDisplayKey: 'Adaptive (Intellectual Impairment)',
-  },
-];
+// `id` is the category's records tab, named in wsoConfig.json. A category whose tab the config
+// leaves out is not listed. The array order is the order of the category flag columns in the
+// adaptive roster sheet.
+export interface AdaptiveCategory {
+  id: string;
+  displayName: string;
+  certificateDisplayKey: string;
+}
+const _adaptiveCategoryWording: Array<{ key: AdaptiveCategoryKey } & Omit<AdaptiveCategory, 'id'>> =
+  [
+    {
+      key: 'physical',
+      displayName: 'Physical Disability',
+      certificateDisplayKey: 'Adaptive (Physical Disability)',
+    },
+    {
+      key: 'hearing',
+      displayName: 'Deaf, Deafened, or Hard of Hearing',
+      certificateDisplayKey: 'Adaptive (Deaf and Hard of Hearing)',
+    },
+    {
+      key: 'vision',
+      displayName: 'Visual Impairment',
+      certificateDisplayKey: 'Adaptive (Visual Impairment)',
+    },
+    {
+      key: 'cognitive',
+      displayName: 'Intellectual Impairment',
+      certificateDisplayKey: 'Adaptive (Intellectual Impairment)',
+    },
+  ];
+const _categorySheetNames = _adaptiveConfig.adaptiveCategoryRecordsSheetNames ?? {};
+export const adaptiveCategories: AdaptiveCategory[] = _adaptiveCategoryWording.flatMap(
+  ({ key, ...wording }) => {
+    const id = _configured(_categorySheetNames[key]);
+    return id ? [{ id, ...wording }] : [];
+  }
+);
+/** The configured category records tabs, in the order of adaptiveCategories. */
+export const adptiveCategoryRecordsSheetNames: string[] = adaptiveCategories.map(
+  (category) => category.id
+);
+
+/**
+ * Whether the Adaptive Records page exists. It lists records one category at a time, so it needs
+ * at least one category tab; the /adaptive route is not served without one.
+ */
+export const adaptiveRecordsPageAvailable: boolean = adaptiveCategories.length > 0;
+/**
+ * Whether the header menu links to the Adaptive WSO Records page: the config's
+ * showAdaptiveRecordsInMenu, and only when the page is available.
+ */
+export const showAdaptiveRecordsInMenu: boolean =
+  adaptiveRecordsPageAvailable && wsoConfig.showAdaptiveRecordsInMenu;
+/**
+ * Whether the Scripts page offers the adaptive records script. It needs the roster sheet and at
+ * least one adaptive records tab to compare against.
+ */
+export const adaptiveRecordsScriptAvailable: boolean =
+  adaptiveLiftersListSheetId !== undefined &&
+  adaptiveLiftersListSheetName !== undefined &&
+  (adaptiveAllRecordsSheetName !== undefined || adaptiveCategories.length > 0);
 
 // The combined Adaptive_All tab is not one of the four categories, so it has no entry above
 // to draw from and needs its own certificate wording.

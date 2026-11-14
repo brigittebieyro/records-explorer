@@ -10,6 +10,14 @@
   "currentRecordsSheetId": "1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ",
   "currentRecordsSheetName": "Post-Aug2026",
   "priorRecordsSheetNames": ["Pre-Aug2026", "Pre-June2025", "Pre-2018"],
+  "standardKey": "STANDARD",
+  "adaptiveAllRecordsSheetName": "Adaptive_All",
+  "adaptiveCategoryRecordsSheetNames": {
+    "physical": "Adaptive_Physical",
+    "hearing": "Adaptive_Hearing",
+    "vision": "Adaptive_Vision",
+    "cognitive": "Adaptive_Cognitive"
+  },
   "adaptiveLiftersListSheetId": "1hO6VHntKEujjtx8P0kIMJQ_vM46INg2D_jHei_HZUW0",
   "adaptiveLiftersListSheetName": "IDsAndCategories",
   "adaptiveOptInFormUrl": "https://forms.gle/2Y7qKS7C2pa3d4jLA",

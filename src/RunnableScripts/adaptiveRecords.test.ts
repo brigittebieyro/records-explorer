@@ -513,6 +513,8 @@ describe('collectRecordBreakers', () => {
       previousRecord: 65,
       previousHolder: 'Jane B. Smith',
       weightClassName: "Women's 77kg",
+      bodyWeightMin: 69,
+      bodyWeightMax: '77',
       ageGroupLabel: 'Open',
       usawNumber: '1013597',
       event: 'Money In The Bank 2026',
@@ -579,11 +581,14 @@ describe('collectRecordBreakers', () => {
 });
 
 describe('generateCsv', () => {
-  test('writes the agreed header and appends the previous-record columns', () => {
+  const csvHeader =
+    'ageGroup,gender,ageMin,ageMax,bodyWeightMin,bodyWeightMax,lift,record,name,date,place,clubName,Bodyweight,USAW Number,Previous Record,Previous Holder,Weight Class';
+
+  test('writes the records sheet columns, then the extras, then the previous-record columns', () => {
     const csv = generateCsv(
       collectRecordBreakers(
         { ...resolvedLifter, categorySheetNames: ['Adaptive_Vision'] },
-        [meetResult()],
+        [meetResult({ club: 'Catalyst Athletics' })],
         {
           Adaptive_Vision: parseAdaptiveRecords([
             recordSheetHeader,
@@ -594,12 +599,65 @@ describe('generateCsv', () => {
     );
     const lines = csv.trim().split('\n');
 
-    expect(lines[0]).toBe(
-      'AdaptiveCategory,Weight Class,Age Group,Bodyweight,Lift,Record,Lifter Name,Date,Event Name,USAW Number,Previous Record,Previous Holder'
+    expect(lines[0]).toBe('Adaptive_Vision');
+    expect(lines[1]).toBe(csvHeader);
+    expect(lines[2]).toBe(
+      "Open,F,0,1000,69,77,Snatch,70,Jane Smith,2026-08-09,Money In The Bank 2026,Catalyst Athletics,72.5,1013597,65,Jane B. Smith,Women's 77kg"
     );
-    expect(lines[1]).toBe(
-      "Adaptive_Vision,Women's 77kg,Open,72.5,Snatch,70,Jane Smith,2026-08-09,Money In The Bank 2026,1013597,65,Jane B. Smith"
+  });
+
+  test('writes the top class the way the sheet does, and an unset club as blank', () => {
+    const csv = generateCsv(
+      collectRecordBreakers(
+        { ...resolvedLifter, categorySheetNames: [] },
+        [meetResult({ 'body_weight_(kg)': 95, club: { type: 'unset' } })],
+        {
+          Adaptive_All: parseAdaptiveRecords([
+            recordSheetHeader,
+            recordRow('Open', 'F', '86', '>86', 'Snatch', '0', 'STANDARD'),
+          ]),
+        }
+      )
     );
+
+    expect(csv.trim().split('\n')[2]).toBe(
+      "Open,F,0,1000,86,>86,Snatch,70,Jane Smith,2026-08-09,Money In The Bank 2026,,95,1013597,0,STANDARD,Women's 86+kg"
+    );
+  });
+
+  test('gives each category its own table, in configured order, and leaves out empty ones', () => {
+    const visionSheet = parseAdaptiveRecords([
+      recordSheetHeader,
+      recordRow('Open', 'F', '69', '77', 'Snatch', '0', 'STANDARD'),
+    ]);
+    const csv = generateCsv(
+      collectRecordBreakers(
+        { ...resolvedLifter, categorySheetNames: ['Adaptive_Vision', 'Adaptive_Cognitive'] },
+        [meetResult()],
+        {
+          Adaptive_All: visionSheet,
+          Adaptive_Vision: visionSheet,
+          // Nothing beaten here: the standard is out of reach.
+          Adaptive_Cognitive: parseAdaptiveRecords([
+            recordSheetHeader,
+            recordRow('Open', 'F', '69', '77', 'Snatch', '500', 'STANDARD'),
+          ]),
+        }
+      )
+    );
+    const lines = csv.trim().split('\n');
+
+    expect(lines.filter((line) => line.startsWith('Adaptive_'))).toEqual([
+      'Adaptive_All',
+      'Adaptive_Vision',
+    ]);
+    expect(lines.filter((line) => line === csvHeader)).toHaveLength(2);
+    expect(lines.slice(0, 4)).toEqual([
+      'Adaptive_All',
+      csvHeader,
+      expect.stringMatching(/^Open,F,/),
+      '',
+    ]);
   });
 
   test('quotes an event name containing a comma', () => {
@@ -620,9 +678,7 @@ describe('generateCsv', () => {
   });
 
   test('an empty run still produces the header', () => {
-    expect(generateCsv([])).toBe(
-      'AdaptiveCategory,Weight Class,Age Group,Bodyweight,Lift,Record,Lifter Name,Date,Event Name,USAW Number,Previous Record,Previous Holder\n'
-    );
+    expect(generateCsv([])).toBe(`${csvHeader}\n`);
   });
 
   test('an athlete who cannot be found in the rankings gets an errors table below', () => {
@@ -668,12 +724,11 @@ describe('generateCsv', () => {
     );
     const lines = csv.trim().split('\n');
 
-    expect(lines[1]).toContain('Adaptive_All');
-    expect(lines.indexOf('Errors')).toBeGreaterThan(1);
+    expect(lines[0]).toBe('Adaptive_All');
+    expect(lines[1]).toBe(csvHeader);
+    expect(lines.indexOf('Errors')).toBeGreaterThan(2);
     // Every record row comes before the blank separator.
-    expect(lines.slice(1, lines.indexOf('')).every((line) => line.startsWith('Adaptive_'))).toBe(
-      true
-    );
+    expect(lines.slice(2, lines.indexOf('')).every((line) => line.startsWith('Open,'))).toBe(true);
   });
 
   test('a clean run ends at the last record, with no errors table', () => {

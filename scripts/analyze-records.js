@@ -461,6 +461,7 @@ async function analyzeRecords() {
                 date: liftData.date || '',
                 event: liftData.event || '',
                 clubName: liftData.club || '',
+                weightClassName: weightClass.name || '',
                 wouldBreak: currentRecord ? currentRecord.weight : null,
                 currentHolder: currentRecord ? currentRecord.lifter : null,
                 ageGroupIndex: ageGroups.indexOf(ageGroup),
@@ -521,7 +522,7 @@ function generateCsv(recordBreakers) {
   });
 
   const rows = [
-    ['ageGroup', 'gender', 'ageMin', 'ageMax', 'bodyWeightMin', 'bodyWeightMax', 'lift', 'record', 'name', 'date', 'place', 'clubName'],
+    ['ageGroup', 'gender', 'ageMin', 'ageMax', 'bodyWeightMin', 'bodyWeightMax', 'lift', 'record', 'name', 'date', 'place', 'clubName', 'Previous Record', 'Previous Holder', 'Weight Class'],
     ...sorted.map(lift => [
       lift.ageGroupId,
       lift.gender,
@@ -535,6 +536,9 @@ function generateCsv(recordBreakers) {
       lift.date,
       lift.event,
       lift.clubName,
+      lift.wouldBreak ?? '',
+      lift.currentHolder || '',
+      lift.weightClassName,
     ]),
   ];
 

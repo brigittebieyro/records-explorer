@@ -38,6 +38,32 @@ export const weightClassIndicator = (weightClass: WeightClass): string =>
     ? `>${parseInt(weightClass.minBodyweight)}`
     : weightClass.maxBodyweight;
 
+// How a masters age group is written in the records sheets' ageGroup column: the bare starting age
+// with a gender prefix ('W35', 'M40'). Open/Junior/youth ids are written as they are. The inverse
+// of normalizeSheetAgeGroup.
+export const sheetAgeGroupLabel = (ageGroup: AgeGroup, gender: 'F' | 'M'): string =>
+  /^\d+$/.test(ageGroup.id) ? `${gender === 'F' ? 'W' : 'M'}${ageGroup.id}` : ageGroup.id;
+
+// The records sheets' column headings from ageGroup onward, in sheet order. Script output that is
+// pasted into a records sheet starts with these columns.
+export const recordSheetColumns = [
+  'ageGroup',
+  'gender',
+  'ageMin',
+  'ageMax',
+  'bodyWeightMin',
+  'bodyWeightMax',
+  'lift',
+  'record',
+  'name',
+  'date',
+  'place',
+  'clubName',
+] as const;
+
+// Lift-history rows return an empty club as { type: 'unset' } rather than a string.
+export const clubText = (club: unknown): string => (typeof club === 'string' ? club.trim() : '');
+
 export const getWeightClassSet = (ageGroup: AgeGroup | undefined | null): WeightClass[] => {
   if (!ageGroup || !ageGroup.customWeightClasses) {
     return defaultWeightClasses;

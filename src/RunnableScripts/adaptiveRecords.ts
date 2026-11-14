@@ -15,12 +15,14 @@ import {
   headers,
 } from '../Data/RoutesAndSettings';
 import {
+  clubText,
   csvField,
   getWeightClassSet,
   getYear,
   isWithinPlausibilityCaps,
   normalizeSheetAgeGroup,
   rateLimitedFetch,
+  recordSheetColumns,
 } from '../Utils/Utils';
 import { AgeGroup, LifterRankingData, MeetRecord, WeightClass } from '../Utils/types';
 
@@ -71,12 +73,19 @@ interface AdaptiveRecordBreaker {
   category: string;
   weightClassName: string;
   ageGroupLabel: string;
-  bodyweight: number;
+  gender: string;
+  ageMin: string;
+  ageMax: string;
+  // The matched sheet row's class bounds, written as the sheet writes them ('>86' for the top class).
+  bodyWeightMin: number;
+  bodyWeightMax: string;
   lift: LiftLabel;
   weight: number;
   lifterName: string;
   date: string;
   event: string;
+  clubName: string;
+  bodyweight: number;
   usawNumber: string;
   previousRecord: number;
   previousHolder: string;
@@ -404,12 +413,20 @@ export function collectRecordBreakers(
             category,
             weightClassName: matchedClass.weightClass.name,
             ageGroupLabel: record.ageGroupLabel,
-            bodyweight,
+            gender: lifter.gender,
+            ageMin: ageGroup.minimum_lifter_age,
+            ageMax: ageGroup.maximum_lifter_age,
+            bodyWeightMin: record.bodyWeightMin,
+            bodyWeightMax: record.bodyWeightMaxIsOpen
+              ? `>${record.bodyWeightMax}`
+              : String(record.bodyWeightMax),
             lift,
             weight,
             lifterName: lifter.name,
             date: result.date,
             event: result.meet ?? '',
+            clubName: clubText(result.club),
+            bodyweight,
             usawNumber: lifter.usawNumber,
             previousRecord: record.weight,
             previousHolder: record.holder,
@@ -426,6 +443,22 @@ export function collectRecordBreakers(
   return [...best.values()];
 }
 
+// Columns are the records sheet's own, so a table pastes straight into the category's tab, followed
+// by the lifter's bodyweight and USAW number, which the sheet has no column for, and then the
+// record being replaced.
+const recordColumns = [
+  ...recordSheetColumns,
+  'Bodyweight',
+  'USAW Number',
+  'Previous Record',
+  'Previous Holder',
+  'Weight Class',
+];
+
+// One table per category, each headed by the category's tab name, in the order the tabs are
+// configured. A category nobody broke a record in is left out; a run with no records at all is a
+// lone header row.
+//
 // An athlete the rankings never turn up is reported in an errors table below the records
 // rather than dropped: a typo in the name or USAW number on the roster sheet would otherwise
 // look exactly like an athlete who simply set no records, and nobody would notice.
@@ -443,36 +476,37 @@ export function generateCsv(
     return breakerA.liftIndex - breakerB.liftIndex;
   });
 
-  const rows = [
-    [
-      'AdaptiveCategory',
-      'Weight Class',
-      'Age Group',
-      'Bodyweight',
-      'Lift',
-      'Record',
-      'Lifter Name',
-      'Date',
-      'Event Name',
-      'USAW Number',
-      'Previous Record',
-      'Previous Holder',
-    ],
-    ...sorted.map((breaker) => [
-      breaker.category,
-      breaker.weightClassName,
-      breaker.ageGroupLabel,
-      breaker.bodyweight,
-      breaker.lift,
-      breaker.weight,
-      breaker.lifterName,
-      breaker.date,
-      breaker.event,
-      breaker.usawNumber,
-      breaker.previousRecord,
-      breaker.previousHolder,
-    ]),
+  const toRow = (breaker: AdaptiveRecordBreaker): Array<string | number> => [
+    breaker.ageGroupLabel,
+    breaker.gender,
+    breaker.ageMin,
+    breaker.ageMax,
+    breaker.bodyWeightMin,
+    breaker.bodyWeightMax,
+    breaker.lift,
+    breaker.weight,
+    breaker.lifterName,
+    breaker.date,
+    breaker.event,
+    breaker.clubName,
+    breaker.bodyweight,
+    breaker.usawNumber,
+    breaker.previousRecord,
+    breaker.previousHolder,
+    breaker.weightClassName,
   ];
+
+  const categories = [...new Set(sorted.map((breaker) => breaker.category))];
+  const rows: Array<Array<string | number>> = [];
+  if (categories.length === 0) rows.push(recordColumns);
+  categories.forEach((category, position) => {
+    if (position > 0) rows.push([]);
+    rows.push(
+      [category],
+      recordColumns,
+      ...sorted.filter((breaker) => breaker.category === category).map(toRow)
+    );
+  });
 
   // A second table below the records, rather than extra columns on them: these rows describe
   // a roster problem, not a lift, and share none of the columns above. Omitted entirely when

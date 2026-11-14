@@ -174,7 +174,8 @@ Adaptive records are optional. Every setting in this section can be left out, an
 
 | You set | What you get |
 | --- | --- |
-| Tabs in `adaptiveCategoryRecordsSheetNames` | Those categories in the Adaptive Records page's dropdown. With none, the dropdown is empty. |
+| `adaptiveAllRecordsSheetName` | The combined records, which the Adaptive Records page opens on. |
+| Tabs in `adaptiveCategoryRecordsSheetNames` | Those categories in the Adaptive Records page's category picker. With none, the page has no category picker. |
 | `showAdaptiveRecordsInMenu` set to `true` | The Adaptive WSO Records menu item. |
 | Both `adaptiveLiftersListSheetId` and `adaptiveLiftersListSheetName`, plus `adaptiveAllRecordsSheetName` or at least one category tab | The "Fetch Adaptive Record Updates" script on `/scripts`. |
 
@@ -194,14 +195,14 @@ The tab in that spreadsheet that lists the athletes. The adaptive records script
 The athletes tab marks each athlete's categories with TRUE/FALSE columns: one for each category you set a tab for, in the order physical, hearing, vision, cognitive.
 
 ### `adaptiveAllRecordsSheetName` (string, optional)
-The tab, in the [current records spreadsheet](#currentrecordssheetid-string), that holds the combined adaptive records across every category. The adaptive records script checks every athlete on the roster against it. The Adaptive Records page doesn't list it.
+The tab, in the [current records spreadsheet](#currentrecordssheetid-string), that holds the combined adaptive records across every category. The adaptive records script checks every athlete on the roster against it. When it's set, the Adaptive Records page opens on these records until someone picks a category, and goes back to them on Reset. When it's left out, the page opens on its description alone. With no category tabs, the page shows only these records and no category picker.
 
 ```json
 "adaptiveAllRecordsSheetName": "Adaptive_All"
 ```
 
 ### `adaptiveCategoryRecordsSheetNames` (object of up to 4 strings, optional)
-The tab, in the same spreadsheet, for each adaptive category you track. The keys are `physical`, `hearing`, `vision` and `cognitive`; leave out any category you don't track, and it won't appear on the site. Without any category tabs the page's dropdown is empty.
+The tab, in the same spreadsheet, for each adaptive category you track. The keys are `physical`, `hearing`, `vision` and `cognitive`; leave out any category you don't track, and it won't appear on the site. Without any category tabs the page has no category picker.
 
 ```json
 "adaptiveCategoryRecordsSheetNames": {

@@ -65,7 +65,8 @@ const adaptiveDescription = () => (
 function AdaptiveRecords() {
   // Two pieces of state, as on the home page: the dropdown holds a pending choice, and Go
   // promotes it to the category actually on display. An empty applied category means the
-  // combined Adaptive_All view, which spans every adaptive lifter.
+  // combined adaptiveAllRecordsSheetName view when that tab is configured, and the preamble alone
+  // when it is not.
   const [selectedCategory, setSelectedCategory] = useState('');
   const [appliedCategory, setAppliedCategory] = useState('');
   // Keyed by sheet name so switching back to a category already viewed costs no request.
@@ -112,39 +113,51 @@ function AdaptiveRecords() {
     return activeRows?.length ? buildAllCurrentRecords(activeRows) : [];
   }, [activeRows]);
 
+  // The missing settings are listed below the summary only while no category is applied.
+  const preamble = (
+    <>
+      {adaptiveDescription()}
+      {!activeCategory && missingAdaptiveConfigs.length > 0 && (
+        <p>Adaptive configs are missing: {missingAdaptiveConfigs.join(', ')}</p>
+      )}
+    </>
+  );
+
   return (
     <div className="App">
-      <OptionsBar
-        label="Select a category: "
-        selects={[
-          {
-            id: 'adaptive-category-select',
-            name: 'Category',
-            value: selectedCategory,
-            onChange: setSelectedCategory,
-            placeholder: 'Category',
-            options: adaptiveCategories.map((category) => ({
-              value: category.id,
-              label: category.displayName,
-            })),
-          },
-        ]}
-        buttons={[
-          {
-            label: 'Go',
-            onClick: () => setAppliedCategory(selectedCategory),
-            enablement: 'onSelectionChange',
-          },
-        ]}
-        onReset={
-          appliedCategory
-            ? () => {
-                setSelectedCategory('');
-                setAppliedCategory('');
-              }
-            : undefined
-        }
-      />
+      {adaptiveCategories.length > 0 && (
+        <OptionsBar
+          label="Select a category: "
+          selects={[
+            {
+              id: 'adaptive-category-select',
+              name: 'Category',
+              value: selectedCategory,
+              onChange: setSelectedCategory,
+              placeholder: 'Category',
+              options: adaptiveCategories.map((category) => ({
+                value: category.id,
+                label: category.displayName,
+              })),
+            },
+          ]}
+          buttons={[
+            {
+              label: 'Go',
+              onClick: () => setAppliedCategory(selectedCategory),
+              enablement: 'onSelectionChange',
+            },
+          ]}
+          onReset={
+            appliedCategory
+              ? () => {
+                  setSelectedCategory('');
+                  setAppliedCategory('');
+                }
+              : undefined
+          }
+        />
+      )}
 
       {status === 'inprogress' && (
         <div className="records-viewer-loading-container">
@@ -159,13 +172,22 @@ function AdaptiveRecords() {
         </div>
       )}
 
-      {status === 'complete' && !!activeCategory && (
+      {/* AllCurrentRecordsView shows its description only alongside records, so the preamble is
+          rendered here when there are none: with no tab to show, or above an empty tab's message.
+          With no category applied it also shows while the combined tab loads or fails to load. */}
+      {((status === 'complete' && (!activeSheetName || recordsData.length === 0)) ||
+        (status !== 'complete' && !activeCategory)) && (
+        <div className="common-text-header record-viewer-fine-print all-records-fine-print">
+          {preamble}
+        </div>
+      )}
+      {status === 'complete' && !!activeSheetName && (
         <AllCurrentRecordsView
           data={recordsData}
           // The certificate is looked up in whichever tab is on display, so the same athlete
           // printed from the combined view and from their category view is read from different
-          // tabs -- by design, it matches what the user was actually looking at.
-          certificateSheet={activeCategory.id}
+          // tabs.
+          certificateSheet={activeSheetName}
           adaptiveCategory={
             activeCategory ? activeCategory.certificateDisplayKey : adaptiveAllCertificateDisplayKey
           }
@@ -174,17 +196,9 @@ function AdaptiveRecords() {
               ? `${activeCategory.displayName} Record Holders`
               : 'All Adaptive Record Holders'
           }
-          description={adaptiveDescription()}
+          description={preamble}
           emptyContent="No adaptive records have been set yet."
         />
-      )}
-      {!activeCategory && (
-        <div className="common-text-header record-viewer-fine-print all-records-fine-print">
-          {adaptiveDescription()}
-          {missingAdaptiveConfigs.length > 0 && (
-            <p>Adaptive configs are missing: {missingAdaptiveConfigs.join(', ')}</p>
-          )}
-        </div>
       )}
     </div>
   );

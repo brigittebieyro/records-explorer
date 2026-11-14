@@ -61,6 +61,8 @@ export interface MeetRecord {
   'best_c&j'?: number;
   'body_weight_(kg)'?: string | number;
   meet?: string;
+  // Empty text columns come back as { type: 'unset' }, not as a string, so always narrow before use.
+  club?: string | null | { type: string };
 }
 
 export type CombinedLiftData = LifterRankingData & Partial<MeetRecord>;

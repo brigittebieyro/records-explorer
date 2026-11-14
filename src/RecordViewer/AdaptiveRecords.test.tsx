@@ -106,16 +106,15 @@ const chooseCategory = async (label: string) => {
 };
 
 /**
- * The page opens on its preamble: records are per-category now, so nothing is listed until a
- * category has been applied. The preamble shows while the combined tab is still loading, so the
- * page has settled once the preamble is up and the loader is gone.
+ * The preamble shows on every view of the page, with or without records listed, and while the
+ * combined tab is still loading. The loader is waited out first: the preamble moves into the
+ * records view once records arrive, so one found while loading may no longer be in the page.
  */
 const landing = async () => {
-  const preamble = await screen.findByText(/Keeping track of local adaptive athletes/);
   await waitFor(() => {
     expect(screen.queryByTestId('circle-loader')).toBeNull();
   });
-  return preamble;
+  return screen.findByText(/Keeping track of local adaptive athletes/);
 };
 
 describe('AdaptiveRecords (user-based)', () => {
@@ -128,6 +127,19 @@ describe('AdaptiveRecords (user-based)', () => {
     mockAllRecordsSheetName = undefined;
     mockMissingAdaptiveConfigs = undefined;
     mockAdaptiveCategories = undefined;
+  });
+
+  test('with only a combined tab configured, lists its records and offers no category picker', async () => {
+    mockAllRecordsSheetName = 'Adaptive_All';
+    mockAdaptiveCategories = [];
+    mockSheets({ Adaptive_All: withRecord('Jane Smith') });
+
+    render(<AdaptiveRecords />);
+
+    expect(await screen.findByText('Jane Smith')).toBeInTheDocument();
+    expect(screen.getByText('All Adaptive Record Holders')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Category')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Go' })).toBeNull();
   });
 
   test('with no opt-in form configured, the page leaves out the opt-in paragraph', async () => {
@@ -154,16 +166,48 @@ describe('AdaptiveRecords (user-based)', () => {
     expect(await screen.findByText('Jane V. Smith')).toBeInTheDocument();
   });
 
-  test('opens on the preamble, listing no records until a category is applied', async () => {
+  test('with a combined tab configured, opens on the combined records', async () => {
+    mockAllRecordsSheetName = 'Adaptive_All';
+    mockSheets({ Adaptive_All: withRecord('Jane Smith') });
+
+    render(<AdaptiveRecords />);
+
+    expect(await screen.findByText('Jane Smith')).toBeInTheDocument();
+    expect(screen.getByText('All Adaptive Record Holders')).toBeInTheDocument();
+    expect(screen.getByText(/Keeping track of local adaptive athletes/)).toBeInTheDocument();
+    expect(screen.queryByTestId('circle-loader')).toBeNull();
+  });
+
+  test('with no combined tab configured, opens on the preamble, listing no records', async () => {
+    mockAllRecordsSheetName = null;
     mockSheets({ Adaptive_All: withRecord('Jane Smith') });
 
     render(<AdaptiveRecords />);
 
     expect(await landing()).toBeInTheDocument();
-    // Records are per-category: there is no combined listing to land on.
     expect(screen.queryByText('All Adaptive Record Holders')).toBeNull();
     expect(screen.queryByText('Jane Smith')).toBeNull();
     expect(screen.queryByTestId('circle-loader')).toBeNull();
+  });
+
+  test('Reset returns to the combined records when a combined tab is configured', async () => {
+    mockAllRecordsSheetName = 'Adaptive_All';
+    mockSheets({
+      Adaptive_All: withRecord('Jane Smith'),
+      Adaptive_Physical: withRecord('Jane P. Smith'),
+    });
+
+    render(<AdaptiveRecords />);
+    await screen.findByText('Jane Smith');
+
+    await chooseCategory('Physical Disability');
+    await screen.findByText('Jane P. Smith');
+    expect(screen.queryByText('Jane Smith')).toBeNull();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Reset' }));
+
+    expect(await screen.findByText('Jane Smith')).toBeInTheDocument();
+    expect(screen.getByText('All Adaptive Record Holders')).toBeInTheDocument();
   });
 
   test('shows its own description rather than the home page fine print', async () => {
@@ -329,18 +373,6 @@ describe('AdaptiveRecords (user-based)', () => {
       expect(screen.getByText(/Adaptive records could not be loaded/)).toBeInTheDocument();
     });
     expect(screen.getByText(/Keeping track of local adaptive athletes/)).toBeInTheDocument();
-  });
-
-  test('with no category tabs configured, the page shows an empty dropdown and its preamble', async () => {
-    mockAdaptiveCategories = [];
-    mockSheets({ Adaptive_All: withRecord('Jane Smith') });
-
-    render(<AdaptiveRecords />);
-
-    expect(await landing()).toBeInTheDocument();
-    const select = screen.getByLabelText('Category');
-    // Only the placeholder remains.
-    expect(select.querySelectorAll('option:not([value=""])')).toHaveLength(0);
   });
 
   test('lists missing adaptive settings below the preamble', async () => {

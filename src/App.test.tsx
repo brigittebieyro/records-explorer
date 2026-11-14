@@ -57,10 +57,10 @@ describe('App routing (user-based)', () => {
 
     expect(screen.getByText(HEADER_TEXT)).toBeInTheDocument();
     expect(screen.getByLabelText('Category')).toBeInTheDocument();
-    // No category is applied yet, so the page settles on its own preamble rather than on any
-    // record list or the home page's "Loading current records…".
+    // The config has a combined tab, so the page opens on it; the mocked sheet is empty, so it
+    // settles on the adaptive empty message rather than the home page's "Loading current records…".
     await waitFor(() => {
-      expect(screen.getByText(/Keeping track of local adaptive athletes/)).toBeInTheDocument();
+      expect(screen.getByText('No adaptive records have been set yet.')).toBeInTheDocument();
     });
     expect(screen.queryByText('Loading current records…')).toBeNull();
   });
@@ -69,7 +69,7 @@ describe('App routing (user-based)', () => {
     mockAdaptiveCategories = [];
     renderAt('/adaptive');
 
-    expect(screen.getByLabelText('Category')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Category')).toBeNull();
     await waitFor(() => {
       expect(screen.getByText(/Keeping track of local adaptive athletes/)).toBeInTheDocument();
     });

@@ -1,7 +1,7 @@
 import './App.css';
 import { useEffect } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { adaptiveRecordsPageAvailable, wsoDisplayName } from './Data/RoutesAndSettings';
+import { wsoDisplayName } from './Data/RoutesAndSettings';
 import Header from './Header/Header';
 import Info from './Info/Info';
 import LocalMeets from './LocalMeets/LocalMeets';
@@ -20,7 +20,7 @@ export default function App() {
       <Header />
       <Routes>
         <Route path="/" element={<RecordViewer />} />
-        {adaptiveRecordsPageAvailable && <Route path="/adaptive" element={<AdaptiveRecords />} />}
+        <Route path="/adaptive" element={<AdaptiveRecords />} />
         <Route path="/info" element={<Info />} />
         <Route path="/local-meet-results" element={<LocalMeets />} />
         <Route path="/scripts" element={<Scripts />} />

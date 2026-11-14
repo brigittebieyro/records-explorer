@@ -53,7 +53,7 @@ all of the adaptive records settings.
 | `allTimeStartDate` | date | yes | [WSO identity](#wso-identity) |
 | `currentRecordsSheetId` | string | yes | [Records Google Sheet](#records-google-sheet) |
 | `currentRecordsSheetName` | string | yes | [Records Google Sheet](#records-google-sheet) |
-| `priorRecordsSheetNames` | list of strings | yes (may be `[]`) | [Records Google Sheet](#records-google-sheet) |
+| `priorRecordsSheetNames` | list of strings | **no** | [Records Google Sheet](#records-google-sheet) |
 | `standardKey` | string | yes | [Records Google Sheet](#records-google-sheet) |
 | `adaptiveAllRecordsSheetName` | string | **no** | [Adaptive records](#adaptive-records) |
 | `adaptiveCategoryRecordsSheetNames` | object of up to 4 strings | **no** | [Adaptive records](#adaptive-records) |
@@ -62,14 +62,14 @@ all of the adaptive records settings.
 | `adaptiveOptInFormUrl` | URL | **no** | [Adaptive records](#adaptive-records) |
 | `showAdaptiveRecordsInMenu` | boolean | **no** | [Adaptive records](#adaptive-records) |
 | `includeClubNameOnCertificate` | boolean | yes | [Certificates](#certificates) |
-| `certificateWebsiteText` | string | yes (may be `""`) | [Certificates](#certificates) |
-| `localScheduleUrl` | URL | yes | [Links and contact](#links-and-contact) |
-| `localHomeUrl` | URL | yes | [Links and contact](#links-and-contact) |
+| `certificateWebsiteText` | string | **no** | [Certificates](#certificates) |
+| `localScheduleUrl` | URL | **no** | [Links and contact](#links-and-contact) |
+| `localHomeUrl` | URL | **no** | [Links and contact](#links-and-contact) |
 | `wsoInfoUSAWUrl` | URL | yes | [Links and contact](#links-and-contact) |
 | `maintainerName` | string | yes | [Links and contact](#links-and-contact) |
 | `maintainerEmail` | string | yes | [Links and contact](#links-and-contact) |
 | `wsoBoundary` | object of 4 numbers | **no** | [Eligibility and access](#eligibility-and-access) |
-| `ineligibleAthletes` | list of strings | yes (may be `[]`) | [Eligibility and access](#eligibility-and-access) |
+| `ineligibleAthletes` | list of strings | **no** | [Eligibility and access](#eligibility-and-access) |
 | `scriptsPassword` | string | yes | [Eligibility and access](#eligibility-and-access) |
 
 ---
@@ -152,8 +152,8 @@ The name of the tab that holds the current records. It's the tab name as shown a
 "currentRecordsSheetName": "Post-Aug2026"
 ```
 
-### `priorRecordsSheetNames` (list of strings)
-Tabs in the same spreadsheet that hold records from earlier periods, such as before a weight class change. List them newest first. The app reads them all for record history. Use `[]` if you have none.
+### `priorRecordsSheetNames` (list of strings, optional)
+Tabs in the same spreadsheet that hold records from earlier periods, such as before a weight class change. List them newest first. The app reads them all for record history. Leave the field out, or use `[]`, if you have none.
 
 ```json
 "priorRecordsSheetNames": ["Pre-Aug2026", "Pre-June2025", "Pre-2018"]
@@ -239,8 +239,8 @@ Whether certificates print the record holder's club. Even when this is `true`, a
 "includeClubNameOnCertificate": true
 ```
 
-### `certificateWebsiteText` (string)
-Text printed in the corner of every certificate, usually your website. Use `""` to print nothing there.
+### `certificateWebsiteText` (string, optional)
+Text printed in the corner of every certificate, usually your website. Leave the field out, or use `""`, to print nothing there.
 
 ```json
 "certificateWebsiteText": "www.canorthcentralwso.org"
@@ -252,8 +252,8 @@ The certificate logo is an image file, not a setting. Replace both `public/WSOLo
 
 ## Links and contact
 
-### `localScheduleUrl`, `localHomeUrl` (URL)
-Your WSO's meet schedule and home page. Both are linked from the header menu.
+### `localScheduleUrl`, `localHomeUrl` (URL, optional)
+Your WSO's meet schedule and home page. Each one that's set is linked from the header menu. Leave a field out to drop its menu link.
 
 ### `wsoInfoUSAWUrl` (URL)
 Your WSO's page on the USA Weightlifting site. It's linked from the About page.
@@ -287,8 +287,8 @@ If you include it, it must have all four keys, each a number:
 
 West and east are negative in the Americas. Remove the whole field to turn the filter off; setting it to `null` or `{}` fails the check.
 
-### `ineligibleAthletes` (list of strings)
-Full names of athletes who may not hold your WSO's records, for example because they live outside the WSO. Spell each name exactly as Sport80 does. The app and the record-breaking scripts skip these athletes. Use `[]` if there are none.
+### `ineligibleAthletes` (list of strings, optional)
+Full names of athletes who may not hold your WSO's records, for example because they live outside the WSO. Spell each name exactly as Sport80 does. The app and the record-breaking scripts skip these athletes. Leave the field out, or use `[]`, if there are none.
 
 ```json
 "ineligibleAthletes": ["Imaginary B. Athlete"]
@@ -313,25 +313,14 @@ You need [Node.js](https://nodejs.org/), which you already have if you can run t
 
 1. **Set the names first.** The hash includes the display name, so fill in `wsoOfficialName`, and `wsoDisplayName` if you use one, and save `wsoConfig.json`.
 2. **Open a terminal in the project folder,** the one that contains `package.json`.
-3. **Run this command.** It asks for the password without showing it as you type, and doesn't save it in your terminal history:
+3. **Run this command:**
 
    ```sh
-   read -rs "PW?Password: "; echo; node -e "const c=require('./src/Data/wsoConfig.json');console.log(require('crypto').createHash('sha256').update(process.argv[1]+'---'+(c.wsoDisplayName ?? c.wsoOfficialName)).digest('hex'))" "$PW"; unset PW
+   npm run update-password
    ```
 
-   That's for zsh, the default terminal on a Mac. In bash, the usual default on Linux, replace the first part, `read -rs "PW?Password: "`, with `read -rsp "Password: " PW`.
-
-4. **Type the password and press Enter.** The command prints a 64-character hash, for example `af8789493e307d3335f2871c97dd8bd0d4c6b8eb8d34e0a45f4246b57811e2ae`.
-5. **Paste the hash into `scriptsPassword`,** in quotes, and save the file.
-6. **Check it.** Start the app (`npm start`), go to `/scripts`, and enter the password. If it's rejected, check that the names in the config are the same as when you made the hash, and make the hash again.
-
-If you'd rather type the password into the command itself, this does the same thing. The password will be saved in your terminal history:
-
-```sh
-node -e "const c=require('./src/Data/wsoConfig.json');console.log(require('crypto').createHash('sha256').update(process.argv[1]+'---'+(c.wsoDisplayName ?? c.wsoOfficialName)).digest('hex'))" 'your-password'
-```
-
-Keep the single quotes around the password. If the password itself contains a single quote, use the first command instead.
+4. **Type the password and press Enter.** It isn't shown as you type, and it isn't saved in your terminal history. The command makes the hash, writes it into `scriptsPassword` in `wsoConfig.json`, and prints it along with the display name it used.
+5. **Check it.** Start the app (`npm start`), go to `/scripts`, and enter the password. If it's rejected, check that the names in the config are the same as when you made the hash, and run the command again.
 
 #### When you need a new hash
 

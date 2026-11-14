@@ -47,12 +47,16 @@ function Header() {
                 <li>
                   <a href="/goals">Senior Nationals Qualification Rankings</a>
                 </li>
-                <li>
-                  <a href={localScheduleUrl}>Local Meet Schedule</a>
-                </li>
-                <li>
-                  <a href={localHomeUrl}>Official WSO Site</a>
-                </li>
+                {localScheduleUrl && (
+                  <li>
+                    <a href={localScheduleUrl}>Local Meet Schedule</a>
+                  </li>
+                )}
+                {localHomeUrl && (
+                  <li>
+                    <a href={localHomeUrl}>Official WSO Site</a>
+                  </li>
+                )}
                 <li>
                   <a href="/info">About</a>
                 </li>

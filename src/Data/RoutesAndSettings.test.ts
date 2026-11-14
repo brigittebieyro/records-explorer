@@ -92,9 +92,10 @@ describe('RoutesAndSettings (user-based)', () => {
   });
 
   describe('A-04 / D-01 / E-02 / E-03: external links', () => {
-    test('WSO site links are web URLs', () => {
-      expect(localScheduleUrl).toMatch(/^https?:\/\//);
-      expect(localHomeUrl).toMatch(/^https?:\/\//);
+    test('WSO site links are web URLs when configured', () => {
+      [localScheduleUrl, localHomeUrl]
+        .filter((url) => url !== undefined)
+        .forEach((url) => expect(url).toMatch(/^https?:\/\//));
     });
 
     test('USAW public rankings site link', () => {

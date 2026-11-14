@@ -8,7 +8,7 @@ The app displays records organized by weight class and age group (Open, Youth, J
 
 ## Installing & Running Locally
 
-The app has some dependencies, and once set up, there are two processes that must run at the same time: the **React dev server** and the **Node.js proxy server**. These will need to be in separate terminal tabs or windows.
+The app has some dependencies, and once set up, there are two processes that must run at the same time: the **React dev server** and the **Node.js proxy server**. These can be run together, or separately for easier development and debugging. 
 
 ### Prerequisites
 
@@ -21,8 +21,16 @@ The app has some dependencies, and once set up, there are two processes that mus
 - Add Google Sheets and Sport80 keys to a `.env.local` local file in the project folder (see [Configuring for your WSO](#configuring-for-your-wso))
 
 ### Start both servers
+You have two choices.
 
-Open two terminal tabs:
+#### Simple viewing and front-end only updates
+For simple viewing, open one terminal and run:
+```
+npm run whole-application
+```
+
+#### Deeper debugging and server development
+If you're making server changes or need to debug in detail, you can run the two services separately. Open two terminal tabs:
 
 **Tab 1 — Node.js proxy (port 5001):**
 ```bash
@@ -124,7 +132,7 @@ The app reads recognized records from a Google Sheet. Create a sheet with the ex
 | --- | --- |
 | `currentRecordsSheetId` | The long string in the sheet's URL: `https://docs.google.com/spreadsheets/d/<SHEET_ID>/edit`. The public spreadsheet link on the site is built from it. |
 | `currentRecordsSheetName` | The tab holding current records. |
-| `priorRecordsSheetNames` | History tabs in the same spreadsheet, newest first. Use `[]` if you have none. |
+| `priorRecordsSheetNames` | History tabs in the same spreadsheet, newest first. Optional; leave it out if you have none. |
 | `adaptiveLiftersListSheetId`, `adaptiveLiftersListSheetName` | Optional. The adaptive athlete roster sheet and tab, read by the adaptive records script. |
 | `standardKey` | The lifter-column text that marks a record standard nobody has reached yet, e.g. `"STANDARD"`. |
 | `adaptiveAllRecordsSheetName` | Optional. The tab holding the combined adaptive records, e.g. `"Adaptive_All"`. |
@@ -142,21 +150,21 @@ The app reads recognized records from a Google Sheet. Create a sheet with the ex
 | Field | What it is |
 | --- | --- |
 | `includeClubNameOnCertificate` | Whether certificates print the record's club, when the sheet row has one. |
-| `certificateWebsiteText` | Printed in the corner of every certificate. `""` prints nothing. |
+| `certificateWebsiteText` | Printed in the corner of every certificate. Optional; leaving it out or `""` prints nothing. |
 
 The certificate logo is an image file that exists in two places: `public/WSOLogo.png` (header and favicon) and `server/certificate/assets/WSOLogo.png` (certificates). Replace both. The certificate copy must be an 8-bit, non-palette PNG.
 
 ### 5. Links and maintainer
 
-`localScheduleUrl`, `localHomeUrl`, and `wsoInfoUSAWUrl` must be full `https://` URLs. `maintainerName` and `maintainerEmail` are shown on the site.
+`localScheduleUrl`, `localHomeUrl`, and `wsoInfoUSAWUrl` must be full `https://` URLs. `localScheduleUrl` and `localHomeUrl` are optional; each one left out drops its header menu link. `maintainerName` and `maintainerEmail` are shown on the site.
 
 ### 6. Rules
 
 | Field | What it is |
 | --- | --- |
 | `wsoBoundary` | Optional. A `{ north, south, west, east }` lat/lng box; local meets outside it are not listed. Leave it out to list every local meet in `wsoRegions`. |
-| `ineligibleAthletes` | Full names, as Sport80 spells them, of athletes who may not hold your WSO's records (e.g. because they live outside the WSO). Use `[]` if none. |
-| `scriptsPassword` | The SHA-256 hex digest of `<password>---<display name>` that unlocks the `/scripts` page, where the display name is `wsoDisplayName`, or `wsoOfficialName` when there is none. Because the name is part of the input, changing it means regenerating this. |
+| `ineligibleAthletes` | Full names, as Sport80 spells them, of athletes who may not hold your WSO's records (e.g. because they live outside the WSO). Optional; leave it out if none. |
+| `scriptsPassword` | The SHA-256 hex digest of `<password>---<display name>` that unlocks the `/scripts` page, where the display name is `wsoDisplayName`, or `wsoOfficialName` when there is none. Because the name is part of the input, changing it means regenerating this. Run `npm run update-password` to set it. |
 
 ### Other WSO-specific content
 

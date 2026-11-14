@@ -110,9 +110,47 @@ To adjust what gets analyzed, edit `scripts/analyze-records.js`:
 - Change the number of top athletes checked per combination (default: 5) in the `fetchTopAthletes` call
 - Modify which age groups or weight classes are included
 
+## Setting up with `npm run setup-application`
+
+If you're setting the app up for a new WSO, start here. After `npm install`, run:
+
+```bash
+npm run setup-application
+```
+
+The setup asks one question at a time and writes `src/Data/wsoConfig.json` with the required settings. Nothing is saved until the last question is answered, and you can press Ctrl+C at any point to quit without changing the config. It replaces any config that is already there, so it asks first.
+
+It covers:
+
+1. **Your WSO's details:** the Sport80 id and name, region and state, time zone, how far back history goes, whether certificates print clubs, your USAW page, and who maintains the site.
+2. **The records spreadsheet.** If you already have one in the app's layout, you give its link, the current records tab and the standard marker. If you don't, the setup offers to make a starter one with a standard of 0 for every age group, weight class and lift. You choose one of these:
+   - **Make it in Google:** you sign in to Google (see below), and the setup creates the spreadsheet in your account. It then asks before sharing it as "anyone with the link can view", which the app needs.
+   - **Make CSV files instead:** the setup writes `starter-sheets/Records.csv` and explains how to import it into a new Google spreadsheet. It then waits for you to paste the new spreadsheet's link. No sign-in is needed.
+   - **No:** the app can't run without a records spreadsheet, so the setup stops and leaves the config unchanged.
+3. **Adaptive records (optional).** If you want them and don't have the tabs yet, the setup can add them: `Adaptive_All`, one tab per category, and an `Adaptive_Roster` tab for athletes. The choices are the same three. If the setup made your records spreadsheet, it adds the tabs the same way without asking again. If the spreadsheet is your own, it asks first, and it never changes a tab you already have. If you say no, the config still names the tabs, and the setup lists the ones you need to add.
+4. **The scripts page password,** typed twice and stored only as a hash (see [CONFIG_README.md](CONFIG_README.md#scriptspassword-string)).
+
+Optional settings, such as a display name, website links or a map boundary, aren't asked. Add them afterwards; [CONFIG_README.md](CONFIG_README.md) describes each one.
+
+### Letting the setup sign in to Google
+
+You only need this if you want the setup to create or change spreadsheets for you. The CSV option needs none of it. Do it once, in the same [Google Cloud Console](https://console.cloud.google.com/) project as your API key:
+
+1. **Turn on the APIs.** Under **APIs & Services > Library**, turn on the **Google Sheets API** (your API key already needs it) and the **Google Drive API** (used to share the new spreadsheet).
+2. **Set up the consent screen.** Under **APIs & Services > OAuth consent screen**, choose **External**, give the app any name (for example "Records Explorer setup") and your email address, and save. Leave it in **Testing**. Under **Test users**, add the Google account you'll sign in with.
+3. **Make a client.** Under **APIs & Services > Credentials**, choose **Create credentials > OAuth client ID**, and pick **Desktop app** as the type. Copy the **client ID** and **client secret**.
+4. **Give them to the setup.** Either paste them when the setup asks, or add them to `.env.local` so it doesn't ask:
+
+   ```
+   GOOGLE_OAUTH_CLIENT_ID=your_client_id
+   GOOGLE_OAUTH_CLIENT_SECRET=your_client_secret
+   ```
+
+When the setup signs in, it opens Google in your browser (or prints a link to open). Google warns that it **"hasn't verified this app"**. That is expected: the app is your own client, not one Google has reviewed. Choose **Advanced**, then **Go to … (unsafe)**, and allow access, leaving every box ticked. The setup asks for permission to create and edit your spreadsheets, and to share the files it creates. It keeps the sign-in only while it runs and saves nothing to disk.
+
 ## Configuring for your WSO
 
-The app is designed to be adapted for any USAW WSO. All WSO-specific settings live in one file: [`src/Data/wsoConfig.json`](src/Data/wsoConfig.json). [`src/Data/RoutesAndSettings.ts`](src/Data/RoutesAndSettings.ts) re-exports these values to the rest of the app (with a comment on each), and holds the USAW platform settings, which are the same for every WSO and should not need to change. The node scripts in `scripts/` read the same JSON file.
+The app is designed to be adapted for any USAW WSO. To set it up from scratch, [`npm run setup-application`](#setting-up-with-npm-run-setup-application) writes the config for you. All WSO-specific settings live in one file: [`src/Data/wsoConfig.json`](src/Data/wsoConfig.json). [`src/Data/RoutesAndSettings.ts`](src/Data/RoutesAndSettings.ts) re-exports these values to the rest of the app (with a comment on each), and holds the USAW platform settings, which are the same for every WSO and should not need to change. The node scripts in `scripts/` read the same JSON file.
 
 The app checks the file against `configSchema` in `RoutesAndSettings.ts` when it loads: a missing required field, or a field of the wrong type, fails with an error naming it. Fields marked optional (`'name?'`) may be left out, and fields the schema doesn't list are ignored. When you add a setting, add it to the schema too.
 

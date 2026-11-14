@@ -6,6 +6,8 @@ Every WSO-specific setting lives in one file: [`src/Data/wsoConfig.json`](src/Da
 - The scripts in `scripts/` read the JSON file directly.
 - API credentials do **not** go in this file. They go in `.env.local` (see the [README](README.md#7-set-your-api-credentials)).
 
+Setting up a new WSO? `npm run setup-application` asks for each required setting and writes this file for you, and can make the records spreadsheet too (see the [README](README.md#setting-up-with-npm-run-setup-application)). Add the optional settings below afterwards.
+
 ## How the file is checked
 
 When the app loads, it checks the file against `configSchema` in `RoutesAndSettings.ts`. If a required field is missing or a value has the wrong type, the app stops with an error that names every bad field, for example:

@@ -62,19 +62,25 @@ The script will:
 
 ### Output format
 
-The generated CSV (`record-breaking-analysis.csv`) has the following columns:
+The generated CSV (`record-breaking-analysis.csv`) uses the records sheet's own columns, in sheet order from `ageGroup` onward, so rows paste straight into the sheet starting at its `ageGroup` column. The record being replaced follows, then the readable weight class name:
 
 | Column | Description |
 |--------|-------------|
-| Age Group | e.g. `Open`, `Junior`, `Masters (35-39)` |
-| Weight Class | e.g. `Women's 63kg`, `Men's 89kg` |
-| Lift | `Snatch`, `Clean & Jerk`, or `Total` |
-| Athlete | Athlete's full name |
-| Weight (kg) | The lift weight |
-| Date | Date the lift was performed |
-| Event | Meet name |
-| Current Record (kg) | The existing record that would be broken |
-| Current Holder | Name of the current record holder |
+| ageGroup | e.g. `OPEN`, `JR`, `U15`, `W35`, `M40` |
+| gender | `F` or `M` |
+| ageMin / ageMax | The age group's age range |
+| bodyWeightMin / bodyWeightMax | The weight class's bounds; the top class is written `>86` |
+| lift | `Snatch`, `Clean & Jerk`, or `Total` |
+| record | The new lift weight |
+| name | Athlete's full name |
+| date | Date the lift was performed |
+| place | Meet name |
+| clubName | The athlete's club at that meet |
+| Previous Record | The existing record that would be broken |
+| Previous Holder | Name of the current record holder |
+| Weight Class | The class as people read it, e.g. `Women's 77kg` |
+
+The Scripts page's **Fetch Record Updates** downloads the same layout. **Fetch Adaptive Record Updates** writes one table per adaptive category, each headed by the category's tab name, with the lifter's `Bodyweight` and `USAW Number` between `clubName` and the previous-record columns, and `Weight Class` last. `npm run gather-history-records` writes `historic-records.csv` with `startDate` and `endDate` first (the dates of the weight-class set each row was found in), then `ageGroup` through `clubName` and `Weight Class`. It has no previous-record columns, since it doesn't compare against current records.
 
 ### Requirements
 

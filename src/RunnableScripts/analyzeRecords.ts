@@ -18,7 +18,14 @@ import {
   u15WeightClasses,
   u17WeightClasses,
 } from '../Data/youthWeightClasses';
-import { csvField, rateLimitedFetch } from '../Utils/Utils';
+import {
+  clubText,
+  csvField,
+  rateLimitedFetch,
+  recordSheetColumns,
+  sheetAgeGroupLabel,
+  weightClassIndicator,
+} from '../Utils/Utils';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -140,6 +147,7 @@ interface BestLift {
   weight: number;
   date: string;
   event: string;
+  club: string;
 }
 
 interface BestLifts {
@@ -170,7 +178,12 @@ function extractBestLifts(
     if (meetYear < minYearForLifter || meetYear > maxYearForLifter) continue;
 
     if (lift.best_snatch && (!bestLifts.snatch || lift.best_snatch > bestLifts.snatch.weight)) {
-      bestLifts.snatch = { weight: lift.best_snatch, date: lift.date, event: lift.meet ?? '' };
+      bestLifts.snatch = {
+        weight: lift.best_snatch,
+        date: lift.date,
+        event: lift.meet ?? '',
+        club: clubText(lift.club),
+      };
     }
     if (
       lift['best_c&j'] &&
@@ -180,31 +193,43 @@ function extractBestLifts(
         weight: lift['best_c&j'],
         date: lift.date,
         event: lift.meet ?? '',
+        club: clubText(lift.club),
       };
     }
     if (lift.total && (!bestLifts.total || lift.total > bestLifts.total.weight)) {
-      bestLifts.total = { weight: lift.total, date: lift.date, event: lift.meet ?? '' };
+      bestLifts.total = {
+        weight: lift.total,
+        date: lift.date,
+        event: lift.meet ?? '',
+        club: clubText(lift.club),
+      };
     }
   }
 
   return bestLifts;
 }
 
-interface RecordBreaker {
+export interface RecordBreaker {
   liftType: string;
   athlete: string;
   weight: number;
-  weightClass: string;
   ageGroup: string;
+  weightClassName: string;
+  gender: 'F' | 'M';
+  ageMin: string;
+  ageMax: string;
+  bodyWeightMin: number;
+  bodyWeightMax: string;
   date: string;
   event: string;
+  clubName: string;
   wouldBreak: number | null;
   currentHolder: string | null;
   ageGroupIndex: number;
   weightClassIndex: number;
 }
 
-function generateCsv(recordBreakers: RecordBreaker[]): string {
+export function generateCsv(recordBreakers: RecordBreaker[]): string {
   const liftOrder: Record<string, number> = { snatch: 0, 'clean & jerk': 1, total: 2 };
   const liftLabel: Record<string, string> = {
     snatch: 'Snatch',
@@ -221,27 +246,23 @@ function generateCsv(recordBreakers: RecordBreaker[]): string {
   });
 
   const rows = [
-    [
-      'Age Group',
-      'Weight Class',
-      'Lift',
-      'Athlete',
-      'Weight (kg)',
-      'Date',
-      'Event',
-      'Current Record (kg)',
-      'Current Holder',
-    ],
+    [...recordSheetColumns, 'Previous Record', 'Previous Holder', 'Weight Class'],
     ...sorted.map((lift) => [
       lift.ageGroup,
-      lift.weightClass,
+      lift.gender,
+      lift.ageMin,
+      lift.ageMax,
+      lift.bodyWeightMin,
+      lift.bodyWeightMax,
       liftLabel[lift.liftType] || lift.liftType,
-      lift.athlete,
       lift.weight,
+      lift.athlete,
       lift.date,
       lift.event,
+      lift.clubName,
       lift.wouldBreak ?? '',
       lift.currentHolder || '',
+      lift.weightClassName,
     ]),
   ];
 
@@ -285,10 +306,7 @@ export async function runAnalyzeRecords(): Promise<string> {
             if (new Date(liftData.date).getFullYear() !== currentYear) continue;
 
             const genderKey = weightClass.gender === 'female' ? 'F' : 'M';
-            const wcKey =
-              weightClass.maxBodyweight === '1000'
-                ? '>' + parseInt(weightClass.minBodyweight)
-                : weightClass.maxBodyweight;
+            const wcKey = weightClassIndicator(weightClass);
             const recordKey = `${genderKey}_${ageGroup.id}_${wcKey}_${liftType}`;
             const currentRecord = currentRecords[recordKey];
 
@@ -297,10 +315,16 @@ export async function runAnalyzeRecords(): Promise<string> {
                 liftType,
                 athlete: athlete.name || 'Unknown',
                 weight: liftData.weight,
-                weightClass: weightClass.name,
-                ageGroup: ageGroup.name,
+                ageGroup: sheetAgeGroupLabel(ageGroup, genderKey),
+                weightClassName: weightClass.name,
+                gender: genderKey,
+                ageMin: ageGroup.minimum_lifter_age,
+                ageMax: ageGroup.maximum_lifter_age,
+                bodyWeightMin: Math.round(parseFloat(weightClass.minBodyweight)),
+                bodyWeightMax: wcKey,
                 date: liftData.date || '',
                 event: liftData.event || '',
+                clubName: liftData.club,
                 wouldBreak: currentRecord.weight,
                 currentHolder: currentRecord.lifter,
                 ageGroupIndex: ageGroups.indexOf(ageGroup),

@@ -250,7 +250,7 @@ describe('RoutesAndSettings (user-based)', () => {
       expect(settings.adaptiveRecordsPageAvailable).toBe(true);
     });
 
-    test('the menu item needs both a category tab and showAdaptiveRecordsInMenu', () => {
+    test('the menu item needs both an adaptive records tab and showAdaptiveRecordsInMenu', () => {
       const withCategory = {
         ...configWithoutAdaptive,
         adaptiveCategoryRecordsSheetNames: { physical: 'Phys' },
@@ -264,7 +264,7 @@ describe('RoutesAndSettings (user-based)', () => {
           .showAdaptiveRecordsInMenu
       ).toBe(false);
       expect(
-        loadWithConfig({ ...configWithoutAdaptive, adaptiveAllRecordsSheetName: 'All' })
+        loadWithConfig({ ...configWithoutAdaptive, showAdaptiveRecordsInMenu: true })
           .showAdaptiveRecordsInMenu
       ).toBe(false);
     });
@@ -288,7 +288,18 @@ describe('RoutesAndSettings (user-based)', () => {
         adaptiveAllRecordsSheetName: 'All',
       });
       expect(combinedOnly.adaptiveRecordsScriptAvailable).toBe(true);
-      expect(combinedOnly.adaptiveRecordsPageAvailable).toBe(false);
+    });
+
+    test('the combined tab alone is enough for the page and, with showAdaptiveRecordsInMenu, its menu item', () => {
+      const combinedOnly = { ...configWithoutAdaptive, adaptiveAllRecordsSheetName: 'All' };
+      const shown = loadWithConfig({ ...combinedOnly, showAdaptiveRecordsInMenu: true });
+      expect(shown.adaptiveCategories).toEqual([]);
+      expect(shown.adaptiveRecordsPageAvailable).toBe(true);
+      expect(shown.showAdaptiveRecordsInMenu).toBe(true);
+      expect(
+        loadWithConfig({ ...combinedOnly, showAdaptiveRecordsInMenu: false })
+          .showAdaptiveRecordsInMenu
+      ).toBe(false);
     });
   });
 

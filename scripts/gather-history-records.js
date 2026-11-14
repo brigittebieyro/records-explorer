@@ -372,6 +372,9 @@ async function gatherHistoryRecords(variableName) {
               date: liftData.date || '',
               event: liftData.event || '',
               clubName: liftData.club || '',
+              weightClassName: weightClass.name || '',
+              startDate: weightClass.start || '',
+              endDate: weightClass.end || '',
               wcIndex: weightClasses.indexOf(weightClass),
               agIndex: ageGroups.indexOf(ageGroup),
             });
@@ -404,6 +407,9 @@ async function gatherHistoryRecords(variableName) {
           date: '',
           event: '',
           clubName: '',
+          weightClassName: weightClass.name || '',
+          startDate: weightClass.start || '',
+          endDate: weightClass.end || '',
           wcIndex: weightClasses.indexOf(weightClass),
           agIndex: ageGroups.indexOf(ageGroup),
         });
@@ -443,8 +449,10 @@ function generateCsv(results) {
   });
 
   const rows = [
-    ['ageGroup', 'gender', 'ageMin', 'ageMax', 'bodyWeightMin', 'bodyWeightMax', 'lift', 'record', 'name', 'date', 'place', 'clubName'],
+    ['startDate', 'endDate', 'ageGroup', 'gender', 'ageMin', 'ageMax', 'bodyWeightMin', 'bodyWeightMax', 'lift', 'record', 'name', 'date', 'place', 'clubName', 'Weight Class'],
     ...sorted.map(r => [
+      r.startDate,
+      r.endDate,
       r.ageGroupId,
       r.gender,
       r.ageMin,
@@ -457,6 +465,7 @@ function generateCsv(results) {
       r.date,
       r.event,
       r.clubName,
+      r.weightClassName,
     ]),
   ];
 

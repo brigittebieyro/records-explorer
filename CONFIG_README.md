@@ -174,7 +174,7 @@ Adaptive records are optional. Every setting in this section except `showAdaptiv
 
 | You set | What you get |
 | --- | --- |
-| At least one tab in `adaptiveCategoryRecordsSheetNames` | The Adaptive Records page at `/adaptive`, listing those categories, and its menu item if `showAdaptiveRecordsInMenu` is `true`. |
+| `adaptiveAllRecordsSheetName`, or at least one tab in `adaptiveCategoryRecordsSheetNames` | The Adaptive Records page at `/adaptive`, and its menu item if `showAdaptiveRecordsInMenu` is `true`. The page lists the combined records if that tab is set, and offers a category picker if any category tabs are set. |
 | Both `adaptiveLiftersListSheetId` and `adaptiveLiftersListSheetName`, plus `adaptiveAllRecordsSheetName` or at least one category tab | The "Fetch Adaptive Record Updates" script on `/scripts`. |
 | None of them | No adaptive page, menu item or script. `showAdaptiveRecordsInMenu` is still required, but has no effect. |
 
@@ -192,14 +192,14 @@ The tab in that spreadsheet that lists the athletes. The adaptive records script
 The athletes tab marks each athlete's categories with TRUE/FALSE columns: one for each category you set a tab for, in the order physical, hearing, vision, cognitive.
 
 ### `adaptiveAllRecordsSheetName` (string, optional)
-The tab, in the [current records spreadsheet](#currentrecordssheetid-string), that holds the combined adaptive records across every category. The adaptive records script checks every athlete on the roster against it. The Adaptive Records page doesn't list it.
+The tab, in the [current records spreadsheet](#currentrecordssheetid-string), that holds the combined adaptive records across every category. The adaptive records script checks every athlete on the roster against it. When it's set, the Adaptive Records page opens on these records until someone picks a category, and goes back to them on Reset. When it's left out, the page opens on its description alone. This tab on its own is enough for the page to exist; with no category tabs, the page shows only these records and no category picker.
 
 ```json
 "adaptiveAllRecordsSheetName": "Adaptive_All"
 ```
 
 ### `adaptiveCategoryRecordsSheetNames` (object of up to 4 strings, optional)
-The tab, in the same spreadsheet, for each adaptive category you track. The keys are `physical`, `hearing`, `vision` and `cognitive`; leave out any category you don't track, and it won't appear on the site. Without any category tabs there is no Adaptive Records page.
+The tab, in the same spreadsheet, for each adaptive category you track. The keys are `physical`, `hearing`, `vision` and `cognitive`; leave out any category you don't track, and it won't appear on the site. Without any category tabs the page has no category picker, and without either these or [`adaptiveAllRecordsSheetName`](#adaptiveallrecordssheetname-string-optional) there is no Adaptive Records page.
 
 ```json
 "adaptiveCategoryRecordsSheetNames": {
@@ -220,7 +220,7 @@ The form adaptive athletes fill in to opt in. When it's set, the Adaptive Record
 ```
 
 ### `showAdaptiveRecordsInMenu` (boolean)
-Whether the header menu links to the Adaptive WSO Records page. Set to `false` to hide the menu item; the page still works for anyone who has its address. With no category tabs configured there is no page, so there's no menu item even when this is `true`.
+Whether the header menu links to the Adaptive WSO Records page. Set to `false` to hide the menu item; the page still works for anyone who has its address. With neither `adaptiveAllRecordsSheetName` nor any category tabs configured there is no page, so there's no menu item even when this is `true`.
 
 ```json
 "showAdaptiveRecordsInMenu": true

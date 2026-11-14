@@ -336,10 +336,11 @@ export const adptiveCategoryRecordsSheetNames: string[] = adaptiveCategories.map
 );
 
 /**
- * Whether the Adaptive Records page exists. It lists records one category at a time, so it needs
- * at least one category tab; the /adaptive route is not served without one.
+ * Whether the Adaptive Records page exists. It needs the combined tab or at least one category
+ * tab; the /adaptive route is not served without one.
  */
-export const adaptiveRecordsPageAvailable: boolean = adaptiveCategories.length > 0;
+export const adaptiveRecordsPageAvailable: boolean =
+  adaptiveAllRecordsSheetName !== undefined || adaptiveCategories.length > 0;
 /**
  * Whether the header menu links to the Adaptive WSO Records page: the config's
  * showAdaptiveRecordsInMenu, and only when the page is available.

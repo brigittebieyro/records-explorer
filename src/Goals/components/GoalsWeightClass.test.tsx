@@ -20,7 +20,7 @@ const makeWeightClass = (overrides: object = {}): WeightClass =>
 
 const makeGoalLifter = (overrides: object = {}): CombinedLiftData =>
   ({
-    name: 'Jane Doe',
+    name: 'Jane Smith',
     total: 180,
     lifter_age: '25',
     lift_date: '2026-01-15',
@@ -114,7 +114,7 @@ describe('GoalsWeightClass (user-based)', () => {
     renderGoalsWeightClass();
 
     await waitFor(() => {
-      expect(screen.getByText(/180kg • Jane Doe/)).toBeInTheDocument();
+      expect(screen.getByText(/180kg • Jane Smith/)).toBeInTheDocument();
     });
     // The list is visible while a small "Verifying" indicator is still checking each athlete.
     expect(screen.getByText('Verifying')).toBeInTheDocument();
@@ -125,9 +125,9 @@ describe('GoalsWeightClass (user-based)', () => {
 
     renderGoalsWeightClass();
 
-    await waitFor(() => expect(screen.getByText(/Jane Doe/)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Jane Smith/)).toBeInTheDocument());
     await waitForVerificationToFinish();
-    expect(screen.getByText(/180kg • Jane Doe/)).toBeInTheDocument();
+    expect(screen.getByText(/180kg • Jane Smith/)).toBeInTheDocument();
   });
 
   test('D-02: requests rankings for the weight class with room for the maybes plus spares', async () => {
@@ -147,14 +147,13 @@ describe('GoalsWeightClass (user-based)', () => {
 
   test('D-03: renders at most safeCount + 10 entries', async () => {
     const lifters = Array.from({ length: 15 }, (_, index) =>
-      makeGoalLifter({ name: `Lifter ${index + 1}`, total: 200 - index })
+      makeGoalLifter({ name: `Jane ${String.fromCharCode(65 + index)}. Smith`, total: 200 - index })
     );
     mockFetchResponses(lifters);
 
     const { container } = renderGoalsWeightClass({ safeCount: 2 });
 
-    // "Lifter 9" is the last name that isn't also a prefix of a higher-numbered one.
-    await waitFor(() => expect(screen.getByText(/Lifter 9/)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Jane I\. Smith/)).toBeInTheDocument());
     await waitForVerificationToFinish();
     expect(container.querySelectorAll('.goals-list-item')).toHaveLength(12);
   });
@@ -162,21 +161,21 @@ describe('GoalsWeightClass (user-based)', () => {
   test('D-04: WSO members are gold-highlighted and show their club', async () => {
     mockFetchResponses([
       makeGoalLifter({
-        name: 'Member Lifter',
+        name: 'Jane A. Smith',
         wso: 'California North Central',
         club: 'Sacramento Barbell',
       }),
-      makeGoalLifter({ name: 'Outside Lifter', wso: 'Pacific Northwest', total: 170 }),
+      makeGoalLifter({ name: 'Jane B. Smith', wso: 'Pacific Northwest', total: 170 }),
     ]);
 
     const { container } = renderGoalsWeightClass();
 
-    await waitFor(() => expect(screen.getByText(/Member Lifter/)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Jane A\. Smith/)).toBeInTheDocument());
     await waitForVerificationToFinish();
 
     const items = Array.from(container.querySelectorAll('.goals-list-item'));
-    const memberRow = items.find((item) => item.textContent?.includes('Member Lifter'));
-    const outsideRow = items.find((item) => item.textContent?.includes('Outside Lifter'));
+    const memberRow = items.find((item) => item.textContent?.includes('Jane A. Smith'));
+    const outsideRow = items.find((item) => item.textContent?.includes('Jane B. Smith'));
     expect(memberRow).toHaveClass('goals-list-highlight');
     expect(memberRow?.textContent).toContain('Sacramento Barbell');
     expect(outsideRow).not.toHaveClass('goals-list-highlight');
@@ -187,36 +186,36 @@ describe('GoalsWeightClass (user-based)', () => {
     // The rankings API returns { type: 'unset' } in place of a string for empty columns.
     mockFetchResponses([
       makeGoalLifter({
-        name: 'Member Lifter',
+        name: 'Jane A. Smith',
         wso: 'California North Central',
         club: { type: 'unset' },
       }),
-      makeGoalLifter({ name: 'Outside Lifter', total: 170, wso: { type: 'unset' } }),
+      makeGoalLifter({ name: 'Jane B. Smith', total: 170, wso: { type: 'unset' } }),
     ]);
 
     const { container } = renderGoalsWeightClass();
 
-    await waitFor(() => expect(screen.getByText(/Member Lifter/)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Jane A\. Smith/)).toBeInTheDocument());
     await waitForVerificationToFinish();
 
     const items = Array.from(container.querySelectorAll('.goals-list-item'));
-    const memberRow = items.find((item) => item.textContent?.includes('Member Lifter'));
-    const outsideRow = items.find((item) => item.textContent?.includes('Outside Lifter'));
+    const memberRow = items.find((item) => item.textContent?.includes('Jane A. Smith'));
+    const outsideRow = items.find((item) => item.textContent?.includes('Jane B. Smith'));
     expect(memberRow?.textContent).toContain('Unaffiliated');
     expect(memberRow).toHaveClass('goals-list-highlight');
-    expect(outsideRow?.textContent).toContain('170kg • Outside Lifter');
+    expect(outsideRow?.textContent).toContain('170kg • Jane B. Smith');
     expect(outsideRow?.textContent).not.toContain('unset');
   });
 
   test('D-05: entries below the qualifying cutoff are marked tentative', async () => {
     const lifters = Array.from({ length: 4 }, (_, index) =>
-      makeGoalLifter({ name: `Lifter ${index + 1}`, total: 200 - index })
+      makeGoalLifter({ name: `Jane ${String.fromCharCode(65 + index)}. Smith`, total: 200 - index })
     );
     mockFetchResponses(lifters);
 
     const { container } = renderGoalsWeightClass({ safeCount: 2 });
 
-    await waitFor(() => expect(screen.getByText(/Lifter 1/)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Jane A\. Smith/)).toBeInTheDocument());
     await waitForVerificationToFinish();
 
     const items = Array.from(container.querySelectorAll('.goals-list-item'));
@@ -230,11 +229,11 @@ describe('GoalsWeightClass (user-based)', () => {
   });
 
   test('D-04: each entry shows the date of the lift behind the total', async () => {
-    mockFetchResponses([makeGoalLifter({ name: 'Dated Lifter', lift_date: '2026-01-15' })]);
+    mockFetchResponses([makeGoalLifter({ name: 'Jane Smith', lift_date: '2026-01-15' })]);
 
     const { container } = renderGoalsWeightClass();
 
-    await waitFor(() => expect(screen.getByText(/Dated Lifter/)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Jane Smith/)).toBeInTheDocument());
     await waitForVerificationToFinish();
 
     expect(container.querySelector('.goals-list-item')?.textContent).toContain('2026-01-15');
@@ -242,10 +241,10 @@ describe('GoalsWeightClass (user-based)', () => {
 
   test('D-05: WSO member highlighting still applies to tentative rows', async () => {
     mockFetchResponses([
-      makeGoalLifter({ name: 'Lifter 1', total: 200 }),
-      makeGoalLifter({ name: 'Lifter 2', total: 190 }),
+      makeGoalLifter({ name: 'Jane A. Smith', total: 200 }),
+      makeGoalLifter({ name: 'Jane B. Smith', total: 190 }),
       makeGoalLifter({
-        name: 'Probable Member',
+        name: 'Jane C. Smith',
         total: 180,
         wso: 'California North Central',
       }),
@@ -253,7 +252,7 @@ describe('GoalsWeightClass (user-based)', () => {
 
     const { container } = renderGoalsWeightClass({ safeCount: 2 });
 
-    await waitFor(() => expect(screen.getByText(/Probable Member/)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Jane C\. Smith/)).toBeInTheDocument());
     await waitForVerificationToFinish();
 
     const items = Array.from(container.querySelectorAll('.goals-list-item'));
@@ -263,13 +262,13 @@ describe('GoalsWeightClass (user-based)', () => {
 
   test('D-06: rank circles count 1, 2, 3… in order', async () => {
     const lifters = Array.from({ length: 4 }, (_, index) =>
-      makeGoalLifter({ name: `Lifter ${index + 1}`, total: 200 - index })
+      makeGoalLifter({ name: `Jane ${String.fromCharCode(65 + index)}. Smith`, total: 200 - index })
     );
     mockFetchResponses(lifters);
 
     const { container } = renderGoalsWeightClass({ safeCount: 2 });
 
-    await waitFor(() => expect(screen.getByText(/Lifter 1/)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Jane A\. Smith/)).toBeInTheDocument());
     await waitForVerificationToFinish();
 
     const ranks = Array.from(container.querySelectorAll('.goals-rank-circle')).map(
@@ -279,37 +278,37 @@ describe('GoalsWeightClass (user-based)', () => {
   });
 
   test('G-04: an athlete whose ranking total is backed by a real meet stays on the list unchanged', async () => {
-    mockFetchResponses([makeLifterWithId('1', { name: 'Supported Lifter', total: 180 })], {
+    mockFetchResponses([makeLifterWithId('1', { name: 'Jane Smith', total: 180 })], {
       '1': { ok: true, data: [makeMeet({ total: 180 })] },
     });
 
     renderGoalsWeightClass();
 
-    await waitFor(() => expect(screen.getByText(/Supported Lifter/)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Jane Smith/)).toBeInTheDocument());
     await waitForVerificationToFinish();
 
-    expect(screen.getByText(/180kg • Supported Lifter/)).toBeInTheDocument();
+    expect(screen.getByText(/180kg • Jane Smith/)).toBeInTheDocument();
   });
 
   test('G-04: an athlete whose ranking total is not directly backed, but a total within 20kg is, gets their total corrected', async () => {
-    mockFetchResponses([makeLifterWithId('1', { name: 'Corrected Lifter', total: 180 })], {
+    mockFetchResponses([makeLifterWithId('1', { name: 'Jane Smith', total: 180 })], {
       '1': { ok: true, data: [makeMeet({ total: 172 })] },
     });
 
     renderGoalsWeightClass();
 
-    await waitFor(() => expect(screen.getByText(/Corrected Lifter/)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Jane Smith/)).toBeInTheDocument());
     await waitForVerificationToFinish();
 
-    expect(screen.getByText(/172kg • Corrected Lifter/)).toBeInTheDocument();
-    expect(screen.queryByText(/180kg • Corrected Lifter/)).toBeNull();
+    expect(screen.getByText(/172kg • Jane Smith/)).toBeInTheDocument();
+    expect(screen.queryByText(/180kg • Jane Smith/)).toBeNull();
   });
 
   test('G-04: an athlete with no supporting meet within 20kg is removed, and later athletes move up in rank', async () => {
     mockFetchResponses(
       [
-        makeLifterWithId('1', { name: 'Unsupported Lifter', total: 300 }),
-        makeLifterWithId('2', { name: 'Next Lifter', total: 250 }),
+        makeLifterWithId('1', { name: 'Jane A. Smith', total: 300 }),
+        makeLifterWithId('2', { name: 'Jane B. Smith', total: 250 }),
       ],
       {
         '1': { ok: true, data: [makeMeet({ total: 150 })] }, // nowhere near 300, so unsupported
@@ -319,10 +318,10 @@ describe('GoalsWeightClass (user-based)', () => {
 
     const { container } = renderGoalsWeightClass();
 
-    await waitFor(() => expect(screen.getByText(/Next Lifter/)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Jane B\. Smith/)).toBeInTheDocument());
     await waitForVerificationToFinish();
 
-    expect(screen.queryByText(/Unsupported Lifter/)).toBeNull();
+    expect(screen.queryByText(/Jane A\. Smith/)).toBeNull();
     const items = Array.from(container.querySelectorAll('.goals-list-item'));
     expect(items).toHaveLength(1);
     expect(container.querySelector('.goals-rank-circle')?.textContent).toBe('1');
@@ -331,37 +330,37 @@ describe('GoalsWeightClass (user-based)', () => {
   test('G-04: a total correction that changes the order re-sorts the list', async () => {
     mockFetchResponses(
       [
-        makeLifterWithId('1', { name: 'Lifter A', total: 190 }),
-        makeLifterWithId('2', { name: 'Lifter B', total: 180 }),
+        makeLifterWithId('1', { name: 'Jane A. Smith', total: 190 }),
+        makeLifterWithId('2', { name: 'Jane B. Smith', total: 180 }),
       ],
       {
         '1': { ok: true, data: [makeMeet({ total: 190 })] }, // stays at 190
-        '2': { ok: true, data: [makeMeet({ total: 198 })] }, // corrected up past Lifter A
+        '2': { ok: true, data: [makeMeet({ total: 198 })] }, // corrected up past Jane A. Smith
       }
     );
 
     const { container } = renderGoalsWeightClass();
 
-    await waitFor(() => expect(screen.getByText(/Lifter A/)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Jane A\. Smith/)).toBeInTheDocument());
     await waitForVerificationToFinish();
 
     const items = Array.from(container.querySelectorAll('.goals-list-item'));
-    expect(items[0].textContent).toContain('Lifter B');
+    expect(items[0].textContent).toContain('Jane B. Smith');
     expect(items[0].textContent).toContain('198kg');
-    expect(items[1].textContent).toContain('Lifter A');
+    expect(items[1].textContent).toContain('Jane A. Smith');
   });
 
   test('G-04: an athlete whose individual data cannot be pulled is kept and assumed valid', async () => {
-    mockFetchResponses([makeLifterWithId('1', { name: 'Unverifiable Lifter', total: 180 })], {
+    mockFetchResponses([makeLifterWithId('1', { name: 'Jane Smith', total: 180 })], {
       '1': { ok: false },
     });
 
     renderGoalsWeightClass();
 
-    await waitFor(() => expect(screen.getByText(/Unverifiable Lifter/)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Jane Smith/)).toBeInTheDocument());
     await waitForVerificationToFinish();
 
-    expect(screen.getByText(/180kg • Unverifiable Lifter/)).toBeInTheDocument();
+    expect(screen.getByText(/180kg • Jane Smith/)).toBeInTheDocument();
   });
 
   test('a failed rankings fetch leaves the spinner without crashing', async () => {

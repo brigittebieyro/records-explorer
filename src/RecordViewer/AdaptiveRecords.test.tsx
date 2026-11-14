@@ -49,10 +49,10 @@ const row = (
 
 // Only rows whose weight class matches a real current class are rendered, so the bodyweight
 // bounds here mirror Women's 77kg and Men's 85kg.
-const withRecord = (holder: string) => [
+const withRecord = (womensHolder: string, mensHolder = 'Jim Brown') => [
   sheetHeader,
-  row('Open', 'F', '69', '77', 'Snatch', '70', holder),
-  row('Open', 'M', '75', '85', 'Snatch', '120', `${holder} Two`),
+  row('Open', 'F', '69', '77', 'Snatch', '70', womensHolder),
+  row('Open', 'M', '75', '85', 'Snatch', '120', mensHolder),
 ];
 
 const standardsOnly = [
@@ -94,19 +94,19 @@ describe('AdaptiveRecords (user-based)', () => {
   });
 
   test('opens on the preamble, listing no records until a category is applied', async () => {
-    mockSheets({ Adaptive_All: withRecord('Jane Doe') });
+    mockSheets({ Adaptive_All: withRecord('Jane Smith') });
 
     render(<AdaptiveRecords />);
 
     expect(await landing()).toBeInTheDocument();
     // Records are per-category: there is no combined listing to land on.
     expect(screen.queryByText('All Adaptive Record Holders')).toBeNull();
-    expect(screen.queryByText('Jane Doe')).toBeNull();
+    expect(screen.queryByText('Jane Smith')).toBeNull();
     expect(screen.queryByTestId('circle-loader')).toBeNull();
   });
 
   test('shows its own description rather than the home page fine print', async () => {
-    mockSheets({ Adaptive_All: withRecord('Jane Doe') });
+    mockSheets({ Adaptive_All: withRecord('Jane Smith') });
 
     render(<AdaptiveRecords />);
 
@@ -115,7 +115,7 @@ describe('AdaptiveRecords (user-based)', () => {
   });
 
   test('renders the opt-in form as a working link, not escaped markup', async () => {
-    mockSheets({ Adaptive_All: withRecord('Jane Doe') });
+    mockSheets({ Adaptive_All: withRecord('Jane Smith') });
 
     render(<AdaptiveRecords />);
 
@@ -131,9 +131,9 @@ describe('AdaptiveRecords (user-based)', () => {
     // The real sheets carry exactly one row per slot, so the unclaimed standard sits in a
     // different weight class from the held record — here Women's 86kg beside Women's 77kg.
     mockSheets({
-      Adaptive_All: withRecord('Jane Doe'),
+      Adaptive_All: withRecord('Jane Smith'),
       Adaptive_Vision: [
-        ...withRecord('Vision Holder'),
+        ...withRecord('Jane V. Smith'),
         row('Open', 'F', '77', '86', 'Snatch', '0', 'STANDARD'),
       ],
     });
@@ -142,13 +142,13 @@ describe('AdaptiveRecords (user-based)', () => {
     await landing();
     await chooseCategory('Visual Impairment');
 
-    await screen.findByText('Vision Holder');
+    await screen.findByText('Jane V. Smith');
     expect(screen.queryByText('STANDARD')).toBeNull();
   });
 
   test('says so plainly when a category holds only standards, instead of hanging on the loader', async () => {
     mockSheets({
-      Adaptive_All: withRecord('Jane Doe'),
+      Adaptive_All: withRecord('Jane Smith'),
       Adaptive_Vision: standardsOnly,
     });
 
@@ -163,8 +163,8 @@ describe('AdaptiveRecords (user-based)', () => {
 
   test('Go stays disabled until a category is picked, and nothing loads before it is pressed', async () => {
     const fetchMock = mockSheets({
-      Adaptive_All: withRecord('Jane Doe'),
-      Adaptive_Vision: withRecord('Vision Holder'),
+      Adaptive_All: withRecord('Jane Smith'),
+      Adaptive_Vision: withRecord('Jane V. Smith'),
     });
 
     render(<AdaptiveRecords />);
@@ -176,14 +176,14 @@ describe('AdaptiveRecords (user-based)', () => {
 
     // Armed, but the view has not moved and no request went out yet.
     expect(screen.getByRole('button', { name: 'Go' })).toBeEnabled();
-    expect(screen.queryByText('Vision Holder')).toBeNull();
+    expect(screen.queryByText('Jane V. Smith')).toBeNull();
     expect(fetchMock).toHaveBeenCalledTimes(fetchesOnLoad);
   });
 
   test('choosing a category and pressing Go loads that category sheet', async () => {
     const fetchMock = mockSheets({
-      Adaptive_All: withRecord('Jane Doe'),
-      Adaptive_Vision: withRecord('Vision Holder'),
+      Adaptive_All: withRecord('Jane Smith'),
+      Adaptive_Vision: withRecord('Jane V. Smith'),
     });
 
     render(<AdaptiveRecords />);
@@ -191,7 +191,7 @@ describe('AdaptiveRecords (user-based)', () => {
 
     await chooseCategory('Visual Impairment');
 
-    expect(await screen.findByText('Vision Holder')).toBeInTheDocument();
+    expect(await screen.findByText('Jane V. Smith')).toBeInTheDocument();
     expect(screen.getByText('Visual Impairment Record Holders')).toBeInTheDocument();
     expect(fetchMock.mock.calls.some(([url]) => String(url).includes('Adaptive_Vision'))).toBe(
       true
@@ -200,8 +200,8 @@ describe('AdaptiveRecords (user-based)', () => {
 
   test('the Reset button appears only once a category is chosen, and returns to the preamble', async () => {
     mockSheets({
-      Adaptive_All: withRecord('Jane Doe'),
-      Adaptive_Physical: withRecord('Physical Holder'),
+      Adaptive_All: withRecord('Jane Smith'),
+      Adaptive_Physical: withRecord('Jane P. Smith'),
     });
 
     render(<AdaptiveRecords />);
@@ -209,13 +209,13 @@ describe('AdaptiveRecords (user-based)', () => {
     expect(screen.queryByRole('button', { name: 'Reset' })).toBeNull();
 
     await chooseCategory('Physical Disability');
-    await screen.findByText('Physical Holder');
+    await screen.findByText('Jane P. Smith');
     const reset = screen.getByRole('button', { name: 'Reset' });
 
     await userEvent.click(reset);
 
     await waitFor(() => {
-      expect(screen.queryByText('Physical Holder')).toBeNull();
+      expect(screen.queryByText('Jane P. Smith')).toBeNull();
     });
     expect(screen.getByText(/Keeping track of local adaptive athletes/)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Reset' })).toBeNull();
@@ -223,23 +223,23 @@ describe('AdaptiveRecords (user-based)', () => {
 
   test('returning to an already-viewed category refetches nothing', async () => {
     const fetchMock = mockSheets({
-      Adaptive_All: withRecord('Jane Doe'),
-      Adaptive_Hearing: withRecord('Hearing Holder'),
+      Adaptive_All: withRecord('Jane Smith'),
+      Adaptive_Hearing: withRecord('Jane H. Smith'),
     });
 
     render(<AdaptiveRecords />);
     await landing();
     await chooseCategory('Deaf, Deafened, or Hard of Hearing');
-    await screen.findByText('Hearing Holder');
+    await screen.findByText('Jane H. Smith');
     const fetchesAfterFirstView = fetchMock.mock.calls.length;
 
     await userEvent.click(screen.getByRole('button', { name: 'Reset' }));
     await waitFor(() => {
-      expect(screen.queryByText('Hearing Holder')).toBeNull();
+      expect(screen.queryByText('Jane H. Smith')).toBeNull();
     });
     await chooseCategory('Deaf, Deafened, or Hard of Hearing');
 
-    expect(await screen.findByText('Hearing Holder')).toBeInTheDocument();
+    expect(await screen.findByText('Jane H. Smith')).toBeInTheDocument();
     // Every sheet on this path has been seen already, so nothing went back out.
     expect(fetchMock).toHaveBeenCalledTimes(fetchesAfterFirstView);
   });

@@ -21,7 +21,7 @@ const {
 } = require('./render');
 
 const RECORD = {
-  weight: '76', lifter: 'Jade Morales', date: '2026-06-23',
+  weight: '76', lifter: 'Jane Smith', date: '2026-06-23',
   event: '2026 USAW National Championships & Mountain North WSO Championships',
   ageGroupId: 'OPEN', gender: 'F', weightClass: '53', lift: 'Snatch',
   sheetName: 'Post-Aug2026',
@@ -114,15 +114,15 @@ test('formatDate never prints the word undefined for an impossible month', () =>
 // ---------------------------------------------------------------------------------------------
 
 test('encodeStringForFileName returns an ASCII token, whatever the cell held', () => {
-  assert.strictEqual(encodeStringForFileName('Jane Doe'), 'JaneDoe');
+  assert.strictEqual(encodeStringForFileName('Jane Smith'), 'JaneSmith');
   // Accented letters keep their base form rather than vanishing.
-  assert.strictEqual(encodeStringForFileName('José Álvarez'), 'JoseAlvarez');
+  assert.strictEqual(encodeStringForFileName('Jáne Smíth'), 'JaneSmith');
   // A date the sheet wrote with slashes stays readable.
   assert.strictEqual(encodeStringForFileName('10/18/2025'), '10-18-2025');
   assert.strictEqual(encodeStringForFileName('2025-10-18'), '2025-10-18');
   // A quote or newline in a cell cannot reach the Content-Disposition header.
-  assert.strictEqual(encodeStringForFileName('Jane "JD"\nDoe'), 'Jane-JD-Doe');
-  assert.strictEqual(encodeStringForFileName("O'Brien-Smith"), 'O-Brien-Smith');
+  assert.strictEqual(encodeStringForFileName('Jane "JS"\nSmith'), 'Jane-JS-Smith');
+  assert.strictEqual(encodeStringForFileName("Jim O'Brown"), 'JimO-Brown');
   assert.strictEqual(encodeStringForFileName(''), '');
   assert.strictEqual(encodeStringForFileName(null), '');
   assert.strictEqual(encodeStringForFileName(undefined), '');
@@ -130,25 +130,25 @@ test('encodeStringForFileName returns an ASCII token, whatever the cell held', (
 
 test('certificateFileName is AthleteName_Lift_<date>.pdf', () => {
   assert.strictEqual(
-    certificateFileName({ lifter: 'Jane Doe', lift: 'Snatch', date: '2025-10-18' }),
-    'JaneDoe_Snatch_2025-10-18.pdf'
+    certificateFileName({ lifter: 'Jane Smith', lift: 'Snatch', date: '2025-10-18' }),
+    'JaneSmith_Snatch_2025-10-18.pdf'
   );
   assert.strictEqual(
-    certificateFileName({ lifter: 'Jane Doe', lift: 'Total', date: '10/18/2025' }),
-    'JaneDoe_Total_10-18-2025.pdf'
+    certificateFileName({ lifter: 'Jane Smith', lift: 'Total', date: '10/18/2025' }),
+    'JaneSmith_Total_10-18-2025.pdf'
   );
   // The three lifts an athlete can hold stay tellable apart, ampersand and all.
   assert.strictEqual(
-    certificateFileName({ lifter: 'Jane Doe', lift: 'Clean & Jerk', date: '2025-10-18' }),
-    'JaneDoe_Clean-Jerk_2025-10-18.pdf'
+    certificateFileName({ lifter: 'Jane Smith', lift: 'Clean & Jerk', date: '2025-10-18' }),
+    'JaneSmith_Clean-Jerk_2025-10-18.pdf'
   );
 });
 
 test('certificateFileName closes the gap when a part is missing', () => {
   // A row with no date is normal on the adaptive tabs -- no trailing separator.
   assert.strictEqual(
-    certificateFileName({ lifter: 'Jane Doe', lift: 'Snatch', date: null }),
-    'JaneDoe_Snatch.pdf'
+    certificateFileName({ lifter: 'Jane Smith', lift: 'Snatch', date: null }),
+    'JaneSmith_Snatch.pdf'
   );
   assert.strictEqual(
     certificateFileName({ lifter: '', lift: 'Snatch', date: '2025-10-18' }),
@@ -156,8 +156,8 @@ test('certificateFileName closes the gap when a part is missing', () => {
   );
   // The lift is required on the request, so this only guards the middle from collapsing away.
   assert.strictEqual(
-    certificateFileName({ lifter: 'Jane Doe', date: '2025-10-18' }),
-    'JaneDoe_Record_2025-10-18.pdf'
+    certificateFileName({ lifter: 'Jane Smith', date: '2025-10-18' }),
+    'JaneSmith_Record_2025-10-18.pdf'
   );
   assert.strictEqual(certificateFileName({}), 'Record.pdf');
 });
@@ -170,7 +170,7 @@ test('buildCertificateLines produces the certificate copy in order', () => {
   assert.deepStrictEqual(textOf(buildCertificateLines(RECORD)), [
     'California North Central WSO',
     'hereby certifies that',
-    'Jade Morales',
+    'Jane Smith',
     "has established the following record for the Women's Open 53kg category:",
     '76kg Snatch',
     'on June 23, 2026',
@@ -355,8 +355,8 @@ test('wrapRunToWidth breaks on word boundaries', () => {
 
 test('wrapRunToWidth keeps an over-long single word rather than dropping it', () => {
   const doc = fakeDoc();
-  const run = { text: 'Featherstonehaugh', font: BODY, size: 10 };
-  assert.deepStrictEqual(wrapRunToWidth(doc, run, 20), ['Featherstonehaugh']);
+  const run = { text: 'Smith', font: BODY, size: 10 };
+  assert.deepStrictEqual(wrapRunToWidth(doc, run, 20), ['Smith']);
 });
 
 test('drawCenteredWrapped never shrinks the font', () => {
@@ -410,7 +410,7 @@ test('renderCertificate handles a category long enough to wrap', async () => {
 // ---------------------------------------------------------------------------------------------
 // renderCertificate -- structural smoke only.
 //
-// expect(buf.toString()).toContain('Jade Morales') will NOT work: content streams are
+// expect(buf.toString()).toContain('Jane Smith') will NOT work: content streams are
 // Flate-compressed, and PDFKit emits hex glyph strings which for an embedded subset are
 // arbitrary glyph ids unrelated to the source characters. So assert against the uncompressed
 // object dictionaries instead. These strings were captured from the Phase 0 spike.
@@ -443,7 +443,7 @@ test('renderCertificate survives a very long lifter name', async () => {
   // artwork's flared ends.
   const buf = await renderCertificate({
     ...RECORD,
-    lifter: 'Bartholomew Featherstonehaugh-Vance the Third',
+    lifter: 'Jane A. B. C. D. E. F. G. H. I. J. K. L. Smith',
   });
   assert.ok(buf.toString('latin1').startsWith('%PDF-'));
 });

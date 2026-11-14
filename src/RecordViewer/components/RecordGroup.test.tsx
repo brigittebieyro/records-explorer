@@ -40,7 +40,7 @@ const makeAgeGroup = (overrides: object = {}): AgeGroup =>
 
 const makeLifter = (memberId: string, overrides: object = {}): CombinedLiftData =>
   ({
-    name: 'Jane Doe',
+    name: 'Jane Smith',
     total: 180,
     lifter_age: '25',
     lift_date: '2026-01-15',
@@ -119,7 +119,7 @@ describe('RecordGroup (user-based)', () => {
       return Promise.resolve({
         ok: true,
         json: async () => ({
-          data: [makeLifter('1'), makeLifter('2', { name: 'Amy Smith', total: 170 })],
+          data: [makeLifter('1'), makeLifter('2', { name: 'Jane B. Smith', total: 170 })],
         }),
       });
     });
@@ -134,15 +134,15 @@ describe('RecordGroup (user-based)', () => {
   });
 
   test('B-08: renders ranked lifters once the fetch completes', async () => {
-    mockFetchResponses([makeLifter('1'), makeLifter('2', { name: 'Amy Smith', total: 170 })]);
+    mockFetchResponses([makeLifter('1'), makeLifter('2', { name: 'Jane B. Smith', total: 170 })]);
 
     renderRecordGroup();
 
     await waitFor(() => {
       expect(screen.getAllByTestId('record-holder')).toHaveLength(2);
     });
-    expect(screen.getByText('Jane Doe')).toBeInTheDocument();
-    expect(screen.getByText('Amy Smith')).toBeInTheDocument();
+    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+    expect(screen.getByText('Jane B. Smith')).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.queryByTestId('circle-loader')).toBeNull();
     });
@@ -168,7 +168,10 @@ describe('RecordGroup (user-based)', () => {
 
   test('B-10: renders at most `count` lifters', async () => {
     const lifters = Array.from({ length: 7 }, (_, index) =>
-      makeLifter(String(index + 1), { name: `Lifter ${index + 1}`, total: 200 - index })
+      makeLifter(String(index + 1), {
+        name: `Jane ${String.fromCharCode(65 + index)}. Smith`,
+        total: 200 - index,
+      })
     );
     mockFetchResponses(lifters);
 
@@ -194,8 +197,8 @@ describe('RecordGroup (user-based)', () => {
   });
 
   test('B-13: changing the sort re-orders the lifters', async () => {
-    const totalLeader = makeLifter('1', { name: 'Total Leader', total: 180 });
-    const snatchLeader = makeLifter('2', { name: 'Snatch Leader', total: 170 });
+    const totalLeader = makeLifter('1', { name: 'Jane A. Smith', total: 180 });
+    const snatchLeader = makeLifter('2', { name: 'Jane B. Smith', total: 170 });
     mockFetchResponses([totalLeader, snatchLeader], {
       '1': [makeMeetRecord({ total: 180, best_snatch: 70 })],
       '2': [makeMeetRecord({ total: 170, best_snatch: 85 })],
@@ -207,13 +210,13 @@ describe('RecordGroup (user-based)', () => {
       expect(screen.getByLabelText('Sort')).toBeInTheDocument();
     });
     await waitFor(() => {
-      expect(screen.getAllByTestId('record-holder')[0]).toHaveTextContent('Total Leader');
+      expect(screen.getAllByTestId('record-holder')[0]).toHaveTextContent('Jane A. Smith');
     });
 
     await userEvent.selectOptions(screen.getByLabelText('Sort'), 'best_snatch');
 
     await waitFor(() => {
-      expect(screen.getAllByTestId('record-holder')[0]).toHaveTextContent('Snatch Leader');
+      expect(screen.getAllByTestId('record-holder')[0]).toHaveTextContent('Jane B. Smith');
     });
   });
 
@@ -246,7 +249,7 @@ describe('RecordGroup (user-based)', () => {
       }
       return Promise.resolve({
         ok: true,
-        json: async () => ({ data: [makeLifter('9', { name: 'Class B Lifter' })] }),
+        json: async () => ({ data: [makeLifter('9', { name: 'Jane B. Smith' })] }),
       });
     });
 
@@ -265,19 +268,19 @@ describe('RecordGroup (user-based)', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Class B Lifter')).toBeInTheDocument();
+      expect(screen.getByText('Jane B. Smith')).toBeInTheDocument();
     });
 
     // Class A's stale response lands after the switch — it must not leak in.
     await act(async () => {
       resolveA({
         ok: true,
-        json: async () => ({ data: [makeLifter('1', { name: 'Class A Lifter' })] }),
+        json: async () => ({ data: [makeLifter('1', { name: 'Jane A. Smith' })] }),
       });
     });
 
-    expect(screen.queryByText('Class A Lifter')).toBeNull();
-    expect(screen.getByText('Class B Lifter')).toBeInTheDocument();
+    expect(screen.queryByText('Jane A. Smith')).toBeNull();
+    expect(screen.getByText('Jane B. Smith')).toBeInTheDocument();
   });
 
   test('G-01: a failed rankings fetch does not crash the component', async () => {
@@ -292,28 +295,28 @@ describe('RecordGroup (user-based)', () => {
 
   test('G-04: lifters with implausible totals are dropped from the rankings', async () => {
     mockFetchResponses([
-      makeLifter('1', { name: 'Plausible Lifter', total: 470 }),
-      makeLifter('2', { name: 'Implausible Lifter', total: 560 }),
+      makeLifter('1', { name: 'Jane A. Smith', total: 470 }),
+      makeLifter('2', { name: 'Jane B. Smith', total: 560 }),
     ]);
 
     renderRecordGroup();
 
     await waitFor(() => {
-      expect(screen.getByText('Plausible Lifter')).toBeInTheDocument();
+      expect(screen.getByText('Jane A. Smith')).toBeInTheDocument();
     });
-    expect(screen.queryByText('Implausible Lifter')).toBeNull();
+    expect(screen.queryByText('Jane B. Smith')).toBeNull();
   });
 
   test('G-04: ineligible athletes are excluded', async () => {
     mockFetchResponses([
       makeLifter('1', { name: 'Imaginary B. Athlete' }),
-      makeLifter('2', { name: 'Real Athlete' }),
+      makeLifter('2', { name: 'Jane Smith' }),
     ]);
 
     renderRecordGroup();
 
     await waitFor(() => {
-      expect(screen.getByText('Real Athlete')).toBeInTheDocument();
+      expect(screen.getByText('Jane Smith')).toBeInTheDocument();
     });
     expect(screen.queryByText('Imaginary B. Athlete')).toBeNull();
   });

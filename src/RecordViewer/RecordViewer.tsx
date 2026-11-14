@@ -239,6 +239,26 @@ function RecordViewer() {
           return;
         }
         const data: { values: string[][] } = await response.json();
+
+        const built = buildAllCurrentRecords(data.values);
+        console.log('sheet diagnostic', {
+          rows: data.values.length,
+          canceled: cancelled,
+          builtEntries: built.length,
+          sampleColumns: data.values
+            .filter((row) => row.some(Boolean))
+            .slice(0, 6)
+            .map((row) => ({
+              age: row[2],
+              gender: row[3],
+              weightClass: row[7],
+              lift: row[8],
+              placeholder: row[10] === 'STANDARD',
+            })),
+        });
+        //console.log('Sheet row count:', data.values.length);
+        //console.log('First few rows:', data.values.slice(0, 3));
+
         if (!cancelled) {
           setLocalStandards(data.values);
           setStandardsStatus('complete');
@@ -248,6 +268,7 @@ function RecordViewer() {
       }
     };
     fetchCurrentStandards();
+
     return () => {
       cancelled = true;
     };
@@ -329,7 +350,12 @@ function RecordViewer() {
     if (wc) applySelection(ag, wc);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
+  console.log('render diagnostic', {
+    standardsStatus,
+    pageStatus: status,
+    storedRows: localStandards.length,
+    entries: allRecordsData.length,
+  });
   return (
     <div className="App">
       <OptionsBar

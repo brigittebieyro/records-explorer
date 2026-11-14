@@ -2,8 +2,8 @@
 // BARS DATA & ROUTES:
 // ----------------------------------------------------------------------------------------------------------------
 //
-export const wsoId = 21;
-export const wsoName = 'California North Central';
+export const wsoId = 15;
+export const wsoName = 'Texas-Oklahoma';
 /**
  * The time zone every record date is read and written in. Hard-coded rather than taken from the
  * viewer's machine: a record was set on one particular day, and that day must not change with who
@@ -12,7 +12,7 @@ export const wsoName = 'California North Central';
  * Sent with every certificate request. The server keeps no copy -- this file is the single source
  * of truth, the same way it is for the sheet ids and the class wording.
  */
-export const recordTimeZone = 'America/Los_Angeles';
+export const recordTimeZone = 'America/Chicago';
 export const wsoRegion = '66'; // This will be used to search for california by state.
 //
 // Use a relative local base path so the client works when deployed behind a reverse proxy.
@@ -148,9 +148,12 @@ export const getSheetRoute = (sheetId: string, sheetName: string): string => {
 };
 // for current records:
 // export const currentRecordsSheetId = '1EJgLNWI4v5KZo780RIZ6zSsaDnOinuhJHQOvZoDL8BM'; // Test sheet.
-export const currentRecordsSheetId = '1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ'; // Records sheet id. Production data! Link is public! DO NOT alter data for testing.
-export const currentRecordsSheetName = 'Post-Aug2026';
-export const priorRecordsSheetNames = ['Pre-Aug2026', 'Pre-June2025', 'Pre-2018']; // Raw_Data is pre-Aug2026. There is a display sheet which references it, and we are not ready to rename.
+//export const currentRecordsSheetId = '1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ'; // Records sheet id. Production data! Link is public! DO NOT alter data for testing.
+export const currentRecordsSheetId = '1gbLq6S4ebW7SGJy4ZyYJZ7ZjOCLjBedjIJzfp9AqIpI'; // Records sheet id. Production data! Link is public! DO NOT alter data for testing.
+//export const currentRecordsSheetName = 'Post-Aug2026';
+export const currentRecordsSheetName = 'Detailed-RecordExplorer';
+//export const priorRecordsSheetNames = ['Pre-Aug2026', 'Pre-June2025', 'Pre-2018']; // Raw_Data is pre-Aug2026. There is a display sheet which references it, and we are not ready to rename.
+export const priorRecordsSheetNames = []; // Raw_Data is pre-Aug2026. There is a display sheet which references it, and we are not ready to rename.
 export const adaptiveAllRecordsSheetName = 'Adaptive_All';
 // The lifter column holds this sentinel when the WSO has set a record standard nobody has
 // reached yet. It is sheet data, so it must match the sheet exactly.

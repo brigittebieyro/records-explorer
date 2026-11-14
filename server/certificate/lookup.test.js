@@ -12,7 +12,7 @@ const HEADER = [
 
 const row = ({
   ageGroup = 'Open', gender = 'F', ageMin = '0', weightClass = '53', lift = 'Snatch',
-  weight = '76', lifter = 'Jade Morales', date = '2026-06-23', event = 'San Francisco Open',
+  weight = '76', lifter = 'Jane Smith', date = '2026-06-23', event = 'San Francisco Open',
 } = {}) => [
   'Norcal', 'California North Central', ageGroup, gender, ageMin, '999', '49',
   weightClass, lift, weight, lifter, date, event,
@@ -23,7 +23,7 @@ test('finds an Open record and returns the printed fields', () => {
     ageGroup: 'OPEN', gender: 'female', weightClass: '53', lift: 'Snatch',
   });
   assert.deepStrictEqual(got, {
-    weight: '76', lifter: 'Jade Morales', date: '2026-06-23', event: 'San Francisco Open',
+    weight: '76', lifter: 'Jane Smith', date: '2026-06-23', event: 'San Francisco Open',
     ageGroupId: 'OPEN', gender: 'F', weightClass: '53', lift: 'Snatch',
   });
 });
@@ -38,10 +38,10 @@ test('the header row never matches a query', () => {
 });
 
 test('masters rows are keyed by ageMin, not the W35/M35 age group cell', () => {
-  const rows = [HEADER, row({ ageGroup: 'W35', ageMin: '35', lifter: 'Masters Lifter' })];
+  const rows = [HEADER, row({ ageGroup: 'W35', ageMin: '35', lifter: 'Jane B. Smith' })];
   assert.strictEqual(
     findRecord(rows, { ageGroup: '35', gender: 'female', weightClass: '53', lift: 'Snatch' }).lifter,
-    'Masters Lifter'
+    'Jane B. Smith'
   );
   // 'W35' is the sheet's spelling, not an age group id, so it must not resolve.
   assert.strictEqual(
@@ -55,24 +55,24 @@ test('youth age groups sharing a weight class indicator are disambiguated by age
   // the key (see the comment at RecordViewer.tsx:153-155).
   const rows = [
     HEADER,
-    row({ ageGroup: 'U11', weightClass: '30', weight: '20', lifter: 'Younger' }),
-    row({ ageGroup: 'U13', weightClass: '30', weight: '35', lifter: 'Older' }),
+    row({ ageGroup: 'U11', weightClass: '30', weight: '20', lifter: 'Jane A. Smith' }),
+    row({ ageGroup: 'U13', weightClass: '30', weight: '35', lifter: 'Jane B. Smith' }),
   ];
   assert.strictEqual(
     findRecord(rows, { ageGroup: 'U11', gender: 'female', weightClass: '30', lift: 'Snatch' }).lifter,
-    'Younger'
+    'Jane A. Smith'
   );
   assert.strictEqual(
     findRecord(rows, { ageGroup: 'U13', gender: 'female', weightClass: '30', lift: 'Snatch' }).lifter,
-    'Older'
+    'Jane B. Smith'
   );
 });
 
 test('open-ended classes match on the > indicator', () => {
-  const rows = [HEADER, row({ weightClass: '>86', lifter: 'Heavyweight' })];
+  const rows = [HEADER, row({ weightClass: '>86', lifter: 'Jane B. Smith' })];
   assert.strictEqual(
     findRecord(rows, { ageGroup: 'OPEN', gender: 'female', weightClass: '>86', lift: 'Snatch' }).lifter,
-    'Heavyweight'
+    'Jane B. Smith'
   );
   assert.strictEqual(
     findRecord(rows, { ageGroup: 'OPEN', gender: 'female', weightClass: '86', lift: 'Snatch' }),
@@ -83,27 +83,27 @@ test('open-ended classes match on the > indicator', () => {
 test('gender filters rows', () => {
   const rows = [
     HEADER,
-    row({ gender: 'F', lifter: 'She' }),
-    row({ gender: 'M', lifter: 'He' }),
+    row({ gender: 'F', lifter: 'Jane Smith' }),
+    row({ gender: 'M', lifter: 'Jim Brown' }),
   ];
   assert.strictEqual(
     findRecord(rows, { ageGroup: 'OPEN', gender: 'female', weightClass: '53', lift: 'Snatch' }).lifter,
-    'She'
+    'Jane Smith'
   );
   assert.strictEqual(
     findRecord(rows, { ageGroup: 'OPEN', gender: 'male', weightClass: '53', lift: 'Snatch' }).lifter,
-    'He'
+    'Jim Brown'
   );
 });
 
 test('duplicate rows resolve last-wins, matching the client map build', () => {
   // No live sheet currently has duplicates; this pins the behaviour so it cannot drift from
   // computeStandardsForWeightClass, which overwrites on each forEach pass.
-  const rows = [HEADER, row({ lifter: 'First', weight: '70' }), row({ lifter: 'Second', weight: '76' })];
+  const rows = [HEADER, row({ lifter: 'Jane A. Smith', weight: '70' }), row({ lifter: 'Jane B. Smith', weight: '76' })];
   const got = findRecord(rows, {
     ageGroup: 'OPEN', gender: 'female', weightClass: '53', lift: 'Snatch',
   });
-  assert.strictEqual(got.lifter, 'Second');
+  assert.strictEqual(got.lifter, 'Jane B. Smith');
   assert.strictEqual(got.weight, '76');
 });
 

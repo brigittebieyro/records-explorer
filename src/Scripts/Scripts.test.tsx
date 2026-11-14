@@ -151,7 +151,7 @@ describe('Scripts (user-based)', () => {
     expect(runningButton).toBeDisabled();
     expect(screen.getByLabelText('Script')).toBeDisabled();
 
-    resolveCsv('lifter,total\nJane Doe,180');
+    resolveCsv('lifter,total\nJane Smith,180');
 
     await waitFor(() => {
       expect(screen.getByText('Download complete.')).toBeInTheDocument();

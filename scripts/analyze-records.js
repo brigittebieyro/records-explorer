@@ -166,13 +166,14 @@ function requireEnv(name) {
 }
 
 const SHEETS_CONFIG = {
-  sheetId: '1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ',
-  sheetName: 'Raw_Data',
+  //sheetId: '1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ',
+  sheetId: '1gbLq6S4ebW7SGJy4ZyYJZ7ZjOCLjBedjIJzfp9AqIpI',
+  sheetName: 'Detailed',
   googleKey: requireEnv('REACT_APP_GOOGLE_API_KEY'),
 };
 
 const USAW_API = 'https://admin-usaw-rankings.sport80.com/api';
-const WSO_ID = 21; // California North Central
+const WSO_ID = 15; // Texas-Oklahoma WSO ID (matches RoutesAndSettings.ts)
 // Query end date is when new weight classes began
 const DATE_RANGE_END = '2026-08-01';
 

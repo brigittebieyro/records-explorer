@@ -39,7 +39,8 @@ interface AdaptiveLifter {
   name: string;
   usawNumber: string;
   startDate: string;
-  weightClassName: string;
+  // Results after this date are ignored. Empty when the roster gives none.
+  endDate: string;
   categorySheetNames: string[];
 }
 
@@ -112,14 +113,15 @@ export function parseAdaptiveRoster(sheetData: string[][]): AdaptiveLifter[] {
   const nameIndex = find(/name/i);
   const usawIndex = find(/usaw/i);
   const startIndex = find(/start/i);
-  const weightClassIndex = find(/weight ?class/i);
+  // Not /end/i alone, which would also match a header like 'Gender'.
+  const endIndex = find(/end ?date/i);
   if (nameIndex === -1 || usawIndex === -1) return [];
 
   // The category flags are the unlabelled columns holding nothing but TRUE/FALSE, in sheet
   // order — the same order as adptiveCategoryRecordsSheetNames. Testing the values rather
   // than just taking every leftover column means an unrecognized column the survey picks up
   // (a preferred email, say) cannot shift the flags out of alignment.
-  const labelled = new Set([nameIndex, usawIndex, startIndex, weightClassIndex]);
+  const labelled = new Set([nameIndex, usawIndex, startIndex, endIndex]);
   const isFlagColumn = (index: number): boolean => {
     const values = sheetData
       .slice(1)
@@ -151,7 +153,7 @@ export function parseAdaptiveRoster(sheetData: string[][]): AdaptiveLifter[] {
       name: String(row[nameIndex] ?? '').trim(),
       usawNumber,
       startDate: startIndex === -1 ? '' : parseSheetDate(row[startIndex]),
-      weightClassName: weightClassIndex === -1 ? '' : String(row[weightClassIndex] ?? '').trim(),
+      endDate: endIndex === -1 ? '' : parseSheetDate(row[endIndex]),
       categorySheetNames,
     });
   }
@@ -231,38 +233,25 @@ export function eligibleAgeGroups(sportingAge: number): AgeGroup[] {
   );
 }
 
-// The roster names the class by its display name ("Women's 77kg"), not its id ("W77").
-function genderFromWeightClassName(weightClassName: string): string | undefined {
-  const weightClass = defaultWeightClasses.find((candidate) => candidate.name === weightClassName);
-  if (!weightClass) return undefined;
-  return weightClass.gender === 'female' ? 'F' : 'M';
-}
-
-// Every class searched is a request, so the order matters. An athlete who has moved is
-// nearly always within a class or two of the one they gave, so widen outwards from it one
-// step at a time — heavier, lighter, heavier, lighter — and stay inside their own gender,
-// which halves the classes worth looking at.
+// The roster does not give a weight class or gender, so every adult class is searched,
+// heaviest first, alternating between the men's and women's sets: Men's 110+, Women's 86+,
+// Men's 110, Women's 86, and so on down to the lightest of each.
 //
 // The youth sets are deliberately not searched: the lightest adult class has no lower
 // bodyweight bound, so even the smallest youth lifter surfaces in it. This only affects
 // finding the athlete — youth age-group records are still matched and reported, via the
 // age groups in collectRecordBreakers.
-export function classSearchOrder(weightClassName: string): WeightClass[] {
-  const chosen = defaultWeightClasses.find((candidate) => candidate.name === weightClassName);
-  // Nothing to widen out from, so fall back to looking in every adult class.
-  if (!chosen) return defaultWeightClasses;
+export function classSearchOrder(): WeightClass[] {
+  // defaultWeightClasses lists each gender's classes together in ascending order.
+  const heaviestFirst = (gender: WeightClass['gender']): WeightClass[] =>
+    defaultWeightClasses.filter((candidate) => candidate.gender === gender).reverse();
+  const men = heaviestFirst('male');
+  const women = heaviestFirst('female');
 
-  // defaultWeightClasses lists each gender's classes together in ascending order, so
-  // neighbours in the filtered list are neighbours by bodyweight.
-  const sameGender = defaultWeightClasses.filter((candidate) => candidate.gender === chosen.gender);
-  const start = sameGender.indexOf(chosen);
-
-  const ordered: WeightClass[] = [chosen];
-  for (let step = 1; step < sameGender.length; step++) {
-    const heavier = sameGender[start + step];
-    const lighter = sameGender[start - step];
-    if (heavier) ordered.push(heavier);
-    if (lighter) ordered.push(lighter);
+  const ordered: WeightClass[] = [];
+  for (let step = 0; step < Math.max(men.length, women.length); step++) {
+    if (men[step]) ordered.push(men[step]);
+    if (women[step]) ordered.push(women[step]);
   }
   return ordered;
 }
@@ -303,7 +292,11 @@ async function searchRankings(
   }
 }
 
-async function fetchLifterResults(lifterId: string, startDate: string): Promise<MeetRecord[]> {
+export async function fetchLifterResults(
+  lifterId: string,
+  startDate: string,
+  lifterEndDate: string
+): Promise<MeetRecord[]> {
   try {
     const response = await rateLimitedFetch(getLifterDataRoute(lifterId), {
       method: 'POST',
@@ -317,6 +310,7 @@ async function fetchLifterResults(lifterId: string, startDate: string): Promise<
         result.date &&
         result.date >= startDate &&
         result.date <= endDate &&
+        (!lifterEndDate || result.date <= lifterEndDate) &&
         isWithinPlausibilityCaps(result)
     );
   } catch {
@@ -327,7 +321,7 @@ async function fetchLifterResults(lifterId: string, startDate: string): Promise<
 // A name search alone is not enough — searching 'Fernandes' returns several different
 // lifters — so the membership number is what actually identifies the athlete.
 export async function resolveLifter(lifter: AdaptiveLifter): Promise<ResolvedLifter | undefined> {
-  for (const weightClass of classSearchOrder(lifter.weightClassName)) {
+  for (const weightClass of classSearchOrder()) {
     const rows = await searchRankings(lifter.name, weightClass);
     const matches = rows.filter((row) => String(row.membership ?? '') === lifter.usawNumber);
     if (matches.length === 0) continue;
@@ -346,7 +340,8 @@ export async function resolveLifter(lifter: AdaptiveLifter): Promise<ResolvedLif
       ...lifter,
       lifterId,
       birthYear: getYear(mostRecent.lift_date) - lifterAge,
-      gender: genderFromWeightClassName(lifter.weightClassName) ?? mostRecent.gender ?? '',
+      // The class the athlete turned up in fixes their gender.
+      gender: weightClass.gender === 'female' ? 'F' : 'M',
     };
   }
   return undefined;
@@ -481,11 +476,10 @@ export function generateCsv(
     rows.push(
       [],
       ['Errors'],
-      ['Lifter Name', 'USAW Number', 'Weight Class', 'Error'],
+      ['Lifter Name', 'USAW Number', 'Error'],
       ...unresolved.map((lifter) => [
         lifter.name,
         lifter.usawNumber,
-        lifter.weightClassName,
         'Not found in the USAW rankings. Check the name and USAW number on the roster sheet.',
       ])
     );
@@ -517,7 +511,11 @@ export async function runAdaptiveRecords(): Promise<string> {
         unresolved.push(lifter);
         continue;
       }
-      const results = await fetchLifterResults(resolved.lifterId, resolved.startDate);
+      const results = await fetchLifterResults(
+        resolved.lifterId,
+        resolved.startDate,
+        resolved.endDate
+      );
       if (results.length === 0) continue;
       recordBreakers.push(...collectRecordBreakers(resolved, results, recordIndex));
     } catch {

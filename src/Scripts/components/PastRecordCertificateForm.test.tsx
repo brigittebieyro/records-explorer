@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import PastRecordCertificateForm from './PastRecordCertificateForm';
 import { recordTimeZone } from '../../Data/RoutesAndSettings';
 
-const pdfResponse = (filename = 'JadeMorales_Snatch_2019-05-04.pdf') => ({
+const pdfResponse = (filename = 'JaneSmith_Snatch_2019-05-04.pdf') => ({
   ok: true,
   blob: async () => new Blob(['%PDF-1.3'], { type: 'application/pdf' }),
   headers: { get: () => `inline; filename="${filename}"` },
@@ -25,7 +25,7 @@ const goButton = () => screen.getByRole('button', { name: 'Go' });
 
 /** Fills every field with a valid past record. */
 const fillForm = async (container: HTMLElement) => {
-  await userEvent.type(lifterInput(), 'Jade Morales');
+  await userEvent.type(lifterInput(), 'Jane Smith');
   await userEvent.type(dateInput(), '2019-05-04');
   await userEvent.type(eventInput(), 'California State Championships');
   await userEvent.selectOptions(select(container, 'certificate-lift'), 'Snatch');
@@ -96,7 +96,7 @@ describe('PastRecordCertificateForm (user-based)', () => {
     const { container } = render(<PastRecordCertificateForm />);
     expect(goButton()).toBeDisabled();
 
-    await userEvent.type(lifterInput(), 'Jade Morales');
+    await userEvent.type(lifterInput(), 'Jane Smith');
     await userEvent.selectOptions(select(container, 'certificate-lift'), 'Snatch');
     expect(goButton()).toBeDisabled();
 
@@ -126,7 +126,7 @@ describe('PastRecordCertificateForm (user-based)', () => {
     // The class wording and the time zone are both composed here and posted whole -- the server
     // keeps no copy of either.
     expect(postedBody()).toEqual({
-      lifter: 'Jade Morales',
+      lifter: 'Jane Smith',
       lift: 'Snatch',
       weight: '76',
       date: '2019-05-04',
@@ -137,7 +137,7 @@ describe('PastRecordCertificateForm (user-based)', () => {
 
     expect(clickSpy).toHaveBeenCalledTimes(1);
     const downloadLink = clickSpy.mock.instances[0] as unknown as HTMLAnchorElement;
-    expect(downloadLink.download).toBe('JadeMorales_Snatch_2019-05-04.pdf');
+    expect(downloadLink.download).toBe('JaneSmith_Snatch_2019-05-04.pdf');
     expect(downloadLink.href).toContain('blob:fake-url');
   });
 

@@ -55,7 +55,7 @@ const makeResult = (overrides: object = {}): MeetResult =>
     best_snatch: 80,
     'body_weight_(kg)': 58.4,
     date: '2026-03-01',
-    lifter: 'Jane Doe',
+    lifter: 'Jane Smith',
     meet: 'Sacramento Open',
     total: 180,
     ...overrides,

@@ -5,7 +5,7 @@ import { AgeGroupRecordSet, StandardRecord } from '../../Utils/types';
 
 const makeRecord = (overrides: object = {}): StandardRecord => ({
   weight: '80',
-  lifter: 'Jane Doe',
+  lifter: 'Jane Smith',
   event: 'Sacramento Open',
   date: '2026-01-15',
   ...overrides,

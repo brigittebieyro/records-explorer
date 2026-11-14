@@ -49,7 +49,7 @@ const makeStandardRow = ({
   indicator = '49',
   lift = 'Total',
   weight = '150',
-  lifter = 'Jane Doe',
+  lifter = 'Jane Smith',
   event = 'Sacramento Open',
   date = '2026-01-15',
 } = {}): string[] => [
@@ -80,7 +80,7 @@ const makeHistoricalRow = ({
   bwMax = '45',
   lift = 'Total',
   weight = '140',
-  lifter = 'Jane Doe',
+  lifter = 'Jane Smith',
   date = '2019-05-04',
   event = 'Some Open',
 } = {}): string[] => [
@@ -135,7 +135,7 @@ describe('RecordViewer helpers (user-based)', () => {
   describe('B-03: buildAllCurrentRecords', () => {
     test('excludes STANDARD placeholder lifters from the all-records view', () => {
       const rows = [
-        makeStandardRow({ lift: 'Total', lifter: 'Jane Doe' }),
+        makeStandardRow({ lift: 'Total', lifter: 'Jane Smith' }),
         makeStandardRow({ lift: 'Snatch', lifter: 'STANDARD' }),
       ];
 
@@ -143,7 +143,7 @@ describe('RecordViewer helpers (user-based)', () => {
 
       expect(entries).toHaveLength(1);
       const { records } = entries[0].groups[0];
-      expect(records['Total'].lifter).toBe('Jane Doe');
+      expect(records['Total'].lifter).toBe('Jane Smith');
       expect(records['Snatch']).toBeUndefined();
     });
 
@@ -157,8 +157,8 @@ describe('RecordViewer helpers (user-based)', () => {
       // Default Women's 49kg and U17 Girls 49kg both use indicator '49', but represent
       // different bodyweight brackets (0-49 vs 45.01-49).
       const rows = [
-        makeStandardRow({ ageKey: 'Open', indicator: '49', lifter: 'Open Lifter' }),
-        makeStandardRow({ ageKey: 'U17', indicator: '49', lifter: 'U17 Lifter' }),
+        makeStandardRow({ ageKey: 'Open', indicator: '49', lifter: 'Jane A. Smith' }),
+        makeStandardRow({ ageKey: 'U17', indicator: '49', lifter: 'Jane B. Smith' }),
       ];
 
       const entries = buildAllCurrentRecords(rows);
@@ -178,13 +178,13 @@ describe('RecordViewer helpers (user-based)', () => {
     test('matches rows by the max-bodyweight indicator and gender', () => {
       const rows = [
         makeStandardRow(),
-        makeStandardRow({ gender: 'M', lifter: 'Wrong Gender' }),
-        makeStandardRow({ indicator: '53', lifter: 'Wrong Class' }),
+        makeStandardRow({ gender: 'M', lifter: 'Jim Brown' }),
+        makeStandardRow({ indicator: '53', lifter: 'Jane B. Smith' }),
       ];
 
       const result = computeStandardsForWeightClass(openWeightClass, rows);
 
-      expect(result['OPEN'].records['Total'].lifter).toBe('Jane Doe');
+      expect(result['OPEN'].records['Total'].lifter).toBe('Jane Smith');
       expect(Object.keys(result)).toHaveLength(1);
     });
 
@@ -195,11 +195,11 @@ describe('RecordViewer helpers (user-based)', () => {
         minBodyweight: '86.01',
         maxBodyweight: '1000',
       } as WeightClass;
-      const rows = [makeStandardRow({ indicator: '>86', lifter: 'Super Heavy' })];
+      const rows = [makeStandardRow({ indicator: '>86', lifter: 'Jane Smith' })];
 
       const result = computeStandardsForWeightClass(superHeavy, rows);
 
-      expect(result['OPEN'].records['Total'].lifter).toBe('Super Heavy');
+      expect(result['OPEN'].records['Total'].lifter).toBe('Jane Smith');
     });
   });
 
@@ -209,24 +209,24 @@ describe('RecordViewer helpers (user-based)', () => {
     test('keeps records matching the age group, gender, and overlapping bodyweights', () => {
       const rows = [
         makeHistoricalRow(),
-        makeHistoricalRow({ ageGroup: 'JR', lifter: 'Wrong Age Group' }),
-        makeHistoricalRow({ gender: 'M', lifter: 'Wrong Gender' }),
-        makeHistoricalRow({ bwMin: '80', bwMax: '90', lifter: 'No Overlap' }),
+        makeHistoricalRow({ ageGroup: 'JR', lifter: 'Jane B. Smith' }),
+        makeHistoricalRow({ gender: 'M', lifter: 'Jim Brown' }),
+        makeHistoricalRow({ bwMin: '80', bwMax: '90', lifter: 'Jane C. Smith' }),
       ];
 
       const records = computeHistoricalRecordsForWeightClass(openWeightClass, openAgeGroup, rows);
 
       expect(records).toHaveLength(1);
-      expect(records[0].lifter).toBe('Jane Doe');
+      expect(records[0].lifter).toBe('Jane Smith');
       expect(records[0].yearSpan).toBe('2018 - 2025');
     });
 
     test("matches masters rows, which the sheets label with a gender prefix ('W35')", () => {
       const mastersAgeGroup = getAgeGroup('35') as AgeGroup;
       const rows = [
-        makeHistoricalRow({ ageGroup: 'W35', lifter: 'Masters Woman' }),
-        makeHistoricalRow({ ageGroup: 'M35', gender: 'M', lifter: 'Masters Man' }),
-        makeHistoricalRow({ ageGroup: 'W40', lifter: 'Wrong Masters Group' }),
+        makeHistoricalRow({ ageGroup: 'W35', lifter: 'Jane A. Smith' }),
+        makeHistoricalRow({ ageGroup: 'M35', gender: 'M', lifter: 'Jim Brown' }),
+        makeHistoricalRow({ ageGroup: 'W40', lifter: 'Jane B. Smith' }),
       ];
 
       const records = computeHistoricalRecordsForWeightClass(
@@ -236,22 +236,22 @@ describe('RecordViewer helpers (user-based)', () => {
       );
 
       expect(records).toHaveLength(1);
-      expect(records[0].lifter).toBe('Masters Woman');
+      expect(records[0].lifter).toBe('Jane A. Smith');
       expect(records[0].ageGroup).toBe('35');
     });
 
     test('keeps a record class that straddles the top of the current class', () => {
       // Women's 49kg is 0 - 49, so a 45 - 53kg class shares the 45 - 49kg band.
-      const rows = [makeHistoricalRow({ bwMin: '45', bwMax: '53', lifter: 'Straddles Top' })];
+      const rows = [makeHistoricalRow({ bwMin: '45', bwMax: '53', lifter: 'Jane Smith' })];
 
       const records = computeHistoricalRecordsForWeightClass(openWeightClass, openAgeGroup, rows);
 
       expect(records).toHaveLength(1);
-      expect(records[0].lifter).toBe('Straddles Top');
+      expect(records[0].lifter).toBe('Jane Smith');
     });
 
     test('drops a record class that only meets the current class at a boundary', () => {
-      const rows = [makeHistoricalRow({ bwMin: '49', bwMax: '55', lifter: 'Touches Only' })];
+      const rows = [makeHistoricalRow({ bwMin: '49', bwMax: '55', lifter: 'Jane Smith' })];
 
       expect(
         computeHistoricalRecordsForWeightClass(openWeightClass, openAgeGroup, rows)
@@ -259,7 +259,7 @@ describe('RecordViewer helpers (user-based)', () => {
     });
 
     test('keeps the lightest class, whose lower bound is 0', () => {
-      const rows = [makeHistoricalRow({ bwMin: '0', bwMax: '45', lifter: 'Lightest Class' })];
+      const rows = [makeHistoricalRow({ bwMin: '0', bwMax: '45', lifter: 'Jane Smith' })];
 
       const records = computeHistoricalRecordsForWeightClass(openWeightClass, openAgeGroup, rows);
 
@@ -269,7 +269,7 @@ describe('RecordViewer helpers (user-based)', () => {
 
     test("keeps an open-ended top class, which the sheets write as '>86'", () => {
       const superHeavy = defaultWeightClasses.find((wc) => wc.id === 'W86plus') as WeightClass;
-      const rows = [makeHistoricalRow({ bwMin: '86', bwMax: '>86', lifter: 'Super Heavy' })];
+      const rows = [makeHistoricalRow({ bwMin: '86', bwMax: '>86', lifter: 'Jane Smith' })];
 
       const records = computeHistoricalRecordsForWeightClass(superHeavy, openAgeGroup, rows);
 
@@ -318,7 +318,7 @@ describe('RecordViewer component (user-based)', () => {
     await waitFor(() => {
       expect(screen.getByText('All Current Record Holders')).toBeInTheDocument();
     });
-    expect(screen.getByText('Jane Doe')).toBeInTheDocument();
+    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
   });
 
   test('every record in the all-records list can be printed from the current sheet', async () => {
@@ -331,7 +331,7 @@ describe('RecordViewer component (user-based)', () => {
     (URL as unknown as { revokeObjectURL: unknown }).revokeObjectURL = jest.fn();
 
     renderRecordViewer();
-    await waitFor(() => expect(screen.getByText('Jane Doe')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Jane Smith')).toBeInTheDocument());
 
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,

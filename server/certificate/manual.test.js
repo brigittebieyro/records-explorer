@@ -11,6 +11,8 @@ const body = (overrides = {}) => ({
   event: 'California State Championships',
   category: "Women's Open 53kg",
   timeZone: 'America/Los_Angeles',
+  title: 'California North Central WSO',
+  website: 'www.canorthcentralwso.org',
   ...overrides,
 });
 
@@ -23,9 +25,20 @@ test('a complete body becomes the record shape the renderer takes', () => {
       date: '2019-05-04',
       category: "Women's Open 53kg",
       event: 'California State Championships',
+      clubName: '',
       timeZone: 'America/Los_Angeles',
+      title: 'California North Central WSO',
+      website: 'www.canorthcentralwso.org',
     },
   });
+});
+
+test('the club is optional, and passed through stripped when given', () => {
+  assert.strictEqual(buildManualRecord(body()).record.clubName, '');
+  assert.strictEqual(
+    buildManualRecord(body({ clubName: '  Bay\u200B Barbell ' })).record.clubName,
+    'Bay Barbell'
+  );
 });
 
 test('the lift is not checked against a list of the three lifts', () => {
@@ -50,6 +63,15 @@ test('the time zone is passed through untouched', () => {
     buildManualRecord(body({ timeZone: 'Asia/Kolkata' })).record.timeZone,
     'Asia/Kolkata'
   );
+});
+
+test('the title and website are passed through stripped, and dropped when not strings', () => {
+  const { record } = buildManualRecord(body({ title: ' Texas\u200B WSO ', website: 'www.example.org' }));
+  assert.strictEqual(record.title, 'Texas WSO');
+  assert.strictEqual(record.website, 'www.example.org');
+  const odd = buildManualRecord(body({ title: ['A'], website: 7 })).record;
+  assert.strictEqual(odd.title, '');
+  assert.strictEqual(odd.website, '');
 });
 
 test('invisible characters are stripped from every printed field', () => {
@@ -79,7 +101,10 @@ test('a missing field becomes an empty string, not an error', () => {
     date: '',
     category: '',
     event: '',
+    clubName: '',
     timeZone: undefined,
+    title: '',
+    website: '',
   });
 });
 

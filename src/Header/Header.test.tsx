@@ -1,6 +1,19 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Header from './Header';
+import { localHomeUrl, localScheduleUrl, wsoDisplayName } from '../Data/RoutesAndSettings';
+
+let mockShowAdaptiveRecordsInMenu = true;
+jest.mock('../Data/RoutesAndSettings', () => ({
+  ...jest.requireActual('../Data/RoutesAndSettings'),
+  get showAdaptiveRecordsInMenu() {
+    return mockShowAdaptiveRecordsInMenu;
+  },
+}));
+
+beforeEach(() => {
+  mockShowAdaptiveRecordsInMenu = true;
+});
 
 describe('Header (user-based)', () => {
   test('A-01: renders the WSO logo and header text', () => {
@@ -9,7 +22,9 @@ describe('Header (user-based)', () => {
     const logo = screen.getByAltText('WSO logo');
     expect(logo).toBeInTheDocument();
     expect(logo).toHaveAttribute('src', '/WSOLogo.png');
-    expect(screen.getByText(/California North Central WSO Records & Results/)).toBeInTheDocument();
+    expect(
+      screen.getByText(new RegExp(`${wsoDisplayName} WSO Records & Results`))
+    ).toBeInTheDocument();
   });
 
   test('A-02: the menu icon toggles the flyout open and closed', async () => {
@@ -28,16 +43,21 @@ describe('Header (user-based)', () => {
     expect(container.querySelector('.menu-flyout')).toHaveClass('hidden');
   });
 
-  test('A-02: the flyout menu contains exactly 6 links', () => {
+  test('A-02: the flyout menu contains exactly 7 links', () => {
+    const { container } = render(<Header />);
+
+    expect(container.querySelectorAll('.menu-flyout a')).toHaveLength(7);
+  });
+
+  test('A-02: with showAdaptiveRecordsInMenu off, the menu has no Adaptive WSO Records link', () => {
+    mockShowAdaptiveRecordsInMenu = false;
     const { container } = render(<Header />);
 
     expect(container.querySelectorAll('.menu-flyout a')).toHaveLength(6);
+    expect(container.querySelector('a[href="/adaptive"]')).toBeNull();
   });
 
-  // Skipped while the Adaptive WSO Records menu item is commented out in Header.tsx — the
-  // page is not ready to go live. Re-enable this and bump the link count above to 7 when the
-  // menu item is restored.
-  test.skip('A-02: Adaptive WSO Records sits directly below WSO Records & Results', () => {
+  test('A-02: Adaptive WSO Records sits directly below WSO Records & Results', () => {
     const { container } = render(<Header />);
     const linkText = Array.from(container.querySelectorAll('.menu-flyout a')).map(
       (link) => link.textContent
@@ -46,7 +66,7 @@ describe('Header (user-based)', () => {
     expect(linkText.slice(0, 2)).toEqual(['WSO Records & Results', 'Adaptive WSO Records']);
   });
 
-  test.skip('A-03: the Adaptive WSO Records link points at /adaptive', () => {
+  test('A-03: the Adaptive WSO Records link points at /adaptive', () => {
     render(<Header />);
 
     expect(screen.getByRole('link', { name: 'Adaptive WSO Records' })).toHaveAttribute(
@@ -77,11 +97,11 @@ describe('Header (user-based)', () => {
 
     expect(screen.getByRole('link', { name: 'Local Meet Schedule' })).toHaveAttribute(
       'href',
-      'https://canorthcentralwso.org/meet-schedule'
+      localScheduleUrl
     );
     expect(screen.getByRole('link', { name: 'Official WSO Site' })).toHaveAttribute(
       'href',
-      'https://canorthcentralwso.org'
+      localHomeUrl
     );
   });
 

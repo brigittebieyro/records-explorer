@@ -28,7 +28,10 @@ function buildManualRecord(body) {
       date: stripUnprintable(source.date),
       category: stripUnprintable(source.category),
       event: stripUnprintable(source.event),
+      clubName: stripUnprintable(source.clubName),
       timeZone: source.timeZone,
+      title: typeof source.title === 'string' ? stripUnprintable(source.title) : '',
+      website: typeof source.website === 'string' ? stripUnprintable(source.website) : '',
     },
   };
 }

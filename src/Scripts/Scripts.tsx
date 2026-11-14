@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import OptionsBar from '../Common/OptionsBar';
 import { scripts } from '../Data/scripts';
-import { scriptsPassword, wsoName } from '../Data/RoutesAndSettings';
+import { scriptsPassword, wsoDisplayName } from '../Data/RoutesAndSettings';
 import { downloadCsv, hashPassword } from '../Utils/Utils';
 
 function Scripts() {
@@ -16,7 +16,7 @@ function Scripts() {
   const selectedScript = scripts.find((scriptObj) => scriptObj.name === selectedName);
 
   const handlePasswordSubmit = async () => {
-    const hashed = await hashPassword(passwordInput, wsoName);
+    const hashed = await hashPassword(passwordInput, wsoDisplayName);
     if (hashed === scriptsPassword) {
       setIsUnlocked(true);
       setPasswordError(false);

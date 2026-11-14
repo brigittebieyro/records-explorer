@@ -26,6 +26,8 @@ const RECORD = {
   ageGroupId: 'OPEN', gender: 'F', weightClass: '53', lift: 'Snatch',
   sheetName: 'Post-Aug2026',
   category: "Women's Open 53kg",
+  title: 'California North Central WSO',
+  website: 'www.canorthcentralwso.org',
 };
 
 const textOf = (lines) => lines.map((l) => l.runs.map((r) => r.text).join(''));
@@ -178,6 +180,19 @@ test('buildCertificateLines produces the certificate copy in order', () => {
   ]);
 });
 
+test('the title is printed exactly as supplied', () => {
+  const lines = buildCertificateLines({ ...RECORD, title: 'Texas Oklahoma WSO' });
+  assert.strictEqual(textOf(lines)[0], 'Texas Oklahoma WSO');
+});
+
+test('without a title the line is left out', () => {
+  for (const title of [undefined, null, '', '   ']) {
+    const lines = buildCertificateLines({ ...RECORD, title });
+    assert.ok(!lines.some((l) => l.id === 'title'));
+    assert.strictEqual(textOf(lines)[0], 'hereby certifies that');
+  }
+});
+
 test('the meet name is printed under the date, a size smaller', () => {
   const byId = Object.fromEntries(buildCertificateLines(RECORD).map((l) => [l.id, l]));
   assert.strictEqual(byId.event.runs[0].text, `at ${RECORD.event}`);
@@ -252,6 +267,35 @@ test('with neither a date nor a meet the record line is the last', () => {
   const bare = buildCertificateLines({ ...RECORD, date: null, event: null });
   assert.deepStrictEqual(textOf(bare).slice(-1), ['76kg Snatch']);
   assert.strictEqual(bare.length, 5);
+});
+
+test('a club prints in roman at the meet\'s size, one blank line below the meet', () => {
+  const lines = buildCertificateLines({ ...RECORD, clubName: 'Bay Barbell' });
+  const byId = Object.fromEntries(lines.map((l) => [l.id, l]));
+  assert.deepStrictEqual(textOf(lines).slice(-1), ['Bay Barbell']);
+  assert.deepStrictEqual(byId.club.runs.map((r) => r.font), [BODY]);
+  assert.strictEqual(byId.club.runs[0].size, byId.event.runs[0].size);
+  assert.strictEqual(byId.club.y - byId.event.y, 2 * (byId.event.y - byId.date.y));
+});
+
+test('without a meet or date the club keeps its blank line below the last line drawn', () => {
+  const noEvent = buildCertificateLines({ ...RECORD, event: null, clubName: 'Bay Barbell' });
+  const date = noEvent.find((l) => l.id === 'date');
+  assert.strictEqual(noEvent.find((l) => l.id === 'club').y, date.y + 38);
+
+  const bare = buildCertificateLines({ ...RECORD, date: null, event: null, clubName: 'Bay Barbell' });
+  const record = bare.find((l) => l.id === 'record');
+  assert.strictEqual(bare.find((l) => l.id === 'club').y, 437 + 19);
+  assert.ok(bare.find((l) => l.id === 'club').y > record.y);
+});
+
+test('without a club the certificate is laid out exactly as before', () => {
+  for (const clubName of [undefined, null, '', '   ']) {
+    assert.deepStrictEqual(
+      buildCertificateLines({ ...RECORD, clubName }),
+      buildCertificateLines(RECORD)
+    );
+  }
 });
 
 test('the kg suffix attaches to the weight, not the lift', () => {

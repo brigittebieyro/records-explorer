@@ -33,13 +33,18 @@ function parseWeightClassesFromContent(content, variableName) {
   const result = [];
   const startIdx = content.indexOf(`export const ${variableName}`);
   if (startIdx === -1) return result;
-  const arrayStart = content.indexOf('[', startIdx);
+  // Search from the '=' so the [] of a type annotation (WeightClass[]) is not taken as the array.
+  const eqIdx = content.indexOf('=', startIdx);
+  if (eqIdx === -1) return result;
+  const arrayStart = content.indexOf('[', eqIdx);
   if (arrayStart === -1) return result;
 
   let depth = 0;
   let objStart = -1;
   for (let i = arrayStart + 1; i < content.length; i++) {
     const ch = content[i];
+    // The array's closing bracket: stop before reading into the next array in the file.
+    if (ch === ']' && depth === 0) break;
     if (ch === '{') {
       if (depth === 0) objStart = i;
       depth++;
@@ -53,7 +58,17 @@ function parseWeightClassesFromContent(content, variableName) {
         const maxMatch = objStr.match(/maxBodyweight:\s*'([^']+)'/);
         const minMatch = objStr.match(/minBodyweight:\s*'([^']+)'/);
         const genderMatch = objStr.match(/gender:\s*'([^']+)'/);
-        const startMatch = objStr.match(/start:\s*'([^']+)'/);
+        // start is either a quoted date or the name of a constant declared in the same file.
+        const startMatch = objStr.match(/start:\s*(?:'([^']+)'|([A-Za-z_$][\w$]*))/);
+        let start = startMatch ? startMatch[1] : undefined;
+        if (startMatch && startMatch[2]) {
+          const constMatch = content.match(new RegExp(`^(?:export )?const ${startMatch[2]}\\s*=\\s*'([^']+)'`, 'm'));
+          start = constMatch ? constMatch[1] : undefined;
+        }
+        if (idMatch && !start) {
+          console.error(`❌ Could not read a start date for weight class ${idMatch[1]} (${variableName}).`);
+          process.exit(1);
+        }
         if (idMatch && sportIdMatch) {
           result.push({
             id: idMatch[1],
@@ -62,7 +77,7 @@ function parseWeightClassesFromContent(content, variableName) {
             maxBodyweight: maxMatch ? maxMatch[1] : undefined,
             minBodyweight: minMatch ? minMatch[1] : undefined,
             gender: genderMatch ? genderMatch[1] : undefined,
-            start: startMatch ? startMatch[1] : undefined,
+            start,
           });
         }
         objStart = -1;
@@ -132,6 +147,9 @@ function loadAgeGroups() {
   return ageGroups;
 }
 
+// The WSO's own settings. src/Data/RoutesAndSettings.ts re-exports the same file to the app.
+const wsoConfig = require('../src/Data/wsoConfig.json');
+
 const defaultWeightClasses = loadWeightClasses();
 const youthWeightClassMap = loadYouthWeightClasses();
 const ageGroups = loadAgeGroups();
@@ -166,22 +184,19 @@ function requireEnv(name) {
 }
 
 const SHEETS_CONFIG = {
-  sheetId: '1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ',
-  sheetName: 'Raw_Data',
+  baseUrl: 'https://sheets.googleapis.com/v4/spreadsheets',
+  sheetId: wsoConfig.currentRecordsSheetId,
+  sheetName: wsoConfig.currentRecordsSheetName,
   googleKey: requireEnv('REACT_APP_GOOGLE_API_KEY'),
 };
 
 const USAW_API = 'https://admin-usaw-rankings.sport80.com/api';
-const WSO_ID = 21; // California North Central
-// Query end date is when new weight classes began
-const DATE_RANGE_END = '2026-08-01';
+const WSO_ID = wsoConfig.wsoId;
+// Query end date is today, in the time zone record dates are kept in. en-CA formats as YYYY-MM-DD.
+const DATE_RANGE_END = new Intl.DateTimeFormat('en-CA', { timeZone: wsoConfig.recordTimeZone }).format(new Date());
 
-// Athletes who appear in WSO rankings but are not eligible for CANCA records
-const INELIGIBLE_ATHLETES = new Set([
-  // 'Aurora van Ulft',
-  // 'Bekdoolot Rasulbekov',
-  'Imaginary B. Athlete',
-]);
+// Athletes who appear in WSO rankings but are not eligible for WSO records
+const INELIGIBLE_ATHLETES = new Set(wsoConfig.ineligibleAthletes);
 
 const headers = {
   accept: 'application/json, text/plain, */*',
@@ -194,7 +209,7 @@ const headers = {
  * Fetch current records from Google Sheets
  */
 async function fetchCurrentRecords() {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.sheetId}/values/${SHEETS_CONFIG.sheetName}?key=${SHEETS_CONFIG.googleKey}`;
+  const url = `${SHEETS_CONFIG.baseUrl}/${SHEETS_CONFIG.sheetId}/values/${SHEETS_CONFIG.sheetName}?key=${SHEETS_CONFIG.googleKey}`;
   console.log('📊 Fetching current records from Google Sheets...');
 
   try {
@@ -320,6 +335,14 @@ async function fetchAthleteLifts(lifterId, dateRangeStart, dateRangeEnd) {
 }
 
 /**
+ * The club on a lift history row, or '' when the row has none. Empty text columns come back as
+ * { type: 'unset' } rather than a string.
+ */
+function liftClub(lift) {
+  return typeof lift.club === 'string' ? lift.club.trim() : '';
+}
+
+/**
  * Extract best lifts by type from athlete's historical data
  */
 function extractBestLifts(athleteData, weightClass, ageGroup, lifter) {
@@ -345,13 +368,13 @@ function extractBestLifts(athleteData, weightClass, ageGroup, lifter) {
     if (meetYear < minYearForLifter || meetYear > maxYearForLifter) continue;
 
     if (lift.best_snatch && (!bestLifts.snatch || lift.best_snatch > bestLifts.snatch.weight)) {
-      bestLifts.snatch = { weight: lift.best_snatch, date: lift.date, event: lift.meet };
+      bestLifts.snatch = { weight: lift.best_snatch, date: lift.date, event: lift.meet, club: liftClub(lift) };
     }
     if (lift['best_c&j'] && (!bestLifts['clean & jerk'] || lift['best_c&j'] > bestLifts['clean & jerk'].weight)) {
-      bestLifts['clean & jerk'] = { weight: lift['best_c&j'], date: lift.date, event: lift.meet };
+      bestLifts['clean & jerk'] = { weight: lift['best_c&j'], date: lift.date, event: lift.meet, club: liftClub(lift) };
     }
     if (lift.total && (!bestLifts.total || lift.total > bestLifts.total.weight)) {
-      bestLifts.total = { weight: lift.total, date: lift.date, event: lift.meet };
+      bestLifts.total = { weight: lift.total, date: lift.date, event: lift.meet, club: liftClub(lift) };
     }
   }
 
@@ -437,6 +460,7 @@ async function analyzeRecords() {
                 bodyWeightMax: weightClass.maxBodyweight,
                 date: liftData.date || '',
                 event: liftData.event || '',
+                clubName: liftData.club || '',
                 wouldBreak: currentRecord ? currentRecord.weight : null,
                 currentHolder: currentRecord ? currentRecord.lifter : null,
                 ageGroupIndex: ageGroups.indexOf(ageGroup),
@@ -497,7 +521,7 @@ function generateCsv(recordBreakers) {
   });
 
   const rows = [
-    ['ageGroup', 'gender', 'ageMin', 'ageMax', 'bodyWeightMin', 'bodyWeightMax', 'lift', 'record', 'name', 'date', 'place'],
+    ['ageGroup', 'gender', 'ageMin', 'ageMax', 'bodyWeightMin', 'bodyWeightMax', 'lift', 'record', 'name', 'date', 'place', 'clubName'],
     ...sorted.map(lift => [
       lift.ageGroupId,
       lift.gender,
@@ -510,6 +534,7 @@ function generateCsv(recordBreakers) {
       lift.athlete,
       lift.date,
       lift.event,
+      lift.clubName,
     ]),
   ];
 

@@ -5,6 +5,7 @@ import {
   getLifterId,
   getRankingsRoute,
   headers,
+  wsoOfficialName,
 } from '../../Data/RoutesAndSettings';
 import { findSupportingTotal, handleError, sortLifts } from '../../Utils/Utils';
 import { CombinedLiftData, MeetRecord, WeightClass } from '../../Utils/types';
@@ -121,7 +122,7 @@ function GoalsWeightClass({ weightClass, safeCount, startDate, endDate }: GoalsW
             // The rankings API sends { type: 'unset' } rather than a string for empty columns.
             const wso = typeof lifter.wso === 'string' ? lifter.wso : undefined;
             const club = typeof lifter.club === 'string' ? lifter.club : 'Unaffiliated';
-            const isLocal = wso === 'California North Central';
+            const isLocal = wso === wsoOfficialName;
             return (
               <div key={`goals-${index}-${lifter.name}`}>
                 <p

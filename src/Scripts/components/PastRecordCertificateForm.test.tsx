@@ -1,7 +1,11 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PastRecordCertificateForm from './PastRecordCertificateForm';
-import { recordTimeZone } from '../../Data/RoutesAndSettings';
+import {
+  certificateTitle,
+  certificateWebsiteText,
+  recordTimeZone,
+} from '../../Data/RoutesAndSettings';
 
 const pdfResponse = (filename = 'JaneSmith_Snatch_2019-05-04.pdf') => ({
   ok: true,
@@ -19,6 +23,7 @@ const select = (container: HTMLElement, id: string): HTMLSelectElement =>
 const lifterInput = () => screen.getByPlaceholderText('Athlete Name');
 const dateInput = () => screen.getByPlaceholderText('Date, any format');
 const eventInput = () => screen.getByPlaceholderText('Event Name');
+const clubInput = () => screen.getByPlaceholderText('Club Name');
 const weightInput = () => screen.getByPlaceholderText('##');
 const weightClassInput = () => screen.getByPlaceholderText('##+');
 const goButton = () => screen.getByRole('button', { name: 'Go' });
@@ -64,6 +69,7 @@ describe('PastRecordCertificateForm (user-based)', () => {
     expect(lifterInput()).toBeInTheDocument();
     expect(dateInput()).toBeInTheDocument();
     expect(eventInput()).toBeInTheDocument();
+    expect(clubInput()).toBeInTheDocument();
     expect(weightInput()).toBeInTheDocument();
     expect(weightClassInput()).toBeInTheDocument();
     expect(select(container, 'certificate-lift')).toBeInTheDocument();
@@ -109,6 +115,21 @@ describe('PastRecordCertificateForm (user-based)', () => {
     expect(goButton()).toBeDisabled();
   });
 
+  test('F-06: the club name is optional, and posted trimmed when filled in', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue(pdfResponse());
+    const { container } = render(<PastRecordCertificateForm />);
+    await fillForm(container);
+    expect(goButton()).toBeEnabled();
+
+    await userEvent.type(clubInput(), '  Bay Barbell ');
+    await userEvent.click(goButton());
+
+    await waitFor(() => {
+      expect(screen.getByText('Download complete.')).toBeInTheDocument();
+    });
+    expect(postedBody().clubName).toBe('Bay Barbell');
+  });
+
   test('F-06: Go posts the entered details and saves the PDF under the server name', async () => {
     (global.fetch as jest.Mock).mockResolvedValue(pdfResponse());
     const { container } = render(<PastRecordCertificateForm />);
@@ -131,8 +152,11 @@ describe('PastRecordCertificateForm (user-based)', () => {
       weight: '76',
       date: '2019-05-04',
       event: 'California State Championships',
+      clubName: '',
       category: "Women's Open 53kg",
       timeZone: recordTimeZone,
+      title: certificateTitle,
+      website: certificateWebsiteText,
     });
 
     expect(clickSpy).toHaveBeenCalledTimes(1);

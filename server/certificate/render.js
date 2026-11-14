@@ -240,9 +240,12 @@ function drawRightAligned(doc, run, { rightX, baselineY }) {
 function buildCertificateLines(record) {
   // Everything from the preamble down sits half a line (~11pt) lower than the logo block, so the
   // centred text reads as its own group rather than crowding the crest.
+  // The title is named by the client (certificateTitle in src/Data/RoutesAndSettings.ts); the
+  // server keeps no copy. Without one, the line is left out.
+  const title = record.title ? String(record.title).trim() : '';
   const lines = [
     // Title sits above the logo.
-    { id: 'title', y: 142, runs: [{ text: 'California North Central WSO', font: SCRIPT, size: 46 }] },
+    ...(title ? [{ id: 'title', y: 142, runs: [{ text: title, font: SCRIPT, size: 46 }] }] : []),
     { id: 'preamble', y: 287, runs: [{ text: 'hereby certifies that', font: BODY_ITALIC, size: 17 }] },
     // Drawn inside the name frame banner, so it gets its own narrower maxWidth.
     { id: 'lifter', y: 337, runs: [{ text: record.lifter, font: BODY_BOLD, size: 24 }] },
@@ -282,13 +285,22 @@ function buildCertificateLines(record) {
   const event = record.event ? String(record.event).trim() : '';
   if (event) {
     lines.push({ id: 'event', y: nextY, runs: [{ text: `at ${event}`, font: BODY_ITALIC, size: 13 }] });
+    nextY += 19;
+  }
+
+  // The club, when there is one, follows one blank line below whichever line above it was drawn
+  // last, in upright type at the event's size.
+  const clubName = record.clubName ? String(record.clubName).trim() : '';
+  if (clubName) {
+    lines.push({ id: 'club', y: nextY + 19, runs: [{ text: clubName, font: BODY, size: 13 }] });
   }
 
   return lines;
 }
 
 /**
- * @param {object} record as returned by findRecord, plus `sheetName`
+ * @param {object} record as returned by findRecord, plus `sheetName`, and the optional `title` and
+ *   `website` the client sends
  * @returns {Promise<Buffer>}
  */
 function renderCertificate(record) {
@@ -380,14 +392,19 @@ function renderCertificate(record) {
 
       // Tucked into the bottom-right inside corner of the border, derived from the artwork's
       // own inner edges so it follows if the border placement ever changes.
-      drawRightAligned(
-        doc,
-        { text: 'www.canorthcentralwso.org', font: BODY, size: 9 },
-        {
-          rightX: borderX + borderWidth * BORDER_INNER_EDGE.right - CORNER_PADDING,
-          baselineY: BORDER_INSET_Y + borderHeight * BORDER_INNER_EDGE.bottom - CORNER_PADDING,
-        }
-      );
+      // The text is named by the client (certificateWebsiteText in src/Data/RoutesAndSettings.ts);
+      // without one, the corner is left blank.
+      const website = record.website ? String(record.website).trim() : '';
+      if (website) {
+        drawRightAligned(
+          doc,
+          { text: website, font: BODY, size: 9 },
+          {
+            rightX: borderX + borderWidth * BORDER_INNER_EDGE.right - CORNER_PADDING,
+            baselineY: BORDER_INSET_Y + borderHeight * BORDER_INNER_EDGE.bottom - CORNER_PADDING,
+          }
+        );
+      }
 
       doc.end();
     } catch (err) {

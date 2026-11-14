@@ -1,5 +1,9 @@
 import { Certificate, filenameFromDisposition } from '../RecordViewer/components/CertificateLink';
-import { recordTimeZone } from '../Data/RoutesAndSettings';
+import {
+  certificateTitle,
+  certificateWebsiteText,
+  recordTimeZone,
+} from '../Data/RoutesAndSettings';
 import { ageGroups } from '../Data/ageGroups';
 
 export const pastRecordCertificateEndpoint = '/api/certificate/manual';
@@ -35,6 +39,8 @@ export interface PastRecordCertificateInput {
   date: string;
   /** The meet the record was set at. Free text, printed as written. */
   event: string;
+  /** Optional. Printed below the meet when filled in. */
+  clubName: string;
   division: string;
   /** Free text, e.g. 'Open', 'Under 15', 'Masters (35-39)'. */
   ageCategory: string;
@@ -86,8 +92,11 @@ export const fetchPastRecordCertificate = async (
       weight: input.weight,
       date: input.date,
       event: input.event.trim(),
+      clubName: input.clubName.trim(),
       category: buildPastRecordCategory(input),
       timeZone: recordTimeZone,
+      title: certificateTitle,
+      website: certificateWebsiteText,
     }),
   });
 

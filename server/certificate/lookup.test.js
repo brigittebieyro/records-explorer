@@ -24,8 +24,35 @@ test('finds an Open record and returns the printed fields', () => {
   });
   assert.deepStrictEqual(got, {
     weight: '76', lifter: 'Jane Smith', date: '2026-06-23', event: 'San Francisco Open',
-    ageGroupId: 'OPEN', gender: 'F', weightClass: '53', lift: 'Snatch',
+    clubName: null, ageGroupId: 'OPEN', gender: 'F', weightClass: '53', lift: 'Snatch',
   });
+});
+
+const QUERY = { ageGroup: 'OPEN', gender: 'female', weightClass: '53', lift: 'Snatch' };
+
+test('the club is read from the clubName column wherever the header puts it', () => {
+  // Right after place, as on the adaptive tabs.
+  const short = findRecord([[...HEADER, 'clubName'], [...row(), 'Bay Barbell']], QUERY);
+  assert.strictEqual(short.clubName, 'Bay Barbell');
+  // After two extra year columns, as on Post-Aug2026.
+  const wide = findRecord(
+    [[...HEADER, 'yearFrom', 'yearTo', ' ClubName '], [...row(), '2026', '2027', 'Bay Barbell']],
+    QUERY
+  );
+  assert.strictEqual(wide.clubName, 'Bay Barbell');
+});
+
+test('a tab with no clubName column finds records exactly as before, with no club', () => {
+  const got = findRecord([HEADER, row()], QUERY);
+  assert.strictEqual(got.clubName, null);
+  assert.strictEqual(got.lifter, 'Jane Smith');
+});
+
+test('an empty or trimmed-away club cell is no club', () => {
+  const header = [...HEADER, 'clubName'];
+  for (const cells of [[...row(), ''], [...row(), '   '], row()]) {
+    assert.strictEqual(findRecord([header, cells], QUERY).clubName, null);
+  }
 });
 
 test('the header row never matches a query', () => {

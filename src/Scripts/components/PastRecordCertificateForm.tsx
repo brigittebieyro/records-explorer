@@ -14,13 +14,14 @@ const emptyForm: PastRecordCertificateInput = {
   weight: '',
   date: '',
   event: '',
+  clubName: '',
   division: '',
   ageCategory: '',
   weightClass: '',
 };
 
 /**
- * Every field has to be filled before a certificate can be asked for. Only that they are filled:
+ * Every field but the club has to be filled before a certificate can be asked for. Only that they are filled:
  * what goes in them is the operator's business, and every one is printed as written.
  */
 const isComplete = (form: PastRecordCertificateInput): boolean =>
@@ -84,6 +85,18 @@ function PastRecordCertificateForm() {
           value={form.lifter}
           disabled={isWorking}
           onChange={(eventObj) => update('lifter', eventObj.target.value)}
+        />
+      </div>
+
+      <div className="script-form-item">
+        <input
+          id="certificate-club"
+          type="text"
+          className="header-button"
+          placeholder="Club Name"
+          value={form.clubName}
+          disabled={isWorking}
+          onChange={(eventObj) => update('clubName', eventObj.target.value)}
         />
       </div>
 

@@ -7,6 +7,24 @@ jest.mock('react-spinners', () => ({
   CircleLoader: () => <div data-testid="circle-loader">Loading</div>,
 }));
 
+// undefined means "as configured"; null stands for a setting the config leaves out.
+let mockOptInFormUrl: string | null | undefined;
+let mockAllRecordsSheetName: string | null | undefined;
+jest.mock('../Data/RoutesAndSettings', () => {
+  const actual = jest.requireActual('../Data/RoutesAndSettings');
+  const configured = (mock: string | null | undefined, real: unknown) =>
+    mock === undefined ? real : (mock ?? undefined);
+  return {
+    ...actual,
+    get adaptiveOptInFormUrl() {
+      return configured(mockOptInFormUrl, actual.adaptiveOptInFormUrl);
+    },
+    get adaptiveAllRecordsSheetName() {
+      return configured(mockAllRecordsSheetName, actual.adaptiveAllRecordsSheetName);
+    },
+  };
+});
+
 const sheetHeader = [
   'federation',
   'recordName',
@@ -91,6 +109,32 @@ describe('AdaptiveRecords (user-based)', () => {
   afterEach(() => {
     global.fetch = originalFetch;
     jest.clearAllMocks();
+    mockOptInFormUrl = undefined;
+    mockAllRecordsSheetName = undefined;
+  });
+
+  test('with no opt-in form configured, the page leaves out the opt-in paragraph', async () => {
+    mockOptInFormUrl = null;
+    mockSheets({ Adaptive_All: withRecord('Jane Smith') });
+
+    render(<AdaptiveRecords />);
+
+    expect(await landing()).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'this form' })).toBeNull();
+    expect(screen.queryByText(/to opt-in to having your results tracked/)).toBeNull();
+  });
+
+  test('with no combined tab configured, the page opens without fetching and still lists a category', async () => {
+    mockAllRecordsSheetName = null;
+    const fetchMock = mockSheets({ Adaptive_Vision: withRecord('Jane V. Smith') });
+
+    render(<AdaptiveRecords />);
+
+    expect(await landing()).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    await chooseCategory('Visual Impairment');
+    expect(await screen.findByText('Jane V. Smith')).toBeInTheDocument();
   });
 
   test('opens on the preamble, listing no records until a category is applied', async () => {

@@ -115,7 +115,7 @@ You can view it with any markdown viewer or include it in your documentation.
 
 ### Data Sources
 
-1. **Current Records**: Google Sheets (`1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ`)
+1. **Current Records**: Google Sheets (`currentRecordsSheetId` in `src/Data/wsoConfig.json`)
 2. **Top Athletes**: USAW Rankings API (`admin-usaw-rankings.sport80.com`)
 
 ### Weight Classes Analyzed

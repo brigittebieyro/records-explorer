@@ -7,7 +7,13 @@ import CertificateLink, {
   filenameFromDisposition,
 } from './CertificateLink';
 import { ageGroups } from '../../Data/ageGroups';
-import { currentRecordsSheetId, recordTimeZone } from '../../Data/RoutesAndSettings';
+import {
+  certificateTitle,
+  certificateWebsiteText,
+  currentRecordsSheetId,
+  includeClubNameOnCertificate,
+  recordTimeZone,
+} from '../../Data/RoutesAndSettings';
 import { AgeGroup, WeightClass } from '../../Utils/types';
 
 const ageGroupById = (id: string): AgeGroup =>
@@ -89,6 +95,9 @@ describe('CertificateLink (user-based)', () => {
       ...PROPS,
       sheetId: currentRecordsSheetId,
       timeZone: recordTimeZone,
+      includeClubName: includeClubNameOnCertificate,
+      title: certificateTitle,
+      website: certificateWebsiteText,
     });
   });
 

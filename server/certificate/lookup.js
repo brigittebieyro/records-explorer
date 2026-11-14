@@ -17,11 +17,22 @@ const COL = {
   event: 12,
 };
 
+// The clubName column sits at a different index on different tabs, and older tabs have none, so it
+// is located by its header rather than by position.
+const CLUB_NAME_HEADER = 'clubname';
+
+/** @returns {number} the clubName column's index in the header row, or -1 when there is none */
+function findClubNameColumn(rows) {
+  const header = Array.isArray(rows) && Array.isArray(rows[0]) ? rows[0] : [];
+  return header.findIndex((cell) => String(cell ?? '').trim().toLowerCase() === CLUB_NAME_HEADER);
+}
+
 /**
  * @param {string[][]} rows raw `values` from the Sheets API, header row included
  * @param {{ageGroup: string, gender: string, weightClass: string, lift: string}} query
  *   gender is 'male' | 'female'; weightClass is the sheet indicator ('53', '>86')
- * @returns {{weight, lifter, date, event, ageGroupId, gender, weightClass, lift}|null}
+ * @returns {{weight, lifter, date, event, clubName, ageGroupId, gender, weightClass, lift}|null}
+ *   clubName is null when the tab has no clubName column or the row leaves it empty
  */
 function findRecord(rows, { ageGroup, gender, weightClass, lift }) {
   if (!Array.isArray(rows)) return null;
@@ -60,6 +71,7 @@ function findRecord(rows, { ageGroup, gender, weightClass, lift }) {
 
   // The adaptive tabs trim trailing empty cells, so a row with no meet can come back 11 wide and
   // these are undefined rather than ''. Normalise to null so the renderer can simply skip them.
+  const clubColumn = findClubNameColumn(rows);
   const optional = (v) => (v === undefined || v === null || String(v).trim() === '' ? null : String(v));
 
   return {
@@ -67,6 +79,7 @@ function findRecord(rows, { ageGroup, gender, weightClass, lift }) {
     lifter: String(match[COL.lifter]),
     date: optional(match[COL.date]),
     event: optional(match[COL.event]),
+    clubName: clubColumn >= 0 ? optional(match[clubColumn]) : null,
     ageGroupId: wantAge,
     gender: wantGender,
     weightClass: wantClass,
@@ -74,4 +87,4 @@ function findRecord(rows, { ageGroup, gender, weightClass, lift }) {
   };
 }
 
-module.exports = { findRecord, COL };
+module.exports = { findRecord, findClubNameColumn, COL };

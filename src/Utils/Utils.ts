@@ -174,7 +174,9 @@ export const getYear = (date: string): number => {
   return new Date(date).getUTCFullYear();
 };
 
+/** Whether a point is inside wsoBoundary. With no boundary configured, every point is. */
 export const isWithinWSOBoundary = (latitude: number, longitude: number): boolean => {
+  if (!wsoBoundary) return true;
   return (
     latitude >= wsoBoundary.south &&
     latitude <= wsoBoundary.north &&

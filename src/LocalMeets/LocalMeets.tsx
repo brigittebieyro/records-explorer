@@ -8,7 +8,10 @@ import {
   getLocalMeetByNameRoute,
   headers,
   localMeetStartDate,
-  wsoRegion,
+  toRecordDate,
+  wsoBoundary,
+  wsoRegions,
+  wsoStateNames,
 } from '../Data/RoutesAndSettings';
 import { handleError, isWithinWSOBoundary } from '../Utils/Utils';
 import { LocalMeet, MeetResult } from '../Utils/types';
@@ -28,28 +31,37 @@ function LocalMeets() {
   const fetchLocalMeetList = async (): Promise<void> => {
     setStatus('inprogress');
     try {
-      const today = new Date().toISOString().split('T')[0];
-      const formData = new FormData();
-      formData.append('event_from_date', localMeetStartDate);
-      formData.append('region', wsoRegion);
-      formData.append('event_to_date', today);
-
+      const today = toRecordDate();
       const { 'content-type': _omit, ...headersWithoutContentType } = headers;
-      const response = await fetch(getMeetsRoute(200), {
-        method: 'POST',
-        headers: headersWithoutContentType,
-        body: formData,
-      });
-      if (!response.ok) {
+      // One request per region; the meet list endpoint takes a single region.
+      const responses = await Promise.all(
+        wsoRegions.map((region) => {
+          const formData = new FormData();
+          formData.append('event_from_date', localMeetStartDate);
+          formData.append('region', region);
+          formData.append('event_to_date', today);
+          return fetch(getMeetsRoute(200), {
+            method: 'POST',
+            headers: headersWithoutContentType,
+            body: formData,
+          });
+        })
+      );
+      if (responses.some((response) => !response.ok)) {
         setStatus('error');
         return;
       }
-      const data = await response.json();
-      const allMeets: LocalMeet[] = data.data ?? [];
-      const localMeets = allMeets
+      const responseData = await Promise.all(responses.map((response) => response.json()));
+      const meetsById = new Map<string, LocalMeet>();
+      responseData
+        .flatMap((data): LocalMeet[] => data.data ?? [])
+        .forEach((meet) => meetsById.set(meet.id, meet));
+      const localMeets = Array.from(meetsById.values())
+        // With no boundary, every meet in the regions is listed, including ones with no geolocation.
         .filter(
           (meet: LocalMeet) =>
-            meet.geolocation && isWithinWSOBoundary(meet.geolocation.lat, meet.geolocation.lng)
+            !wsoBoundary ||
+            (meet.geolocation && isWithinWSOBoundary(meet.geolocation.lat, meet.geolocation.lng))
         )
         .sort(
           (meetA, meetB) =>
@@ -64,11 +76,14 @@ function LocalMeets() {
     }
   };
 
-  const getCityFromAddress = (address: string): string => {
+  // "City, State" for the first part of the address that is one of wsoStateNames; undefined when none is.
+  const getCityFromAddress = (address: string): string | undefined => {
     const addressParts = address.split(', ');
-    const californiaIndex = addressParts.indexOf('California');
-    const cityName = addressParts[californiaIndex - 1];
-    return `${cityName}${!!cityName ? ', ' : ''}California`;
+    const stateIndex = addressParts.findIndex((part) => wsoStateNames.includes(part));
+    if (stateIndex < 0) return undefined;
+    const stateName = addressParts[stateIndex];
+    const cityName = stateIndex > 0 ? addressParts[stateIndex - 1] : undefined;
+    return cityName ? `${cityName}, ${stateName}` : stateName;
   };
 
   const handleGo = async (meetId: string = selectedMeetId): Promise<void> => {
@@ -80,7 +95,7 @@ function LocalMeets() {
     try {
       // Parse the meet date from subtitle for use as the search date range.
 
-      const today = new Date().toISOString().split('T')[0];
+      const today = toRecordDate();
       const toIso = (dateStr: string): string | null => {
         const date = new Date(dateStr.trim());
         return isNaN(date.getTime()) ? null : date.toISOString().split('T')[0];
@@ -196,29 +211,35 @@ function LocalMeets() {
         )}
 
         {status === 'complete' && meets.length === 0 && (
-          <p className="local-meets-empty">No recent meets found within the WSO boundaries.</p>
+          <p className="local-meets-empty">No recent local meets found.</p>
         )}
 
         {status === 'complete' && !currentMeet && meets.length > 0 && (
           <ul className="local-meets-list">
-            {meets.map((meet) => (
-              <li
-                key={meet.id}
-                className="local-meet-item"
-                onClick={() => handleGo(meet.id)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(eventObj) => eventObj.key === 'Enter' && handleGo(meet.id)}
-              >
-                <strong>
-                  <span>{meet.name}</span>
-                </strong>
-                {meet.subtitle && <span className="local-meet-date">{meet.subtitle}</span>} &bull;{' '}
-                {meet.address && (
-                  <span className="local-meet-address">{getCityFromAddress(meet.address)}</span>
-                )}
-              </li>
-            ))}
+            {meets.map((meet) => {
+              const cityLabel = meet.address ? getCityFromAddress(meet.address) : undefined;
+              return (
+                <li
+                  key={meet.id}
+                  className="local-meet-item"
+                  onClick={() => handleGo(meet.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(eventObj) => eventObj.key === 'Enter' && handleGo(meet.id)}
+                >
+                  <strong>
+                    <span>{meet.name}</span>
+                  </strong>
+                  {meet.subtitle && <span className="local-meet-date">{meet.subtitle}</span>}
+                  {cityLabel && (
+                    <>
+                      {' '}
+                      &bull; <span className="local-meet-address">{cityLabel}</span>
+                    </>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
 

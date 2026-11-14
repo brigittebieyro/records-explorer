@@ -251,6 +251,18 @@ describe('Utils (user-based)', () => {
       expect(isWithinWSOBoundary(42.01, -124.41)).toBe(true);
       expect(isWithinWSOBoundary(34.79, -114.13)).toBe(true);
     });
+
+    test('with no boundary configured, every point is inside', () => {
+      jest.isolateModules(() => {
+        jest.doMock('../Data/RoutesAndSettings', () => ({
+          ...jest.requireActual('../Data/RoutesAndSettings'),
+          wsoBoundary: undefined,
+        }));
+        const { isWithinWSOBoundary: isWithinNoBoundary } = require('./Utils');
+        expect(isWithinNoBoundary(34.05, -118.24)).toBe(true);
+        expect(isWithinNoBoundary(0, 0)).toBe(true);
+      });
+    });
   });
 
   describe('F-01 / F-02: hashPassword', () => {
@@ -304,7 +316,7 @@ describe('Utils (user-based)', () => {
       await rateLimitedFetch('https://example.test/b');
       await rateLimitedFetch('https://example.test/c');
 
-      const gaps = requestedWaits.slice(1).map((wait, index) => wait - requestedWaits[index]);
+      const gaps = requestedWaits.slice(1).map((waitMs, index) => waitMs - requestedWaits[index]);
       expect(gaps.length).toBeGreaterThanOrEqual(1);
       expect(gaps.every((gap) => gap === 100)).toBe(true);
     });
@@ -326,7 +338,7 @@ describe('Utils (user-based)', () => {
         rateLimitedFetch('https://example.test/3'),
       ]);
 
-      const gaps = requestedWaits.slice(1).map((wait, index) => wait - requestedWaits[index]);
+      const gaps = requestedWaits.slice(1).map((waitMs, index) => waitMs - requestedWaits[index]);
       expect(gaps.every((gap) => gap === 100)).toBe(true);
       expect(global.fetch).toHaveBeenCalledTimes(3);
     });

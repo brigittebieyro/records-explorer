@@ -1,5 +1,10 @@
 import { useState } from 'react';
-import { localHomeUrl, localScheduleUrl, wsoName } from '../Data/RoutesAndSettings';
+import {
+  localHomeUrl,
+  localScheduleUrl,
+  showAdaptiveRecordsInMenu,
+  wsoDisplayName,
+} from '../Data/RoutesAndSettings';
 
 function Header() {
   const [menuVisible, setMenuVisible] = useState(false);
@@ -21,7 +26,7 @@ function Header() {
       <div className="App">
         <header className="App-header">
           <img className="header-logo" src="/WSOLogo.png" width="150" height="150" alt="WSO logo" />
-          {wsoName} WSO Records & Results
+          {wsoDisplayName} WSO Records & Results
         </header>
 
         <div className="menu-container">
@@ -31,9 +36,11 @@ function Header() {
                 <li>
                   <a href="/">WSO Records & Results</a>
                 </li>
-                {/* <li>
-                  <a href="/adaptive">Adaptive WSO Records</a>
-                </li> */}
+                {showAdaptiveRecordsInMenu && (
+                  <li>
+                    <a href="/adaptive">Adaptive WSO Records</a>
+                  </li>
+                )}
                 <li>
                   <a href="/local-meet-results">Local Meet Results</a>
                 </li>

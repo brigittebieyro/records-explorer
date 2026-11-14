@@ -22,8 +22,8 @@ const adaptiveDescription = () => (
       Keeping track of local adaptive athletes' accomplishments can be a bit tricky. The WSO has no
       way of knowing which local meet results should qualify - but when you knock it out of the
       park, we want to celebrate with you. All athletes deserve to know that we're not alone, and to
-      have both role models and reasonable standards to work towards. Standards have been set at
-      PLACEHOLDER FIX ME to start with.
+      have both role models and reasonable standards to work towards. Standards have been set at 0
+      to start with.
     </p>
     {adaptiveOptInFormUrl && (
       <p>

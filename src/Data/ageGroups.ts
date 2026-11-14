@@ -26,7 +26,7 @@ export const ageGroups: AgeGroup[] = [
     name: 'Under 13',
     usawDisplayKey: '13 Under Age Group',
     certificateDisplayKey: '12-13,',
-    minimum_lifter_age: '0',
+    minimum_lifter_age: '12',
     maximum_lifter_age: '13',
     disabled: false,
     customWeightClasses: true,

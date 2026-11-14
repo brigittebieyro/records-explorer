@@ -1,5 +1,11 @@
 import { useState } from 'react';
-import { currentRecordsSheetId, recordTimeZone } from '../../Data/RoutesAndSettings';
+import {
+  certificateTitle,
+  certificateWebsiteText,
+  currentRecordsSheetId,
+  includeClubNameOnCertificate,
+  recordTimeZone,
+} from '../../Data/RoutesAndSettings';
 import { AgeGroup, WeightClass } from '../../Utils/types';
 
 export const certificateEndpoint = '/api/certificate';
@@ -77,7 +83,14 @@ export const fetchCertificate = async (request: CertificateRequest): Promise<Cer
   const response = await fetch(certificateEndpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...request, sheetId: currentRecordsSheetId, timeZone: recordTimeZone }),
+    body: JSON.stringify({
+      ...request,
+      sheetId: currentRecordsSheetId,
+      timeZone: recordTimeZone,
+      includeClubName: includeClubNameOnCertificate,
+      title: certificateTitle,
+      website: certificateWebsiteText,
+    }),
   });
   if (!response.ok) {
     throw new Error(`Certificate request failed: ${response.status}`);

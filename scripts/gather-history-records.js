@@ -163,6 +163,9 @@ function loadAgeGroups() {
   return ageGroups;
 }
 
+// The WSO's own settings. src/Data/RoutesAndSettings.ts re-exports the same file to the app.
+const wsoConfig = require('../src/Data/wsoConfig.json');
+
 // ---------------------------------------------------------------------------
 // ID normalisation: W35/M35 -> 35, JR / OPEN / U11 etc. unchanged
 // ---------------------------------------------------------------------------
@@ -189,13 +192,10 @@ function requireEnv(name) {
 }
 
 const USAW_API = 'https://admin-usaw-rankings.sport80.com/api';
-const WSO_ID = 21; // California North Central
+const WSO_ID = wsoConfig.wsoId;
 
-const INELIGIBLE_ATHLETES = new Set([
-  // 'Aurora van Ulft',
-  // 'Bekdoolot Rasulbekov',
-  'Imaginary B. Athlete',
-]);
+// Athletes who appear in WSO rankings but are not eligible for WSO records
+const INELIGIBLE_ATHLETES = new Set(wsoConfig.ineligibleAthletes);
 
 const headers = {
   accept: 'application/json, text/plain, */*',
@@ -249,6 +249,14 @@ async function fetchAthleteLifts(lifterId, dateStart, dateEnd) {
   }
 }
 
+/**
+ * The club on a lift history row, or '' when the row has none. Empty text columns come back as
+ * { type: 'unset' } rather than a string.
+ */
+function liftClub(lift) {
+  return typeof lift.club === 'string' ? lift.club.trim() : '';
+}
+
 function extractBestLifts(athleteData, weightClass, ageGroup, lifter) {
   const minBw = parseFloat(weightClass.minBodyweight);
   const maxBw = parseFloat(weightClass.maxBodyweight);
@@ -267,13 +275,13 @@ function extractBestLifts(athleteData, weightClass, ageGroup, lifter) {
     if (meetYear < minYear || meetYear > maxYear) continue;
 
     if (lift.best_snatch && (!best.snatch || lift.best_snatch > best.snatch.weight)) {
-      best.snatch = { weight: lift.best_snatch, date: lift.date, event: lift.meet };
+      best.snatch = { weight: lift.best_snatch, date: lift.date, event: lift.meet, club: liftClub(lift) };
     }
     if (lift['best_c&j'] && (!best['clean & jerk'] || lift['best_c&j'] > best['clean & jerk'].weight)) {
-      best['clean & jerk'] = { weight: lift['best_c&j'], date: lift.date, event: lift.meet };
+      best['clean & jerk'] = { weight: lift['best_c&j'], date: lift.date, event: lift.meet, club: liftClub(lift) };
     }
     if (lift.total && (!best.total || lift.total > best.total.weight)) {
-      best.total = { weight: lift.total, date: lift.date, event: lift.meet };
+      best.total = { weight: lift.total, date: lift.date, event: lift.meet, club: liftClub(lift) };
     }
   }
 
@@ -363,6 +371,7 @@ async function gatherHistoryRecords(variableName) {
               athlete: athlete.name || 'Unknown',
               date: liftData.date || '',
               event: liftData.event || '',
+              clubName: liftData.club || '',
               wcIndex: weightClasses.indexOf(weightClass),
               agIndex: ageGroups.indexOf(ageGroup),
             });
@@ -394,6 +403,7 @@ async function gatherHistoryRecords(variableName) {
           athlete: '',
           date: '',
           event: '',
+          clubName: '',
           wcIndex: weightClasses.indexOf(weightClass),
           agIndex: ageGroups.indexOf(ageGroup),
         });
@@ -433,7 +443,7 @@ function generateCsv(results) {
   });
 
   const rows = [
-    ['ageGroup', 'gender', 'ageMin', 'ageMax', 'bodyWeightMin', 'bodyWeightMax', 'lift', 'record', 'name', 'date', 'place'],
+    ['ageGroup', 'gender', 'ageMin', 'ageMax', 'bodyWeightMin', 'bodyWeightMax', 'lift', 'record', 'name', 'date', 'place', 'clubName'],
     ...sorted.map(r => [
       r.ageGroupId,
       r.gender,
@@ -446,6 +456,7 @@ function generateCsv(results) {
       r.athlete,
       r.date,
       r.event,
+      r.clubName,
     ]),
   ];
 

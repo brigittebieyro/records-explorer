@@ -5,7 +5,7 @@ import { defaultWeightClasses } from '../Data/defaultWeightClasses';
 import {
   getNationalsDateRange,
   usawRankingsPublicSiteLink,
-  wsoName,
+  wsoDisplayName,
 } from '../Data/RoutesAndSettings';
 import GoalsWeightClass from './components/GoalsWeightClass';
 import { WeightClass } from '../Utils/types';
@@ -57,7 +57,8 @@ function Goals() {
       <p className="goals-descriptive-text">
         With the 2027 change in format for Senior Nationals, everybody wants to reach their top
         twelve (or six for the very lightest weight classes). Here's a view of what the top totals
-        for each group looks like, with {wsoName} WSO members already in that tier highlighted.
+        for each group looks like, with {wsoDisplayName} WSO members already in that tier
+        highlighted.
       </p>
       <p className="goals-descriptive-text">
         Of course not every in the national top group will attempt to sign up for Nationals. We're

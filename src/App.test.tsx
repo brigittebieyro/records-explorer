@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import App from './App';
+import { wsoDisplayName } from './Data/RoutesAndSettings';
 
 jest.mock('react-spinners', () => ({
   CircleLoader: () => <div data-testid="circle-loader">Loading</div>,
@@ -16,7 +17,7 @@ const renderAt = (path: string) => {
   return render(<App />);
 };
 
-const HEADER_TEXT = /California North Central WSO Records & Results/;
+const HEADER_TEXT = new RegExp(`${wsoDisplayName} WSO Records & Results`);
 
 describe('App routing (user-based)', () => {
   beforeEach(() => {

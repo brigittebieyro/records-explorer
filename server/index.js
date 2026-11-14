@@ -71,7 +71,7 @@ app.use('/api/meet-results', (req, res) => {
 const { getRecordRows } = require('./certificate/sheet');
 const { findRecord } = require('./certificate/lookup');
 const { renderCertificate, certificateFileName } = require('./certificate/render');
-const { buildManualRecord } = require('./certificate/manual');
+const { buildManualRecord, stripUnprintable } = require('./certificate/manual');
 
 // The JSON body parser is mounted on this ROUTE, never app-wide. The four cors-anywhere routes
 // above proxy POSTs whose content-type is application/json (see `headers` in
@@ -81,15 +81,26 @@ const { buildManualRecord } = require('./certificate/manual');
 // including that one -- as a flat 404, so the symptom reads as "USAW is 404ing" rather than
 // "we ate the body".
 //
-// Small limit: the payload is six short fields.
+// Small limit: the payload is a handful of short fields.
 const certificateBody = express.json({ limit: '8kb' });
 
 // Which spreadsheet and tab to read are both named by the client, with no default here: src/Data
 // is the single source of truth for them, and a default is just a mirror that goes stale quietly.
 // getRecordRows validates both before anything is fetched.
 app.post('/api/certificate', certificateBody, async (req, res) => {
-  const { sheetId, sheet, ageGroup, gender, weightClass, lift, category, timeZone } =
-    req.body || {};
+  const {
+    sheetId,
+    sheet,
+    ageGroup,
+    gender,
+    weightClass,
+    lift,
+    category,
+    timeZone,
+    includeClubName,
+    title,
+    website,
+  } = req.body || {};
 
   if (!ageGroup || !gender || !weightClass || !lift) {
     res.status(400).json({ error: 'ageGroup, gender, weightClass and lift are all required' });
@@ -135,6 +146,16 @@ app.post('/api/certificate', certificateBody, async (req, res) => {
       sheetName: String(sheet).trim(),
       category: printedCategory,
       timeZone,
+      // The certificate title and corner website are the WSO's (src/Data/wsoConfig.json), sent by
+      // the client. Anything other than a string prints nothing.
+      title: typeof title === 'string' ? stripUnprintable(title) : '',
+      website: typeof website === 'string' ? stripUnprintable(website) : '',
+      // Printed only when the client asks for it (includeClubNameOnCertificate in
+      // src/Data/RoutesAndSettings.ts) and the row has one.
+      clubName:
+        includeClubName === true && record.clubName
+          ? record.clubName.replace(/[\p{Cc}\p{Cf}]/gu, '').trim()
+          : null,
     });
   } catch (err) {
     console.error(`[certificate] render failed: ${err.stack || err.message}`);

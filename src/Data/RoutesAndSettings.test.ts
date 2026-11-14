@@ -1,6 +1,9 @@
 import {
   americanRecordsUrl,
-  endDate,
+  certificateTitle,
+  configSchema,
+  currentRecordsSheetId,
+  // endDate, -- for a future test
   getIndividualMeetResultsRoute,
   getLifterDataRoute,
   getLifterId,
@@ -22,11 +25,16 @@ import {
   nationalsQualifyingStartDate,
   priorRecordsSheetNames,
   publicSpreadsheetLink,
+  toRecordDate,
   usawRankingsPublicSiteLink,
   wsoBoundary,
+  wsoRegions,
+  wsoStateNames,
   wsoInfoUSAWUrl,
-  wsoName,
+  wsoDisplayName,
 } from './RoutesAndSettings';
+import wsoConfig from './wsoConfig.json';
+import { findInvalidConfigFields } from '../Utils/SettingsUtils';
 
 describe('RoutesAndSettings (user-based)', () => {
   describe('route builders', () => {
@@ -77,15 +85,16 @@ describe('RoutesAndSettings (user-based)', () => {
   });
 
   describe('B-16: historical record sheet tabs', () => {
-    test('priorRecordsSheetNames lists the three history tabs', () => {
-      expect(priorRecordsSheetNames).toEqual(['Pre-Aug2026', 'Pre-June2025', 'Pre-2018']);
+    test('priorRecordsSheetNames is a list of tab names', () => {
+      expect(Array.isArray(priorRecordsSheetNames)).toBe(true);
+      priorRecordsSheetNames.forEach((name) => expect(name.trim()).not.toBe(''));
     });
   });
 
   describe('A-04 / D-01 / E-02 / E-03: external links', () => {
-    test('WSO site links', () => {
-      expect(localScheduleUrl).toBe('https://canorthcentralwso.org/meet-schedule');
-      expect(localHomeUrl).toBe('https://canorthcentralwso.org');
+    test('WSO site links are web URLs', () => {
+      expect(localScheduleUrl).toMatch(/^https?:\/\//);
+      expect(localHomeUrl).toMatch(/^https?:\/\//);
     });
 
     test('USAW public rankings site link', () => {
@@ -96,15 +105,18 @@ describe('RoutesAndSettings (user-based)', () => {
 
     test('About page links', () => {
       expect(americanRecordsUrl).toBe('https://www.usaweightlifting.org/american-records');
-      expect(wsoInfoUSAWUrl).toBe(
-        'https://www.usaweightlifting.org/club-wso/wso-information/california-north-central'
-      );
+      expect(wsoInfoUSAWUrl).toMatch(/^https?:\/\//);
       expect(githubUrl).toBe('https://github.com/brigittebieyro/records-explorer');
-      expect(publicSpreadsheetLink).toContain('https://docs.google.com/spreadsheets/d/');
     });
 
-    test('maintainer email is set', () => {
-      expect(maintainerEmail).toBe('brigitte.bieyro@gmail.com');
+    test('the public spreadsheet link points at the current records sheet', () => {
+      expect(publicSpreadsheetLink).toBe(
+        `https://docs.google.com/spreadsheets/d/${currentRecordsSheetId}`
+      );
+    });
+
+    test('maintainer email is a string', () => {
+      expect(typeof maintainerEmail).toBe('string');
     });
   });
 
@@ -121,33 +133,39 @@ describe('RoutesAndSettings (user-based)', () => {
       expect(localMeetStartDate).toBe('2026-01-01');
     });
 
-    test('the WSO boundary covers northern/central California', () => {
+    test('local meets are searched by a list of regions and state names', () => {
+      expect(Array.isArray(wsoRegions)).toBe(true);
+      expect(Array.isArray(wsoStateNames)).toBe(true);
+    });
+
+    test('the WSO boundary, when set, is a box with north above south and east of west', () => {
+      if (!wsoBoundary) return;
       expect(wsoBoundary.north).toBeGreaterThan(wsoBoundary.south);
       expect(wsoBoundary.east).toBeGreaterThan(wsoBoundary.west);
-      expect(wsoBoundary).toEqual({ north: 42.01, south: 34.79, west: -124.41, east: -114.13 });
     });
   });
 
   describe('D-01: nationals qualification date range', () => {
-    // Nationals is 2027-03-07, qualifying window 2026-02-04 through 2027-02-04.
+    // Nationals is 2027-03-07, qualifying window 2026-02-04 through 2027-02-04. Instants are noon
+    // UTC, which is the same calendar day in every US time zone.
     test('well before Nationals, the official qualifying window is used', () => {
-      expect(getNationalsDateRange(new Date('2026-08-29'))).toEqual({
+      expect(getNationalsDateRange(new Date('2026-08-29T12:00:00Z'))).toEqual({
         startDate: nationalsQualifyingStartDate,
         endDate: nationalsQualifyingEndDate,
       });
     });
 
     test('the qualifying window still applies on the day of Nationals', () => {
-      expect(getNationalsDateRange(new Date('2027-03-07'))).toEqual({
+      expect(getNationalsDateRange(new Date('2027-03-07T12:00:00Z'))).toEqual({
         startDate: nationalsQualifyingStartDate,
         endDate: nationalsQualifyingEndDate,
       });
     });
 
     test('once Nationals has passed, the range falls back to the last 16 months', () => {
-      expect(getNationalsDateRange(new Date('2027-03-08'))).toEqual({
+      expect(getNationalsDateRange(new Date('2027-03-08T12:00:00Z'))).toEqual({
         startDate: '2025-11-08',
-        endDate,
+        endDate: '2027-03-09',
       });
     });
   });
@@ -175,7 +193,60 @@ describe('RoutesAndSettings (user-based)', () => {
     });
   });
 
-  test('the WSO identity is California North Central', () => {
-    expect(wsoName).toBe('California North Central');
+  test('the certificate title is the WSO name', () => {
+    expect(certificateTitle).toBe(`${wsoDisplayName} WSO`);
+  });
+
+  describe('WSO names', () => {
+    /** Loads this module against `config` in place of the shipped wsoConfig.json. */
+    const loadWithConfig = (config: object): typeof import('./RoutesAndSettings') => {
+      let settings: typeof import('./RoutesAndSettings') | undefined;
+      jest.isolateModules(() => {
+        jest.doMock('./wsoConfig.json', () => config);
+        settings = require('./RoutesAndSettings');
+      });
+      jest.dontMock('./wsoConfig.json');
+      return settings!;
+    };
+
+    test('the display name is the official name when the config has no wsoDisplayName', () => {
+      const { wsoDisplayName: displayName, wsoOfficialName: officialName } = loadWithConfig({
+        ...wsoConfig,
+        wsoOfficialName: 'Official Name',
+      });
+      expect(officialName).toBe('Official Name');
+      expect(displayName).toBe('Official Name');
+    });
+
+    test('the display name is wsoDisplayName when the config has one', () => {
+      const settings = loadWithConfig({
+        ...wsoConfig,
+        wsoOfficialName: 'Official Name',
+        wsoDisplayName: 'Display Name',
+      });
+      expect(settings.wsoOfficialName).toBe('Official Name');
+      expect(settings.wsoDisplayName).toBe('Display Name');
+      expect(settings.certificateTitle).toBe('Display Name WSO');
+    });
+  });
+
+  describe('toRecordDate', () => {
+    test('is a YYYY-MM-DD day', () => {
+      expect(toRecordDate(new Date('2026-09-29T12:00:00Z'))).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    });
+
+    test('names the day in the record time zone, not the UTC day', () => {
+      const instant = new Date('2026-09-30T03:30:00Z');
+      const expected = new Intl.DateTimeFormat('en-CA', {
+        timeZone: wsoConfig.recordTimeZone,
+      }).format(instant);
+      expect(toRecordDate(instant)).toBe(expected);
+    });
+  });
+
+  describe('wsoConfig.json shape', () => {
+    test('the shipped config matches the config schema', () => {
+      expect(findInvalidConfigFields(wsoConfig, configSchema)).toEqual([]);
+    });
   });
 });

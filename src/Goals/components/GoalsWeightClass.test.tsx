@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import GoalsWeightClass from './GoalsWeightClass';
 import { CombinedLiftData, MeetRecord, WeightClass } from '../../Utils/types';
+import { wsoOfficialName } from '../../Data/RoutesAndSettings';
 
 jest.mock('react-spinners', () => ({
   CircleLoader: () => <div data-testid="circle-loader">Loading</div>,
@@ -162,7 +163,7 @@ describe('GoalsWeightClass (user-based)', () => {
     mockFetchResponses([
       makeGoalLifter({
         name: 'Jane A. Smith',
-        wso: 'California North Central',
+        wso: wsoOfficialName,
         club: 'Sacramento Barbell',
       }),
       makeGoalLifter({ name: 'Jane B. Smith', wso: 'Pacific Northwest', total: 170 }),
@@ -187,7 +188,7 @@ describe('GoalsWeightClass (user-based)', () => {
     mockFetchResponses([
       makeGoalLifter({
         name: 'Jane A. Smith',
-        wso: 'California North Central',
+        wso: wsoOfficialName,
         club: { type: 'unset' },
       }),
       makeGoalLifter({ name: 'Jane B. Smith', total: 170, wso: { type: 'unset' } }),
@@ -246,7 +247,7 @@ describe('GoalsWeightClass (user-based)', () => {
       makeGoalLifter({
         name: 'Jane C. Smith',
         total: 180,
-        wso: 'California North Central',
+        wso: wsoOfficialName,
       }),
     ]);
 

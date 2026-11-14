@@ -93,58 +93,68 @@ To adjust what gets analyzed, edit `scripts/analyze-records.js`:
 
 ## Configuring for your WSO
 
-The app is designed to be adapted for any USAW WSO. All WSO-specific settings live in one file: [`src/Data/RoutesAndSettings.ts`](src/Data/RoutesAndSettings.ts).
+The app is designed to be adapted for any USAW WSO. All WSO-specific settings live in one file: [`src/Data/wsoConfig.json`](src/Data/wsoConfig.json). [`src/Data/RoutesAndSettings.ts`](src/Data/RoutesAndSettings.ts) re-exports these values to the rest of the app (with a comment on each), and holds the USAW platform settings, which are the same for every WSO and should not need to change. The node scripts in `scripts/` read the same JSON file.
 
-### 1. Set your WSO identity
+The app checks the file against `configSchema` in `RoutesAndSettings.ts` when it loads: a missing required field, or a field of the wrong type, fails with an error naming it. Fields marked optional (`'name?'`) may be left out, and fields the schema doesn't list are ignored. When you add a setting, add it to the schema too.
 
-```ts
-export const wsoId = 21;           // Your WSO's Sport80 numeric ID
-export const wsoName = 'California North Central';  // Display name
-```
+For every field's type, whether it's required, and an example value, see [CONFIG_README.md](CONFIG_README.md).
 
-Find your `wsoId` in the USAW Sport80 admin portal or by inspecting API requests on the USAW rankings site.
+### 1. WSO identity
 
-### 2. Point to your records Google Sheet
+| Field | What it is |
+| --- | --- |
+| `wsoId` | Your WSO's Sport80 numeric ID. Find it in the Sport80 admin portal or by inspecting API requests on the USAW rankings site. |
+| `wsoOfficialName` | Your WSO's name exactly as Sport80 reports it, e.g. `"California North Central"`. Used to highlight your WSO's lifters on the Goals page. |
+| `wsoDisplayName` | Optional. The name shown in the header, the page title, and as `<name> WSO` across the top of certificates. Leave it out to show `wsoOfficialName`. |
+| `wsoRegions` | Sport80 region ids for your state or states, e.g. `["66"]`. The Local Meets page requests the meet list once per region and lists the results together. |
+| `wsoStateNames` | Your state or states as written in Sport80 meet addresses, e.g. `["California"]`. Used to show each local meet's city. |
+| `recordTimeZone` | IANA time zone record dates are kept in, e.g. `"America/New_York"`. Decides what "today" is for every date range and how certificate dates print. |
+| `allTimeStartDate` | How far back the all-time record search reaches (`YYYY-MM-DD`). |
 
-The app reads recognized records from a Google Sheet. Create a sheet with the expected column layout and update:
+### 2. Records Google Sheet
 
-```ts
-export const currentRecordsSheetId = 'YOUR_SHEET_ID';
-export const currentRecordsSheetName = 'Raw_Data';  // or whatever your tab is named
-```
+The app reads recognized records from a Google Sheet. Create a sheet with the expected column layout and set:
 
-The Sheet ID is the long string in the sheet's URL: `https://docs.google.com/spreadsheets/d/<SHEET_ID>/edit`.
+| Field | What it is |
+| --- | --- |
+| `currentRecordsSheetId` | The long string in the sheet's URL: `https://docs.google.com/spreadsheets/d/<SHEET_ID>/edit`. The public spreadsheet link on the site is built from it. |
+| `currentRecordsSheetName` | The tab holding current records. |
+| `priorRecordsSheetNames` | History tabs in the same spreadsheet, newest first. Use `[]` if you have none. |
+| `adaptiveLiftersListSheetId`, `adaptiveLiftersListSheetName` | The adaptive athlete roster sheet and tab. |
 
-### 3. Update external links
+The adaptive record tabs (`Adaptive_All`, `Adaptive_Physical`, ...) and the `STANDARD` placeholder are part of the sheet template and stay in `RoutesAndSettings.ts`.
 
-```ts
-export const localScheduleUrl = 'https://yourwso.org/meet-schedule';
-export const localHomeUrl     = 'https://yourwso.org';
-export const wsoInfoUSAWUrl   = 'https://www.usaweightlifting.org/club-wso/wso-information/your-wso';
-```
+### 3. Adaptive records
 
-### 4. Set the maintainer info
+| Field | What it is |
+| --- | --- |
+| `showAdaptiveRecordsInMenu` | Whether the header menu links to the Adaptive WSO Records page. |
+| `adaptiveOptInFormUrl` | The form adaptive athletes use to opt in. |
 
-```ts
-export const maintainerEmail = 'you@example.com';
-export const maintainerName  = 'Your Name';
-```
+### 4. Certificates
 
-### 5. Configure date ranges
+| Field | What it is |
+| --- | --- |
+| `includeClubNameOnCertificate` | Whether certificates print the record's club, when the sheet row has one. |
+| `certificateWebsiteText` | Printed in the corner of every certificate. `""` prints nothing. |
 
-```ts
-export const allTimeStartDate      = '1998-01-01'; // How far back to search for records
-export const youthAllTimeStartDate = '2014-01-01'; // Start date for youth records
-export const endDate               = '2026-08-01'; // When the current weight classes expire
-```
+The certificate logo is an image file that exists in two places: `public/WSOLogo.png` (header and favicon) and `server/certificate/assets/WSOLogo.png` (certificates). Replace both. The certificate copy must be an 8-bit, non-palette PNG.
 
-### 6. Add ineligible athletes
+### 5. Links and maintainer
 
-If your WSO has any rules which preclude specific athletes from holding records, you can list them here. California North Central requires that all recordholders live within the WSO area, athletes who reside in other states or countries can not hold these records. 
+`localScheduleUrl`, `localHomeUrl`, and `wsoInfoUSAWUrl` must be full `https://` URLs. `maintainerName` and `maintainerEmail` are shown on the site.
 
-```ts
-export const ineligibleAthletes: string[] = ['Full Name', 'Another Name'];
-```
+### 6. Rules
+
+| Field | What it is |
+| --- | --- |
+| `wsoBoundary` | Optional. A `{ north, south, west, east }` lat/lng box; local meets outside it are not listed. Leave it out to list every local meet in `wsoRegions`. |
+| `ineligibleAthletes` | Full names, as Sport80 spells them, of athletes who may not hold your WSO's records (e.g. because they live outside the WSO). Use `[]` if none. |
+| `scriptsPassword` | The SHA-256 hex digest of `<password>---<display name>` that unlocks the `/scripts` page, where the display name is `wsoDisplayName`, or `wsoOfficialName` when there is none. Because the name is part of the input, changing it means regenerating this. |
+
+### Other WSO-specific content
+
+Some wording is not a setting: the copy on the About page (`src/Info/Info.tsx`) describes California North Central's region and standards votes. Edit it directly.
 
 ### 7. Set your API credentials
 

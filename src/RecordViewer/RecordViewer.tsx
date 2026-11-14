@@ -17,7 +17,7 @@ import {
   getSheetRoute,
   priorRecordsSheetNames,
   standardKey,
-  wsoName,
+  wsoDisplayName,
   youthAllTimeStartDate,
 } from '../Data/RoutesAndSettings';
 import {
@@ -404,7 +404,7 @@ function RecordViewer() {
               <div className="record-group-info">
                 <p className="page-title">Current Top Athletes</p>
                 <p className="record-group-description">
-                  These are the {wsoName} WSO's top ranked lifters in the current{' '}
+                  These are the {wsoDisplayName} WSO's top ranked lifters in the current{' '}
                   <strong>{currentWeightClass.name}</strong> weight class, active{' '}
                   <strong>
                     from {new Date(currentWeightClass.start).getUTCFullYear()}, originally fetched

@@ -10,7 +10,8 @@ jest.mock('react-spinners', () => ({
 // undefined means "as configured"; null stands for a setting the config leaves out.
 let mockOptInFormUrl: string | null | undefined;
 let mockAllRecordsSheetName: string | null | undefined;
-let mockNoCategories = false;
+let mockMissingAdaptiveConfigs: string[] | undefined;
+let mockAdaptiveCategories: unknown[] | undefined;
 jest.mock('../Data/RoutesAndSettings', () => {
   const actual = jest.requireActual('../Data/RoutesAndSettings');
   const configured = (mock: string | null | undefined, real: unknown) =>
@@ -23,8 +24,11 @@ jest.mock('../Data/RoutesAndSettings', () => {
     get adaptiveAllRecordsSheetName() {
       return configured(mockAllRecordsSheetName, actual.adaptiveAllRecordsSheetName);
     },
+    get missingAdaptiveConfigs() {
+      return mockMissingAdaptiveConfigs ?? actual.missingAdaptiveConfigs;
+    },
     get adaptiveCategories() {
-      return mockNoCategories ? [] : actual.adaptiveCategories;
+      return mockAdaptiveCategories ?? actual.adaptiveCategories;
     },
   };
 });
@@ -102,10 +106,16 @@ const chooseCategory = async (label: string) => {
 };
 
 /**
- * The preamble shows on every view of the page, with or without records listed. Waiting on it is
- * how a test knows the page has settled.
+ * The preamble shows on every view of the page, with or without records listed, and while the
+ * combined tab is still loading. The loader is waited out first: the preamble moves into the
+ * records view once records arrive, so one found while loading may no longer be in the page.
  */
-const landing = () => screen.findByText(/Keeping track of local adaptive athletes/);
+const landing = async () => {
+  await waitFor(() => {
+    expect(screen.queryByTestId('circle-loader')).toBeNull();
+  });
+  return screen.findByText(/Keeping track of local adaptive athletes/);
+};
 
 describe('AdaptiveRecords (user-based)', () => {
   const originalFetch = global.fetch;
@@ -115,12 +125,13 @@ describe('AdaptiveRecords (user-based)', () => {
     jest.clearAllMocks();
     mockOptInFormUrl = undefined;
     mockAllRecordsSheetName = undefined;
-    mockNoCategories = false;
+    mockMissingAdaptiveConfigs = undefined;
+    mockAdaptiveCategories = undefined;
   });
 
   test('with only a combined tab configured, lists its records and offers no category picker', async () => {
     mockAllRecordsSheetName = 'Adaptive_All';
-    mockNoCategories = true;
+    mockAdaptiveCategories = [];
     mockSheets({ Adaptive_All: withRecord('Jane Smith') });
 
     render(<AdaptiveRecords />);
@@ -349,5 +360,54 @@ describe('AdaptiveRecords (user-based)', () => {
       expect(screen.getByText(/Adaptive records could not be loaded/)).toBeInTheDocument();
     });
     expect(screen.queryByTestId('circle-loader')).toBeNull();
+  });
+
+  test('the preamble still shows when the combined tab fails to load', async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue({ ok: false, status: 500 }) as unknown as typeof fetch;
+
+    render(<AdaptiveRecords />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Adaptive records could not be loaded/)).toBeInTheDocument();
+    });
+    expect(screen.getByText(/Keeping track of local adaptive athletes/)).toBeInTheDocument();
+  });
+
+  test('lists missing adaptive settings below the preamble', async () => {
+    mockMissingAdaptiveConfigs = ['adaptiveAllRecordsSheetName', 'adaptiveOptInFormUrl'];
+    mockSheets({});
+
+    render(<AdaptiveRecords />);
+
+    expect(await landing()).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Adaptive configs are missing: adaptiveAllRecordsSheetName, adaptiveOptInFormUrl'
+      )
+    ).toBeInTheDocument();
+  });
+
+  test('says nothing about missing settings when every one is configured', async () => {
+    mockMissingAdaptiveConfigs = [];
+    mockSheets({ Adaptive_All: withRecord('Jane Smith') });
+
+    render(<AdaptiveRecords />);
+
+    expect(await landing()).toBeInTheDocument();
+    expect(screen.queryByText(/Adaptive configs are missing/)).toBeNull();
+  });
+
+  test('the missing settings message is not shown once a category is applied', async () => {
+    mockMissingAdaptiveConfigs = ['adaptiveOptInFormUrl'];
+    mockSheets({ Adaptive_Vision: withRecord('Jane V. Smith') });
+
+    render(<AdaptiveRecords />);
+    await landing();
+    await chooseCategory('Visual Impairment');
+
+    await screen.findByText('Jane V. Smith');
+    expect(screen.queryByText(/Adaptive configs are missing/)).toBeNull();
   });
 });

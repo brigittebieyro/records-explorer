@@ -32,7 +32,9 @@
     "server": "nodemon --exec \"node --env-file-if-exists=.env.local\" server/index.js | pino-colada",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,json}\"",
     "analyze-records": "node --env-file-if-exists=.env.local scripts/analyze-records.js",
-    "gather-history-records": "node --env-file-if-exists=.env.local scripts/gather-history-records.js"
+    "gather-history-records": "node --env-file-if-exists=.env.local scripts/gather-history-records.js",
+    "update-password": "node scripts/update-password.js",
+    "whole-application": "concurrently -n server,client -c blue,green -k \"npm run server\" \"npm start\""
   },
   "jest": {
     "collectCoverageFrom": [
@@ -85,6 +87,7 @@
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
     "body-parser": "^2.2.1",
+    "concurrently": "^10.0.7",
     "express": "4.21.2",
     "express-pino-logger": "^7.0.0",
     "node-env-run": "^4.0.2",

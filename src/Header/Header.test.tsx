@@ -1,18 +1,31 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Header from './Header';
-import { localHomeUrl, localScheduleUrl, wsoDisplayName } from '../Data/RoutesAndSettings';
+import { wsoDisplayName } from '../Data/RoutesAndSettings';
+
+const testScheduleUrl = 'https://example.org/meet-schedule';
+const testHomeUrl = 'https://example.org';
 
 let mockShowAdaptiveRecordsInMenu = true;
+let mockLocalScheduleUrl: string | undefined = testScheduleUrl;
+let mockLocalHomeUrl: string | undefined = testHomeUrl;
 jest.mock('../Data/RoutesAndSettings', () => ({
   ...jest.requireActual('../Data/RoutesAndSettings'),
   get showAdaptiveRecordsInMenu() {
     return mockShowAdaptiveRecordsInMenu;
   },
+  get localScheduleUrl() {
+    return mockLocalScheduleUrl;
+  },
+  get localHomeUrl() {
+    return mockLocalHomeUrl;
+  },
 }));
 
 beforeEach(() => {
   mockShowAdaptiveRecordsInMenu = true;
+  mockLocalScheduleUrl = testScheduleUrl;
+  mockLocalHomeUrl = testHomeUrl;
 });
 
 describe('Header (user-based)', () => {
@@ -97,12 +110,26 @@ describe('Header (user-based)', () => {
 
     expect(screen.getByRole('link', { name: 'Local Meet Schedule' })).toHaveAttribute(
       'href',
-      localScheduleUrl
+      testScheduleUrl
     );
     expect(screen.getByRole('link', { name: 'Official WSO Site' })).toHaveAttribute(
       'href',
-      localHomeUrl
+      testHomeUrl
     );
+  });
+
+  test('A-04: each external link is left out of the menu when its URL is not configured', () => {
+    mockLocalScheduleUrl = undefined;
+    const { unmount } = render(<Header />);
+    expect(screen.queryByRole('link', { name: 'Local Meet Schedule' })).toBeNull();
+    expect(screen.getByRole('link', { name: 'Official WSO Site' })).toBeInTheDocument();
+    unmount();
+
+    mockLocalScheduleUrl = testScheduleUrl;
+    mockLocalHomeUrl = undefined;
+    render(<Header />);
+    expect(screen.getByRole('link', { name: 'Local Meet Schedule' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Official WSO Site' })).toBeNull();
   });
 
   test('A-05: the hidden /scripts route is not linked anywhere in the menu', () => {

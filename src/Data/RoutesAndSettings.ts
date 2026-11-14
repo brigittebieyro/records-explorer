@@ -31,10 +31,10 @@ export const configSchema: ConfigSchema = {
   recordTimeZone: 'string',
   allTimeStartDate: 'IsoDate',
   includeClubNameOnCertificate: 'boolean',
-  certificateWebsiteText: 'string',
+  'certificateWebsiteText?': 'string',
   currentRecordsSheetId: 'string',
   currentRecordsSheetName: 'string',
-  priorRecordsSheetNames: 'string[]',
+  'priorRecordsSheetNames?': 'string[]',
   standardKey: 'string',
   'adaptiveAllRecordsSheetName?': 'string',
   'adaptiveCategoryRecordsSheetNames?': {
@@ -46,14 +46,14 @@ export const configSchema: ConfigSchema = {
   'adaptiveLiftersListSheetId?': 'string',
   'adaptiveLiftersListSheetName?': 'string',
   'adaptiveOptInFormUrl?': 'WebUrl',
-  showAdaptiveRecordsInMenu: 'boolean',
-  localScheduleUrl: 'WebUrl',
-  localHomeUrl: 'WebUrl',
+  'showAdaptiveRecordsInMenu?': 'boolean',
+  'localScheduleUrl?': 'WebUrl',
+  'localHomeUrl?': 'WebUrl',
   wsoInfoUSAWUrl: 'WebUrl',
   maintainerEmail: 'string',
   maintainerName: 'string',
   'wsoBoundary?': { north: 'number', south: 'number', west: 'number', east: 'number' },
-  ineligibleAthletes: 'string[]',
+  'ineligibleAthletes?': 'string[]',
   scriptsPassword: 'string',
 };
 assertConfigMatchesSchema(wsoConfig, configSchema, 'wsoConfig.json');
@@ -89,8 +89,13 @@ export const recordTimeZone: string = wsoConfig.recordTimeZone;
  * Sent with every certificate request; a tab without a clubName column prints no club either way.
  */
 export const includeClubNameOnCertificate: boolean = wsoConfig.includeClubNameOnCertificate;
-/** Printed in the corner of every certificate. An empty string prints nothing there. */
-export const certificateWebsiteText: string = wsoConfig.certificateWebsiteText;
+/**
+ * Printed in the corner of every certificate. An empty string, or leaving it out of the config,
+ * prints nothing there. Read through a wider type: the JSON import's inferred type has no field
+ * the file leaves out.
+ */
+export const certificateWebsiteText: string =
+  (wsoConfig as { certificateWebsiteText?: string }).certificateWebsiteText ?? '';
 /** The large title across the top of every certificate. */
 export const certificateTitle: string = `${wsoDisplayName} WSO`;
 
@@ -243,8 +248,9 @@ export const getSheetRoute = (sheetId: string, sheetName: string): string => {
 //   1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ -- production data! Link is public! DO NOT alter data for testing.
 export const currentRecordsSheetId: string = wsoConfig.currentRecordsSheetId;
 export const currentRecordsSheetName: string = wsoConfig.currentRecordsSheetName;
-/** History tabs in the same spreadsheet, newest first. */
-export const priorRecordsSheetNames: string[] = wsoConfig.priorRecordsSheetNames;
+/** History tabs in the same spreadsheet, newest first. Empty when the config leaves it out. */
+export const priorRecordsSheetNames: string[] =
+  (wsoConfig as { priorRecordsSheetNames?: string[] }).priorRecordsSheetNames ?? [];
 // ----------------------------------------------------------------------------------------------------------------
 // Adaptive records settings, all optional. Read through a wider type: the JSON import's inferred type has
 // no field the file leaves out, and requires every field the file has.
@@ -257,6 +263,7 @@ interface AdaptiveConfig {
   adaptiveLiftersListSheetId?: string;
   adaptiveLiftersListSheetName?: string;
   adaptiveOptInFormUrl?: string;
+  showAdaptiveRecordsInMenu?: boolean;
 }
 const _adaptiveConfig = wsoConfig as AdaptiveConfig;
 /** The value, or undefined when the config leaves it out or blank. */
@@ -335,18 +342,21 @@ export const adptiveCategoryRecordsSheetNames: string[] = adaptiveCategories.map
   (category) => category.id
 );
 
-/**
- * Whether the Adaptive Records page exists. It needs the combined tab or at least one category
- * tab; the /adaptive route is not served without one.
- */
-export const adaptiveRecordsPageAvailable: boolean =
-  adaptiveAllRecordsSheetName !== undefined || adaptiveCategories.length > 0;
-/**
- * Whether the header menu links to the Adaptive WSO Records page: the config's
- * showAdaptiveRecordsInMenu, and only when the page is available.
- */
+/** Whether the header menu links to the Adaptive WSO Records page. False when the config leaves it out. */
 export const showAdaptiveRecordsInMenu: boolean =
-  adaptiveRecordsPageAvailable && wsoConfig.showAdaptiveRecordsInMenu;
+  _adaptiveConfig.showAdaptiveRecordsInMenu ?? false;
+/**
+ * The adaptive settings, by config name, that are left out or blank, in this order. Listed on the
+ * Adaptive Records page below its summary.
+ */
+export const missingAdaptiveConfigs: string[] = Object.entries({
+  adaptiveAllRecordsSheetName,
+  adaptiveLiftersListSheetName,
+  adaptiveLiftersListSheetId,
+  adaptiveOptInFormUrl,
+})
+  .filter(([, value]) => value === undefined)
+  .map(([name]) => name);
 /**
  * Whether the Scripts page offers the adaptive records script. It needs the roster sheet and at
  * least one adaptive records tab to compare against.
@@ -364,8 +374,16 @@ export const adaptiveAllCertificateDisplayKey = 'Adaptive (Overall)';
 // External Links
 // ----------------------------------------------------------------------------------------------------------------
 //
-export const localScheduleUrl: WebUrl = wsoConfig.localScheduleUrl as WebUrl;
-export const localHomeUrl: WebUrl = wsoConfig.localHomeUrl as WebUrl;
+// Read through a wider type: the JSON import's inferred type has no field the file leaves out.
+const _linksConfig = wsoConfig as { localScheduleUrl?: string; localHomeUrl?: string };
+/** Linked from the header menu when set; undefined when the config leaves it out or blank. */
+export const localScheduleUrl: WebUrl | undefined = _configured(_linksConfig.localScheduleUrl) as
+  | WebUrl
+  | undefined;
+/** Linked from the header menu when set; undefined when the config leaves it out or blank. */
+export const localHomeUrl: WebUrl | undefined = _configured(_linksConfig.localHomeUrl) as
+  | WebUrl
+  | undefined;
 export const americanRecordsUrl: WebUrl = 'https://www.usaweightlifting.org/american-records';
 export const wsoInfoUSAWUrl: WebUrl = wsoConfig.wsoInfoUSAWUrl as WebUrl;
 export const githubUrl: WebUrl = 'https://github.com/brigittebieyro/records-explorer';
@@ -387,7 +405,9 @@ export const wsoBoundary: WsoBoundary | undefined = (wsoConfig as { wsoBoundary?
 // Exceptions who may not hold records, e.g. because they do not live within the WSO.
 // ----------------------------------------------------------------------------------------------------------------
 //
-export const ineligibleAthletes: string[] = wsoConfig.ineligibleAthletes;
+// Empty when the config leaves it out.
+export const ineligibleAthletes: string[] =
+  (wsoConfig as { ineligibleAthletes?: string[] }).ineligibleAthletes ?? [];
 
 // ----------------------------------------------------------------------------------------------------------------
 // Scripts page password: the SHA-256 hex digest of `${password}---${wsoDisplayName}` (see hashPassword

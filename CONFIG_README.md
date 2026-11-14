@@ -40,7 +40,7 @@ Most itemps are required.
 Optional items:
 `wsoDisplayName`,
 `wsoBoundary`
- the adaptive records settings OTHER than `showAdaptiveRecordsInMenu`.
+all of the adaptive records settings.
 
 | Field | Type | Required | Section |
 | --- | --- | --- | --- |
@@ -53,23 +53,23 @@ Optional items:
 | `allTimeStartDate` | date | yes | [WSO identity](#wso-identity) |
 | `currentRecordsSheetId` | string | yes | [Records Google Sheet](#records-google-sheet) |
 | `currentRecordsSheetName` | string | yes | [Records Google Sheet](#records-google-sheet) |
-| `priorRecordsSheetNames` | list of strings | yes (may be `[]`) | [Records Google Sheet](#records-google-sheet) |
+| `priorRecordsSheetNames` | list of strings | **no** | [Records Google Sheet](#records-google-sheet) |
 | `standardKey` | string | yes | [Records Google Sheet](#records-google-sheet) |
 | `adaptiveAllRecordsSheetName` | string | **no** | [Adaptive records](#adaptive-records) |
 | `adaptiveCategoryRecordsSheetNames` | object of up to 4 strings | **no** | [Adaptive records](#adaptive-records) |
 | `adaptiveLiftersListSheetId` | string | **no** | [Adaptive records](#adaptive-records) |
 | `adaptiveLiftersListSheetName` | string | **no** | [Adaptive records](#adaptive-records) |
 | `adaptiveOptInFormUrl` | URL | **no** | [Adaptive records](#adaptive-records) |
-| `showAdaptiveRecordsInMenu` | boolean | yes | [Adaptive records](#adaptive-records) |
+| `showAdaptiveRecordsInMenu` | boolean | **no** | [Adaptive records](#adaptive-records) |
 | `includeClubNameOnCertificate` | boolean | yes | [Certificates](#certificates) |
-| `certificateWebsiteText` | string | yes (may be `""`) | [Certificates](#certificates) |
-| `localScheduleUrl` | URL | yes | [Links and contact](#links-and-contact) |
-| `localHomeUrl` | URL | yes | [Links and contact](#links-and-contact) |
+| `certificateWebsiteText` | string | **no** | [Certificates](#certificates) |
+| `localScheduleUrl` | URL | **no** | [Links and contact](#links-and-contact) |
+| `localHomeUrl` | URL | **no** | [Links and contact](#links-and-contact) |
 | `wsoInfoUSAWUrl` | URL | yes | [Links and contact](#links-and-contact) |
 | `maintainerName` | string | yes | [Links and contact](#links-and-contact) |
 | `maintainerEmail` | string | yes | [Links and contact](#links-and-contact) |
 | `wsoBoundary` | object of 4 numbers | **no** | [Eligibility and access](#eligibility-and-access) |
-| `ineligibleAthletes` | list of strings | yes (may be `[]`) | [Eligibility and access](#eligibility-and-access) |
+| `ineligibleAthletes` | list of strings | **no** | [Eligibility and access](#eligibility-and-access) |
 | `scriptsPassword` | string | yes | [Eligibility and access](#eligibility-and-access) |
 
 ---
@@ -152,8 +152,8 @@ The name of the tab that holds the current records. It's the tab name as shown a
 "currentRecordsSheetName": "Post-Aug2026"
 ```
 
-### `priorRecordsSheetNames` (list of strings)
-Tabs in the same spreadsheet that hold records from earlier periods, such as before a weight class change. List them newest first. The app reads them all for record history. Use `[]` if you have none.
+### `priorRecordsSheetNames` (list of strings, optional)
+Tabs in the same spreadsheet that hold records from earlier periods, such as before a weight class change. List them newest first. The app reads them all for record history. Leave the field out, or use `[]`, if you have none.
 
 ```json
 "priorRecordsSheetNames": ["Pre-Aug2026", "Pre-June2025", "Pre-2018"]
@@ -170,13 +170,16 @@ The text in a record's lifter column that marks a record standard: a mark your W
 
 ## Adaptive records
 
-Adaptive records are optional. Every setting in this section except `showAdaptiveRecordsInMenu` can be left out, and a blank string (`""`) counts as left out. What's available depends on which settings are present:
+Adaptive records are optional. Every setting in this section can be left out, and a blank string (`""`) counts as left out. The Adaptive Records page at `/adaptive` is always served; what it and the rest of the site offer depends on which settings are present:
 
 | You set | What you get |
 | --- | --- |
-| `adaptiveAllRecordsSheetName`, or at least one tab in `adaptiveCategoryRecordsSheetNames` | The Adaptive Records page at `/adaptive`, and its menu item if `showAdaptiveRecordsInMenu` is `true`. The page lists the combined records if that tab is set, and offers a category picker if any category tabs are set. |
+| `adaptiveAllRecordsSheetName` | The combined records, which the Adaptive Records page opens on. |
+| Tabs in `adaptiveCategoryRecordsSheetNames` | Those categories in the Adaptive Records page's category picker. With none, the page has no category picker. |
+| `showAdaptiveRecordsInMenu` set to `true` | The Adaptive WSO Records menu item. |
 | Both `adaptiveLiftersListSheetId` and `adaptiveLiftersListSheetName`, plus `adaptiveAllRecordsSheetName` or at least one category tab | The "Fetch Adaptive Record Updates" script on `/scripts`. |
-| None of them | No adaptive page, menu item or script. `showAdaptiveRecordsInMenu` is still required, but has no effect. |
+
+When any of `adaptiveAllRecordsSheetName`, `adaptiveLiftersListSheetName`, `adaptiveLiftersListSheetId` or `adaptiveOptInFormUrl` is left out, the Adaptive Records page lists them below its summary: "Adaptive configs are missing: …".
 
 ### `adaptiveLiftersListSheetId` (string, optional)
 The id of the spreadsheet that holds your adaptive athletes and their categories. It's taken from the URL the same way as [`currentRecordsSheetId`](#currentrecordssheetid-string), and can be the same spreadsheet or a different one.
@@ -192,14 +195,14 @@ The tab in that spreadsheet that lists the athletes. The adaptive records script
 The athletes tab marks each athlete's categories with TRUE/FALSE columns: one for each category you set a tab for, in the order physical, hearing, vision, cognitive.
 
 ### `adaptiveAllRecordsSheetName` (string, optional)
-The tab, in the [current records spreadsheet](#currentrecordssheetid-string), that holds the combined adaptive records across every category. The adaptive records script checks every athlete on the roster against it. When it's set, the Adaptive Records page opens on these records until someone picks a category, and goes back to them on Reset. When it's left out, the page opens on its description alone. This tab on its own is enough for the page to exist; with no category tabs, the page shows only these records and no category picker.
+The tab, in the [current records spreadsheet](#currentrecordssheetid-string), that holds the combined adaptive records across every category. The adaptive records script checks every athlete on the roster against it. When it's set, the Adaptive Records page opens on these records until someone picks a category, and goes back to them on Reset. When it's left out, the page opens on its description alone. With no category tabs, the page shows only these records and no category picker.
 
 ```json
 "adaptiveAllRecordsSheetName": "Adaptive_All"
 ```
 
 ### `adaptiveCategoryRecordsSheetNames` (object of up to 4 strings, optional)
-The tab, in the same spreadsheet, for each adaptive category you track. The keys are `physical`, `hearing`, `vision` and `cognitive`; leave out any category you don't track, and it won't appear on the site. Without any category tabs the page has no category picker, and without either these or [`adaptiveAllRecordsSheetName`](#adaptiveallrecordssheetname-string-optional) there is no Adaptive Records page.
+The tab, in the same spreadsheet, for each adaptive category you track. The keys are `physical`, `hearing`, `vision` and `cognitive`; leave out any category you don't track, and it won't appear on the site. Without any category tabs the page has no category picker.
 
 ```json
 "adaptiveCategoryRecordsSheetNames": {
@@ -219,8 +222,8 @@ The form adaptive athletes fill in to opt in. When it's set, the Adaptive Record
 "adaptiveOptInFormUrl": "https://forms.gle/2Y7qKS7C2pa3d4jLA"
 ```
 
-### `showAdaptiveRecordsInMenu` (boolean)
-Whether the header menu links to the Adaptive WSO Records page. Set to `false` to hide the menu item; the page still works for anyone who has its address. With neither `adaptiveAllRecordsSheetName` nor any category tabs configured there is no page, so there's no menu item even when this is `true`.
+### `showAdaptiveRecordsInMenu` (boolean, optional)
+Whether the header menu links to the Adaptive WSO Records page. Set to `false`, or leave it out, to hide the menu item; the page still works for anyone who has its address.
 
 ```json
 "showAdaptiveRecordsInMenu": true
@@ -237,8 +240,8 @@ Whether certificates print the record holder's club. Even when this is `true`, a
 "includeClubNameOnCertificate": true
 ```
 
-### `certificateWebsiteText` (string)
-Text printed in the corner of every certificate, usually your website. Use `""` to print nothing there.
+### `certificateWebsiteText` (string, optional)
+Text printed in the corner of every certificate, usually your website. Leave the field out, or use `""`, to print nothing there.
 
 ```json
 "certificateWebsiteText": "www.canorthcentralwso.org"
@@ -250,8 +253,8 @@ The certificate logo is an image file, not a setting. Replace both `public/WSOLo
 
 ## Links and contact
 
-### `localScheduleUrl`, `localHomeUrl` (URL)
-Your WSO's meet schedule and home page. Both are linked from the header menu.
+### `localScheduleUrl`, `localHomeUrl` (URL, optional)
+Your WSO's meet schedule and home page. Each one that's set is linked from the header menu. Leave a field out to drop its menu link.
 
 ### `wsoInfoUSAWUrl` (URL)
 Your WSO's page on the USA Weightlifting site. It's linked from the About page.
@@ -285,8 +288,8 @@ If you include it, it must have all four keys, each a number:
 
 West and east are negative in the Americas. Remove the whole field to turn the filter off; setting it to `null` or `{}` fails the check.
 
-### `ineligibleAthletes` (list of strings)
-Full names of athletes who may not hold your WSO's records, for example because they live outside the WSO. Spell each name exactly as Sport80 does. The app and the record-breaking scripts skip these athletes. Use `[]` if there are none.
+### `ineligibleAthletes` (list of strings, optional)
+Full names of athletes who may not hold your WSO's records, for example because they live outside the WSO. Spell each name exactly as Sport80 does. The app and the record-breaking scripts skip these athletes. Leave the field out, or use `[]`, if there are none.
 
 ```json
 "ineligibleAthletes": ["Imaginary B. Athlete"]
@@ -311,25 +314,14 @@ You need [Node.js](https://nodejs.org/), which you already have if you can run t
 
 1. **Set the names first.** The hash includes the display name, so fill in `wsoOfficialName`, and `wsoDisplayName` if you use one, and save `wsoConfig.json`.
 2. **Open a terminal in the project folder,** the one that contains `package.json`.
-3. **Run this command.** It asks for the password without showing it as you type, and doesn't save it in your terminal history:
+3. **Run this command:**
 
    ```sh
-   read -rs "PW?Password: "; echo; node -e "const c=require('./src/Data/wsoConfig.json');console.log(require('crypto').createHash('sha256').update(process.argv[1]+'---'+(c.wsoDisplayName ?? c.wsoOfficialName)).digest('hex'))" "$PW"; unset PW
+   npm run update-password
    ```
 
-   That's for zsh, the default terminal on a Mac. In bash, the usual default on Linux, replace the first part, `read -rs "PW?Password: "`, with `read -rsp "Password: " PW`.
-
-4. **Type the password and press Enter.** The command prints a 64-character hash, for example `af8789493e307d3335f2871c97dd8bd0d4c6b8eb8d34e0a45f4246b57811e2ae`.
-5. **Paste the hash into `scriptsPassword`,** in quotes, and save the file.
-6. **Check it.** Start the app (`npm start`), go to `/scripts`, and enter the password. If it's rejected, check that the names in the config are the same as when you made the hash, and make the hash again.
-
-If you'd rather type the password into the command itself, this does the same thing. The password will be saved in your terminal history:
-
-```sh
-node -e "const c=require('./src/Data/wsoConfig.json');console.log(require('crypto').createHash('sha256').update(process.argv[1]+'---'+(c.wsoDisplayName ?? c.wsoOfficialName)).digest('hex'))" 'your-password'
-```
-
-Keep the single quotes around the password. If the password itself contains a single quote, use the first command instead.
+4. **Type the password and press Enter.** It isn't shown as you type, and it isn't saved in your terminal history. The command makes the hash, writes it into `scriptsPassword` in `wsoConfig.json`, and prints it along with the display name it used.
+5. **Check it.** Start the app (`npm start`), go to `/scripts`, and enter the password. If it's rejected, check that the names in the config are the same as when you made the hash, and run the command again.
 
 #### When you need a new hash
 

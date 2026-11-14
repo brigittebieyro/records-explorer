@@ -10,6 +10,7 @@ import {
   adaptiveOptInFormUrl,
   currentRecordsSheetId,
   getSheetRoute,
+  missingAdaptiveConfigs,
 } from '../Data/RoutesAndSettings';
 import { AllCurrentRecordsEntry } from '../Utils/types';
 
@@ -112,6 +113,16 @@ function AdaptiveRecords() {
     return activeRows?.length ? buildAllCurrentRecords(activeRows) : [];
   }, [activeRows]);
 
+  // The missing settings are listed below the summary only while no category is applied.
+  const preamble = (
+    <>
+      {adaptiveDescription()}
+      {!activeCategory && missingAdaptiveConfigs.length > 0 && (
+        <p>Adaptive configs are missing: {missingAdaptiveConfigs.join(', ')}</p>
+      )}
+    </>
+  );
+
   return (
     <div className="App">
       {adaptiveCategories.length > 0 && (
@@ -162,10 +173,12 @@ function AdaptiveRecords() {
       )}
 
       {/* AllCurrentRecordsView shows its description only alongside records, so the preamble is
-          rendered here when there are none: with no tab to show, or above an empty tab's message. */}
-      {status === 'complete' && (!activeSheetName || recordsData.length === 0) && (
+          rendered here when there are none: with no tab to show, or above an empty tab's message.
+          With no category applied it also shows while the combined tab loads or fails to load. */}
+      {((status === 'complete' && (!activeSheetName || recordsData.length === 0)) ||
+        (status !== 'complete' && !activeCategory)) && (
         <div className="common-text-header record-viewer-fine-print all-records-fine-print">
-          {adaptiveDescription()}
+          {preamble}
         </div>
       )}
       {status === 'complete' && !!activeSheetName && (
@@ -183,7 +196,7 @@ function AdaptiveRecords() {
               ? `${activeCategory.displayName} Record Holders`
               : 'All Adaptive Record Holders'
           }
-          description={adaptiveDescription()}
+          description={preamble}
           emptyContent="No adaptive records have been set yet."
         />
       )}

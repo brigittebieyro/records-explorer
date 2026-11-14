@@ -92,9 +92,10 @@ describe('RoutesAndSettings (user-based)', () => {
   });
 
   describe('A-04 / D-01 / E-02 / E-03: external links', () => {
-    test('WSO site links are web URLs', () => {
-      expect(localScheduleUrl).toMatch(/^https?:\/\//);
-      expect(localHomeUrl).toMatch(/^https?:\/\//);
+    test('WSO site links are web URLs when configured', () => {
+      [localScheduleUrl, localHomeUrl]
+        .filter((url) => url !== undefined)
+        .forEach((url) => expect(url).toMatch(/^https?:\/\//));
     });
 
     test('USAW public rankings site link', () => {
@@ -216,6 +217,7 @@ describe('RoutesAndSettings (user-based)', () => {
       adaptiveLiftersListSheetId: _rosterId,
       adaptiveLiftersListSheetName: _rosterName,
       adaptiveOptInFormUrl: _form,
+      showAdaptiveRecordsInMenu: _menu,
       ...configWithoutAdaptive
     } = wsoConfig;
 
@@ -223,20 +225,39 @@ describe('RoutesAndSettings (user-based)', () => {
       expect(findInvalidConfigFields(configWithoutAdaptive, configSchema)).toEqual([]);
     });
 
-    test('with no adaptive settings, the page, menu item and script are all unavailable', () => {
-      const settings = loadWithConfig({
-        ...configWithoutAdaptive,
-        showAdaptiveRecordsInMenu: true,
-      });
+    test('with no adaptive settings, the menu item and script are unavailable and every setting is listed as missing', () => {
+      const settings = loadWithConfig(configWithoutAdaptive);
       expect(settings.adaptiveAllRecordsSheetName).toBeUndefined();
       expect(settings.adaptiveCategories).toEqual([]);
       expect(settings.adptiveCategoryRecordsSheetNames).toEqual([]);
       expect(settings.adaptiveLiftersListSheetId).toBeUndefined();
       expect(settings.adaptiveLiftersListSheetName).toBeUndefined();
       expect(settings.adaptiveOptInFormUrl).toBeUndefined();
-      expect(settings.adaptiveRecordsPageAvailable).toBe(false);
       expect(settings.showAdaptiveRecordsInMenu).toBe(false);
       expect(settings.adaptiveRecordsScriptAvailable).toBe(false);
+      expect(settings.missingAdaptiveConfigs).toEqual([
+        'adaptiveAllRecordsSheetName',
+        'adaptiveLiftersListSheetName',
+        'adaptiveLiftersListSheetId',
+        'adaptiveOptInFormUrl',
+      ]);
+    });
+
+    test('only the settings left out or blank are listed as missing', () => {
+      const settings = loadWithConfig({
+        ...configWithoutAdaptive,
+        adaptiveAllRecordsSheetName: 'All',
+        adaptiveLiftersListSheetId: 'id',
+        adaptiveLiftersListSheetName: '  ',
+      });
+      expect(settings.missingAdaptiveConfigs).toEqual([
+        'adaptiveLiftersListSheetName',
+        'adaptiveOptInFormUrl',
+      ]);
+    });
+
+    test('the shipped config is missing no adaptive settings', () => {
+      expect(loadWithConfig(wsoConfig).missingAdaptiveConfigs).toEqual([]);
     });
 
     test('only the categories with a tab are listed, in category order, and a blank tab counts as none', () => {
@@ -247,26 +268,18 @@ describe('RoutesAndSettings (user-based)', () => {
       expect(settings.adaptiveCategories.map((category) => category.id)).toEqual(['Vis', 'Cog']);
       expect(settings.adaptiveCategories[0].displayName).toBe('Visual Impairment');
       expect(settings.adptiveCategoryRecordsSheetNames).toEqual(['Vis', 'Cog']);
-      expect(settings.adaptiveRecordsPageAvailable).toBe(true);
     });
 
-    test('the menu item needs both an adaptive records tab and showAdaptiveRecordsInMenu', () => {
-      const withCategory = {
-        ...configWithoutAdaptive,
-        adaptiveCategoryRecordsSheetNames: { physical: 'Phys' },
-      };
-      expect(
-        loadWithConfig({ ...withCategory, showAdaptiveRecordsInMenu: true })
-          .showAdaptiveRecordsInMenu
-      ).toBe(true);
-      expect(
-        loadWithConfig({ ...withCategory, showAdaptiveRecordsInMenu: false })
-          .showAdaptiveRecordsInMenu
-      ).toBe(false);
+    test('the menu item follows showAdaptiveRecordsInMenu, which is false when left out', () => {
       expect(
         loadWithConfig({ ...configWithoutAdaptive, showAdaptiveRecordsInMenu: true })
           .showAdaptiveRecordsInMenu
+      ).toBe(true);
+      expect(
+        loadWithConfig({ ...configWithoutAdaptive, showAdaptiveRecordsInMenu: false })
+          .showAdaptiveRecordsInMenu
       ).toBe(false);
+      expect(loadWithConfig(configWithoutAdaptive).showAdaptiveRecordsInMenu).toBe(false);
     });
 
     test('the script needs the roster sheet and at least one adaptive records tab', () => {
@@ -288,18 +301,6 @@ describe('RoutesAndSettings (user-based)', () => {
         adaptiveAllRecordsSheetName: 'All',
       });
       expect(combinedOnly.adaptiveRecordsScriptAvailable).toBe(true);
-    });
-
-    test('the combined tab alone is enough for the page and, with showAdaptiveRecordsInMenu, its menu item', () => {
-      const combinedOnly = { ...configWithoutAdaptive, adaptiveAllRecordsSheetName: 'All' };
-      const shown = loadWithConfig({ ...combinedOnly, showAdaptiveRecordsInMenu: true });
-      expect(shown.adaptiveCategories).toEqual([]);
-      expect(shown.adaptiveRecordsPageAvailable).toBe(true);
-      expect(shown.showAdaptiveRecordsInMenu).toBe(true);
-      expect(
-        loadWithConfig({ ...combinedOnly, showAdaptiveRecordsInMenu: false })
-          .showAdaptiveRecordsInMenu
-      ).toBe(false);
     });
   });
 

@@ -46,7 +46,7 @@ export const configSchema: ConfigSchema = {
   'adaptiveLiftersListSheetId?': 'string',
   'adaptiveLiftersListSheetName?': 'string',
   'adaptiveOptInFormUrl?': 'WebUrl',
-  showAdaptiveRecordsInMenu: 'boolean',
+  'showAdaptiveRecordsInMenu?': 'boolean',
   localScheduleUrl: 'WebUrl',
   localHomeUrl: 'WebUrl',
   wsoInfoUSAWUrl: 'WebUrl',
@@ -257,6 +257,7 @@ interface AdaptiveConfig {
   adaptiveLiftersListSheetId?: string;
   adaptiveLiftersListSheetName?: string;
   adaptiveOptInFormUrl?: string;
+  showAdaptiveRecordsInMenu?: boolean;
 }
 const _adaptiveConfig = wsoConfig as AdaptiveConfig;
 /** The value, or undefined when the config leaves it out or blank. */
@@ -335,17 +336,21 @@ export const adptiveCategoryRecordsSheetNames: string[] = adaptiveCategories.map
   (category) => category.id
 );
 
-/**
- * Whether the Adaptive Records page exists. It lists records one category at a time, so it needs
- * at least one category tab; the /adaptive route is not served without one.
- */
-export const adaptiveRecordsPageAvailable: boolean = adaptiveCategories.length > 0;
-/**
- * Whether the header menu links to the Adaptive WSO Records page: the config's
- * showAdaptiveRecordsInMenu, and only when the page is available.
- */
+/** Whether the header menu links to the Adaptive WSO Records page. False when the config leaves it out. */
 export const showAdaptiveRecordsInMenu: boolean =
-  adaptiveRecordsPageAvailable && wsoConfig.showAdaptiveRecordsInMenu;
+  _adaptiveConfig.showAdaptiveRecordsInMenu ?? false;
+/**
+ * The adaptive settings, by config name, that are left out or blank, in this order. Listed on the
+ * Adaptive Records page below its summary.
+ */
+export const missingAdaptiveConfigs: string[] = Object.entries({
+  adaptiveAllRecordsSheetName,
+  adaptiveLiftersListSheetName,
+  adaptiveLiftersListSheetId,
+  adaptiveOptInFormUrl,
+})
+  .filter(([, value]) => value === undefined)
+  .map(([name]) => name);
 /**
  * Whether the Scripts page offers the adaptive records script. It needs the roster sheet and at
  * least one adaptive records tab to compare against.

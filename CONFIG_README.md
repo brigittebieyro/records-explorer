@@ -40,7 +40,7 @@ Most itemps are required.
 Optional items:
 `wsoDisplayName`,
 `wsoBoundary`
- the adaptive records settings OTHER than `showAdaptiveRecordsInMenu`.
+all of the adaptive records settings.
 
 | Field | Type | Required | Section |
 | --- | --- | --- | --- |
@@ -60,7 +60,7 @@ Optional items:
 | `adaptiveLiftersListSheetId` | string | **no** | [Adaptive records](#adaptive-records) |
 | `adaptiveLiftersListSheetName` | string | **no** | [Adaptive records](#adaptive-records) |
 | `adaptiveOptInFormUrl` | URL | **no** | [Adaptive records](#adaptive-records) |
-| `showAdaptiveRecordsInMenu` | boolean | yes | [Adaptive records](#adaptive-records) |
+| `showAdaptiveRecordsInMenu` | boolean | **no** | [Adaptive records](#adaptive-records) |
 | `includeClubNameOnCertificate` | boolean | yes | [Certificates](#certificates) |
 | `certificateWebsiteText` | string | yes (may be `""`) | [Certificates](#certificates) |
 | `localScheduleUrl` | URL | yes | [Links and contact](#links-and-contact) |
@@ -170,13 +170,15 @@ The text in a record's lifter column that marks a record standard: a mark your W
 
 ## Adaptive records
 
-Adaptive records are optional. Every setting in this section except `showAdaptiveRecordsInMenu` can be left out, and a blank string (`""`) counts as left out. What's available depends on which settings are present:
+Adaptive records are optional. Every setting in this section can be left out, and a blank string (`""`) counts as left out. The Adaptive Records page at `/adaptive` is always served; what it and the rest of the site offer depends on which settings are present:
 
 | You set | What you get |
 | --- | --- |
-| At least one tab in `adaptiveCategoryRecordsSheetNames` | The Adaptive Records page at `/adaptive`, listing those categories, and its menu item if `showAdaptiveRecordsInMenu` is `true`. |
+| Tabs in `adaptiveCategoryRecordsSheetNames` | Those categories in the Adaptive Records page's dropdown. With none, the dropdown is empty. |
+| `showAdaptiveRecordsInMenu` set to `true` | The Adaptive WSO Records menu item. |
 | Both `adaptiveLiftersListSheetId` and `adaptiveLiftersListSheetName`, plus `adaptiveAllRecordsSheetName` or at least one category tab | The "Fetch Adaptive Record Updates" script on `/scripts`. |
-| None of them | No adaptive page, menu item or script. `showAdaptiveRecordsInMenu` is still required, but has no effect. |
+
+When any of `adaptiveAllRecordsSheetName`, `adaptiveLiftersListSheetName`, `adaptiveLiftersListSheetId` or `adaptiveOptInFormUrl` is left out, the Adaptive Records page lists them below its summary: "Adaptive configs are missing: …".
 
 ### `adaptiveLiftersListSheetId` (string, optional)
 The id of the spreadsheet that holds your adaptive athletes and their categories. It's taken from the URL the same way as [`currentRecordsSheetId`](#currentrecordssheetid-string), and can be the same spreadsheet or a different one.
@@ -199,7 +201,7 @@ The tab, in the [current records spreadsheet](#currentrecordssheetid-string), th
 ```
 
 ### `adaptiveCategoryRecordsSheetNames` (object of up to 4 strings, optional)
-The tab, in the same spreadsheet, for each adaptive category you track. The keys are `physical`, `hearing`, `vision` and `cognitive`; leave out any category you don't track, and it won't appear on the site. Without any category tabs there is no Adaptive Records page.
+The tab, in the same spreadsheet, for each adaptive category you track. The keys are `physical`, `hearing`, `vision` and `cognitive`; leave out any category you don't track, and it won't appear on the site. Without any category tabs the page's dropdown is empty.
 
 ```json
 "adaptiveCategoryRecordsSheetNames": {
@@ -219,8 +221,8 @@ The form adaptive athletes fill in to opt in. When it's set, the Adaptive Record
 "adaptiveOptInFormUrl": "https://forms.gle/2Y7qKS7C2pa3d4jLA"
 ```
 
-### `showAdaptiveRecordsInMenu` (boolean)
-Whether the header menu links to the Adaptive WSO Records page. Set to `false` to hide the menu item; the page still works for anyone who has its address. With no category tabs configured there is no page, so there's no menu item even when this is `true`.
+### `showAdaptiveRecordsInMenu` (boolean, optional)
+Whether the header menu links to the Adaptive WSO Records page. Set to `false`, or leave it out, to hide the menu item; the page still works for anyone who has its address.
 
 ```json
 "showAdaptiveRecordsInMenu": true

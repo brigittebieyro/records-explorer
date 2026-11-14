@@ -6,14 +6,19 @@ The application also displays historical bests across all weight classes going b
 
 The app displays records organized by weight class and age group (Open, Youth, Junior, Senior, and all Masters bands), showing snatch, clean & jerk, and combined total bests for each category. Each record entry links out to the source meet result, and the app also surfaces the "all current records" view so you can see every record holder at a glance. The app additionally provides quick links to the USAW national American Records page, the WSO's meet schedule, and its USAW profile.
 
-## Running Locally
+## Installing & Running Locally
 
-The app has two processes that must run at the same time: the **React dev server** and the **Node.js proxy server**. 
+The app has some dependencies, and once set up, there are two processes that must run at the same time: the **React dev server** and the **Node.js proxy server**. These will need to be in separate terminal tabs or windows.
 
 ### Prerequisites
 
-- Node.js 18+
-- API credentials set in `.env.local` (see [Configuring for your WSO](#configuring-for-your-wso))
+- Node.js 24+
+- An API key for [Google Sheets](https://support.google.com/googleapi/answer/6158862?hl=en). 
+
+### App Install & Further Setup
+
+- Run `npm install` to get all javascript dependencies installed automatically.
+- Add Google Sheets and Sport80 keys to a `.env.local` local file in the project folder (see [Configuring for your WSO](#configuring-for-your-wso))
 
 ### Start both servers
 
@@ -123,13 +128,13 @@ The app reads recognized records from a Google Sheet. Create a sheet with the ex
 | `adaptiveLiftersListSheetId`, `adaptiveLiftersListSheetName` | Optional. The adaptive athlete roster sheet and tab, read by the adaptive records script. |
 | `standardKey` | The lifter-column text that marks a record standard nobody has reached yet, e.g. `"STANDARD"`. |
 | `adaptiveAllRecordsSheetName` | Optional. The tab holding the combined adaptive records, e.g. `"Adaptive_All"`. |
-| `adaptiveCategoryRecordsSheetNames` | Optional. The tab for each adaptive category you track, keyed `physical`, `hearing`, `vision`, `cognitive`. With none, there is no Adaptive Records page or menu item. |
+| `adaptiveCategoryRecordsSheetNames` | Optional. The tab for each adaptive category you track, keyed `physical`, `hearing`, `vision`, `cognitive`. With none, the Adaptive Records page's dropdown is empty. |
 
 ### 3. Adaptive records
 
 | Field | What it is |
 | --- | --- |
-| `showAdaptiveRecordsInMenu` | Whether the header menu links to the Adaptive WSO Records page. Has no effect without adaptive category tabs. |
+| `showAdaptiveRecordsInMenu` | Optional. Whether the header menu links to the Adaptive WSO Records page. Treated as `false` when left out. |
 | `adaptiveOptInFormUrl` | Optional. The form adaptive athletes use to opt in. |
 
 ### 4. Certificates

@@ -10,6 +10,7 @@ import {
   adaptiveOptInFormUrl,
   currentRecordsSheetId,
   getSheetRoute,
+  missingAdaptiveConfigs,
 } from '../Data/RoutesAndSettings';
 import { AllCurrentRecordsEntry } from '../Utils/types';
 
@@ -177,9 +178,12 @@ function AdaptiveRecords() {
           emptyContent="No adaptive records have been set yet."
         />
       )}
-      {status === 'complete' && !activeCategory && (
+      {!activeCategory && (
         <div className="common-text-header record-viewer-fine-print all-records-fine-print">
           {adaptiveDescription()}
+          {missingAdaptiveConfigs.length > 0 && (
+            <p>Adaptive configs are missing: {missingAdaptiveConfigs.join(', ')}</p>
+          )}
         </div>
       )}
     </div>

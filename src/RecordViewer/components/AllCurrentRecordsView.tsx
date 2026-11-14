@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import RecordListForWeightClass from './RecordListForWeightClass';
 import { ageGroups } from '../../Data/ageGroups';
+import { weightClassIndicator } from '../../Utils/Utils';
 import { AllCurrentRecordsEntry } from '../../Utils/types';
 
 interface AllCurrentRecordsViewProps {
@@ -47,10 +48,11 @@ const byAgeGroupOrder = (
 const mergeByBodyweight = (entries: AllCurrentRecordsEntry[]): AllCurrentRecordsEntry[] => {
   const map = new Map<string, AllCurrentRecordsEntry>();
   for (const entry of entries) {
-    // Keyed by minBodyweight, not maxBodyweight: every "+" class (across adult
-    // and youth age groups) shares the placeholder maxBodyweight '1000', but
-    // each has a distinct real minBodyweight threshold.
-    const key = entry.weightClass.minBodyweight;
+    // Keyed by the class indicator the records sheet uses: the max bodyweight, or '>min' for a
+    // "+" class (every "+" class shares the placeholder max '1000'). minBodyweight alone does
+    // not identify a class: the same class can start at different weights in different sets
+    // (49kg is 0-49 for Open but 45.01-49 for U15), and every set's lightest class starts at 0.
+    const key = weightClassIndicator(entry.weightClass);
     const existing = map.get(key);
     if (existing) {
       map.set(key, {
@@ -105,7 +107,7 @@ function AllCurrentRecordsView({
           <h2 className="all-records-gender-header">Women</h2>
           {womensData.map(({ weightClass, groups }) => (
             <RecordListForWeightClass
-              key={`female-${weightClass.minBodyweight}`}
+              key={`female-${weightClassIndicator(weightClass)}`}
               weightClass={weightClass}
               groups={groups}
               certificateSheet={certificateSheet}
@@ -117,7 +119,7 @@ function AllCurrentRecordsView({
           <h2 className="all-records-gender-header">Men</h2>
           {mensData.map(({ weightClass, groups }) => (
             <RecordListForWeightClass
-              key={`male-${weightClass.minBodyweight}`}
+              key={`male-${weightClassIndicator(weightClass)}`}
               weightClass={weightClass}
               groups={groups}
               certificateSheet={certificateSheet}

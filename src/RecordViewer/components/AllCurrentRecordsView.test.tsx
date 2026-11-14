@@ -140,6 +140,55 @@ describe('AllCurrentRecordsView (user-based)', () => {
     expect(screen.getByText('Jane B. Smith')).toBeInTheDocument();
   });
 
+  test('B-02: the same class from adult and youth sets merges even when their lower bounds differ', () => {
+    const { container } = render(
+      <AllCurrentRecordsView
+        data={[
+          makeEntry(
+            { id: 'W49', minBodyweight: '0', maxBodyweight: '49' },
+            { id: 'JR', name: 'Junior' }
+          ),
+          makeEntry(
+            { id: 'W49', minBodyweight: '0', maxBodyweight: '49' },
+            { id: 'OPEN', name: 'Open' }
+          ),
+          makeEntry(
+            { id: 'W49', name: 'Girls 49kg', minBodyweight: '45.01', maxBodyweight: '49' },
+            { id: 'U15', name: 'Under 15' }
+          ),
+        ]}
+      />
+    );
+
+    const headers = Array.from(container.querySelectorAll('.all-records-weight-class-header')).map(
+      (node) => node.textContent
+    );
+    expect(headers).toEqual(["Women's 49kg"]);
+    const names = Array.from(container.querySelectorAll('.all-records-age-group-name')).map(
+      (node) => node.textContent
+    );
+    expect(names).toEqual(['Open', 'Under 15', 'Junior']);
+  });
+
+  test("B-02: each set's lightest class keeps its own section despite all starting at 0", () => {
+    const { container } = render(
+      <AllCurrentRecordsView
+        data={[
+          makeEntry({ id: 'W49', minBodyweight: '0', maxBodyweight: '49' }),
+          makeEntry(
+            { id: 'W30', name: 'Girls 30kg', minBodyweight: '0', maxBodyweight: '30' },
+            { id: 'U11', name: 'Under 11' }
+          ),
+        ]}
+      />
+    );
+
+    const headers = Array.from(container.querySelectorAll('.all-records-weight-class-header')).map(
+      (node) => node.textContent
+    );
+    expect(headers).toEqual(["Women's 30kg", "Women's 49kg"]);
+  });
+
   test('B-02: merged age-group rows display youngest to oldest: Open, youth (youngest first), Junior, Masters (youngest first)', () => {
     const { container } = render(
       <AllCurrentRecordsView

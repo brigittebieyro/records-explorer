@@ -28,8 +28,8 @@ export const configSchema: ConfigSchema = {
   'wsoDisplayName?': 'string',
   wsoRegions: 'string[]',
   wsoStateNames: 'string[]',
-  recordTimeZone: 'string',
-  allTimeStartDate: 'IsoDate',
+  'recordTimeZone?': 'string',
+  'allTimeStartDate?': 'IsoDate',
   includeClubNameOnCertificate: 'boolean',
   'certificateWebsiteText?': 'string',
   currentRecordsSheetId: 'string',
@@ -82,8 +82,12 @@ export const wsoStateNames: string[] = wsoConfig.wsoStateNames;
  * who is looking at it.
  *
  * Sent with every certificate request. The server keeps no copy.
+ *
+ * America/Los_Angeles when the config leaves it out. Read through a wider type: the JSON import's
+ * inferred type has no field the file leaves out.
  */
-export const recordTimeZone: string = wsoConfig.recordTimeZone;
+export const recordTimeZone: string =
+  (wsoConfig as { recordTimeZone?: string }).recordTimeZone ?? 'America/Los_Angeles';
 /**
  * Whether a certificate printed from a records sheet prints the record's club, when the row has one.
  * Sent with every certificate request; a tab without a clubName column prints no club either way.
@@ -191,8 +195,12 @@ const _shiftIsoDate = (isoDate: string, { days = 0, months = 0 }): string => {
 // each class supplies its own start date. Queries run through tomorrow so that meets logged
 // today are always inside the range.
 export const endDate = _shiftIsoDate(toRecordDate(), { days: 1 });
-/** How far back the all-time record search reaches, set per WSO. */
-export const allTimeStartDate: string = wsoConfig.allTimeStartDate;
+/**
+ * How far back the all-time record search reaches, set per WSO. 1998-01-01 when the config leaves
+ * it out. Read through a wider type: the JSON import's inferred type has no field the file leaves out.
+ */
+export const allTimeStartDate: string =
+  (wsoConfig as { allTimeStartDate?: string }).allTimeStartDate ?? '1998-01-01';
 export const youthAllTimeStartDate = '2014-01-01'; // This is a magic number - looking for a date which captures history, without the source API throwing errors.
 // Older meets don't all have logitude and latitude, so we can't filter them all.
 export const localMeetStartDate = '2026-01-01';

@@ -110,9 +110,28 @@ To adjust what gets analyzed, edit `scripts/analyze-records.js`:
 - Change the number of top athletes checked per combination (default: 5) in the `fetchTopAthletes` call
 - Modify which age groups or weight classes are included
 
+## Setting up with `npm run setup-application`
+
+If you're setting the app up for a new WSO, start here. After `npm install`, run:
+
+```bash
+npm run setup-application
+```
+
+The setup asks one question at a time and writes `src/Data/wsoConfig.json` with the required settings. Nothing is saved until the last question is answered, and you can press Ctrl+C at any point to quit without changing the config. It replaces any config that is already there, so it asks first.
+
+It covers:
+
+1. **Your WSO's details:** the Sport80 id and name, region and state, time zone, how far back history goes, whether certificates print clubs, your USAW page, and who maintains the site.
+2. **The records spreadsheet id:** A Google sheet's ID is in the url when viewing it in a web browser, it's a long string of letters, numbers, and dashes. You'll be asked for the names of tabs in the sheet, and what you list as the recordholder for standards yet to be broken. Make sure your spreadsheet is visible to "anyone with the link".
+3. **Adaptive records (optional):** Do you want to track adaptive records? Say yes, and the adaptive records page shows in the menu. The adaptive tab names, opt-in form link, and athlete roster spreadsheet are optional settings you can add afterwards (see [CONFIG_README.md](CONFIG_README.md)).
+4. **Your scripts page password,** you're gonna have to type this twice.  (see [CONFIG_README.md](CONFIG_README.md#scriptspassword-string)).
+
+Other optional configs aren't asked for, this is just to get you off the ground. You can use [CONFIG_README.md](CONFIG_README.md) as a reference on how to use optional configs for more customization.
+
 ## Configuring for your WSO
 
-The app is designed to be adapted for any USAW WSO. All WSO-specific settings live in one file: [`src/Data/wsoConfig.json`](src/Data/wsoConfig.json). [`src/Data/RoutesAndSettings.ts`](src/Data/RoutesAndSettings.ts) re-exports these values to the rest of the app (with a comment on each), and holds the USAW platform settings, which are the same for every WSO and should not need to change. The node scripts in `scripts/` read the same JSON file.
+The app is designed to be adapted for any USAW WSO. To set it up from scratch, [`npm run setup-application`](#setting-up-with-npm-run-setup-application) writes the config for you. All WSO-specific settings live in one file: [`src/Data/wsoConfig.json`](src/Data/wsoConfig.json). [`src/Data/RoutesAndSettings.ts`](src/Data/RoutesAndSettings.ts) re-exports these values to the rest of the app (with a comment on each), and holds the USAW platform settings, which are the same for every WSO and should not need to change. The node scripts in `scripts/` read the same JSON file.
 
 The app checks the file against `configSchema` in `RoutesAndSettings.ts` when it loads: a missing required field, or a field of the wrong type, fails with an error naming it. Fields marked optional (`'name?'`) may be left out, and fields the schema doesn't list are ignored. When you add a setting, add it to the schema too.
 
@@ -127,8 +146,8 @@ For every field's type, whether it's required, and an example value, see [CONFIG
 | `wsoDisplayName` | Optional. The name shown in the header, the page title, and as `<name> WSO` across the top of certificates. Leave it out to show `wsoOfficialName`. |
 | `wsoRegions` | Sport80 region ids for your state or states, e.g. `["66"]`. The Local Meets page requests the meet list once per region and lists the results together. |
 | `wsoStateNames` | Your state or states as written in Sport80 meet addresses, e.g. `["California"]`. Used to show each local meet's city. |
-| `recordTimeZone` | IANA time zone record dates are kept in, e.g. `"America/New_York"`. Decides what "today" is for every date range and how certificate dates print. |
-| `allTimeStartDate` | How far back the all-time record search reaches (`YYYY-MM-DD`). |
+| `recordTimeZone` | Optional. IANA time zone record dates are kept in, e.g. `"America/New_York"`. Decides what "today" is for every date range and how certificate dates print. Defaults to `"America/Los_Angeles"`. |
+| `allTimeStartDate` | Optional. How far back the all-time record search reaches (`YYYY-MM-DD`). Defaults to `"1998-01-01"`. |
 
 ### 2. Records Google Sheet
 

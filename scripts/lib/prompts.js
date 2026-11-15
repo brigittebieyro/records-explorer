@@ -74,25 +74,7 @@ function createPrompter(onCancel) {
     return /^y/i.test(answer);
   }
 
-  /**
-   * Shows numbered options and returns the chosen option's `value`.
-   * @param {Array<{ label: string, value: string }>} options
-   */
-  async function askChoice(question, options) {
-    console.log(question);
-    options.forEach((option, index) => console.log(`  ${index + 1}. ${option.label}`));
-    const answer = await ask(`Choose 1-${options.length}`, {
-      validate: (value) => {
-        const number = Number(value);
-        return Number.isInteger(number) && number >= 1 && number <= options.length
-          ? undefined
-          : `Please enter a number from 1 to ${options.length}.`;
-      },
-    });
-    return options[Number(answer) - 1].value;
-  }
-
-  return { ask, askYesNo, askChoice, close: () => rl.close() };
+  return { ask, askYesNo, close: () => rl.close() };
 }
 
 module.exports = { promptHidden, createPrompter };

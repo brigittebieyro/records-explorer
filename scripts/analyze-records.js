@@ -63,8 +63,11 @@ const SHEETS_CONFIG = {
 
 const USAW_API = 'https://admin-usaw-rankings.sport80.com/api';
 const WSO_ID = wsoConfig.wsoId;
-// Query end date is today, in the time zone record dates are kept in. en-CA formats as YYYY-MM-DD.
-const DATE_RANGE_END = new Intl.DateTimeFormat('en-CA', { timeZone: wsoConfig.recordTimeZone }).format(new Date());
+// Query end date is today, in the time zone record dates are kept in (America/Los_Angeles when the
+// config leaves it out, as in src/Data/RoutesAndSettings.ts). en-CA formats as YYYY-MM-DD.
+const DATE_RANGE_END = new Intl.DateTimeFormat('en-CA', {
+  timeZone: wsoConfig.recordTimeZone ?? 'America/Los_Angeles',
+}).format(new Date());
 
 // Athletes who appear in WSO rankings but are not eligible for WSO records
 const INELIGIBLE_ATHLETES = new Set(wsoConfig.ineligibleAthletes);

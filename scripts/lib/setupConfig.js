@@ -33,8 +33,6 @@ const REQUIRED_KEYS = [
   'wsoOfficialName',
   'wsoRegions',
   'wsoStateNames',
-  'recordTimeZone',
-  'allTimeStartDate',
   'includeClubNameOnCertificate',
   'currentRecordsSheetId',
   'currentRecordsSheetName',
@@ -45,31 +43,8 @@ const REQUIRED_KEYS = [
   'scriptsPassword',
 ];
 
-const ADAPTIVE_CATEGORY_KEYS = ['physical', 'hearing', 'vision', 'cognitive'];
-
-const DEFAULT_TAB_NAMES = {
-  records: 'Records',
-  adaptiveAll: 'Adaptive_All',
-  adaptiveCategories: {
-    physical: 'Adaptive_Physical',
-    hearing: 'Adaptive_Hearing',
-    vision: 'Adaptive_Vision',
-    cognitive: 'Adaptive_Cognitive',
-  },
-  adaptiveRoster: 'Adaptive_Roster',
-};
-
 // The same charset server/certificate/sheet.js accepts.
 const SHEET_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
-const SHEET_URL_PATTERN = /\/spreadsheets\/d\/([A-Za-z0-9_-]+)/;
-
-/** A spreadsheet id from either the id itself or a full spreadsheet URL; undefined when neither. */
-function extractSheetId(input) {
-  const text = String(input ?? '').trim();
-  const fromUrl = SHEET_URL_PATTERN.exec(text);
-  if (fromUrl) return fromUrl[1];
-  return SHEET_ID_PATTERN.test(text) ? text : undefined;
-}
 
 /** "66, 67" -> ["66", "67"]. Blank items are dropped. */
 function parseList(input) {
@@ -98,54 +73,32 @@ const checks = {
   email: (value) =>
     /^[^\s@]+@[^\s@]+$/.test(value) ? undefined : 'Please enter an email address, like name@example.org.',
   sheetId: (value) =>
-    extractSheetId(value)
+    SHEET_ID_PATTERN.test(value)
       ? undefined
-      : 'Please paste the spreadsheet link, or the id from it: ' +
+      : 'Please enter only the id: the part of the spreadsheet link shown here, ' +
         'https://docs.google.com/spreadsheets/d/<THIS PART>/edit',
 };
 
 /**
- * The config file's contents: the required fields, plus the adaptive fields when `adaptive` is
- * given. Fields left undefined or blank are left out.
+ * The config file's contents: the required fields, in schema order, plus
+ * showAdaptiveRecordsInMenu when `trackAdaptiveRecords` is true.
  *
  * @param {object} required every key in REQUIRED_KEYS
- * @param {object | undefined} adaptive { allRecordsSheetName, categoryRecordsSheetNames,
- *   liftersListSheetId, liftersListSheetName, optInFormUrl }
+ * @param {{ trackAdaptiveRecords?: boolean }} [options]
  */
-function buildConfig(required, adaptive) {
+function buildConfig(required, { trackAdaptiveRecords = false } = {}) {
   const missing = REQUIRED_KEYS.filter((key) => required[key] === undefined);
   if (missing.length > 0) throw new Error(`buildConfig is missing ${missing.join(', ')}`);
 
   const values = { ...required };
-  if (adaptive) {
-    const categories = Object.fromEntries(
-      ADAPTIVE_CATEGORY_KEYS.filter((key) => blankToUndefined(adaptive.categoryRecordsSheetNames?.[key])).map(
-        (key) => [key, adaptive.categoryRecordsSheetNames[key]]
-      )
-    );
-    Object.assign(values, {
-      adaptiveAllRecordsSheetName: blankToUndefined(adaptive.allRecordsSheetName),
-      adaptiveCategoryRecordsSheetNames: Object.keys(categories).length > 0 ? categories : undefined,
-      adaptiveLiftersListSheetId: blankToUndefined(adaptive.liftersListSheetId),
-      adaptiveLiftersListSheetName: blankToUndefined(adaptive.liftersListSheetName),
-      adaptiveOptInFormUrl: blankToUndefined(adaptive.optInFormUrl),
-      showAdaptiveRecordsInMenu: true,
-    });
-  }
+  if (trackAdaptiveRecords) values.showAdaptiveRecordsInMenu = true;
   return Object.fromEntries(
     CONFIG_KEY_ORDER.filter((key) => values[key] !== undefined).map((key) => [key, values[key]])
   );
 }
 
-function blankToUndefined(value) {
-  return typeof value === 'string' && value.trim() === '' ? undefined : value;
-}
-
 module.exports = {
   REQUIRED_KEYS,
-  ADAPTIVE_CATEGORY_KEYS,
-  DEFAULT_TAB_NAMES,
-  extractSheetId,
   parseList,
   checks,
   buildConfig,

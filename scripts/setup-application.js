@@ -1,12 +1,10 @@
 #!/usr/bin/env node
 
 /**
- * Interactive first-time setup: asks for each required setting one at a time, sets up the records
- * spreadsheet (and, optionally, the adaptive records tabs), and writes src/Data/wsoConfig.json.
+ * Interactive first-time setup: asks for each required setting one at a time, the records
+ * spreadsheet, and whether to track adaptive records, and writes src/Data/wsoConfig.json.
  *
- * The setup never connects to Google. When the person needs starter tabs, it asks, then writes
- * them as CSV files to import into Google Sheets by hand. The config file is written only at the
- * very end; quitting earlier leaves it as it was.
+ * The config file is written only at the very end; quitting early makes no changes.
  *
  * Usage: npm run setup-application
  */
@@ -15,26 +13,17 @@ const fs = require('fs');
 const path = require('path');
 const { createPrompter, promptHidden } = require('./lib/prompts');
 const { displayNameOf, hashPassword } = require('./lib/password');
-const { buildRecordRows, buildRosterRows } = require('./lib/starterRows');
-const { existingCsvFiles, writeCsvTabs } = require('./lib/csv');
 const {
-  ADAPTIVE_CATEGORY_KEYS,
-  DEFAULT_TAB_NAMES,
   buildConfig,
   checks,
-  extractSheetId,
   parseList,
 } = require('./lib/setupConfig');
 
 const projectRoot = path.join(__dirname, '..');
 const configPath = path.join(projectRoot, 'src', 'Data', 'wsoConfig.json');
-const csvDir = path.join(projectRoot, 'starter-sheets');
 const relative = (file) => path.relative(process.cwd(), file) || file;
 
 const DEFAULT_STANDARD_KEY = 'STANDARD';
-
-/** Things the person still has to do, printed in the closing summary. */
-const notes = [];
 
 let prompter;
 
@@ -44,60 +33,6 @@ function heading(text) {
 
 function sheetUrl(sheetId) {
   return `https://docs.google.com/spreadsheets/d/${sheetId}`;
-}
-
-// ------------------------------------------------------------------------------------------------
-// CSV files
-// ------------------------------------------------------------------------------------------------
-
-/**
- * Writes `tabs` as CSV files, asking before replacing files from an earlier run.
- * @returns {Promise<string[]>} the files the person should import
- */
-async function writeCsvFiles(tabs) {
-  const existing = existingCsvFiles(csvDir, tabs);
-  if (existing.length > 0) {
-    console.log(`\nThese files are already in ${relative(csvDir)}/:`);
-    existing.forEach((file) => console.log(`  ${path.basename(file)}`));
-    const replace = await prompter.askYesNo('Replace them with new ones?');
-    if (!replace) {
-      console.log(
-        'Keeping the existing files. If they came from a run with different answers, run the setup\n' +
-          'again and choose to replace them.'
-      );
-      const kept = new Set(existing);
-      const files = writeCsvTabs(
-        csvDir,
-        tabs.filter((tab) => !kept.has(path.join(csvDir, `${tab.name}.csv`)))
-      );
-      return [...existing, ...files];
-    }
-  }
-  return writeCsvTabs(csvDir, tabs);
-}
-
-function printImportSteps(files, { newSpreadsheet }) {
-  console.log(`\nThe CSV files are in ${relative(csvDir)}/:`);
-  files.forEach((file) => console.log(`  ${path.basename(file)}`));
-  console.log('\nTo add them to Google Sheets:');
-  let step = 1;
-  if (newSpreadsheet) {
-    console.log(`  ${step++}. Make a new, blank spreadsheet: go to https://sheets.new`);
-  } else {
-    console.log(`  ${step++}. Open your records spreadsheet.`);
-  }
-  console.log(
-    `  ${step++}. For each file: choose File > Import > Upload, pick the file, and choose\n` +
-      '     "Insert new sheet(s)". The new tab is named after the file. Keep that name: it is the\n' +
-      '     name the config uses.'
-  );
-  if (newSpreadsheet) {
-    console.log(
-      `  ${step++}. You can delete the empty "Sheet1" tab.\n` +
-        `  ${step++}. Click Share, and under "General access" choose "Anyone with the link" as Viewer.\n` +
-        '     The app can only read the spreadsheet when it is shared this way.'
-    );
-  }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -132,17 +67,6 @@ async function askRequiredValues() {
       { validate: checks.list }
     )
   );
-  answers.recordTimeZone = await prompter.ask(
-    'The time zone your record dates are kept in (for example America/Los_Angeles)',
-    {
-      defaultValue: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      validate: checks.required,
-    }
-  );
-  answers.allTimeStartDate = await prompter.ask(
-    'How far back all-time history searches go, as YYYY-MM-DD (for example 1998-01-01)',
-    { validate: checks.isoDate }
-  );
   answers.includeClubNameOnCertificate = await prompter.askYesNo(
     "Print the record holder's club on certificates?"
   );
@@ -161,190 +85,38 @@ async function askRequiredValues() {
   return answers;
 }
 
-/**
- * @returns {Promise<null | { sheetId, sheetName, standardKey, createdBySetup }>} null when
- *   the person has no spreadsheet and doesn't want one made
- */
-async function setUpRecordsSpreadsheet(wsoOfficialName) {
+/** @returns {Promise<{ sheetId, sheetName, standardKey }>} */
+async function askRecordsSpreadsheet() {
   heading('Records spreadsheet');
   console.log(
-    'Records Explorer reads your recognized records from a Google spreadsheet. If you don\'t have\n' +
-      'one yet, the setup can make a starter one with the columns the app reads.\n'
+    'Records Explorer reads your recognized records from a Google spreadsheet. Its id can be found in the page URL when viewing it in a browser.\n' +
+    ' https://docs.google.com/spreadsheets/d/<SHEET-ID>/edit\n'
   );
-  const hasSpreadsheet = await prompter.askYesNo(
-    'Do you already have a records spreadsheet that Records Explorer reads?'
+  const sheetId = await prompter.ask('The spreadsheet id', { validate: checks.sheetId });
+  const sheetName = await prompter.ask(
+    'The name of the tab with your current records, as shown at the bottom of the spreadsheet',
+    { validate: checks.required }
   );
-  if (hasSpreadsheet) {
-    const sheetId = extractSheetId(
-      await prompter.ask('Paste its link (or just the id from the link)', {
-        validate: checks.sheetId,
-      })
-    );
-    const sheetName = await prompter.ask(
-      'The name of the tab with your current records, as shown at the bottom of the spreadsheet',
-      { validate: checks.required }
-    );
-    const standardKey = await prompter.ask(
-      'The text in the lifter column that marks a record standard nobody has reached yet',
-      { defaultValue: DEFAULT_STANDARD_KEY, validate: checks.required }
-    );
-    return { sheetId, sheetName, standardKey, createdBySetup: false };
-  }
-
-  const makeFile = await prompter.askYesNo(
-    `\nMay the setup make a starter records file for you to import into a new Google spreadsheet?\n` +
-      `It is a CSV file for a "${DEFAULT_TAB_NAMES.records}" tab, with a standard of 0 for every\n` +
-      'age group, weight class and lift.'
+  const standardKey = await prompter.ask(
+    'The text in the lifter column that marks a record standard nobody has reached yet',
+    { defaultValue: DEFAULT_STANDARD_KEY, validate: checks.required }
   );
-  if (!makeFile) return null;
-
-  const tabs = [
-    {
-      name: DEFAULT_TAB_NAMES.records,
-      rows: buildRecordRows({ recordName: wsoOfficialName, standardKey: DEFAULT_STANDARD_KEY }),
-    },
-  ];
-  const files = await writeCsvFiles(tabs);
-  printImportSteps(files, { newSpreadsheet: true });
-  console.log(
-    '\nWhen the spreadsheet is ready, copy its link from the address bar. The setup will wait.'
-  );
-  const sheetId = extractSheetId(
-    await prompter.ask('Paste the new spreadsheet\'s link (or just the id from the link)', {
-      validate: checks.sheetId,
-    })
-  );
-  return {
-    sheetId,
-    sheetName: DEFAULT_TAB_NAMES.records,
-    standardKey: DEFAULT_STANDARD_KEY,
-    createdBySetup: true,
-  };
+  return { sheetId, sheetName, standardKey };
 }
 
-/** The adaptive part of the config, or undefined when the person doesn't want adaptive records. */
-async function setUpAdaptiveRecords(records, wsoOfficialName) {
+async function askTrackAdaptiveRecords() {
   heading('Adaptive records');
-  const include = await prompter.askYesNo('Do you want to include adaptive records?');
-  if (!include) return undefined;
-
-  const hasTabs =
-    !records.createdBySetup &&
-    (await prompter.askYesNo(
-      'Does your records spreadsheet already have the adaptive records tabs, and do you have an\n' +
-        'adaptive athlete roster tab?'
-    ));
-
-  let adaptive;
-  if (hasTabs) {
-    adaptive = await askExistingAdaptiveTabs(records.sheetId);
-  } else {
-    adaptive = {
-      allRecordsSheetName: DEFAULT_TAB_NAMES.adaptiveAll,
-      categoryRecordsSheetNames: { ...DEFAULT_TAB_NAMES.adaptiveCategories },
-      liftersListSheetId: records.sheetId,
-      liftersListSheetName: DEFAULT_TAB_NAMES.adaptiveRoster,
-    };
-    await createAdaptiveTabs(records, wsoOfficialName);
-  }
-
-  adaptive.optInFormUrl = await prompter.ask(
-    'The link to the form adaptive athletes fill in to opt in (press Enter to skip)',
-    { validate: checks.optionalWebUrl }
-  );
-  if (!adaptive.optInFormUrl) {
-    notes.push(
-      'Add adaptiveOptInFormUrl to the config when you have an opt-in form (see CONFIG_README.md).'
-    );
-  }
-  return adaptive;
-}
-
-async function askExistingAdaptiveTabs(recordsSheetId) {
-  console.log('\nTab names are as shown at the bottom of the spreadsheet. Press Enter to skip one.\n');
-  const allRecordsSheetName = await prompter.ask(
-    'The tab with the combined adaptive records for every category'
-  );
-  const categoryLabels = {
-    physical: 'physical disability',
-    hearing: 'deaf, deafened, or hard of hearing',
-    vision: 'visual impairment',
-    cognitive: 'intellectual impairment',
-  };
-  const categoryRecordsSheetNames = {};
-  for (const key of ADAPTIVE_CATEGORY_KEYS) {
-    categoryRecordsSheetNames[key] = await prompter.ask(
-      `The tab with the ${categoryLabels[key]} records`
-    );
-  }
-  const liftersListSheetId = extractSheetId(
-    await prompter.ask(
-      'The link (or id) of the spreadsheet with the adaptive athlete roster. Press Enter if it is\n' +
-        'the records spreadsheet',
-      { defaultValue: recordsSheetId, validate: checks.sheetId }
-    )
-  );
-  const liftersListSheetName = await prompter.ask('The roster tab');
-  return {
-    allRecordsSheetName,
-    categoryRecordsSheetNames,
-    liftersListSheetId,
-    liftersListSheetName,
-  };
-}
-
-/**
- * Writes the adaptive tabs as CSV files to import into the records spreadsheet. When the setup
- * made the records file, the person already agreed to starter files, so it doesn't ask again.
- */
-async function createAdaptiveTabs(records, wsoOfficialName) {
-  const recordRows = buildRecordRows({
-    recordName: wsoOfficialName,
-    standardKey: records.standardKey,
-  });
-  const tabs = [
-    { name: DEFAULT_TAB_NAMES.adaptiveAll, rows: recordRows },
-    ...ADAPTIVE_CATEGORY_KEYS.map((key) => ({
-      name: DEFAULT_TAB_NAMES.adaptiveCategories[key],
-      rows: recordRows,
-    })),
-    { name: DEFAULT_TAB_NAMES.adaptiveRoster, rows: buildRosterRows() },
-  ];
-  const tabNames = tabs.map((tab) => tab.name);
-
-  const makeFiles =
-    records.createdBySetup ||
-    (await prompter.askYesNo(
-      `\nMay the setup make files for these tabs, for you to import into your records spreadsheet?\n` +
-        `  ${tabNames.join(', ')}\n` +
-        'They are CSV files. The records tabs start with a standard of 0 everywhere; the roster\n' +
-        'tab has only its header row.'
-    ));
-
-  if (makeFiles) {
-    const files = await writeCsvFiles(tabs);
-    printImportSteps(files, { newSpreadsheet: false });
-    notes.push(
-      `Import the adaptive CSV files from ${relative(csvDir)}/ into your records spreadsheet, ` +
-        'keeping each tab named after its file.'
-    );
-    return;
-  }
-
-  notes.push(
-    'Adaptive records are set up only partway. The config names these tabs, which your records ' +
-      `spreadsheet still needs: ${tabNames.join(', ')}. Run the setup again to have their files made, or ` +
-      'add them yourself: the records tabs use the same columns as your current records tab.'
-  );
+  return prompter.askYesNo('Do you want to track adaptive records?');
 }
 
 async function askPassword(displayName) {
   heading('Scripts page password');
   console.log(
-    'The /scripts page runs record updates and is locked with a password. Only a scrambled copy\n' +
-      '(a hash) is stored in the config. Typing is not shown.\n'
+    'The /scripts page does not show in the menu because it\'s just for you ' +
+    'and your committee members. It will also be protected with a password of your ' +
+    'choosing. Select a password now. You can update this at any time.\n'
   );
-  for (;;) {
+  for (; ;) {
     const password = await promptHidden('Choose a password: ');
     if (!password) {
       console.log('  The password cannot be empty.');
@@ -370,7 +142,7 @@ async function main() {
 
   console.log(
     '\nWelcome to Records Explorer setup. This asks for the settings your site needs and writes\n' +
-      `them to ${relative(configPath)}. Nothing is saved until the end. Press Ctrl+C to quit.`
+    `them to ${relative(configPath)}. Nothing is saved until the end. Press Ctrl+C to quit.`
   );
 
   if (fs.existsSync(configPath)) {
@@ -382,7 +154,7 @@ async function main() {
     }
     const replace = await prompter.askYesNo(
       `\nThere is already a config file${current ? ` for ${current}` : ''}. Setup will replace it ` +
-        'when it finishes. Continue?'
+      'when it finishes. Continue?'
     );
     if (!replace) {
       console.log('Nothing was changed.');
@@ -393,44 +165,27 @@ async function main() {
 
   const required = await askRequiredValues();
 
-  const records = await setUpRecordsSpreadsheet(required.wsoOfficialName);
-  if (!records) {
-    console.log(
-      '\nRecords Explorer needs a records spreadsheet to show records, so setup has stopped here.\n' +
-        'When you have one, or are ready for the setup to make one, please run\n' +
-        '`npm run setup-application` again. The config file was not changed.'
-    );
-    prompter.close();
-    return;
-  }
+  const records = await askRecordsSpreadsheet();
   Object.assign(required, {
     currentRecordsSheetId: records.sheetId,
     currentRecordsSheetName: records.sheetName,
     standardKey: records.standardKey,
   });
 
-  const adaptive = await setUpAdaptiveRecords(records, required.wsoOfficialName);
+  const trackAdaptiveRecords = await askTrackAdaptiveRecords();
 
   prompter.close();
   // The config the setup writes has no wsoDisplayName, so the hash uses wsoOfficialName.
   required.scriptsPassword = await askPassword(displayNameOf(required));
 
-  const config = buildConfig(required, adaptive);
+  const config = buildConfig(required, { trackAdaptiveRecords });
   fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
 
-  heading('Done');
-  console.log(`Saved your settings to ${relative(configPath)}.`);
-  console.log(`Records spreadsheet: ${sheetUrl(records.sheetId)}`);
-  if (notes.length > 0) {
-    console.log('\nStill to do:');
-    notes.forEach((note) => console.log(`  - ${note}`));
-  }
+  heading('All set!');
   console.log(
-    '\nNext steps:\n' +
-      '  - Put your Google API key and Sport80 token in .env.local (README.md, "Set your API credentials").\n' +
-      '  - Replace the logo images (CONFIG_README.md, "Certificates").\n' +
-      '  - Optional settings, such as a display name or your website links, are in CONFIG_README.md.\n' +
-      '  - Start the site with: npm run whole-application'
+    '\nYou\ve plugged in the personalized data you need to run the site.\n' +
+    'If you haven\'t already, follow instructions from the Readme ' +
+    '(README.md, "Set your API credentials") to place your API tokens where the app can use them.\n'
   );
 }
 

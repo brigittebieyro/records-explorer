@@ -6,7 +6,7 @@ Every WSO-specific setting lives in one file: [`src/Data/wsoConfig.json`](src/Da
 - The scripts in `scripts/` read the JSON file directly.
 - API credentials do **not** go in this file. They go in `.env.local` (see the [README](README.md#7-set-your-api-credentials)).
 
-Starting from scratch? `npm run setup-application` asks for each required setting and writes this file for you, and can make starter records files to import into Google Sheets (see the [README](README.md#setting-up-with-npm-run-setup-application)). This will give you the basics needed for the app to work. You can always add optional items later.
+Starting from scratch? `npm run setup-application` asks for each required setting and writes this file for you (see the [README](README.md#setting-up-with-npm-run-setup-application)). This will give you the basics needed for the app to work. You can always add optional items later.
 
 ## How the file is checked
 
@@ -41,6 +41,8 @@ JSON doesn't allow comments or trailing commas.
 Most itemps are required.
 Optional items:
 `wsoDisplayName`,
+`recordTimeZone`,
+`allTimeStartDate`,
 `wsoBoundary`
 all of the adaptive records settings.
 
@@ -51,8 +53,8 @@ all of the adaptive records settings.
 | `wsoDisplayName` | string | **no** | [WSO identity](#wso-identity) |
 | `wsoRegions` | list of strings | yes | [WSO identity](#wso-identity) |
 | `wsoStateNames` | list of strings | yes | [WSO identity](#wso-identity) |
-| `recordTimeZone` | string | yes | [WSO identity](#wso-identity) |
-| `allTimeStartDate` | date | yes | [WSO identity](#wso-identity) |
+| `recordTimeZone` | string | **no** | [WSO identity](#wso-identity) |
+| `allTimeStartDate` | date | **no** | [WSO identity](#wso-identity) |
 | `currentRecordsSheetId` | string | yes | [Records Google Sheet](#records-google-sheet) |
 | `currentRecordsSheetName` | string | yes | [Records Google Sheet](#records-google-sheet) |
 | `priorRecordsSheetNames` | list of strings | **no** | [Records Google Sheet](#records-google-sheet) |
@@ -120,15 +122,19 @@ Your state or states, written the way they appear in Sport80 meet addresses (`"C
 "wsoStateNames": ["California"]
 ```
 
-### `recordTimeZone` (string)
+### `recordTimeZone` (string, optional)
 The [IANA time zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) your record dates are kept in. It decides what "today" is for every date range, in the app and in the scripts, and how dates print on certificates. Using one fixed zone means a record's date doesn't shift depending on where the viewer is.
+
+Leave it out to use `America/Los_Angeles`.
 
 ```json
 "recordTimeZone": "America/Los_Angeles"
 ```
 
-### `allTimeStartDate` (date)
+### `allTimeStartDate` (date, optional)
 How far back the all-time history searches go. U11 and U13 use their own start date, set in code, because those age groups have a shorter history.
+
+Leave it out to use `1998-01-01`.
 
 ```json
 "allTimeStartDate": "1998-01-01"

@@ -123,15 +123,11 @@ The setup asks one question at a time and writes `src/Data/wsoConfig.json` with 
 It covers:
 
 1. **Your WSO's details:** the Sport80 id and name, region and state, time zone, how far back history goes, whether certificates print clubs, your USAW page, and who maintains the site.
-2. **The records spreadsheet.** If you already have one in the app's layout, you give its link, the current records tab and the standard marker. If you don't, the setup asks whether to make a starter file, with a standard of 0 for every age group, weight class and lift.
-   - **Yes:** the setup writes `starter-sheets/Records.csv` and explains how to import it into a new Google spreadsheet and share it. It then waits until you paste the new spreadsheet's link.
-   - **No:** the app can't run without a records spreadsheet, so the setup stops and leaves the config unchanged.
-3. **Adaptive records (optional).** If you want them and don't have the tabs yet, the setup can make CSV files for them: `Adaptive_All`, one tab per category, and an `Adaptive_Roster` tab for athletes. You import these into your records spreadsheet the same way. If the setup made your records file, it makes these without asking again; otherwise it asks first. If you say no, the config still names the tabs, and the setup lists the ones you need to add.
-4. **The scripts page password,** typed twice and stored only as a hash (see [CONFIG_README.md](CONFIG_README.md#scriptspassword-string)).
+2. **The records spreadsheet id:** A Google sheet's ID is in the url when viewing it in a web browser, it's a long string of letters, numbers, and dashes. You'll be asked for the names of tabs in the sheet, and what you list as the recordholder for standards yet to be broken. Make sure your spreadsheet is visible to "anyone with the link".
+3. **Adaptive records (optional):** Do you want to track adaptive records? Say yes, and the adaptive records page shows in the menu. The adaptive tab names, opt-in form link, and athlete roster spreadsheet are optional settings you can add afterwards (see [CONFIG_README.md](CONFIG_README.md)).
+4. **Your scripts page password,** you're gonna have to type this twice.  (see [CONFIG_README.md](CONFIG_README.md#scriptspassword-string)).
 
-Optional settings, such as a display name, website links or a map boundary, aren't asked. Add them afterwards; [CONFIG_README.md](CONFIG_README.md) describes each one.
-
-The setup never connects to your Google account. To import a CSV file as a tab, open the spreadsheet in Google Sheets, choose **File > Import > Upload**, pick the file, and choose **Insert new sheet(s)**. The new tab takes the file's name, which is the name the config uses, so keep it.
+Other optional configs aren't asked for, this is just to get you off the ground. You can use [CONFIG_README.md](CONFIG_README.md) as a reference on how to use optional configs for more customization.
 
 ## Configuring for your WSO
 
@@ -150,8 +146,8 @@ For every field's type, whether it's required, and an example value, see [CONFIG
 | `wsoDisplayName` | Optional. The name shown in the header, the page title, and as `<name> WSO` across the top of certificates. Leave it out to show `wsoOfficialName`. |
 | `wsoRegions` | Sport80 region ids for your state or states, e.g. `["66"]`. The Local Meets page requests the meet list once per region and lists the results together. |
 | `wsoStateNames` | Your state or states as written in Sport80 meet addresses, e.g. `["California"]`. Used to show each local meet's city. |
-| `recordTimeZone` | IANA time zone record dates are kept in, e.g. `"America/New_York"`. Decides what "today" is for every date range and how certificate dates print. |
-| `allTimeStartDate` | How far back the all-time record search reaches (`YYYY-MM-DD`). |
+| `recordTimeZone` | Optional. IANA time zone record dates are kept in, e.g. `"America/New_York"`. Decides what "today" is for every date range and how certificate dates print. Defaults to `"America/Los_Angeles"`. |
+| `allTimeStartDate` | Optional. How far back the all-time record search reaches (`YYYY-MM-DD`). Defaults to `"1998-01-01"`. |
 
 ### 2. Records Google Sheet
 

@@ -138,29 +138,9 @@ function loadAgeGroups() {
   return ageGroups;
 }
 
-/**
- * The adaptive category keys and on-screen names, in the order of _adaptiveCategoryWording in
- * src/Data/RoutesAndSettings.ts. That order is also the order of the category flag columns in the
- * adaptive roster sheet.
- */
-function loadAdaptiveCategories() {
-  const content = fs.readFileSync(path.join(dataDir, 'RoutesAndSettings.ts'), 'utf-8');
-  const pattern = /key:\s*'([a-z]+)',\s*displayName:\s*'([^']+)'/g;
-  return [...content.matchAll(pattern)].map(([, key, displayName]) => ({ key, displayName }));
-}
-
-/** The weight classes an age group uses: its own set when it has one (common for youth only), otherwise the default set. */
-function weightClassSetFor(ageGroup, defaultWeightClasses, youthWeightClassMap) {
-  if (!ageGroup || !ageGroup.customWeightClasses) return defaultWeightClasses;
-  const youthSet = youthWeightClassMap[ageGroup.id];
-  return youthSet && youthSet.length ? youthSet : defaultWeightClasses;
-}
-
 module.exports = {
   loadWeightClasses,
   parseWeightClassesFromContent,
   loadYouthWeightClasses,
   loadAgeGroups,
-  loadAdaptiveCategories,
-  weightClassSetFor,
 };

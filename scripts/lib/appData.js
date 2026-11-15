@@ -149,7 +149,7 @@ function loadAdaptiveCategories() {
   return [...content.matchAll(pattern)].map(([, key, displayName]) => ({ key, displayName }));
 }
 
-/** The weight classes an age group uses: its own youth set when it has one, otherwise the default set. */
+/** The weight classes an age group uses: its own set when it has one (common for youth only), otherwise the default set. */
 function weightClassSetFor(ageGroup, defaultWeightClasses, youthWeightClassMap) {
   if (!ageGroup || !ageGroup.customWeightClasses) return defaultWeightClasses;
   const youthSet = youthWeightClassMap[ageGroup.id];

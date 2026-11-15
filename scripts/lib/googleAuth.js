@@ -23,6 +23,35 @@ const SCOPES = {
   driveFile: 'https://www.googleapis.com/auth/drive.file',
 };
 
+// What Google's consent screen calls each permission, and what the setup uses it for.
+const SCOPE_DESCRIPTIONS = {
+  [SCOPES.spreadsheets]: {
+    consentText: 'See, edit, create, and delete all your Google Sheets spreadsheets',
+    reason:
+      'to create the records spreadsheet, and to add the adaptive records tabs to a spreadsheet ' +
+      'you already have. The setup only adds new tabs; it never changes or deletes ones you have.',
+  },
+  [SCOPES.driveFile]: {
+    consentText:
+      'See, edit, create, and delete only the specific Google Drive files you use with this app',
+    reason:
+      'to share the spreadsheet the setup creates as "anyone with the link can view", which the ' +
+      'app needs in order to read it. This only covers files the setup itself creates.',
+  },
+};
+
+/** One bullet per scope: the consent screen's wording, then why the setup needs it. */
+function describeScopes(scopes) {
+  return scopes
+    .map((scope) => {
+      const description = SCOPE_DESCRIPTIONS[scope];
+      return description
+        ? `  - "${description.consentText}"\n    Needed ${description.reason}`
+        : `  - ${scope}`;
+    })
+    .join('\n');
+}
+
 const base64Url = (buffer) => buffer.toString('base64url');
 
 /** Opens `url` in the default browser. Failure is ignored: the URL is also printed. */
@@ -35,7 +64,7 @@ function openInBrowser(url) {
         : ['xdg-open', [url]];
   try {
     const child = spawn(command, args, { stdio: 'ignore', detached: true });
-    child.on('error', () => {});
+    child.on('error', () => { });
     child.unref();
   } catch {
     // The printed link still works.
@@ -133,9 +162,11 @@ async function signIn({ clientId, clientSecret, scopes }) {
   console.log('\nOpening Google sign-in in your browser. If it does not open, visit this link:');
   console.log(`\n  ${authUrl.toString()}\n`);
   console.log(
-    'Google will warn that it "hasn\'t verified this app". That is expected: the app is your own\n' +
-      'OAuth client. Choose "Advanced", then "Go to ... (unsafe)", then allow access.\n'
+    'Google will warn that it "hasn\'t verified this app". That\'s expected, because this is a brand new app, owned by you. ' +
+    'Your own personal OAuth client. Choose "Advanced", then "Go to ... (unsafe)", then allow access.\n' +
+    'If this feels like an unacceptable risk, no problem. We can start fresh, and download a starter CSV instead.'
   );
+  console.log(`\nGoogle will ask for these permissions:\n${describeScopes(scopes)}\n`);
   openInBrowser(authUrl.toString());
 
   let code;
@@ -168,8 +199,9 @@ async function signIn({ clientId, clientSecret, scopes }) {
   const missing = scopes.filter((scope) => !granted.has(scope));
   if (missing.length > 0) {
     throw new Error(
-      'Google sign-in finished without every permission the setup needs. ' +
-        'Please run it again and leave all the boxes ticked.'
+      'Google sign-in finished without these permissions, which the setup needs in order to create a new Google sheet as you and make updates to it later in the process:\n' +
+      `${describeScopes(missing)}\n` +
+      'To continue, sign in again and leave those items selected.'
     );
   }
   return body.access_token;

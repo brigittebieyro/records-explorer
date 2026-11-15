@@ -4,9 +4,9 @@
  * Interactive first-time setup: asks for each required setting one at a time, sets up the records
  * spreadsheet (and, optionally, the adaptive records tabs), and writes src/Data/wsoConfig.json.
  *
- * Every Google Sheets change is asked first, with three answers: make the change through the
- * Google API (after the person signs in), write CSV files to import by hand instead, or don't.
- * The config file is written only at the very end; quitting earlier leaves it as it was.
+ * The setup never connects to Google. When the person needs starter tabs, it asks, then writes
+ * them as CSV files to import into Google Sheets by hand. The config file is written only at the
+ * very end; quitting earlier leaves it as it was.
  *
  * Usage: npm run setup-application
  */
@@ -17,8 +17,6 @@ const { createPrompter, promptHidden } = require('./lib/prompts');
 const { displayNameOf, hashPassword } = require('./lib/password');
 const { buildRecordRows, buildRosterRows } = require('./lib/starterRows');
 const { existingCsvFiles, writeCsvTabs } = require('./lib/csv');
-const { SCOPES, signIn } = require('./lib/googleAuth');
-const { createSpreadsheet, addTabs, shareAnyoneWithLinkCanView } = require('./lib/sheetsApi');
 const {
   ADAPTIVE_CATEGORY_KEYS,
   DEFAULT_TAB_NAMES,
@@ -35,17 +33,10 @@ const relative = (file) => path.relative(process.cwd(), file) || file;
 
 const DEFAULT_STANDARD_KEY = 'STANDARD';
 
-const CHOICES = {
-  google: 'google',
-  csv: 'csv',
-  no: 'no',
-};
-
 /** Things the person still has to do, printed in the closing summary. */
 const notes = [];
 
 let prompter;
-let googleToken;
 
 function heading(text) {
   console.log(`\n=== ${text} ===\n`);
@@ -56,48 +47,8 @@ function sheetUrl(sheetId) {
 }
 
 // ------------------------------------------------------------------------------------------------
-// Google access
+// CSV files
 // ------------------------------------------------------------------------------------------------
-
-/** Signs in once and reuses the token for the rest of the run. */
-async function getGoogleToken() {
-  if (googleToken) return googleToken;
-  let clientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
-  let clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
-  if (!clientId || !clientSecret) {
-    console.log(
-      '\nTo work in your Google account, the setup needs an OAuth client ID and secret from your\n' +
-        'Google Cloud project. README.md, "Setting up with npm run setup-application", explains how\n' +
-        'to make them. To skip this question next time, put them in .env.local as\n' +
-        'GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET.\n'
-    );
-    clientId = clientId || (await prompter.ask('OAuth client ID', { validate: checks.required }));
-    clientSecret =
-      clientSecret || (await prompter.ask('OAuth client secret', { validate: checks.required }));
-  }
-  googleToken = await signIn({
-    clientId,
-    clientSecret,
-    scopes: [SCOPES.spreadsheets, SCOPES.driveFile],
-  });
-  console.log('Signed in to Google.');
-  return googleToken;
-}
-
-/**
- * Asks how a spreadsheet change should be made.
- * @returns {Promise<'google' | 'csv' | 'no'>}
- */
-function askSheetPermission(question, googleLabel) {
-  return prompter.askChoice(question, [
-    { label: googleLabel, value: CHOICES.google },
-    {
-      label: `No, make CSV files instead (I'll import them into Google Sheets myself)`,
-      value: CHOICES.csv,
-    },
-    { label: 'No', value: CHOICES.no },
-  ]);
-}
 
 /**
  * Writes `tabs` as CSV files, asking before replacing files from an earlier run.
@@ -211,7 +162,7 @@ async function askRequiredValues() {
 }
 
 /**
- * @returns {Promise<null | { sheetId, sheetName, standardKey, createdBySetup, method }>} null when
+ * @returns {Promise<null | { sheetId, sheetName, standardKey, createdBySetup }>} null when
  *   the person has no spreadsheet and doesn't want one made
  */
 async function setUpRecordsSpreadsheet(wsoOfficialName) {
@@ -237,15 +188,15 @@ async function setUpRecordsSpreadsheet(wsoOfficialName) {
       'The text in the lifter column that marks a record standard nobody has reached yet',
       { defaultValue: DEFAULT_STANDARD_KEY, validate: checks.required }
     );
-    return { sheetId, sheetName, standardKey, createdBySetup: false, method: undefined };
+    return { sheetId, sheetName, standardKey, createdBySetup: false };
   }
 
-  let method = await askSheetPermission(
-    `\nMay the setup create a starter records spreadsheet in your Google account? It will have one\n` +
-      `"${DEFAULT_TAB_NAMES.records}" tab with a standard of 0 for every age group, weight class and lift.`,
-    'Yes, sign in to Google and create it'
+  const makeFile = await prompter.askYesNo(
+    `\nMay the setup make a starter records file for you to import into a new Google spreadsheet?\n` +
+      `It is a CSV file for a "${DEFAULT_TAB_NAMES.records}" tab, with a standard of 0 for every\n` +
+      'age group, weight class and lift.'
   );
-  if (method === CHOICES.no) return null;
+  if (!makeFile) return null;
 
   const tabs = [
     {
@@ -253,27 +204,6 @@ async function setUpRecordsSpreadsheet(wsoOfficialName) {
       rows: buildRecordRows({ recordName: wsoOfficialName, standardKey: DEFAULT_STANDARD_KEY }),
     },
   ];
-  const result = {
-    sheetName: DEFAULT_TAB_NAMES.records,
-    standardKey: DEFAULT_STANDARD_KEY,
-    createdBySetup: true,
-  };
-
-  if (method === CHOICES.google) {
-    try {
-      const token = await getGoogleToken();
-      const created = await createSpreadsheet(token, `${wsoOfficialName} WSO Records`, tabs);
-      console.log(`\nCreated your records spreadsheet: ${created.spreadsheetUrl}`);
-      await offerToShare(token, created.spreadsheetId);
-      return { ...result, sheetId: created.spreadsheetId, method };
-    } catch (error) {
-      console.log(`\n${error.message}`);
-      const useCsv = await prompter.askYesNo('Make CSV files to import by hand instead?');
-      if (!useCsv) return null;
-      method = CHOICES.csv;
-    }
-  }
-
   const files = await writeCsvFiles(tabs);
   printImportSteps(files, { newSpreadsheet: true });
   console.log(
@@ -284,29 +214,12 @@ async function setUpRecordsSpreadsheet(wsoOfficialName) {
       validate: checks.sheetId,
     })
   );
-  return { ...result, sheetId, method };
-}
-
-async function offerToShare(token, sheetId) {
-  const share = await prompter.askYesNo(
-    'The app can only read the spreadsheet when it is shared as "anyone with the link can view".\n' +
-      'Anyone with the link could then see it, as the site will link to it. Share it that way now?'
-  );
-  if (!share) {
-    notes.push(
-      `Share the records spreadsheet as "Anyone with the link" (Viewer): ${sheetUrl(sheetId)}`
-    );
-    return;
-  }
-  try {
-    await shareAnyoneWithLinkCanView(token, sheetId);
-    console.log('Shared: anyone with the link can view.');
-  } catch (error) {
-    console.log(error.message);
-    notes.push(
-      `Share the records spreadsheet as "Anyone with the link" (Viewer): ${sheetUrl(sheetId)}`
-    );
-  }
+  return {
+    sheetId,
+    sheetName: DEFAULT_TAB_NAMES.records,
+    standardKey: DEFAULT_STANDARD_KEY,
+    createdBySetup: true,
+  };
 }
 
 /** The adaptive part of the config, or undefined when the person doesn't want adaptive records. */
@@ -381,8 +294,8 @@ async function askExistingAdaptiveTabs(recordsSheetId) {
 }
 
 /**
- * Makes the adaptive tabs in the records spreadsheet, the same way the records spreadsheet was
- * made when the setup made it, and otherwise with the person's permission.
+ * Writes the adaptive tabs as CSV files to import into the records spreadsheet. When the setup
+ * made the records file, the person already agreed to starter files, so it doesn't ask again.
  */
 async function createAdaptiveTabs(records, wsoOfficialName) {
   const recordRows = buildRecordRows({
@@ -399,33 +312,16 @@ async function createAdaptiveTabs(records, wsoOfficialName) {
   ];
   const tabNames = tabs.map((tab) => tab.name);
 
-  let method = records.method;
-  if (!records.createdBySetup) {
-    method = await askSheetPermission(
-      `\nMay the setup add these tabs to your records spreadsheet?\n  ${tabNames.join(', ')}\n` +
-        'The records tabs start with a standard of 0 everywhere; the roster tab has only its\n' +
-        'header row. Tabs you already have are not changed.',
-      'Yes, sign in to Google and add them'
-    );
-  }
+  const makeFiles =
+    records.createdBySetup ||
+    (await prompter.askYesNo(
+      `\nMay the setup make files for these tabs, for you to import into your records spreadsheet?\n` +
+        `  ${tabNames.join(', ')}\n` +
+        'They are CSV files. The records tabs start with a standard of 0 everywhere; the roster\n' +
+        'tab has only its header row.'
+    ));
 
-  if (method === CHOICES.google) {
-    try {
-      const token = await getGoogleToken();
-      const { added, skipped } = await addTabs(token, records.sheetId, tabs);
-      if (added.length > 0) console.log(`\nAdded tabs: ${added.join(', ')}`);
-      if (skipped.length > 0) {
-        console.log(`Left these tabs as they were, since they already exist: ${skipped.join(', ')}`);
-      }
-      return;
-    } catch (error) {
-      console.log(`\n${error.message}`);
-      const useCsv = await prompter.askYesNo('Make CSV files to import by hand instead?');
-      method = useCsv ? CHOICES.csv : CHOICES.no;
-    }
-  }
-
-  if (method === CHOICES.csv) {
+  if (makeFiles) {
     const files = await writeCsvFiles(tabs);
     printImportSteps(files, { newSpreadsheet: false });
     notes.push(
@@ -437,7 +333,7 @@ async function createAdaptiveTabs(records, wsoOfficialName) {
 
   notes.push(
     'Adaptive records are set up only partway. The config names these tabs, which your records ' +
-      `spreadsheet still needs: ${tabNames.join(', ')}. Run the setup again to have them made, or ` +
+      `spreadsheet still needs: ${tabNames.join(', ')}. Run the setup again to have their files made, or ` +
       'add them yourself: the records tabs use the same columns as your current records tab.'
   );
 }

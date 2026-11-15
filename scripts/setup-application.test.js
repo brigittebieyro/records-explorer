@@ -91,7 +91,7 @@ function parseCsv(text) {
   return result;
 }
 
-test('CSV files hold exactly the rows the Google API would write', () => {
+test('CSV files read back as exactly the rows given', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'setup-csv-'));
   try {
     const tabs = [

@@ -6,6 +6,8 @@ Every WSO-specific setting lives in one file: [`src/Data/wsoConfig.json`](src/Da
 - The scripts in `scripts/` read the JSON file directly.
 - API credentials do **not** go in this file. They go in `.env.local` (see the [README](README.md#7-set-your-api-credentials)).
 
+Starting from scratch? `npm run setup-application` asks for each required setting and writes this file for you (see the [README](README.md#setting-up-with-npm-run-setup-application)). This will give you the basics needed for the app to work. You can always add optional items later.
+
 ## How the file is checked
 
 When the app loads, it checks the file against `configSchema` in `RoutesAndSettings.ts`. If a required field is missing or a value has the wrong type, the app stops with an error that names every bad field, for example:
@@ -39,6 +41,11 @@ JSON doesn't allow comments or trailing commas.
 Most itemps are required.
 Optional items:
 `wsoDisplayName`,
+`recordTimeZone`,
+`allTimeStartDate`,
+`youthAllTimeStartDate`,
+`localMeetStartDate`,
+the three nationals dates,
 `wsoBoundary`
 all of the adaptive records settings.
 
@@ -49,8 +56,13 @@ all of the adaptive records settings.
 | `wsoDisplayName` | string | **no** | [WSO identity](#wso-identity) |
 | `wsoRegions` | list of strings | yes | [WSO identity](#wso-identity) |
 | `wsoStateNames` | list of strings | yes | [WSO identity](#wso-identity) |
-| `recordTimeZone` | string | yes | [WSO identity](#wso-identity) |
-| `allTimeStartDate` | date | yes | [WSO identity](#wso-identity) |
+| `recordTimeZone` | string | **no** | [WSO identity](#wso-identity) |
+| `allTimeStartDate` | date | **no** | [WSO identity](#wso-identity) |
+| `youthAllTimeStartDate` | date | **no** | [WSO identity](#wso-identity) |
+| `localMeetStartDate` | date | **no** | [Local meets and Nationals](#local-meets-and-nationals) |
+| `nationalsDate` | date | **no** | [Local meets and Nationals](#local-meets-and-nationals) |
+| `nationalsQualifyingStartDate` | date | **no** | [Local meets and Nationals](#local-meets-and-nationals) |
+| `nationalsQualifyingEndDate` | date | **no** | [Local meets and Nationals](#local-meets-and-nationals) |
 | `currentRecordsSheetId` | string | yes | [Records Google Sheet](#records-google-sheet) |
 | `currentRecordsSheetName` | string | yes | [Records Google Sheet](#records-google-sheet) |
 | `priorRecordsSheetNames` | list of strings | **no** | [Records Google Sheet](#records-google-sheet) |
@@ -118,18 +130,55 @@ Your state or states, written the way they appear in Sport80 meet addresses (`"C
 "wsoStateNames": ["California"]
 ```
 
-### `recordTimeZone` (string)
+### `recordTimeZone` (string, optional)
 The [IANA time zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) your record dates are kept in. It decides what "today" is for every date range, in the app and in the scripts, and how dates print on certificates. Using one fixed zone means a record's date doesn't shift depending on where the viewer is.
+
+Leave it out to use `America/Los_Angeles`.
 
 ```json
 "recordTimeZone": "America/Los_Angeles"
 ```
 
-### `allTimeStartDate` (date)
-How far back the all-time history searches go. U11 and U13 use their own start date, set in code, because those age groups have a shorter history.
+### `allTimeStartDate` (date, optional)
+How far back the all-time history searches go. U11 and U13 use [`youthAllTimeStartDate`](#youthalltimestartdate-date-optional) instead, because those age groups have a shorter history.
+
+Leave it out to use `1998-01-01`.
 
 ```json
 "allTimeStartDate": "1998-01-01"
+```
+
+### `youthAllTimeStartDate` (date, optional)
+How far back the all-time history searches go for U11 and U13. An earlier date can make the rankings source return errors for these age groups.
+
+Leave it out to use `2014-01-01`.
+
+```json
+"youthAllTimeStartDate": "2014-01-01"
+```
+
+---
+
+## Local meets and Nationals
+
+### `localMeetStartDate` (date, optional)
+The earliest meet date the Local Meet Results page lists. Older meets don't all have a location, so [`wsoBoundary`](#wsoboundary-optional) can't filter them reliably. `npm run setup-application` sets this to one year before the day you run it.
+
+Leave it out to drop the Local Meet Results menu link. The page at `/local-meet-results` then says local meet results are not set up.
+
+```json
+"localMeetStartDate": "2026-01-01"
+```
+
+### `nationalsDate`, `nationalsQualifyingStartDate`, `nationalsQualifyingEndDate` (date, optional)
+The date of Senior Nationals and the first and last days of its qualifying window. Until `nationalsDate` has passed, the Senior Nationals Qualification Rankings page ranks lifts made in the qualifying window. After that, it ranks the last 16 months until you enter next year's dates. Update all three each year.
+
+Leave any of the three out to drop the Senior Nationals Qualification Rankings menu link. The page at `/goals` then says the rankings are not set up.
+
+```json
+"nationalsDate": "2027-03-07",
+"nationalsQualifyingStartDate": "2026-02-04",
+"nationalsQualifyingEndDate": "2027-02-04"
 ```
 
 ---

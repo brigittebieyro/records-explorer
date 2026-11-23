@@ -27,6 +27,7 @@
     "test": "react-scripts test",
     "test:coverage": "CI=true react-scripts test --watchAll=false --coverage",
     "test:server": "node --test 'server/**/*.test.js'",
+    "test:scripts": "node --test 'scripts/**/*.test.js'",
     "coverage": "npm run test:coverage",
     "eject": "react-scripts eject",
     "server": "nodemon --exec \"node --env-file-if-exists=.env.local\" server/index.js | pino-colada",
@@ -34,6 +35,7 @@
     "analyze-records": "node --env-file-if-exists=.env.local scripts/analyze-records.js",
     "gather-history-records": "node --env-file-if-exists=.env.local scripts/gather-history-records.js",
     "update-password": "node scripts/update-password.js",
+    "setup-application": "node --env-file-if-exists=.env.local scripts/setup-application.js",
     "whole-application": "concurrently -n server,client -c blue,green -k \"npm run server\" \"npm start\""
   },
   "jest": {

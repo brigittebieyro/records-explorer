@@ -18,6 +18,20 @@ import { LocalMeet, MeetResult } from '../Utils/types';
 import LocalMeetResultsByWeightClass from './LocalMeetResultsByWeightClass';
 
 function LocalMeets() {
+  if (localMeetStartDate === undefined) {
+    return (
+      <div className="App">
+        <p className="page-title">Local Meet Results</p>
+        <div className="local-meets-parent">
+          <p className="local-meets-empty">Local meet results are not set up for this site.</p>
+        </div>
+      </div>
+    );
+  }
+  return <LocalMeetsPage startDate={localMeetStartDate} />;
+}
+
+function LocalMeetsPage({ startDate }: { startDate: string }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [status, setStatus] = useState<string | undefined>();
   const [meets, setMeets] = useState<LocalMeet[]>([]);
@@ -37,7 +51,7 @@ function LocalMeets() {
       const responses = await Promise.all(
         wsoRegions.map((region) => {
           const formData = new FormData();
-          formData.append('event_from_date', localMeetStartDate);
+          formData.append('event_from_date', startDate);
           formData.append('region', region);
           formData.append('event_to_date', today);
           return fetch(getMeetsRoute(200), {
@@ -114,7 +128,7 @@ function LocalMeets() {
         body: JSON.stringify({
           columns: [],
           filters: {
-            date_range_start: searchStart || localMeetStartDate,
+            date_range_start: searchStart || startDate,
             date_range_end: searchEnd || today,
             level: 1,
           },

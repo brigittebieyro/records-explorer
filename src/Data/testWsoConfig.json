@@ -1,0 +1,42 @@
+{
+  "wsoId": 21,
+  "wsoOfficialName": "California North Central",
+  "wsoRegions": ["66"],
+  "wsoStateNames": ["California"],
+  "recordTimeZone": "America/Los_Angeles",
+  "allTimeStartDate": "1998-01-01",
+  "localMeetStartDate": "2026-01-01",
+  "nationalsDate": "2027-03-07",
+  "nationalsQualifyingStartDate": "2026-02-04",
+  "nationalsQualifyingEndDate": "2027-02-04",
+  "includeClubNameOnCertificate": true,
+  "certificateWebsiteText": "www.canorthcentralwso.org",
+  "currentRecordsSheetId": "1ZAs27jQCPYTVgLuQ-feBHSO-BgGjGCewUs0djG23pXQ",
+  "currentRecordsSheetName": "Post-Aug2026",
+  "priorRecordsSheetNames": ["Pre-Aug2026", "Pre-June2025", "Pre-2018"],
+  "standardKey": "STANDARD",
+  "adaptiveAllRecordsSheetName": "Adaptive_All",
+  "adaptiveCategoryRecordsSheetNames": {
+    "physical": "Adaptive_Physical",
+    "hearing": "Adaptive_Hearing",
+    "vision": "Adaptive_Vision",
+    "cognitive": "Adaptive_Cognitive"
+  },
+  "adaptiveLiftersListSheetId": "1hO6VHntKEujjtx8P0kIMJQ_vM46INg2D_jHei_HZUW0",
+  "adaptiveLiftersListSheetName": "IDsAndCategories",
+  "adaptiveOptInFormUrl": "https://forms.gle/2Y7qKS7C2pa3d4jLA",
+  "showAdaptiveRecordsInMenu": true,
+  "localScheduleUrl": "https://canorthcentralwso.org/meet-schedule",
+  "localHomeUrl": "https://canorthcentralwso.org",
+  "wsoInfoUSAWUrl": "https://www.usaweightlifting.org/club-wso/wso-information/california-north-central",
+  "maintainerEmail": "maintainer@example.org",
+  "maintainerName": "Test Maintainer",
+  "wsoBoundary": {
+    "north": 42.01,
+    "south": 34.79,
+    "west": -124.41,
+    "east": -114.13
+  },
+  "ineligibleAthletes": ["Imaginary B. Athlete"],
+  "scriptsPassword": "ea08af88f45b2031464da9a3f5ffcfb993dff502fc1b945beee186764a21a89d"
+}

@@ -3,8 +3,10 @@ import {
   collectRecordBreakers,
   eligibleAgeGroups,
   fetchLifterResults,
+  AdaptiveRecordBreaker,
   findWeightClass,
   generateCsv,
+  generateSummary,
   parseAdaptiveRecords,
   parseAdaptiveRoster,
   parseSheetDate,
@@ -382,6 +384,22 @@ describe('resolveLifter', () => {
     expect(JSON.parse(fetchMock.mock.calls[0][1].body).filters.weight_class).toBe(941);
   });
 
+  test('searches from the weight classes taking effect when the start date is earlier', async () => {
+    const fetchMock = mockRankings([rankingRow('1013597', '56984')]);
+
+    await resolveLifter(rosterEntry);
+
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).filters.date_range_start).toBe('2026-08-01');
+  });
+
+  test('searches from a start date later than the weight classes taking effect', async () => {
+    const fetchMock = mockRankings([rankingRow('1013597', '56984')]);
+
+    await resolveLifter({ ...rosterEntry, startDate: '2026-09-01' });
+
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).filters.date_range_start).toBe('2026-09-01');
+  });
+
   test('takes the gender from the class the athlete is found in', async () => {
     // The second class searched is Women's 86+kg.
     mockRankings([], [rankingRow('1013597', '56984', { gender: undefined })]);
@@ -433,6 +451,7 @@ describe('fetchLifterResults', () => {
       ok: true,
       json: async () => ({
         data: [
+          meetResult({ date: '2026-07-15' }),
           meetResult({ date: '2026-08-09' }),
           meetResult({ date: '2026-09-01' }),
           meetResult({ date: '2026-09-02' }),
@@ -455,7 +474,23 @@ describe('fetchLifterResults', () => {
   test('keeps every result when there is no end date', async () => {
     const results = await fetchLifterResults('56984', '2020-01-15', '');
 
-    expect(results).toHaveLength(3);
+    expect(results.map((result) => result.date)).toEqual([
+      '2026-08-09',
+      '2026-09-01',
+      '2026-09-02',
+    ]);
+  });
+
+  test('drops results before the weight classes took effect when the start date is earlier', async () => {
+    const results = await fetchLifterResults('56984', '2020-01-15', '');
+
+    expect(results.map((result) => result.date)).not.toContain('2026-07-15');
+  });
+
+  test('keeps a start date later than the weight classes taking effect', async () => {
+    const results = await fetchLifterResults('56984', '2026-09-01', '');
+
+    expect(results.map((result) => result.date)).toEqual(['2026-09-01', '2026-09-02']);
   });
 });
 
@@ -699,9 +734,7 @@ describe('generateCsv', () => {
     expect(lines[1]).toBe('');
     expect(lines[2]).toBe('Errors');
     expect(lines[3]).toBe('Lifter Name,USAW Number,Error');
-    expect(lines[4]).toBe(
-      'Jane B. Smith,9999999,Not found in the USAW rankings. Check the name and USAW number on the roster sheet.'
-    );
+    expect(lines[4]).toBe('Jane B. Smith,9999999,Not ranked within eligible period');
   });
 
   test('the errors table sits below the records, not among them', () => {
@@ -742,5 +775,87 @@ describe('generateCsv', () => {
     );
 
     expect(csv).not.toContain('Errors');
+  });
+});
+
+describe('generateSummary', () => {
+  const bullet = '\\u8226?';
+  const adaptiveBreaker = (
+    overrides: Partial<AdaptiveRecordBreaker> = {}
+  ): AdaptiveRecordBreaker => ({
+    category: 'Adaptive_Vision',
+    weightClassName: "Women's 77kg",
+    ageGroupLabel: 'Open',
+    gender: 'F',
+    ageMin: '0',
+    ageMax: '1000',
+    bodyWeightMin: 69,
+    bodyWeightMax: '77',
+    lift: 'Snatch',
+    weight: 70,
+    lifterName: 'Jane Smith',
+    date: '2026-08-09',
+    event: 'Money In The Bank 2026',
+    clubName: '',
+    bodyweight: 72.5,
+    usawNumber: '1013597',
+    previousRecord: 65,
+    previousHolder: 'Jane B. Smith',
+    categoryIndex: 0,
+    ageGroupIndex: 0,
+    weightClassIndex: 0,
+    liftIndex: 0,
+    ...overrides,
+  });
+
+  test('adds the category on its own line, worded as on the certificates', () => {
+    const summary = generateSummary([
+      adaptiveBreaker(),
+      adaptiveBreaker({ lift: 'Total', liftIndex: 2, weight: 150 }),
+    ]);
+
+    expect(summary).toContain(
+      `{\\b Jane Smith}\\line\nOpen Women ${bullet} 77kg\\line\nAdaptive (Visual Impairment)\\line\n70kg Snatch ${bullet} 150kg Total\\par`
+    );
+  });
+
+  test('the same record in two categories is reported in each', () => {
+    const summary = generateSummary([
+      adaptiveBreaker(),
+      adaptiveBreaker({ category: 'Adaptive_All', categoryIndex: 1 }),
+    ]);
+
+    expect(summary).toContain('Adaptive (Visual Impairment)');
+    expect(summary).toContain('Adaptive (Overall)');
+  });
+
+  test('athletes in the same category compete for a record, and a same-day tie is shared', () => {
+    const summary = generateSummary([
+      adaptiveBreaker({ lifterName: 'Athlete One' }),
+      adaptiveBreaker({ lifterName: 'Athlete Two' }),
+      adaptiveBreaker({ lifterName: 'Athlete Three', weight: 68 }),
+    ]);
+
+    expect(summary).toContain('{\\b TIED!! Athlete One & Athlete Two}');
+    expect(summary).not.toContain('Athlete Three');
+  });
+
+  test("men's and women's records in matching class positions do not compete", () => {
+    const summary = generateSummary([
+      adaptiveBreaker({ lifterName: 'Woman' }),
+      adaptiveBreaker({
+        lifterName: 'Man',
+        gender: 'M',
+        weightClassName: "Men's 79kg",
+        weight: 90,
+      }),
+    ]);
+
+    expect(summary).toContain('{\\b Woman}');
+    expect(summary).toContain(`{\\b Man}\\line\nOpen Men ${bullet} 79kg`);
+  });
+
+  test('an empty run says there are no new records', () => {
+    expect(generateSummary([])).toContain('No new records.');
   });
 });

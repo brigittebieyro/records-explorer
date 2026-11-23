@@ -10,6 +10,7 @@ import {
 } from '../Data/youthWeightClasses';
 import {
   downloadCsv,
+  downloadFile,
   getAgeGroup,
   getWeightClassSet,
   getYear,
@@ -380,6 +381,15 @@ describe('Utils (user-based)', () => {
       const link = clickSpy.mock.instances[0] as unknown as HTMLAnchorElement;
       expect(link.download).toBe('counts.csv');
       expect(link.href).toContain('blob:fake-url');
+    });
+
+    test('downloadFile hands any text to the browser with the given type', () => {
+      downloadFile('{\\rtf1 summary}', 'record-summary.rtf', 'application/rtf');
+
+      const blob = createObjectURL.mock.calls[0][0] as Blob;
+      expect(blob.type).toBe('application/rtf');
+      const link = clickSpy.mock.instances[0] as unknown as HTMLAnchorElement;
+      expect(link.download).toBe('record-summary.rtf');
     });
 
     test('leaves the link out of the page and releases the url once the save has had time', () => {

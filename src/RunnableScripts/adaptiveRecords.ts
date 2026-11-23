@@ -1,11 +1,12 @@
 import { ageGroups } from '../Data/ageGroups';
-import { defaultWeightClasses } from '../Data/defaultWeightClasses';
+import { defaultWeightClasses, weightClassesStart } from '../Data/defaultWeightClasses';
 import {
+  adaptiveAllCertificateDisplayKey,
   adaptiveAllRecordsSheetName,
+  adaptiveCategories,
   adaptiveLiftersListSheetId,
   adaptiveLiftersListSheetName,
   adptiveCategoryRecordsSheetNames,
-  allTimeStartDate,
   currentRecordsSheetId,
   endDate,
   getLifterDataRoute,
@@ -15,6 +16,7 @@ import {
   headers,
 } from '../Data/RoutesAndSettings';
 import {
+  buildRecordSummaryRtf,
   clubText,
   csvField,
   getWeightClassSet,
@@ -22,9 +24,12 @@ import {
   isWithinPlausibilityCaps,
   normalizeSheetAgeGroup,
   rateLimitedFetch,
+  RecordSummaryEntry,
   recordSheetColumns,
+  summaryAgeGroupLine,
+  weightClassShortName,
 } from '../Utils/Utils';
-import { AgeGroup, LifterRankingData, MeetRecord, WeightClass } from '../Utils/types';
+import { AgeGroup, LifterRankingData, MeetRecord, ScriptOutput, WeightClass } from '../Utils/types';
 
 // The record sheets name the three lifts exactly this way, so these strings are both the
 // sheet lookup key and the CSV label.
@@ -69,7 +74,7 @@ interface AdaptiveRecord {
 // sheet name -> `${ageGroupId}_${gender}_${lift}` -> the classes recorded for that slot.
 type AdaptiveRecordIndex = Record<string, Record<string, AdaptiveRecord[]>>;
 
-interface AdaptiveRecordBreaker {
+export interface AdaptiveRecordBreaker {
   category: string;
   weightClassName: string;
   ageGroupLabel: string;
@@ -280,14 +285,21 @@ async function fetchSheet(sheetId: string, sheetName: string): Promise<string[][
   return data.values;
 }
 
+// Results before the current weight classes took effect were lifted under different
+// boundaries, so they cannot set records in these classes.
+export function earliestResultDate(startDate: string): string {
+  return startDate > weightClassesStart ? startDate : weightClassesStart;
+}
+
 async function searchRankings(
   name: string,
-  weightClass: WeightClass
+  weightClass: WeightClass,
+  startDate: string
 ): Promise<LifterRankingData[]> {
   const body = JSON.stringify({
     columns: [],
     filters: {
-      date_range_start: allTimeStartDate,
+      date_range_start: earliestResultDate(startDate),
       date_range_end: endDate,
       weight_class: weightClass.sport80Id,
     },
@@ -319,10 +331,11 @@ export async function fetchLifterResults(
     if (!response.ok) return [];
     const data = await response.json();
     const results: MeetRecord[] = data.data || [];
+    const earliest = earliestResultDate(startDate);
     return results.filter(
       (result) =>
         result.date &&
-        result.date >= startDate &&
+        result.date >= earliest &&
         result.date <= endDate &&
         (!lifterEndDate || result.date <= lifterEndDate) &&
         isWithinPlausibilityCaps(result)
@@ -336,7 +349,7 @@ export async function fetchLifterResults(
 // lifters — so the membership number is what actually identifies the athlete.
 export async function resolveLifter(lifter: AdaptiveLifter): Promise<ResolvedLifter | undefined> {
   for (const weightClass of classSearchOrder()) {
-    const rows = await searchRankings(lifter.name, weightClass);
+    const rows = await searchRankings(lifter.name, weightClass, lifter.startDate);
     const matches = rows.filter((row) => String(row.membership ?? '') === lifter.usawNumber);
     if (matches.length === 0) continue;
 
@@ -519,7 +532,7 @@ export function generateCsv(
       ...unresolved.map((lifter) => [
         lifter.name,
         lifter.usawNumber,
-        'Not found in the USAW rankings. Check the name and USAW number on the roster sheet.',
+        'Not ranked within eligible period',
       ])
     );
   }
@@ -527,9 +540,47 @@ export function generateCsv(
   return rows.map((row) => row.map(csvField).join(',')).join('\n') + '\n';
 }
 
+// The category as the certificates word it, e.g. 'Adaptive (Visual Impairment)'. Falls back to the
+// tab name for a tab with no wording.
+function summaryCategoryLine(category: string): string {
+  if (category === adaptiveAllRecordsSheetName) return adaptiveAllCertificateDisplayKey;
+  return (
+    adaptiveCategories.find((candidate) => candidate.id === category)?.certificateDisplayKey ??
+    category
+  );
+}
+
+// Unresolved athletes are reported in the CSV only.
+export function generateSummary(recordBreakers: AdaptiveRecordBreaker[]): string {
+  const entries: RecordSummaryEntry[] = recordBreakers.map((breaker) => {
+    const gender = breaker.gender === 'F' ? 'F' : 'M';
+    const blockKey = `${breaker.category}_${breaker.ageGroupLabel}_${gender}_${breaker.weightClassName}`;
+    return {
+      slotKey: `${blockKey}_${breaker.lift}`,
+      blockKey,
+      detailLines: [
+        `${summaryAgeGroupLine(ageGroups[breaker.ageGroupIndex], gender)} • ${weightClassShortName(breaker.weightClassName)}`,
+        summaryCategoryLine(breaker.category),
+      ],
+      athlete: breaker.lifterName,
+      weight: breaker.weight,
+      date: breaker.date,
+      lift: breaker.lift,
+      liftIndex: breaker.liftIndex,
+      sortKeys: [
+        breaker.categoryIndex,
+        breaker.ageGroupIndex,
+        gender === 'F' ? 0 : 1,
+        breaker.weightClassIndex,
+      ],
+    };
+  });
+  return buildRecordSummaryRtf(entries);
+}
+
 // ─── Exported entry point ─────────────────────────────────────────────────────
 
-export async function runAdaptiveRecords(): Promise<string> {
+export async function runAdaptiveRecords(): Promise<ScriptOutput> {
   // The Scripts page lists this script only when adaptiveRecordsScriptAvailable, which needs both.
   if (adaptiveLiftersListSheetId === undefined || adaptiveLiftersListSheetName === undefined) {
     throw new Error('wsoConfig.json names no adaptive athlete roster sheet');
@@ -567,5 +618,8 @@ export async function runAdaptiveRecords(): Promise<string> {
     }
   }
 
-  return generateCsv(recordBreakers, unresolved);
+  return {
+    csv: generateCsv(recordBreakers, unresolved),
+    summary: generateSummary(recordBreakers),
+  };
 }

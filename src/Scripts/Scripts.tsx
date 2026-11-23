@@ -2,7 +2,7 @@ import { useState } from 'react';
 import OptionsBar from '../Common/OptionsBar';
 import { scripts } from '../Data/scripts';
 import { scriptsPassword, wsoDisplayName } from '../Data/RoutesAndSettings';
-import { downloadCsv, hashPassword } from '../Utils/Utils';
+import { downloadCsv, downloadFile, hashPassword } from '../Utils/Utils';
 
 function Scripts() {
   const [selectedName, setSelectedName] = useState('');
@@ -28,13 +28,17 @@ function Scripts() {
   const handleRun = async () => {
     // A form-driven script has neither, and never reaches here -- its own controls replace the
     // Run button below. Destructured so both stay narrowed across the await.
-    const { source, fileName } = selectedScript ?? {};
+    const { source, fileName, summaryFileName } = selectedScript ?? {};
     if (!source || !fileName) return;
     setIsRunning(true);
     setStatus('idle');
     setError(undefined);
     try {
-      downloadCsv(await source(), fileName);
+      const { csv, summary } = await source();
+      downloadCsv(csv, fileName);
+      if (summary !== undefined && summaryFileName) {
+        downloadFile(summary, summaryFileName, 'application/rtf');
+      }
       setStatus('done');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred.');

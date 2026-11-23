@@ -1,4 +1,4 @@
-import { AgeGroup, LifterRankingData, MeetRecord, WeightClass } from '../Utils/types';
+import { AgeGroup, LifterRankingData, MeetRecord, ScriptOutput, WeightClass } from '../Utils/types';
 import { ageGroups } from '../Data/ageGroups';
 import { defaultWeightClasses } from '../Data/defaultWeightClasses';
 import {
@@ -19,12 +19,16 @@ import {
   u17WeightClasses,
 } from '../Data/youthWeightClasses';
 import {
+  buildRecordSummaryRtf,
   clubText,
   csvField,
+  RecordSummaryEntry,
   rateLimitedFetch,
   recordSheetColumns,
   sheetAgeGroupLabel,
+  summaryAgeGroupLine,
   weightClassIndicator,
+  weightClassShortName,
 } from '../Utils/Utils';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -229,14 +233,14 @@ export interface RecordBreaker {
   weightClassIndex: number;
 }
 
-export function generateCsv(recordBreakers: RecordBreaker[]): string {
-  const liftOrder: Record<string, number> = { snatch: 0, 'clean & jerk': 1, total: 2 };
-  const liftLabel: Record<string, string> = {
-    snatch: 'Snatch',
-    'clean & jerk': 'Clean & Jerk',
-    total: 'Total',
-  };
+const liftOrder: Record<string, number> = { snatch: 0, 'clean & jerk': 1, total: 2 };
+const liftLabel: Record<string, string> = {
+  snatch: 'Snatch',
+  'clean & jerk': 'Clean & Jerk',
+  total: 'Total',
+};
 
+export function generateCsv(recordBreakers: RecordBreaker[]): string {
   const sorted = [...recordBreakers].sort((breakerA, breakerB) => {
     if (breakerA.ageGroupIndex !== breakerB.ageGroupIndex)
       return breakerA.ageGroupIndex - breakerB.ageGroupIndex;
@@ -269,11 +273,31 @@ export function generateCsv(recordBreakers: RecordBreaker[]): string {
   return rows.map((row) => row.map(csvField).join(',')).join('\n') + '\n';
 }
 
+export function generateSummary(recordBreakers: RecordBreaker[]): string {
+  const entries: RecordSummaryEntry[] = recordBreakers.map((breaker) => {
+    const blockKey = `${breaker.gender}_${breaker.ageGroup}_${breaker.weightClassName}`;
+    return {
+      slotKey: `${blockKey}_${breaker.liftType}`,
+      blockKey,
+      detailLines: [
+        `${summaryAgeGroupLine(ageGroups[breaker.ageGroupIndex], breaker.gender)} • ${weightClassShortName(breaker.weightClassName)}`,
+      ],
+      athlete: breaker.athlete,
+      weight: breaker.weight,
+      date: breaker.date,
+      lift: liftLabel[breaker.liftType] || breaker.liftType,
+      liftIndex: liftOrder[breaker.liftType] ?? 99,
+      sortKeys: [breaker.ageGroupIndex, breaker.weightClassIndex],
+    };
+  });
+  return buildRecordSummaryRtf(entries);
+}
+
 // ─── Exported entry point ─────────────────────────────────────────────────────
 
 const ineligibleSet = new Set(ineligibleAthletes);
 
-export async function runAnalyzeRecords(): Promise<string> {
+export async function runAnalyzeRecords(): Promise<ScriptOutput> {
   const recordBreakers: RecordBreaker[] = [];
 
   const sheetData = await fetchCurrentRecords();
@@ -339,5 +363,5 @@ export async function runAnalyzeRecords(): Promise<string> {
     }
   }
 
-  return generateCsv(recordBreakers);
+  return { csv: generateCsv(recordBreakers), summary: generateSummary(recordBreakers) };
 }

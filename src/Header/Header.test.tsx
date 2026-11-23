@@ -7,12 +7,20 @@ const testScheduleUrl = 'https://example.org/meet-schedule';
 const testHomeUrl = 'https://example.org';
 
 let mockShowAdaptiveRecordsInMenu = true;
+let mockShowLocalMeetsInMenu = true;
+let mockShowGoalsInMenu = true;
 let mockLocalScheduleUrl: string | undefined = testScheduleUrl;
 let mockLocalHomeUrl: string | undefined = testHomeUrl;
 jest.mock('../Data/RoutesAndSettings', () => ({
   ...jest.requireActual('../Data/RoutesAndSettings'),
   get showAdaptiveRecordsInMenu() {
     return mockShowAdaptiveRecordsInMenu;
+  },
+  get showLocalMeetsInMenu() {
+    return mockShowLocalMeetsInMenu;
+  },
+  get showGoalsInMenu() {
+    return mockShowGoalsInMenu;
   },
   get localScheduleUrl() {
     return mockLocalScheduleUrl;
@@ -24,6 +32,8 @@ jest.mock('../Data/RoutesAndSettings', () => ({
 
 beforeEach(() => {
   mockShowAdaptiveRecordsInMenu = true;
+  mockShowLocalMeetsInMenu = true;
+  mockShowGoalsInMenu = true;
   mockLocalScheduleUrl = testScheduleUrl;
   mockLocalHomeUrl = testHomeUrl;
 });
@@ -68,6 +78,22 @@ describe('Header (user-based)', () => {
 
     expect(container.querySelectorAll('.menu-flyout a')).toHaveLength(6);
     expect(container.querySelector('a[href="/adaptive"]')).toBeNull();
+  });
+
+  test('A-02: with showLocalMeetsInMenu off, the menu has no Local Meet Results link', () => {
+    mockShowLocalMeetsInMenu = false;
+    const { container } = render(<Header />);
+
+    expect(container.querySelectorAll('.menu-flyout a')).toHaveLength(6);
+    expect(container.querySelector('a[href="/local-meet-results"]')).toBeNull();
+  });
+
+  test('A-02: with showGoalsInMenu off, the menu has no Senior Nationals Qualification Rankings link', () => {
+    mockShowGoalsInMenu = false;
+    const { container } = render(<Header />);
+
+    expect(container.querySelectorAll('.menu-flyout a')).toHaveLength(6);
+    expect(container.querySelector('a[href="/goals"]')).toBeNull();
   });
 
   test('A-02: Adaptive WSO Records sits directly below WSO Records & Results', () => {

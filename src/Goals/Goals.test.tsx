@@ -92,7 +92,9 @@ describe('Goals (user-based)', () => {
   });
 
   test('D-01: rankings are pulled over the nationals qualification date range', async () => {
-    const { startDate, endDate } = getNationalsDateRange();
+    const range = getNationalsDateRange();
+    if (!range) throw new Error('the test config sets all three nationals dates');
+    const { startDate, endDate } = range;
 
     renderGoals();
     await runSearch(femaleClasses[0].id);
@@ -146,5 +148,29 @@ describe('Goals (user-based)', () => {
     renderGoals('/goals?weightClass=BOGUS');
 
     expect(screen.queryByTestId('goals-weight-class')).toBeNull();
+  });
+});
+
+describe('Goals without nationals dates', () => {
+  test('D-01: the page says rankings are not set up and fetches nothing', () => {
+    let IsolatedGoals: typeof Goals | undefined;
+    jest.isolateModules(() => {
+      jest.doMock('../Data/RoutesAndSettings', () => ({
+        ...jest.requireActual('../Data/RoutesAndSettings'),
+        getNationalsDateRange: () => undefined,
+      }));
+      IsolatedGoals = require('./Goals').default;
+    });
+    jest.dontMock('../Data/RoutesAndSettings');
+    if (!IsolatedGoals) throw new Error('Goals did not load');
+
+    render(<IsolatedGoals />);
+
+    expect(screen.getByText('Senior Nationals Qualification Rankings')).toBeInTheDocument();
+    expect(
+      screen.getByText('Senior Nationals qualification rankings are not set up for this site.')
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('goals-weight-class')).toBeNull();
+    expect(screen.queryByLabelText('Weight Class')).toBeNull();
   });
 });

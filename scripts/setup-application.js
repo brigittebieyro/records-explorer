@@ -16,6 +16,7 @@ const { displayNameOf, hashPassword } = require('./lib/password');
 const {
   buildConfig,
   checks,
+  isoDateOneYearAgo,
   parseList,
 } = require('./lib/setupConfig');
 
@@ -178,12 +179,15 @@ async function main() {
   // The config the setup writes has no wsoDisplayName, so the hash uses wsoOfficialName.
   required.scriptsPassword = await askPassword(displayNameOf(required));
 
+  // Local meets are listed from one year back.
+  required.localMeetStartDate = isoDateOneYearAgo();
+
   const config = buildConfig(required, { trackAdaptiveRecords });
   fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
 
   heading('All set!');
   console.log(
-    '\nYou\ve plugged in the personalized data you need to run the site.\n' +
+    '\nSuccessful site configuration! You now have all the most basic features in place.\n' +
     'If you haven\'t already, follow instructions from the Readme ' +
     '(README.md, "Set your API credentials") to place your API tokens where the app can use them.\n'
   );

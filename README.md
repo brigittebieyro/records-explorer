@@ -148,6 +148,9 @@ For every field's type, whether it's required, and an example value, see [CONFIG
 | `wsoStateNames` | Your state or states as written in Sport80 meet addresses, e.g. `["California"]`. Used to show each local meet's city. |
 | `recordTimeZone` | Optional. IANA time zone record dates are kept in, e.g. `"America/New_York"`. Decides what "today" is for every date range and how certificate dates print. Defaults to `"America/Los_Angeles"`. |
 | `allTimeStartDate` | Optional. How far back the all-time record search reaches (`YYYY-MM-DD`). Defaults to `"1998-01-01"`. |
+| `youthAllTimeStartDate` | Optional. The same, for U11 and U13. Defaults to `"2014-01-01"`. |
+| `localMeetStartDate` | Optional. The earliest meet date the Local Meet Results page lists. When it's left out, the menu has no Local Meet Results link. |
+| `nationalsDate`, `nationalsQualifyingStartDate`, `nationalsQualifyingEndDate` | Optional. Senior Nationals and its qualifying window; update them each year. When any is left out, the menu has no Senior Nationals Qualification Rankings link. |
 
 ### 2. Records Google Sheet
 

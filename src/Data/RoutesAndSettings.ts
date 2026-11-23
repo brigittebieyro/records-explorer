@@ -30,6 +30,11 @@ export const configSchema: ConfigSchema = {
   wsoStateNames: 'string[]',
   'recordTimeZone?': 'string',
   'allTimeStartDate?': 'IsoDate',
+  'youthAllTimeStartDate?': 'IsoDate',
+  'localMeetStartDate?': 'IsoDate',
+  'nationalsDate?': 'IsoDate',
+  'nationalsQualifyingStartDate?': 'IsoDate',
+  'nationalsQualifyingEndDate?': 'IsoDate',
   includeClubNameOnCertificate: 'boolean',
   'certificateWebsiteText?': 'string',
   currentRecordsSheetId: 'string',
@@ -201,21 +206,53 @@ export const endDate = _shiftIsoDate(toRecordDate(), { days: 1 });
  */
 export const allTimeStartDate: string =
   (wsoConfig as { allTimeStartDate?: string }).allTimeStartDate ?? '1998-01-01';
-export const youthAllTimeStartDate = '2014-01-01'; // This is a magic number - looking for a date which captures history, without the source API throwing errors.
-// Older meets don't all have logitude and latitude, so we can't filter them all.
-export const localMeetStartDate = '2026-01-01';
+// Read through a wider type: the JSON import's inferred type has no field the file leaves out.
+const _datesConfig = wsoConfig as {
+  youthAllTimeStartDate?: string;
+  localMeetStartDate?: string;
+  nationalsDate?: string;
+  nationalsQualifyingStartDate?: string;
+  nationalsQualifyingEndDate?: string;
+};
+/**
+ * How far back the all-time record search reaches for U11 and U13. 2014-01-01 when the config
+ * leaves it out: a date which captures history, without the source API throwing errors.
+ */
+export const youthAllTimeStartDate: string = _datesConfig.youthAllTimeStartDate ?? '2014-01-01';
+/**
+ * The earliest local meet listed. Older meets don't all have longitude and latitude, so they can't
+ * all be filtered by wsoBoundary. Undefined when the config leaves it out.
+ */
+export const localMeetStartDate: string | undefined = _datesConfig.localMeetStartDate;
+/** Whether the header menu links to the Local Meet Results page: only when localMeetStartDate is set. */
+export const showLocalMeetsInMenu: boolean = localMeetStartDate !== undefined;
 
-// Must be manually updated each year.
-export const nationalsData = '2027-03-07'; // Mar 7, 2027
-export const nationalsQualifyingStartDate = '2026-02-04'; //February 4, 2026 – February 4, 2027
-export const nationalsQualifyingEndDate = '2027-02-04';
+/** Senior Nationals and its qualifying window. Each is undefined when the config leaves it out. */
+export const nationalsDate: string | undefined = _datesConfig.nationalsDate;
+export const nationalsQualifyingStartDate: string | undefined =
+  _datesConfig.nationalsQualifyingStartDate;
+export const nationalsQualifyingEndDate: string | undefined =
+  _datesConfig.nationalsQualifyingEndDate;
+/** Whether the header menu links to the Goals page: only when all three nationals dates are set. */
+export const showGoalsInMenu: boolean =
+  nationalsDate !== undefined &&
+  nationalsQualifyingStartDate !== undefined &&
+  nationalsQualifyingEndDate !== undefined;
 
 // Until Nationals happens, rank on the official qualifying window. Once it's past, that window is
-// stale until next year's dates are entered, so fall back to a rolling 16 months.
+// stale until next year's dates are entered, so fall back to a rolling 16 months. Undefined when
+// any of the three nationals dates is left out of the config.
 export const getNationalsDateRange = (
   today: Date = new Date()
-): { startDate: string; endDate: string } => {
-  if (toRecordDate(today) <= nationalsData) {
+): { startDate: string; endDate: string } | undefined => {
+  if (
+    nationalsDate === undefined ||
+    nationalsQualifyingStartDate === undefined ||
+    nationalsQualifyingEndDate === undefined
+  ) {
+    return undefined;
+  }
+  if (toRecordDate(today) <= nationalsDate) {
     return { startDate: nationalsQualifyingStartDate, endDate: nationalsQualifyingEndDate };
   }
   return getRecentMonthsDateRange(16, today);

@@ -12,6 +12,7 @@ const CONFIG_KEY_ORDER = [
   'wsoStateNames',
   'recordTimeZone',
   'allTimeStartDate',
+  'localMeetStartDate',
   'includeClubNameOnCertificate',
   'currentRecordsSheetId',
   'currentRecordsSheetName',
@@ -79,6 +80,13 @@ const checks = {
         'https://docs.google.com/spreadsheets/d/<THIS PART>/edit',
 };
 
+/** The local calendar date one year before `today`, as YYYY-MM-DD. Feb 29 rolls over to Mar 1. */
+function isoDateOneYearAgo(today = new Date()) {
+  const date = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+  const pad = (value) => String(value).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
 /**
  * The config file's contents: the required fields, in schema order, plus
  * showAdaptiveRecordsInMenu when `trackAdaptiveRecords` is true.
@@ -102,4 +110,5 @@ module.exports = {
   parseList,
   checks,
   buildConfig,
+  isoDateOneYearAgo,
 };

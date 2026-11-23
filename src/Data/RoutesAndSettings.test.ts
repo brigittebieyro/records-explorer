@@ -33,7 +33,7 @@ import {
   wsoInfoUSAWUrl,
   wsoDisplayName,
 } from './RoutesAndSettings';
-import wsoConfig from './wsoConfig.json';
+import wsoConfig from './testWsoConfig.json';
 import { findInvalidConfigFields } from '../Utils/SettingsUtils';
 
 describe('RoutesAndSettings (user-based)', () => {
@@ -130,8 +130,8 @@ describe('RoutesAndSettings (user-based)', () => {
   });
 
   describe('C-01: local meet settings', () => {
-    test('local meets are searched from 2026-01-01', () => {
-      expect(localMeetStartDate).toBe('2026-01-01');
+    test('local meets are searched from the configured localMeetStartDate', () => {
+      expect(localMeetStartDate).toBe(wsoConfig.localMeetStartDate);
     });
 
     test('local meets are searched by a list of regions and state names', () => {
@@ -147,7 +147,7 @@ describe('RoutesAndSettings (user-based)', () => {
   });
 
   describe('D-01: nationals qualification date range', () => {
-    // Nationals is 2027-03-07, qualifying window 2026-02-04 through 2027-02-04. Instants are noon
+    // The test config: Nationals is 2027-03-07, qualifying window 2026-02-04 through 2027-02-04. Instants are noon
     // UTC, which is the same calendar day in every US time zone.
     test('well before Nationals, the official qualifying window is used', () => {
       expect(getNationalsDateRange(new Date('2026-08-29T12:00:00Z'))).toEqual({
@@ -198,15 +198,17 @@ describe('RoutesAndSettings (user-based)', () => {
     expect(certificateTitle).toBe(`${wsoDisplayName} WSO`);
   });
 
-  /** Loads this module against `config` in place of the shipped wsoConfig.json. */
+  /**
+   * Loads this module against `config` in place of the test config. isolateModules would keep
+   * serving the test config that setupTests.ts mocks in once any module has read it, so the
+   * registry is reset instead, then the test config mock is put back.
+   */
   const loadWithConfig = (config: object): typeof import('./RoutesAndSettings') => {
-    let settings: typeof import('./RoutesAndSettings') | undefined;
-    jest.isolateModules(() => {
-      jest.doMock('./wsoConfig.json', () => config);
-      settings = require('./RoutesAndSettings');
-    });
-    jest.dontMock('./wsoConfig.json');
-    if (!settings) throw new Error('RoutesAndSettings did not load');
+    jest.resetModules();
+    jest.doMock('./wsoConfig.json', () => config);
+    const settings: typeof import('./RoutesAndSettings') = require('./RoutesAndSettings');
+    jest.resetModules();
+    jest.doMock('./wsoConfig.json', () => wsoConfig);
     return settings;
   };
 
@@ -256,7 +258,7 @@ describe('RoutesAndSettings (user-based)', () => {
       ]);
     });
 
-    test('the shipped config is missing no adaptive settings', () => {
+    test('the test config is missing no adaptive settings', () => {
       expect(loadWithConfig(wsoConfig).missingAdaptiveConfigs).toEqual([]);
     });
 
@@ -304,6 +306,59 @@ describe('RoutesAndSettings (user-based)', () => {
     });
   });
 
+  describe('optional date settings', () => {
+    const {
+      localMeetStartDate: _local,
+      nationalsDate: _nationals,
+      nationalsQualifyingStartDate: _qualifyingStart,
+      nationalsQualifyingEndDate: _qualifyingEnd,
+      ...configWithoutDates
+    } = wsoConfig;
+
+    test('a config with no optional dates passes the schema check', () => {
+      expect(findInvalidConfigFields(configWithoutDates, configSchema)).toEqual([]);
+    });
+
+    test('with no localMeetStartDate, the Local Meet Results menu item is unavailable', () => {
+      const settings = loadWithConfig(configWithoutDates);
+      expect(settings.localMeetStartDate).toBeUndefined();
+      expect(settings.showLocalMeetsInMenu).toBe(false);
+      expect(
+        loadWithConfig({ ...configWithoutDates, localMeetStartDate: '2025-11-22' })
+          .showLocalMeetsInMenu
+      ).toBe(true);
+    });
+
+    test('the Goals menu item and date range need all three nationals dates', () => {
+      const nationals = {
+        nationalsDate: '2027-03-07',
+        nationalsQualifyingStartDate: '2026-02-04',
+        nationalsQualifyingEndDate: '2027-02-04',
+      };
+      const complete = loadWithConfig({ ...configWithoutDates, ...nationals });
+      expect(complete.showGoalsInMenu).toBe(true);
+      expect(complete.getNationalsDateRange(new Date('2026-08-29T12:00:00Z'))).toEqual({
+        startDate: '2026-02-04',
+        endDate: '2027-02-04',
+      });
+
+      for (const left of Object.keys(nationals)) {
+        const { [left]: _omit, ...partial } = nationals as Record<string, string>;
+        const settings = loadWithConfig({ ...configWithoutDates, ...partial });
+        expect(settings.showGoalsInMenu).toBe(false);
+        expect(settings.getNationalsDateRange()).toBeUndefined();
+      }
+    });
+
+    test('youthAllTimeStartDate is 2014-01-01 when left out, and the configured date otherwise', () => {
+      expect(loadWithConfig(configWithoutDates).youthAllTimeStartDate).toBe('2014-01-01');
+      expect(
+        loadWithConfig({ ...configWithoutDates, youthAllTimeStartDate: '2016-01-01' })
+          .youthAllTimeStartDate
+      ).toBe('2016-01-01');
+    });
+  });
+
   describe('WSO names', () => {
     test('the display name is the official name when the config has no wsoDisplayName', () => {
       const { wsoDisplayName: displayName, wsoOfficialName: officialName } = loadWithConfig({
@@ -342,6 +397,12 @@ describe('RoutesAndSettings (user-based)', () => {
 
   describe('wsoConfig.json shape', () => {
     test('the shipped config matches the config schema', () => {
+      expect(findInvalidConfigFields(jest.requireActual('./wsoConfig.json'), configSchema)).toEqual(
+        []
+      );
+    });
+
+    test('the test config matches the config schema', () => {
       expect(findInvalidConfigFields(wsoConfig, configSchema)).toEqual([]);
     });
   });

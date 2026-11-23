@@ -43,6 +43,9 @@ Optional items:
 `wsoDisplayName`,
 `recordTimeZone`,
 `allTimeStartDate`,
+`youthAllTimeStartDate`,
+`localMeetStartDate`,
+the three nationals dates,
 `wsoBoundary`
 all of the adaptive records settings.
 
@@ -55,6 +58,11 @@ all of the adaptive records settings.
 | `wsoStateNames` | list of strings | yes | [WSO identity](#wso-identity) |
 | `recordTimeZone` | string | **no** | [WSO identity](#wso-identity) |
 | `allTimeStartDate` | date | **no** | [WSO identity](#wso-identity) |
+| `youthAllTimeStartDate` | date | **no** | [WSO identity](#wso-identity) |
+| `localMeetStartDate` | date | **no** | [Local meets and Nationals](#local-meets-and-nationals) |
+| `nationalsDate` | date | **no** | [Local meets and Nationals](#local-meets-and-nationals) |
+| `nationalsQualifyingStartDate` | date | **no** | [Local meets and Nationals](#local-meets-and-nationals) |
+| `nationalsQualifyingEndDate` | date | **no** | [Local meets and Nationals](#local-meets-and-nationals) |
 | `currentRecordsSheetId` | string | yes | [Records Google Sheet](#records-google-sheet) |
 | `currentRecordsSheetName` | string | yes | [Records Google Sheet](#records-google-sheet) |
 | `priorRecordsSheetNames` | list of strings | **no** | [Records Google Sheet](#records-google-sheet) |
@@ -132,12 +140,45 @@ Leave it out to use `America/Los_Angeles`.
 ```
 
 ### `allTimeStartDate` (date, optional)
-How far back the all-time history searches go. U11 and U13 use their own start date, set in code, because those age groups have a shorter history.
+How far back the all-time history searches go. U11 and U13 use [`youthAllTimeStartDate`](#youthalltimestartdate-date-optional) instead, because those age groups have a shorter history.
 
 Leave it out to use `1998-01-01`.
 
 ```json
 "allTimeStartDate": "1998-01-01"
+```
+
+### `youthAllTimeStartDate` (date, optional)
+How far back the all-time history searches go for U11 and U13. An earlier date can make the rankings source return errors for these age groups.
+
+Leave it out to use `2014-01-01`.
+
+```json
+"youthAllTimeStartDate": "2014-01-01"
+```
+
+---
+
+## Local meets and Nationals
+
+### `localMeetStartDate` (date, optional)
+The earliest meet date the Local Meet Results page lists. Older meets don't all have a location, so [`wsoBoundary`](#wsoboundary-optional) can't filter them reliably. `npm run setup-application` sets this to one year before the day you run it.
+
+Leave it out to drop the Local Meet Results menu link. The page at `/local-meet-results` then says local meet results are not set up.
+
+```json
+"localMeetStartDate": "2026-01-01"
+```
+
+### `nationalsDate`, `nationalsQualifyingStartDate`, `nationalsQualifyingEndDate` (date, optional)
+The date of Senior Nationals and the first and last days of its qualifying window. Until `nationalsDate` has passed, the Senior Nationals Qualification Rankings page ranks lifts made in the qualifying window. After that, it ranks the last 16 months until you enter next year's dates. Update all three each year.
+
+Leave any of the three out to drop the Senior Nationals Qualification Rankings menu link. The page at `/goals` then says the rankings are not set up.
+
+```json
+"nationalsDate": "2027-03-07",
+"nationalsQualifyingStartDate": "2026-02-04",
+"nationalsQualifyingEndDate": "2027-02-04"
 ```
 
 ---

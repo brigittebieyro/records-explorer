@@ -20,9 +20,23 @@ const getCount = (weightClass: WeightClass): number => {
   return index < 2 ? 6 : 12;
 };
 
-const { startDate, endDate } = getNationalsDateRange();
+const nationalsDateRange = getNationalsDateRange();
 
 function Goals() {
+  if (!nationalsDateRange) {
+    return (
+      <div className="goals-parent">
+        <p className="page-title">Senior Nationals Qualification Rankings</p>
+        <p className="goals-descriptive-text">
+          Senior Nationals qualification rankings are not set up for this site.
+        </p>
+      </div>
+    );
+  }
+  return <GoalsPage {...nationalsDateRange} />;
+}
+
+function GoalsPage({ startDate, endDate }: { startDate: string; endDate: string }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedWeightClass, setSelectedWeightClass] = useState(
     searchParams.get('weightClass') ?? ''

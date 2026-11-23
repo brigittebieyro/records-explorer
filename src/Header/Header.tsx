@@ -3,6 +3,8 @@ import {
   localHomeUrl,
   localScheduleUrl,
   showAdaptiveRecordsInMenu,
+  showGoalsInMenu,
+  showLocalMeetsInMenu,
   wsoDisplayName,
 } from '../Data/RoutesAndSettings';
 
@@ -41,12 +43,16 @@ function Header() {
                     <a href="/adaptive">Adaptive WSO Records</a>
                   </li>
                 )}
-                <li>
-                  <a href="/local-meet-results">Local Meet Results</a>
-                </li>
-                <li>
-                  <a href="/goals">Senior Nationals Qualification Rankings</a>
-                </li>
+                {showLocalMeetsInMenu && (
+                  <li>
+                    <a href="/local-meet-results">Local Meet Results</a>
+                  </li>
+                )}
+                {showGoalsInMenu && (
+                  <li>
+                    <a href="/goals">Senior Nationals Qualification Rankings</a>
+                  </li>
+                )}
                 {localScheduleUrl && (
                   <li>
                     <a href={localScheduleUrl}>Local Meet Schedule</a>

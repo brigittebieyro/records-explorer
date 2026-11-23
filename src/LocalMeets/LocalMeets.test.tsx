@@ -131,6 +131,17 @@ describe('LocalMeets (user-based)', () => {
   });
 
   describe('C-01: loading the meet list', () => {
+    test('with no localMeetStartDate, the page says local meets are not set up and fetches nothing', () => {
+      mockedSettings.localMeetStartDate = undefined;
+      renderLocalMeets();
+
+      expect(screen.getByText('Local Meet Results')).toBeInTheDocument();
+      expect(
+        screen.getByText('Local meet results are not set up for this site.')
+      ).toBeInTheDocument();
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+
     test('shows the page title and a spinner while meets load', () => {
       (global.fetch as jest.Mock).mockImplementation(() => new Promise(() => {}));
 

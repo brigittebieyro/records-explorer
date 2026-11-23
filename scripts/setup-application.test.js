@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { REQUIRED_KEYS, buildConfig, checks, parseList } = require(
+const { REQUIRED_KEYS, buildConfig, checks, isoDateOneYearAgo, parseList } = require(
   './lib/setupConfig'
 );
 const { hashPassword } = require('./lib/password');
@@ -51,6 +51,20 @@ test('tracking adaptive records adds only showAdaptiveRecordsInMenu, in schema o
   const keys = Object.keys(config);
   assert.ok(keys.indexOf('standardKey') < keys.indexOf('showAdaptiveRecordsInMenu'));
   assert.ok(keys.indexOf('showAdaptiveRecordsInMenu') < keys.indexOf('wsoInfoUSAWUrl'));
+});
+
+test('localMeetStartDate, when given, is written in schema order after the identity settings', () => {
+  const config = buildConfig({ ...required, localMeetStartDate: '2025-11-22' });
+  assert.equal(config.localMeetStartDate, '2025-11-22');
+  const keys = Object.keys(config);
+  assert.ok(keys.indexOf('wsoStateNames') < keys.indexOf('localMeetStartDate'));
+  assert.ok(keys.indexOf('localMeetStartDate') < keys.indexOf('includeClubNameOnCertificate'));
+});
+
+test('isoDateOneYearAgo is the same calendar day one year back', () => {
+  assert.equal(isoDateOneYearAgo(new Date(2026, 10, 22)), '2025-11-22');
+  assert.equal(isoDateOneYearAgo(new Date(2026, 0, 5)), '2025-01-05');
+  assert.equal(isoDateOneYearAgo(new Date(2028, 1, 29)), '2027-03-01');
 });
 
 test('buildConfig refuses a config missing a required setting', () => {

@@ -2,7 +2,7 @@ import { WeightClass } from '../Utils/types';
 
 // Open, Junior, and Masters all share this set. Boundaries took effect August 1, 2026;
 // the prior set is kept as weightClasses2025 in historicWeightClasses.ts.
-const weightClassesStart = '2026-08-01';
+export const weightClassesStart = '2026-08-01';
 
 export const defaultWeightClasses: WeightClass[] = [
   {

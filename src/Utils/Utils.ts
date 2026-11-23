@@ -239,10 +239,9 @@ export const csvField = (value: unknown): string => {
     : str;
 };
 
-// Hands the finished CSV to the browser as a download. Shared by the Scripts page's Run button and
-// by the forms of the scripts that own their own download.
-export const downloadCsv = (csv: string, fileName: string): void => {
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+// Hands finished text to the browser as a download.
+export const downloadFile = (content: string, fileName: string, mimeType: string): void => {
+  const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
@@ -253,6 +252,151 @@ export const downloadCsv = (csv: string, fileName: string): void => {
   document.body.removeChild(link);
   // Revoking immediately races the save and can produce an empty file.
   setTimeout(() => URL.revokeObjectURL(url), 10000);
+};
+
+// Hands the finished CSV to the browser as a download. Shared by the Scripts page's Run button and
+// by the forms of the scripts that own their own download.
+export const downloadCsv = (csv: string, fileName: string): void =>
+  downloadFile(csv, fileName, 'text/csv;charset=utf-8;');
+
+// ─── Record summary ───────────────────────────────────────────────────────────
+
+// Lowercases the name, then capitalizes the first letter of each word. A word starts after a
+// space or a hyphen.
+export const formatAthleteName = (name: string): string =>
+  name
+    .trim()
+    .toLowerCase()
+    .replace(
+      /(^|[\s-])(\p{L})/gu,
+      (_match, separator: string, letter: string) => `${separator}${letter.toUpperCase()}`
+    );
+
+// Youth groups (the ones with their own weight classes) say girls/boys, everyone else
+// women/men. Masters groups, whose names are bare age ranges, put the gender first.
+export const summaryAgeGroupLine = (ageGroup: AgeGroup, gender: 'F' | 'M'): string => {
+  const genderWord = ageGroup.customWeightClasses
+    ? gender === 'F'
+      ? 'Girls'
+      : 'Boys'
+    : gender === 'F'
+      ? 'Women'
+      : 'Men';
+  return /^\d+$/.test(ageGroup.id)
+    ? `${genderWord} ${ageGroup.name}`
+    : `${ageGroup.name} ${genderWord}`;
+};
+
+// "Women's 86+kg" -> "86+kg".
+export const weightClassShortName = (weightClassName: string): string =>
+  weightClassName.replace(/^(Women's|Men's|Girls|Boys)\s+/, '');
+
+// Escapes RTF control characters and writes every non-ASCII UTF-16 code unit as \uN?, where N is
+// the signed 16-bit value RTF expects.
+export const rtfEscape = (text: string): string => {
+  let escaped = '';
+  for (let index = 0; index < text.length; index++) {
+    const character = text[index];
+    const code = text.charCodeAt(index);
+    if (character === '\\' || character === '{' || character === '}') {
+      escaped += `\\${character}`;
+    } else if (code > 127) {
+      escaped += `\\u${code > 32767 ? code - 65536 : code}?`;
+    } else {
+      escaped += character;
+    }
+  }
+  return escaped;
+};
+
+export interface RecordSummaryEntry {
+  // Identifies the record itself. Entries sharing a slot compete for it.
+  slotKey: string;
+  // Identifies the age group and class (and anything else in detailLines) the lift belongs to.
+  blockKey: string;
+  // The lines between the name and the lifts, e.g. ['Open Women • 61kg'].
+  detailLines: string[];
+  athlete: string;
+  weight: number;
+  date: string;
+  // 'Snatch', 'Clean & Jerk' or 'Total'.
+  lift: string;
+  liftIndex: number;
+  // Orders blocks: compared element by element, ascending.
+  sortKeys: number[];
+}
+
+const compareSortKeys = (keysA: number[], keysB: number[]): number => {
+  for (let index = 0; index < Math.max(keysA.length, keysB.length); index++) {
+    const difference = (keysA[index] ?? 0) - (keysB[index] ?? 0);
+    if (difference !== 0) return difference;
+  }
+  return 0;
+};
+
+// Builds the RTF summary. Each slot keeps only its heaviest lift, the earliest one on equal weight.
+// Athletes tied on weight and date share a 'TIED!!' block that holds only the tied lifts. Blocks
+// are one per athlete (or tied group) per blockKey.
+export const buildRecordSummaryRtf = (entries: RecordSummaryEntry[]): string => {
+  const slots = new Map<string, RecordSummaryEntry[]>();
+  for (const entry of entries) {
+    const slot = slots.get(entry.slotKey) ?? [];
+    slot.push(entry);
+    slots.set(entry.slotKey, slot);
+  }
+
+  const winners: Array<{ entry: RecordSummaryEntry; athletes: string[] }> = [];
+  for (const slot of slots.values()) {
+    const heaviest = Math.max(...slot.map((entry) => entry.weight));
+    const atHeaviest = slot.filter((entry) => entry.weight === heaviest);
+    const earliest = atHeaviest.map((entry) => entry.date).sort()[0];
+    const tied = atHeaviest.filter((entry) => entry.date === earliest);
+    const athletes = [...new Set(tied.map((entry) => formatAthleteName(entry.athlete)))];
+    winners.push({ entry: tied[0], athletes });
+  }
+
+  winners.sort(
+    (winnerA, winnerB) =>
+      compareSortKeys(winnerA.entry.sortKeys, winnerB.entry.sortKeys) ||
+      winnerA.entry.liftIndex - winnerB.entry.liftIndex
+  );
+
+  const blocks = new Map<
+    string,
+    {
+      heading: string;
+      detailLines: string[];
+      lifts: Array<{ liftIndex: number; text: string }>;
+    }
+  >();
+  for (const { entry, athletes } of winners) {
+    const heading = athletes.length > 1 ? `TIED!! ${athletes.join(' & ')}` : athletes[0];
+    const key = `${entry.blockKey}\u0000${heading}`;
+    const block = blocks.get(key) ?? { heading, detailLines: entry.detailLines, lifts: [] };
+    block.lifts.push({ liftIndex: entry.liftIndex, text: `${entry.weight}kg ${entry.lift}` });
+    blocks.set(key, block);
+  }
+
+  const body =
+    blocks.size === 0
+      ? 'No new records.\\par'
+      : [...blocks.values()]
+          .map(
+            (block) =>
+              [
+                `{\\b ${rtfEscape(block.heading)}}`,
+                ...block.detailLines.map(rtfEscape),
+                rtfEscape(
+                  [...block.lifts]
+                    .sort((liftA, liftB) => liftA.liftIndex - liftB.liftIndex)
+                    .map((lift) => lift.text)
+                    .join(' • ')
+                ),
+              ].join('\\line\n') + '\\par'
+          )
+          .join('\n\\par\n');
+
+  return `{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Helvetica;}}\\f0\\fs24\n${body}\n}\n`;
 };
 
 export async function hashPassword(input: string, salt: string): Promise<string> {

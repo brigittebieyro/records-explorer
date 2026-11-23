@@ -4,6 +4,7 @@ import Scripts from './Scripts';
 import { scriptsPassword } from '../Data/RoutesAndSettings';
 import { hashPassword } from '../Utils/Utils';
 import { scripts } from '../Data/scripts';
+import { ScriptOutput } from '../Utils/types';
 
 // Only the password check is stubbed. The rest of the module stays real so that the download this
 // page performs is the shipped one -- the assertions below are about its Blob and anchor.
@@ -18,12 +19,14 @@ jest.mock('../Data/scripts', () => ({
       name: 'Fetch Record Updates',
       description: 'Test script description.',
       fileName: 'record-breaking-analysis.csv',
+      summaryFileName: 'record-summary.rtf',
       source: jest.fn(),
     },
     {
       name: 'Fetch Adaptive Record Updates',
       description: 'Test adaptive script description.',
       fileName: 'adaptive-record-breaking-analysis.csv',
+      summaryFileName: 'adaptive-record-summary.rtf',
       source: jest.fn(),
     },
     {
@@ -134,11 +137,11 @@ describe('Scripts (user-based)', () => {
     expect(screen.getByText('Test script description.')).toBeInTheDocument();
   });
 
-  test('F-03: Run shows Running…, downloads the CSV, and reports completion', async () => {
-    let resolveCsv: (csv: string) => void = () => {};
+  test('F-03: Run shows Running…, downloads the CSV and summary, and reports completion', async () => {
+    let resolveOutput: (output: ScriptOutput) => void = () => {};
     scriptSource.mockReturnValue(
-      new Promise<string>((resolve) => {
-        resolveCsv = resolve;
+      new Promise<ScriptOutput>((resolve) => {
+        resolveOutput = resolve;
       })
     );
     const { container } = render(<Scripts />);
@@ -151,22 +154,28 @@ describe('Scripts (user-based)', () => {
     expect(runningButton).toBeDisabled();
     expect(screen.getByLabelText('Script')).toBeDisabled();
 
-    resolveCsv('lifter,total\nJane Smith,180');
+    resolveOutput({ csv: 'lifter,total\nJane Smith,180', summary: '{\\rtf1 summary}' });
 
     await waitFor(() => {
       expect(screen.getByText('Download complete.')).toBeInTheDocument();
     });
-    expect(createObjectURL).toHaveBeenCalledTimes(1);
-    expect(createObjectURL.mock.calls[0][0]).toBeInstanceOf(Blob);
-    expect(clickSpy).toHaveBeenCalledTimes(1);
-    const downloadLink = clickSpy.mock.instances[0] as unknown as HTMLAnchorElement;
-    expect(downloadLink.download).toBe('record-breaking-analysis.csv');
-    expect(downloadLink.href).toContain('blob:fake-url');
+    expect(createObjectURL).toHaveBeenCalledTimes(2);
+    const [csvBlob, summaryBlob] = createObjectURL.mock.calls.map((call) => call[0] as Blob);
+    expect(csvBlob.type).toBe('text/csv;charset=utf-8;');
+    expect(summaryBlob.type).toBe('application/rtf');
+    expect(clickSpy).toHaveBeenCalledTimes(2);
+    const [csvLink, summaryLink] = clickSpy.mock.instances as unknown as HTMLAnchorElement[];
+    expect(csvLink.download).toBe('record-breaking-analysis.csv');
+    expect(csvLink.href).toContain('blob:fake-url');
+    expect(summaryLink.download).toBe('record-summary.rtf');
     expect(screen.getByRole('button', { name: 'Run' })).toBeEnabled();
   });
 
   test('F-05: each script downloads under its own filename', async () => {
-    adaptiveScriptSource.mockResolvedValue('category,lift\nAdaptive_All,Snatch');
+    adaptiveScriptSource.mockResolvedValue({
+      csv: 'category,lift\nAdaptive_All,Snatch',
+      summary: '{\\rtf1 summary}',
+    });
     const { container } = render(<Scripts />);
     await unlock(container);
     await userEvent.selectOptions(screen.getByLabelText('Script'), 'Fetch Adaptive Record Updates');
@@ -177,8 +186,9 @@ describe('Scripts (user-based)', () => {
       expect(screen.getByText('Download complete.')).toBeInTheDocument();
     });
     expect(scriptSource).not.toHaveBeenCalled();
-    const downloadLink = clickSpy.mock.instances[0] as unknown as HTMLAnchorElement;
-    expect(downloadLink.download).toBe('adaptive-record-breaking-analysis.csv');
+    const [csvLink, summaryLink] = clickSpy.mock.instances as unknown as HTMLAnchorElement[];
+    expect(csvLink.download).toBe('adaptive-record-breaking-analysis.csv');
+    expect(summaryLink.download).toBe('adaptive-record-summary.rtf');
   });
 
   test('F-06: a script that needs details shows its form in place of Run', async () => {

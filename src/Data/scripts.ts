@@ -1,4 +1,5 @@
 import { ComponentType } from 'react';
+import { ScriptOutput } from '../Utils/types';
 import { adaptiveRecordsScriptAvailable } from './RoutesAndSettings';
 import { runAdaptiveRecords } from '../RunnableScripts/adaptiveRecords';
 import { runAnalyzeRecords } from '../RunnableScripts/analyzeRecords';
@@ -12,9 +13,11 @@ export interface Script {
    * Scripts that take no input: the Scripts page runs them on its Run button and downloads what
    * they return as `fileName`. Mutually exclusive with `Form`.
    */
-  source?: () => Promise<string>;
-  /** The download name for `source` output. */
+  source?: () => Promise<ScriptOutput>;
+  /** The download name for the CSV from `source`. */
   fileName?: string;
+  /** The download name for the RTF summary from `source`, when it returns one. */
+  summaryFileName?: string;
   /**
    * Scripts that need details from the operator render their own controls instead of a Run
    * button, and own their own download -- the output need not be text.
@@ -27,8 +30,9 @@ export const scripts: Script[] = [
     name: 'Fetch Record Updates',
     source: runAnalyzeRecords,
     fileName: 'record-breaking-analysis.csv',
+    summaryFileName: 'record-summary.rtf',
     description:
-      'Queries the USAW API and Google Sheets to identify lifts that would break existing WSO records in the current calendar year, then downloads the results as a CSV. Note: this analysis covers all age groups and weight classes and will take several minutes to complete.',
+      'Queries the USAW API and Google Sheets to identify lifts that would break existing WSO records in the current calendar year, then downloads the results as a CSV, along with a rich-text summary for written communications. Note: this analysis covers all age groups and weight classes and will take several minutes to complete.',
   },
   // Listed only when the config names the roster sheet and at least one adaptive records tab.
   ...(adaptiveRecordsScriptAvailable
@@ -37,8 +41,9 @@ export const scripts: Script[] = [
           name: 'Fetch Adaptive Record Updates',
           source: runAdaptiveRecords,
           fileName: 'adaptive-record-breaking-analysis.csv',
+          summaryFileName: 'adaptive-record-summary.rtf',
           description:
-            "Walks the adaptive athlete roster, pulls each athlete's competition results from their start date up to their end date, if one is set, and downloads a CSV of every lift that beats the standing record or standard — in the all-adaptive sheet and in each category the athlete is registered for. Resolving an athlete may take several requests, so allow a minute or two.",
+            "Walks the adaptive athlete roster, pulls each athlete's competition results from their start date up to their end date, if one is set, and downloads a CSV of every lift that beats the standing record or standard — in the all-adaptive sheet and in each category the athlete is registered for, along with a rich-text summary for written communications. Resolving an athlete may take several requests, so allow a minute or two.",
         },
       ]
     : []),

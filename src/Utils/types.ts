@@ -147,3 +147,9 @@ export interface AllCurrentRecordsEntry {
   weightClass: WeightClass;
   groups: AllCurrentRecordsGroup[];
 }
+
+// What a no-input script on the Scripts page returns: the CSV, plus an optional RTF summary.
+export interface ScriptOutput {
+  csv: string;
+  summary?: string;
+}

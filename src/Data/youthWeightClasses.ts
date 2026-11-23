@@ -1,8 +1,8 @@
 import { WeightClass } from '../Utils/types';
+import { weightClassesStart } from './defaultWeightClasses';
 
-// Youth boundaries took effect August 1, 2026; the prior sets are kept as part of
-// weightClasses2025 in historicWeightClasses.ts.
-const weightClassesStart = '2026-08-01';
+// Youth boundaries took effect on weightClassesStart, the same date as the senior set; the prior
+// sets are kept as part of weightClasses2025 in historicWeightClasses.ts.
 
 // U11 and U13 share bodyweight breakpoints, but each age group has its own sport80Ids.
 export const u11WeightClasses: WeightClass[] = [
